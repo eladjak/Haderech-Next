@@ -1,0 +1,413 @@
+<html><head><base href="home">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+<style>
+    :root {
+        --primary-color: #4A90E2;
+        --secondary-color: #50E3C2;
+        --background-color: #F5F7FA;
+        --text-color: #333333;
+        --error-color: #FF4D4F;
+        --success-color: #52C41A;
+        --font-main: 'Rubik', sans-serif;
+        --font-heading: 'Heebo', sans-serif;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: var(--font-main);
+        direction: rtl;
+    }
+
+    body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+    }
+
+    .header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .icons {
+        display: flex;
+        gap: 15px;
+    }
+
+    .icon {
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .main-content {
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .main-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .main-button {
+        background-color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #1e90ff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main-button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .main-button i {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .courses-carousel {
+        display: flex;
+        overflow-x: auto;
+        gap: 15px;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+    }
+
+    .course-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        min-width: 200px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-card img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .course-card h3 {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    .course-card p {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .community-posts {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .post {
+        border-bottom: 1px solid #eee;
+        padding: 15px 0;
+    }
+
+    .post:last-child {
+        border-bottom: none;
+    }
+
+    .post h3 {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+
+    .post p {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .post-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    .main-button, .course-card, .post {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .main-button:hover, .course-card:hover, .post:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .main-buttons {
+            grid-template-columns: 1fr;
+        }
+
+        .courses-carousel {
+            flex-direction: column;
+        }
+
+        .course-card {
+            width: 100%;
+        }
+    }
+
+    .form-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .form-button {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .form-button:hover {
+        background-color: #3A80D2;
+    }
+
+    .course-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .course-title {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    .course-description {
+        font-size: 18px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .course-content {
+        padding: 40px 20px;
+    }
+
+    .lesson-list {
+        list-style-type: none;
+    }
+
+    .lesson-item {
+        background-color: white;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .lesson-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .lesson-description {
+        font-size: 16px;
+        color: #666;
+    }
+
+    .simulator-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .scenario {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .scenario-title {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .scenario-description {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+
+    .option-list {
+        list-style-type: none;
+    }
+
+    .option-item {
+        background-color: #f0f0f0;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .option-item:hover {
+        background-color: #e0e0e0;
+    }
+</style>
+</head>
+<body>
+<header class="header" role="banner">
+    <div class="logo" aria-label="לוגו הדרך">הדרך</div>
+    <nav class="icons" role="navigation" aria-label="תפריט משתמש">
+        <button class="icon" aria-label="התראות">
+            <i class="fas fa-bell"></i>
+        </button>
+        <button class="icon" aria-label="פרופיל משתמש">
+            <i class="fas fa-user"></i>
+        </button>
+    </nav>
+</header>
+
+<main class="main-content" role="main">
+    <div class="main-buttons">
+        <button class="main-button" onclick="window.location.href='courses'">
+            <i class="fas fa-book"></i>
+            קורסים
+        </button>
+        <button class="main-button" onclick="window.location.href='community'">
+            <i class="fas fa-users"></i>
+            קהילה
+        </button>
+        <button class="main-button" onclick="window.location.href='date-simulator'">
+            <i class="fas fa-heart"></i>
+            סימולטור דייטים
+        </button>
+        <button class="main-button" onclick="window.location.href='smart-bot'">
+            <i class="fas fa-robot"></i>
+            בוט חכם
+        </button>
+    </div>
+
+    <h2 class="section-title">קורסים מומלצים</h2>
+    <div class="courses-carousel">
+        <div class="course-card">
+            <img src="https://example.com/course1.jpg" alt="תקשורת זוגית" width="200" height="100">
+            <h3>תקשורת זוגית</h3>
+            <p>למדו כיצד לשפר את התקשורת בזוגיות</p>
+        </div>
+        <div class="course-card">
+            <img src="https://example.com/course2.jpg" alt="בניית ביטחון עצמי" width="200" height="100">
+            <h3>בניית ביטחון עצמי</h3>
+            <p>גלו את הכוח הפנימי שלכם</p>
+        </div>
+        <div class="course-card">
+            <img src="https://example.com/course3.jpg" alt="שפת גוף בדייטים" width="200" height="100">
+            <h3>שפת גוף בדייטים</h3>
+            <p>הבינו את המסרים הלא מילוליים</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">פוסים אחרונים מהקהילה</h2>
+    <div class="community-posts">
+        <div class="post">
+            <h3>איך להתמודד עם פחד מדחייה?</h3>
+            <p>שלום לכולם, אני מתקשה להתמודד עם פחד מדחייה בדייטים. יש למישהו טיפים?</p>
+            <div class="post-meta">
+                <span>מאת: דנה</span>
+                <span>לפני 2 שעות</span>
+            </div>
+        </div>
+        <div class="post">
+            <h3>הצלחה בדייט ראשון!</h3>
+            <p>רציתי לשתף שהיה לי דייט ראשון מדהים אתמול! תודה לכל מי שנתן לי עצות.</p>
+            <div class="post-meta">
+                <span>מאת: יוסי</span>
+                <span>לפני 5 שעות</span>
+            </div>
+        </div>
+        <div class="post">
+            <h3>שאלה לגבי קורס התקשורת הזוגית</h3>
+            <p>האם מישהו כאן לקח את הקורס? אשמח לשמוע חוות דעת לפני שאני נרשם.</p>
+            <div class="post-meta">
+                <span>מאת: מיכל</span>
+                <span>לפני 8 שעות</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.querySelectorAll('.main-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const destination = this.textContent.trim();
+            console.log(`ניווט אל: ${destination}`);
+        });
+    });
+
+    document.querySelectorAll('.course-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const courseName = this.querySelector('h3').textContent;
+            console.log(`פתיחת קורס: ${courseName}`);
+        });
+    });
+
+    document.querySelectorAll('.post').forEach(post => {
+        post.addEventListener('click', function() {
+            const postTitle = this.querySelector('h3').textContent;
+            console.log(`פתיחת פוסט: ${postTitle}`);
+        });
+    });
+</script>
+</body></html>

@@ -1,0 +1,97 @@
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import type { Database } from '@/types/supabase'
+
+export async function GET() {
+  try {
+    const supabase = createRouteHandlerClient<Database>({ cookies })
+    
+    const { data: courses, error } = await supabase
+      .from('courses')
+      .select(`
+        *,
+        instructor:profiles(name, avatar_url),
+        lessons:lessons(count),
+        ratings:course_ratings(avg(rating))
+      `)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    return NextResponse.json(courses)
+  } catch (error) {
+    console.error('Error fetching courses:', error)
+    return NextResponse.json(
+      { error: 'שגיאה בטעינת הקורסים' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const supabase = createRouteHandlerClient<Database>({ cookies })
+    
+    // וידוא שהמשתמש מחובר ושהוא מדריך
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json(
+        { error: 'יש להתחבר כדי ליצור קורס' },
+        { status: 401 }
+      )
+    }
+    
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+    
+    if (!profile || profile.role !== 'instructor') {
+      return NextResponse.json(
+        { error: 'רק מדריכים יכולים ליצור קורסים' },
+        { status: 403 }
+      )
+    }
+    
+    const {
+      title,
+      description,
+      level,
+      duration,
+      price,
+      thumbnail_url,
+      topics,
+      requirements
+    } = await request.json()
+    
+    const { data: course, error } = await supabase
+      .from('courses')
+      .insert({
+        title,
+        description,
+        level,
+        duration,
+        price,
+        thumbnail_url,
+        topics,
+        requirements,
+        instructor_id: session.user.id,
+        status: 'draft',
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+    
+    if (error) throw error
+    
+    return NextResponse.json(course)
+  } catch (error) {
+    console.error('Error creating course:', error)
+    return NextResponse.json(
+      { error: 'שגיאה ביצירת הקורס' },
+      { status: 500 }
+    )
+  }
+} 
