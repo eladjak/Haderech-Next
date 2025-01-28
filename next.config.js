@@ -6,7 +6,7 @@ module.exports = {
   i18n: {
     locales: ['he', 'en'],
     defaultLocale: 'he',
-    localeDetection: true
+    localeDetection: false
   },
   
   // Image optimization
@@ -95,7 +95,6 @@ module.exports = {
   
   // Experimental features
   experimental: {
-    serverActions: true,
     typedRoutes: true,
     serverComponentsExternalPackages: ['@prisma/client']
   },
@@ -116,7 +115,4 @@ module.exports = {
   
   // Generate ETags
   generateEtags: true,
-  
-  // Disable x-powered-by
-  xPoweredBy: false,
 } 
