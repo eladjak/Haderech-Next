@@ -1,68 +1,37 @@
-import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getLatestForumPosts, type ForumPost } from '@/lib/api'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { formatDistanceToNow } from 'date-fns'
-import { he } from 'date-fns/locale'
+import { MessageSquare } from "lucide-react"
+import Link from "next/link"
 
-export async function LatestForumPosts() {
-  const posts = await getLatestForumPosts()
+import type { ForumPost } from "@/types/forum"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-  if (!posts || posts.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>פוסטים אחרונים בפורום</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">אין פוסטים חדשים</p>
-        </CardContent>
-      </Card>
-    )
-  }
+interface LatestForumPostsProps {
+  posts: ForumPost[]
+}
 
+export function LatestForumPosts({ posts }: LatestForumPostsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>פוסטים אחרונים בפורום</CardTitle>
+        <CardTitle>דיונים אחרונים</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {posts.map((post: ForumPost) => (
+          {posts.map((post) => (
             <Link
               key={post.id}
-              href={`/forum/posts/${post.id}`}
-              className="block space-y-3"
+              href={`/forum/${post.id}`}
+              className="block space-y-2 rounded-lg border p-4 hover:bg-muted/50"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-8 w-8">
-                    {post.author.avatar_url ? (
-                      <AvatarImage src={post.author.avatar_url} />
-                    ) : null}
-                    <AvatarFallback>
-                      {post.author.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium leading-none">
-                      {post.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {post.author.name} •{' '}
-                      {formatDistanceToNow(new Date(post.created_at), {
-                        addSuffix: true,
-                        locale: he,
-                      })}
-                    </p>
-                  </div>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">{post.title}</h3>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>{post.commentsCount}</span>
                 </div>
-                {post.replies_count > 0 && (
-                  <span className="text-sm text-muted-foreground">
-                    {post.replies_count} תגובות
-                  </span>
-                )}
               </div>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {post.content}
+              </p>
             </Link>
           ))}
         </div>

@@ -1,8 +1,9 @@
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Clock, Star } from 'lucide-react'
-import Image from 'next/image'
-import { Course } from '@/lib/api'
+import Image from "next/image"
+import Link from "next/link"
+import { Clock, Users } from "lucide-react"
+
+import type { Course } from "@/types/courses"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface CourseCardProps {
   course: Course
@@ -11,42 +12,33 @@ interface CourseCardProps {
 export function CourseCard({ course }: CourseCardProps) {
   return (
     <Card className="overflow-hidden">
-      <div className="relative aspect-video">
-        {course.thumbnail ? (
+      <CardHeader className="p-0">
+        <div className="relative aspect-video">
           <Image
-            src={course.thumbnail}
+            src={course.thumbnail || "/placeholder.jpg"}
             alt={course.title}
             fill
             className="object-cover"
           />
-        ) : (
-          <div className="h-full bg-muted" />
-        )}
-      </div>
-      <CardHeader className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{course.title}</h3>
-          {course.averageRating > 0 && (
-            <div className="flex items-center gap-1 text-yellow-500">
-              <Star className="h-4 w-4" />
-              <span>{course.averageRating.toFixed(1)}</span>
-            </div>
-          )}
         </div>
+      </CardHeader>
+      <CardContent className="p-4">
+        <CardTitle className="mb-2 line-clamp-2">{course.title}</CardTitle>
         <p className="text-sm text-muted-foreground line-clamp-2">
           {course.description}
         </p>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>{course.duration} דקות</span>
-        </div>
       </CardContent>
-      <CardFooter>
-        <Button className="w-full">
-          {course.price > 0 ? `₪${course.price}` : 'חינם'}
-        </Button>
+      <CardFooter className="p-4 pt-0">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            <span>{course.duration} דקות</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            <span>{course.studentsCount} תלמידים</span>
+          </div>
+        </div>
       </CardFooter>
     </Card>
   )

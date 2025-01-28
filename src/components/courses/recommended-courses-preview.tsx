@@ -1,27 +1,24 @@
-import { Course, getRecommendedCourses } from '@/lib/api'
-import { CourseCard } from '@/components/courses/course-card'
+import type { Course } from "@/types/courses"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CourseCard } from "@/components/courses/course-card"
 
-export async function RecommendedCoursesPreview() {
-  const recommendedCourses = await getRecommendedCourses()
+interface RecommendedCoursesPreviewProps {
+  courses: Course[]
+}
 
-  if (!recommendedCourses) {
-    return (
-      <div className="text-center text-muted-foreground">
-        טוען המלצות קורסים...
-      </div>
-    )
-  }
-
+export function RecommendedCoursesPreview({ courses }: RecommendedCoursesPreviewProps) {
   return (
-    <div className="mt-8">
-      <h2 className="text-2xl font-semibold tracking-tight mb-4">
-        קורסים מומלצים עבורך
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recommendedCourses.slice(0, 3).map((course: Course) => (
-          <CourseCard key={course.id} course={course} />
-        ))}
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>קורסים מומלצים</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {courses.map((course) => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 } 
