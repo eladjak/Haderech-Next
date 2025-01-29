@@ -1,141 +1,24 @@
 /**
- * @file courses/[id]/page.tsx
- * @description Course details page component that displays comprehensive information about a specific course.
- * This is a server component that fetches the course data server-side.
+ * @file courses/[courseId]/page.tsx
+ * @description דף קורס ספציפי
  */
 
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Clock, Star, Users } from 'lucide-react'
+
 import { CourseHeader } from '@/components/course/course-header'
-import { CourseLessons } from '@/components/course/course-lessons'
-import { CourseRatings } from '@/components/course/course-ratings'
+import { CourseSidebar } from '@/components/course/course-sidebar'
+import { CourseContent } from '@/components/course/course-content'
 import { CourseProgress } from '@/components/course/course-progress'
+import { CourseRatings } from '@/components/course/course-ratings'
+import { CourseComments } from '@/components/course/course-comments'
 
 interface CoursePageProps {
   params: {
-    id: string
+    courseId: string
   }
-}
-
-/**
- * Course details page component
- * 
- * @param props - Component props containing the course ID
- * @returns The course details page with lessons, ratings, and progress information
- */
-export default async function CoursePage({ params }: CoursePageProps) {
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    }
-  )
-
-  // Get course with related data
-  const { data: course } = await supabase
-    .from('courses')
-    .select(`
-      *,
-      instructor:profiles(
-        id,
-        name,
-        avatar_url,
-        bio
-      ),
-      lessons:lessons(
-        id,
-        title,
-        description,
-        duration,
-        type,
-        order
-      ),
-      ratings:course_ratings(
-        rating,
-        review,
-        created_at,
-        user:profiles(
-          name,
-          avatar_url
-        )
-      )
-    `)
-    .eq('id', params.id)
-    .single()
-
-  if (!course) {
-    notFound()
-  }
-
-  // Get user's enrollment and progress if authenticated
-  const { data: { session } } = await supabase.auth.getSession()
-  let enrollment = null
-  let progress = null
-
-  if (session) {
-    const { data: enrollmentData } = await supabase
-      .from('course_enrollments')
-      .select('*')
-      .eq('course_id', params.id)
-      .eq('user_id', session.user.id)
-      .single()
-
-    if (enrollmentData) {
-      enrollment = enrollmentData
-
-      const { data: progressData } = await supabase
-        .from('lesson_progress')
-        .select('*')
-        .eq('course_id', params.id)
-        .eq('user_id', session.user.id)
-
-      progress = progressData
-    }
-  }
-
-  // Calculate course statistics
-  const stats = {
-    totalLessons: course.lessons?.length ?? 0,
-    totalDuration: course.lessons?.reduce((acc, lesson) => acc + (lesson.duration ?? 0), 0) ?? 0,
-    averageRating: course.ratings?.reduce((acc, r) => acc + r.rating, 0) / (course.ratings?.length ?? 1) ?? 0,
-    totalRatings: course.ratings?.length ?? 0,
-    completedLessons: progress?.filter(p => p.completed)?.length ?? 0,
-  }
-
-  return (
-    <div className="container mx-auto py-8">
-      <CourseHeader
-        course={course}
-        stats={stats}
-        enrollment={enrollment}
-      />
-      <div className="grid gap-8 mt-8">
-        <CourseLessons
-          lessons={course.lessons}
-          progress={progress}
-          isEnrolled={!!enrollment}
-        />
-        <CourseRatings ratings={course.ratings} />
-        {enrollment && (
-          <CourseProgress
-            stats={stats}
-            progress={progress}
-          />
-        )}
-      </div>
-    </div>
-  )
 }
 
 export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
@@ -152,52 +35,123 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
     }
   )
 
-  // Get course with related data
   const { data: course } = await supabase
+    .from('courses')
+    .select('title, description')
+    .eq('id', params.courseId)
+    .single()
+
+  if (!course) {
+    return {
+      title: 'קורס לא נמצא',
+      description: 'הקורס המבוקש לא נמצא',
+    }
+  }
+
+  return {
+    title: course.title,
+    description: course.description,
+  }
+}
+
+export default async function CoursePage({ params }: CoursePageProps) {
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  const { data: { session } } = await supabase.auth.getSession()
+
+  const { data: course, error: courseError } = await supabase
     .from('courses')
     .select(`
       *,
-      instructor:profiles(
+      instructor:profiles!instructor_id (
         id,
         name,
         avatar_url,
         bio
       ),
-      lessons:lessons(
-        id,
-        title,
-        description,
-        duration,
-        type,
-        order
+      lessons (
+        *,
+        progress:lesson_progress (*)
       ),
-      ratings:course_ratings(
-        rating,
-        review,
-        created_at,
-        user:profiles(
+      ratings:course_ratings (
+        *,
+        user:profiles!user_id (
+          id,
           name,
           avatar_url
         )
+      ),
+      comments:course_comments (
+        *,
+        user:profiles!user_id (
+          id,
+          name,
+          avatar_url
+        ),
+        replies!parent_id (
+          *,
+          user:profiles!user_id (
+            id,
+            name,
+            avatar_url
+          )
+        )
       )
     `)
-    .eq('id', params.id)
+    .eq('id', params.courseId)
     .single()
 
-  if (!course) {
-    return {
-      title: 'קורס לא נמצא | הדרך',
-      description: 'הקורס המבוקש לא נמצא במערכת',
-    }
+  if (courseError || !course) {
+    console.error('Error fetching course:', courseError)
+    notFound()
   }
 
-  return {
-    title: `${course.title} | הדרך`,
-    description: course.description,
-    openGraph: {
-      title: `${course.title} | הדרך`,
-      description: course.description,
-      type: 'website',
-    },
+  // בדיקה אם המשתמש רשום לקורס
+  let isEnrolled = false
+  if (session) {
+    const { data: enrollment } = await supabase
+      .from('enrollments')
+      .select('id')
+      .eq('course_id', params.courseId)
+      .eq('user_id', session.user.id)
+      .single()
+
+    isEnrolled = !!enrollment
   }
+
+  // חישוב התקדמות כללית בקורס
+  const totalLessons = course.lessons.length
+  const completedLessons = course.lessons.filter(lesson => 
+    lesson.progress?.some(p => p.user_id === session?.user.id && p.completed)
+  ).length
+
+  const progress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <CourseHeader course={course} isEnrolled={isEnrolled} />
+      <div className="flex-1 container grid gap-6 md:grid-cols-7 lg:gap-10 py-8">
+        <div className="md:col-span-5">
+          <CourseContent course={course} isEnrolled={isEnrolled} />
+          <CourseProgress progress={progress} completedLessons={completedLessons} totalLessons={totalLessons} />
+          <CourseRatings ratings={course.ratings} courseId={course.id} />
+          <CourseComments comments={course.comments} courseId={course.id} />
+        </div>
+        <aside className="md:col-span-2">
+          <CourseSidebar course={course} isEnrolled={isEnrolled} />
+        </aside>
+      </div>
+    </div>
+  )
 } 
