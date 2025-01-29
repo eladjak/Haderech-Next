@@ -12,7 +12,7 @@ import type { Database } from '@/types/supabase'
  * GET handler for retrieving course lessons
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: { courseId: string } }
 ) {
   try {

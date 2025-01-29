@@ -12,7 +12,7 @@ import type { Database } from '@/types/supabase'
  * GET handler for retrieving course details
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: { courseId: string } }
 ) {
   try {
@@ -181,7 +181,7 @@ export async function PUT(
  * DELETE handler for removing a course
  */
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: { courseId: string } }
 ) {
   try {
