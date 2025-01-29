@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { WordTokenizer } from 'natural'
 
@@ -29,7 +30,12 @@ function findRelevantTopic(input: string): string {
 }
 
 // Log chat interaction to the database
-async function logChatInteraction(supabase: any, userId: string, input: string, response: string) {
+async function logChatInteraction(
+  supabase: SupabaseClient,
+  userId: string,
+  input: string,
+  response: string
+) {
   const { error } = await supabase
     .from('chat_interactions')
     .insert({
@@ -52,7 +58,18 @@ async function logChatInteraction(supabase: any, userId: string, input: string, 
  */
 export async function POST(req: Request) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
     
     // Check authentication
     const { data: { session } } = await supabase.auth.getSession()
