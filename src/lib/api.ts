@@ -1,6 +1,129 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+/**
+ * @file api.ts
+ * @description Client-side API utilities for interacting with the Supabase backend.
+ * Provides a singleton instance of the Supabase client and helper functions for common operations.
+ */
 
-const supabase = createClientComponentClient()
+import { createBrowserClient } from '@supabase/ssr'
+import type { Database } from '@/types/supabase'
+
+/**
+ * Creates a singleton instance of the Supabase client for browser use
+ */
+export const supabase = createBrowserClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+/**
+ * Uploads a file to Supabase storage
+ * 
+ * @param file - The file to upload
+ * @param bucket - The storage bucket to upload to
+ * @returns The public URL of the uploaded file
+ * @throws Error if the upload fails
+ */
+export async function uploadFile(file: File, bucket: string) {
+  const timestamp = Date.now()
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${timestamp}.${fileExt}`
+
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(fileName, file)
+
+  if (error) {
+    throw error
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(fileName)
+
+  return publicUrl
+}
+
+/**
+ * Fetches the current user's profile
+ * 
+ * @returns The user's profile data
+ * @throws Error if fetching fails or user is not authenticated
+ */
+export async function getProfile() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return profile
+}
+
+/**
+ * Updates the current user's profile
+ * 
+ * @param updates - The profile fields to update
+ * @returns The updated profile data
+ * @throws Error if update fails or user is not authenticated
+ */
+export async function updateProfile(updates: Partial<Database['public']['Tables']['profiles']['Update']>) {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', session.user.id)
+    .select()
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return profile
+}
+
+/**
+ * Signs out the current user
+ * 
+ * @throws Error if sign out fails
+ */
+export async function signOut() {
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    throw error
+  }
+}
+
+/**
+ * Signs in with GitHub OAuth
+ * 
+ * @throws Error if sign in fails
+ */
+export async function signInWithGithub() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  })
+
+  if (error) {
+    throw error
+  }
+}
 
 export interface Course {
   id: string

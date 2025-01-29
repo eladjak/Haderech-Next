@@ -1,7 +1,6 @@
 /**
- * @file upload/route.ts
- * @description API route for handling file uploads to Supabase storage.
- * Provides endpoint for authenticated users to upload files with proper validation.
+ * @file route.ts
+ * @description API route handlers for file upload operations
  */
 
 import { createServerClient } from '@supabase/ssr'
@@ -10,23 +9,7 @@ import { NextResponse } from 'next/server'
 import type { Database } from '@/types/supabase'
 
 /**
- * POST /api/upload
- * 
- * Handles file upload to Supabase storage. Only authenticated users can upload files.
- * Files are validated for type and size before upload.
- * 
- * @requires Authentication
- * 
- * @param {Request} request - The incoming request object containing the file data
- * @returns {Promise<NextResponse>} JSON response containing the uploaded file URL or error message
- * 
- * @example Request Body (FormData)
- * ```
- * FormData {
- *   file: File,
- *   bucket: "avatars" | "course-thumbnails" | etc.
- * }
- * ```
+ * POST handler for file uploads
  */
 export async function POST(request: Request) {
   try {
@@ -42,17 +25,15 @@ export async function POST(request: Request) {
         },
       }
     )
-    
-    // Verify authentication
+
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get form data
     const formData = await request.formData()
     const file = formData.get('file') as File
     const bucket = formData.get('bucket') as string
@@ -71,50 +52,28 @@ export async function POST(request: Request) {
       )
     }
 
-    // Validate file type and size
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
-    const maxSize = 5 * 1024 * 1024 // 5MB
-
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Only JPEG, PNG and GIF are allowed.' },
-        { status: 400 }
-      )
-    }
-
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File size too large. Maximum size is 5MB.' },
-        { status: 400 }
-      )
-    }
-
-    // Generate unique filename
-    const timestamp = Date.now()
     const fileExt = file.name.split('.').pop()
-    const fileName = `${session.user.id}-${timestamp}.${fileExt}`
+    const fileName = `${session.user.id}/${Date.now()}.${fileExt}`
 
-    // Upload file
-    const { data, error } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(fileName, file)
 
-    if (error) {
-      console.error('Error uploading file:', error)
+    if (uploadError) {
+      console.error('Error uploading file:', uploadError)
       return NextResponse.json(
-        { error: 'שגיאה בהעלאת הקובץ' },
+        { error: 'Failed to upload file' },
         { status: 500 }
       )
     }
 
-    // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from(bucket)
       .getPublicUrl(fileName)
 
     return NextResponse.json({ url: publicUrl })
   } catch (error) {
-    console.error('Error in POST /api/upload:', error)
+    console.error('Upload error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

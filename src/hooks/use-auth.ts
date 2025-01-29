@@ -1,16 +1,26 @@
+/**
+ * @file use-auth.ts
+ * @description Custom hook for managing authentication state and user session
+ */
+
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { setUser, setLoading, setError } from '@/store/slices/userSlice'
+import { supabase } from '@/lib/api'
 
+/**
+ * Custom hook that provides authentication state and user session management
+ * 
+ * @returns Object containing user state and auth methods
+ */
 export function useAuth() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { user, isLoading, error } = useAppSelector((state) => state.user)
-  const supabase = createClientComponentClient()
 
   useEffect(() => {
+    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -45,98 +55,55 @@ export function useAuth() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [dispatch, router, supabase])
+  }, [dispatch, router])
 
   const signIn = async (email: string, password: string) => {
+    dispatch(setLoading(true))
     try {
-      dispatch(setLoading(true))
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       if (error) throw error
-      router.push('/')
     } catch (error) {
       console.error('Error signing in:', error)
       dispatch(setError('שגיאה בהתחברות'))
-      return false
     } finally {
       dispatch(setLoading(false))
     }
-    return true
   }
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string) => {
+    dispatch(setLoading(true))
     try {
-      dispatch(setLoading(true))
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            name,
-          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
       if (error) throw error
-      router.push('/onboarding')
+      router.push('/verify-email')
     } catch (error) {
       console.error('Error signing up:', error)
       dispatch(setError('שגיאה בהרשמה'))
-      return false
     } finally {
       dispatch(setLoading(false))
     }
-    return true
   }
 
   const signOut = async () => {
+    dispatch(setLoading(true))
     try {
-      dispatch(setLoading(true))
       const { error } = await supabase.auth.signOut()
       if (error) throw error
     } catch (error) {
       console.error('Error signing out:', error)
       dispatch(setError('שגיאה בהתנתקות'))
-      return false
     } finally {
       dispatch(setLoading(false))
     }
-    return true
-  }
-
-  const resetPassword = async (email: string) => {
-    try {
-      dispatch(setLoading(true))
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      })
-      if (error) throw error
-    } catch (error) {
-      console.error('Error resetting password:', error)
-      dispatch(setError('שגיאה באיפוס הסיסמה'))
-      return false
-    } finally {
-      dispatch(setLoading(false))
-    }
-    return true
-  }
-
-  const updatePassword = async (password: string) => {
-    try {
-      dispatch(setLoading(true))
-      const { error } = await supabase.auth.updateUser({
-        password,
-      })
-      if (error) throw error
-    } catch (error) {
-      console.error('Error updating password:', error)
-      dispatch(setError('שגיאה בעדכון הסיסמה'))
-      return false
-    } finally {
-      dispatch(setLoading(false))
-    }
-    return true
   }
 
   return {
@@ -146,7 +113,5 @@ export function useAuth() {
     signIn,
     signUp,
     signOut,
-    resetPassword,
-    updatePassword,
   }
 } 

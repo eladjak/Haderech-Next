@@ -1,161 +1,146 @@
-import { useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '@/store/store'
-import { setUser, setLoading, setError } from '@/store/slices/userSlice'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '@/types/supabase'
-import type { Profile } from '@/lib/supabase'
-import { useAuth } from './use-auth'
-import { useToast } from './use-toast'
-import { User } from '@/models/types'
+/**
+ * @file use-profile.ts
+ * @description Custom hook for managing user profile data and operations
+ */
 
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/api'
+import type { Database } from '@/types/supabase'
+
+type BaseProfile = Database['public']['Tables']['profiles']['Row']
+interface Profile extends BaseProfile {
+  avatar_url?: string | null
+}
+
+/**
+ * Custom hook for managing user profile data and operations
+ * 
+ * @returns Object containing:
+ * - profile: The current user's profile data
+ * - loading: Boolean indicating if profile data is being loaded
+ * - error: Any error that occurred during profile operations
+ * - updateProfile: Function to update the user's profile
+ * - uploadAvatar: Function to upload a new avatar image
+ * - deleteAvatar: Function to delete the current avatar
+ */
 export function useProfile() {
-  const dispatch = useAppDispatch()
-  const { user, isLoading, error } = useAppSelector((state) => state.user)
-  const { user: authUser } = useAuth()
-  const { error: showError } = useToast()
-  const supabase = createClientComponentClient<Database>()
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        dispatch(setLoading(true))
-        
-        const { data: { session }, error: authError } = await supabase.auth.getSession()
-        if (authError) throw authError
-        
-        if (!session?.user) {
-          dispatch(setUser(null))
-          return
-        }
-
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-
-        if (profileError) throw profileError
-
-        if (!profile) {
-          // Create new profile if it doesn't exist
-          const newProfile = {
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.user_metadata?.name || 'משתמש חדש',
-            avatar_url: session.user.user_metadata?.avatar_url,
-            points: 0,
-            level: 'מתחיל',
-            badges: [],
-            completed_courses: [],
-            forum_posts: 0,
-            login_streak: 1,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-
-          const { data: createdProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert([newProfile])
-            .select()
-            .single()
-
-          if (createError) throw createError
-          dispatch(setUser(createdProfile as User))
-        } else {
-          dispatch(setUser(profile as User))
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error)
-        dispatch(setError('שגיאה בטעינת הפרופיל'))
-      } finally {
-        dispatch(setLoading(false))
-      }
-    }
-
     fetchProfile()
-  }, [dispatch, supabase])
+  }, [])
+
+  const fetchProfile = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/login')
+        return
+      }
+
+      const { data, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single()
+
+      if (profileError) throw profileError
+
+      setProfile(data)
+    } catch (err) {
+      console.error('Error fetching profile:', err)
+      setError(err instanceof Error ? err : new Error('שגיאה בטעינת הפרופיל'))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return
-
     try {
-      const { error } = await supabase
+      setLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('לא מחובר')
+      }
+
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id)
+        .eq('id', session.user.id)
 
-      if (error) throw error
+      if (updateError) throw updateError
 
-      // עדכון המצב המקומי
-      dispatch(setUser(prev => prev ? { ...prev, ...updates } : null))
-
-      return { success: true }
-    } catch (error) {
-      console.error('Error updating profile:', error)
-      throw error
+      await fetchProfile()
+    } catch (err) {
+      console.error('Error updating profile:', err)
+      setError(err instanceof Error ? err : new Error('שגיאה בעדכון הפרופיל'))
+      throw err
+    } finally {
+      setLoading(false)
     }
   }
 
   const uploadAvatar = async (file: File) => {
-    if (!user) return
-
     try {
-      const fileExt = file.name.split('.').pop()
-      const filePath = `avatars/${user.id}/${Date.now()}.${fileExt}`
+      setLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('לא מחובר')
+      }
 
-      // העלאת הקובץ ל-Storage
-      const { error: uploadError } = await supabase
-        .storage
-        .from('uploads')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${session.user.id}/avatar.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true })
 
       if (uploadError) throw uploadError
 
-      // קבלת URL ציבורי לקובץ
-      const { data: { publicUrl } } = supabase
-        .storage
-        .from('uploads')
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
         .getPublicUrl(filePath)
 
-      // עדכון ה-avatar_url בפרופיל
       await updateProfile({ avatar_url: publicUrl })
-
-      return { publicUrl }
-    } catch (error) {
-      console.error('Error uploading avatar:', error)
-      throw error
+    } catch (err) {
+      console.error('Error uploading avatar:', err)
+      setError(err instanceof Error ? err : new Error('שגיאה בהעלאת התמונה'))
+      throw err
+    } finally {
+      setLoading(false)
     }
   }
 
   const deleteAvatar = async () => {
-    if (!user || !user.avatar_url) return
-
     try {
-      const path = user.avatar_url.split('/').slice(-2).join('/')
+      setLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('לא מחובר')
+      }
 
-      // מחיקת הקובץ מ-Storage
-      const { error: deleteError } = await supabase
-        .storage
-        .from('uploads')
-        .remove([`avatars/${path}`])
+      const { error: deleteError } = await supabase.storage
+        .from('avatars')
+        .remove([`${session.user.id}/avatar`])
 
       if (deleteError) throw deleteError
 
-      // עדכון הפרופיל
-      await updateProfile({ avatar_url: undefined })
-
-      return { success: true }
-    } catch (error) {
-      console.error('Error deleting avatar:', error)
-      throw error
+      await updateProfile({ avatar_url: null })
+    } catch (err) {
+      console.error('Error deleting avatar:', err)
+      setError(err instanceof Error ? err : new Error('שגיאה במחיקת התמונה'))
+      throw err
+    } finally {
+      setLoading(false)
     }
   }
 
-  return { user, isLoading, error, updateProfile, uploadAvatar, deleteAvatar }
+  return { profile, loading, error, updateProfile, uploadAvatar, deleteAvatar }
 } 
