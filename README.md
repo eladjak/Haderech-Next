@@ -1,96 +1,82 @@
-# 🌟 HaDerech - Innovative Learning Platform for Relationship Improvement
-# הדרך - פלטפורמת למידה חדשנית לשיפור מערכות יחסים
+# הדרך - פלטפורמת למידה מקוונת 🎓
 
-An advanced learning platform combining AI, interactive courses, and personalized recommendations for improving relationships. Built with cutting-edge industry technologies.
+פלטפורמת למידה מקוונת מתקדמת המאפשרת למידה אינטראקטיבית, שיתוף ידע וצמיחה אישית.
 
-פלטפורמת "הדרך" היא מערכת למידה מתקדמת המשלבת AI, קורסים אינטראקטיביים, והמלצות מותאמות אישית לשיפור מערכות יחסים. המערכת בנויה עם הטכנולוגיות המתקדמות ביותר בתעשייה.
+## 🌟 תכונות עיקריות
 
-## 🚀 Key Features | תכונות עיקריות
+- **קורסים אינטראקטיביים** - מגוון קורסים בנושאים שונים
+- **למידה מותאמת אישית** - התקדמות בקצב אישי ומעקב אחר ההתקדמות
+- **קהילה תומכת** - פורומים, תגובות ושיתוף ידע
+- **ממשק משתמש מודרני** - חווית משתמש נוחה ואינטואיטיבית
+- **תמיכה בעברית** - ממשק מלא בעברית כולל RTL
 
-- 📚 **Interactive Course System** - Rich and immersive learning experience
-- 🤖 **Advanced AI** - Real-time recommendations and personalization
-- 🎮 **Scenario Simulator** - Practical situation training
-- 👥 **Supportive Community** - Sharing, discussions and mutual support
-- 📊 **Progress Tracking** - Analysis and visualization of personal progress
-- 📱 **Modern UX** - Clean and intuitive user interface
+## 🛠️ טכנולוגיות
 
-## 🛠 Technologies | טכנולוגיות
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **UI Components**: Radix UI, Shadcn UI
+- **State Management**: Redux Toolkit
+- **Internationalization**: i18next
+- **Testing**: Jest, React Testing Library
+- **CI/CD**: Vercel, GitHub Actions
 
-- **Frontend**: Next.js 15, TypeScript 5, shadcn/ui, Tailwind CSS
-- **Backend**: Supabase (PostgreSQL, Auth, Storage, Edge Functions)
-- **AI**: OpenAI GPT-4
-- **Deployment**: Vercel Platform
-- **Testing**: Jest, React Testing Library, Playwright
-- **CI/CD**: Vercel Pipeline, GitHub Actions
+## 📦 התקנה
 
-## 🏗 Local Installation | התקנה מקומית
-
-### Prerequisites | דרישות מקדימות
-- Node.js 20.x or higher
-- pnpm (recommended) or npm
-- Supabase account
-- OpenAI API key
-- Vercel account (for deployment)
-
-### Installation Steps | שלבי התקנה
-
-1. Clone the repository | שכפל את המאגר:
 ```bash
-git clone https://github.com/your-username/haderech-next.git
+# שיבוט המאגר
+git clone https://github.com/eladjak/haderech-next.git
 cd haderech-next
-```
 
-2. Install dependencies | התקן את התלויות:
-```bash
-pnpm install
-```
+# התקנת תלויות
+npm install
 
-3. Set up environment variables | הגדר את משתני הסביבה:
-```bash
+# הגדרת משתני סביבה
 cp .env.example .env.local
-```
-Update `.env.local` with your Supabase and OpenAI keys.
+# עריכת .env.local עם הערכים המתאימים
 
-4. Run the project | הפעל את הפרויקט:
+# הרצת הפרויקט בסביבת פיתוח
+npm run dev
+```
+
+## 🗺️ מפת דרכים
+
+ראה [ROADMAP.md](ROADMAP.md) לפירוט מלא של תכנית הפיתוח.
+
+## 📚 תיעוד
+
+- [תיעוד API](docs/api.md)
+- [מדריך למפתח](docs/developer-guide.md)
+- [ארכיטקטורה](docs/architecture.md)
+- [מדריך תרומה](CONTRIBUTING.md)
+
+## 🧪 בדיקות
+
 ```bash
-pnpm dev
+# הרצת כל הבדיקות
+npm test
+
+# הרצת בדיקות עם כיסוי
+npm run test:coverage
+
+# הרצת בדיקות בזמן פיתוח
+npm run test:watch
 ```
 
-The project will be available at `http://localhost:3000` 🎉
+## 🤝 תרומה
 
-## 🌐 Deployment | דיפלוי
+אנחנו מעריכים כל תרומה! אנא קראו את [מדריך התרומה](CONTRIBUTING.md) לפני שתתחילו.
 
-The project is configured for automatic deployment on Vercel. Every push to main branch triggers an automatic deployment.
+## 📄 רישיון
 
-1. Log in to Vercel and create a new project
-2. Connect your repository
-3. Configure required environment variables
-4. Deployment will run automatically
+פרויקט זה מופץ תחת רישיון MIT. ראה קובץ [LICENSE](LICENSE) לפרטים נוספים.
 
-## 👩‍💻 Contributing | תרומה לפרויקט
+## 👥 צוות
 
-We appreciate all contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for information about the contribution process.
+- **אלעד ג'קובס** - מייסד ומפתח ראשי
+- תרומות נוספות מהקהילה
 
-## 📝 License | רישיון
+## 📞 יצירת קשר
 
-This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
-
-## 📚 Additional Documentation | תיעוד נוסף
-
-- [Project Guidelines](docs/PROJECT_GUIDELINES.md)
-- [Technical Specification](docs/TECHNICAL_SPEC.md)
-- [Development Roadmap](docs/development_roadmap.md)
-- [AI Features](docs/AI_FEATURES.md)
-- [API Documentation](docs/API.md)
-- [Voice Commands](docs/VOICE_COMMANDS.md)
-- [Social Learning](docs/SOCIAL_LEARNING.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
-- [Database Design](docs/database_design.md)
-- [Test Plan](docs/test_plan.md)
-- [Performance Report](docs/performance_report.md)
-- [Code Review Guidelines](docs/code_review.md)
-- [Migration Guide](docs/MIGRATION_GUIDE.md)
-
-## 🤝 Support | תמיכה
-
-If you encounter any issues or have questions, please open an issue in the GitHub issues system.
+- אימייל: [eladjak@gmail.com](mailto:eladjak@gmail.com)
+- טוויטר: [@eladjak](https://twitter.com/eladjak)
+- אתר: [haderech.co.il](https://haderech.co.il)
