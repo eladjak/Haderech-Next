@@ -1,107 +1,122 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+/**
+ * @file upload/route.ts
+ * @description API route for handling file uploads to Supabase storage.
+ * Provides endpoint for authenticated users to upload files with proper validation.
+ */
+
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { Database } from '@/types/supabase'
 
-type FileType = 'avatar' | 'lesson' | 'attachment'
-
-const allowedTypes: Record<FileType, readonly string[]> = {
-  'avatar': ['image/jpeg', 'image/png', 'image/gif'],
-  'lesson': ['video/mp4', 'audio/mpeg', 'application/pdf'],
-  'attachment': ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-} as const
-
-const maxSizes: Record<FileType, number> = {
-  'avatar': 5 * 1024 * 1024, // 5MB
-  'lesson': 500 * 1024 * 1024, // 500MB
-  'attachment': 50 * 1024 * 1024 // 50MB
-} as const
-
+/**
+ * POST /api/upload
+ * 
+ * Handles file upload to Supabase storage. Only authenticated users can upload files.
+ * Files are validated for type and size before upload.
+ * 
+ * @requires Authentication
+ * 
+ * @param {Request} request - The incoming request object containing the file data
+ * @returns {Promise<NextResponse>} JSON response containing the uploaded file URL or error message
+ * 
+ * @example Request Body (FormData)
+ * ```
+ * FormData {
+ *   file: File,
+ *   bucket: "avatars" | "course-thumbnails" | etc.
+ * }
+ * ```
+ */
 export async function POST(request: Request) {
   try {
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const cookieStore = cookies()
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'יש להתחבר כדי להעלות קבצים' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
-    
+
+    // Get form data
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const type = formData.get('type') as FileType
-    
+    const bucket = formData.get('bucket') as string
+
     if (!file) {
       return NextResponse.json(
-        { error: 'לא נבחר קובץ' },
+        { error: 'No file provided' },
         { status: 400 }
       )
     }
-    
-    // וידוא סוג הקובץ
-    if (!type || !(allowedTypes[type] as string[]).includes(file.type)) {
+
+    if (!bucket) {
       return NextResponse.json(
-        { error: 'סוג קובץ לא נתמך' },
+        { error: 'No bucket specified' },
         { status: 400 }
       )
     }
-    
-    // הגבלת גודל הקובץ
-    if (file.size > maxSizes[type]) {
+
+    // Validate file type and size
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+    const maxSize = 5 * 1024 * 1024 // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'הקובץ גדול מדי' },
+        { error: 'Invalid file type. Only JPEG, PNG and GIF are allowed.' },
         { status: 400 }
       )
     }
-    
-    // יצירת שם ייחודי לקובץ
+
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: 'File size too large. Maximum size is 5MB.' },
+        { status: 400 }
+      )
+    }
+
+    // Generate unique filename
+    const timestamp = Date.now()
     const fileExt = file.name.split('.').pop()
-    const fileName = `${type}/${session.user.id}/${Date.now()}.${fileExt}`
-    
-    // העלאת הקובץ ל-Storage
-    const { data, error } = await supabase
-      .storage
-      .from('uploads')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
-    
-    if (error) throw error
-    
-    // יצירת URL ציבורי לקובץ
-    const { data: { publicUrl } } = supabase
-      .storage
-      .from('uploads')
+    const fileName = `${session.user.id}-${timestamp}.${fileExt}`
+
+    // Upload file
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file)
+
+    if (error) {
+      console.error('Error uploading file:', error)
+      return NextResponse.json(
+        { error: 'שגיאה בהעלאת הקובץ' },
+        { status: 500 }
+      )
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
       .getPublicUrl(fileName)
-    
-    // שמירת רשומה של הקובץ
-    const { error: dbError } = await supabase
-      .from('uploads')
-      .insert({
-        user_id: session.user.id,
-        file_name: file.name,
-        file_type: file.type,
-        file_size: file.size,
-        storage_path: fileName,
-        public_url: publicUrl,
-        type,
-        created_at: new Date().toISOString()
-      })
-    
-    if (dbError) throw dbError
-    
-    return NextResponse.json({
-      url: publicUrl,
-      path: fileName
-    })
+
+    return NextResponse.json({ url: publicUrl })
   } catch (error) {
-    console.error('Error uploading file:', error)
+    console.error('Error in POST /api/upload:', error)
     return NextResponse.json(
-      { error: 'שגיאה בהעלאת הקובץ' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
