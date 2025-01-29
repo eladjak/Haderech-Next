@@ -1,50 +1,188 @@
+/**
+ * @file courses/[id]/page.tsx
+ * @description Course details page component that displays comprehensive information about a specific course.
+ * This is a server component that fetches the course data server-side.
+ */
+
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Clock, Star, Users } from 'lucide-react'
+import { CourseHeader } from '@/components/course/course-header'
+import { CourseLessons } from '@/components/course/course-lessons'
+import { CourseRatings } from '@/components/course/course-ratings'
+import { CourseProgress } from '@/components/course/course-progress'
 
-interface CourseDetailProps {
+interface CoursePageProps {
   params: {
     id: string
   }
 }
 
-async function getCourse(id: string) {
-  const supabase = createServerComponentClient({ cookies })
-  
-  const { data: course, error } = await supabase
+/**
+ * Course details page component
+ * 
+ * @param props - Component props containing the course ID
+ * @returns The course details page with lessons, ratings, and progress information
+ */
+export default async function CoursePage({ params }: CoursePageProps) {
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  // Get course with related data
+  const { data: course } = await supabase
     .from('courses')
     .select(`
       *,
-      lessons:course_lessons(count),
-      students:course_enrollments(count),
-      ratings:course_ratings(rating)
+      instructor:profiles(
+        id,
+        name,
+        avatar_url,
+        bio
+      ),
+      lessons:lessons(
+        id,
+        title,
+        description,
+        duration,
+        type,
+        order
+      ),
+      ratings:course_ratings(
+        rating,
+        review,
+        created_at,
+        user:profiles(
+          name,
+          avatar_url
+        )
+      )
     `)
-    .eq('id', id)
+    .eq('id', params.id)
     .single()
 
-  if (error) {
-    console.error('Error fetching course:', error)
-    return null
+  if (!course) {
+    notFound()
   }
 
-  const averageRating = course.ratings.length > 0
-    ? course.ratings.reduce((acc: number, curr: { rating: number }) => acc + curr.rating, 0) / course.ratings.length
-    : 0
+  // Get user's enrollment and progress if authenticated
+  const { data: { session } } = await supabase.auth.getSession()
+  let enrollment = null
+  let progress = null
 
-  return {
-    ...course,
-    studentsCount: course.students[0]?.count || 0,
-    lessonsCount: course.lessons[0]?.count || 0,
-    averageRating,
+  if (session) {
+    const { data: enrollmentData } = await supabase
+      .from('course_enrollments')
+      .select('*')
+      .eq('course_id', params.id)
+      .eq('user_id', session.user.id)
+      .single()
+
+    if (enrollmentData) {
+      enrollment = enrollmentData
+
+      const { data: progressData } = await supabase
+        .from('lesson_progress')
+        .select('*')
+        .eq('course_id', params.id)
+        .eq('user_id', session.user.id)
+
+      progress = progressData
+    }
   }
+
+  // Calculate course statistics
+  const stats = {
+    totalLessons: course.lessons?.length ?? 0,
+    totalDuration: course.lessons?.reduce((acc, lesson) => acc + (lesson.duration ?? 0), 0) ?? 0,
+    averageRating: course.ratings?.reduce((acc, r) => acc + r.rating, 0) / (course.ratings?.length ?? 1) ?? 0,
+    totalRatings: course.ratings?.length ?? 0,
+    completedLessons: progress?.filter(p => p.completed)?.length ?? 0,
+  }
+
+  return (
+    <div className="container mx-auto py-8">
+      <CourseHeader
+        course={course}
+        stats={stats}
+        enrollment={enrollment}
+      />
+      <div className="grid gap-8 mt-8">
+        <CourseLessons
+          lessons={course.lessons}
+          progress={progress}
+          isEnrolled={!!enrollment}
+        />
+        <CourseRatings ratings={course.ratings} />
+        {enrollment && (
+          <CourseProgress
+            stats={stats}
+            progress={progress}
+          />
+        )}
+      </div>
+    </div>
+  )
 }
 
-export async function generateMetadata({ params }: CourseDetailProps): Promise<Metadata> {
-  const course = await getCourse(params.id)
+export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  // Get course with related data
+  const { data: course } = await supabase
+    .from('courses')
+    .select(`
+      *,
+      instructor:profiles(
+        id,
+        name,
+        avatar_url,
+        bio
+      ),
+      lessons:lessons(
+        id,
+        title,
+        description,
+        duration,
+        type,
+        order
+      ),
+      ratings:course_ratings(
+        rating,
+        review,
+        created_at,
+        user:profiles(
+          name,
+          avatar_url
+        )
+      )
+    `)
+    .eq('id', params.id)
+    .single()
 
   if (!course) {
     return {
@@ -62,53 +200,4 @@ export async function generateMetadata({ params }: CourseDetailProps): Promise<M
       type: 'website',
     },
   }
-}
-
-export default async function CourseDetail({ params }: CourseDetailProps) {
-  const course = await getCourse(params.id)
-
-  if (!course) {
-    notFound()
-  }
-
-  return (
-    <div className="container mx-auto py-8">
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="text-3xl">{course.title}</CardTitle>
-          <CardDescription className="text-lg">
-            {course.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              <span>{course.duration} שעות</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span>{course.studentsCount} תלמידים</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              <span>{course.averageRating.toFixed(1)} דירוג ממוצע</span>
-            </div>
-          </div>
-          <div className="mt-6">
-            <h3 className="mb-2 text-lg font-semibold">מה תלמדו בקורס:</h3>
-            <ul className="list-disc space-y-1 rtl:mr-4">
-              {course.syllabus?.map((item: string) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="mt-8 flex justify-between">
-            <div className="text-2xl font-bold">₪{course.price}</div>
-            <Button size="lg">הרשמה לקורס</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
 } 

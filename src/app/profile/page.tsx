@@ -1,6 +1,12 @@
+/**
+ * @file profile/page.tsx
+ * @description Profile page component that displays and allows editing of user profile information.
+ * This is a server component that fetches the initial profile data server-side.
+ */
+
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,6 +15,9 @@ import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { RecommendedCoursesPreview } from '@/components/recommended-courses-preview'
 import { LatestForumPosts } from '@/components/latest-forum-posts'
+import { ProfileForm } from '@/components/profile/profile-form'
+import { ProfileStats } from '@/components/profile/profile-stats'
+import { ProfileHeader } from '@/components/profile/profile-header'
 
 export const metadata: Metadata = {
   title: 'הפרופיל שלי | הדרך',
@@ -36,14 +45,25 @@ interface Profile {
 }
 
 async function getUserProfile(): Promise<Profile | null> {
-  const supabase = createServerComponentClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
   
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) {
-    redirect('/login')
+    redirect('/auth/login')
   }
 
-  const { data: profile, error } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select(`
       *,
@@ -55,10 +75,28 @@ async function getUserProfile(): Promise<Profile | null> {
         ),
         progress,
         last_accessed
-      )
+      ),
+      completed_courses:course_enrollments(
+        count,
+        completed_at
+      ),
+      achievements:user_achievements(count)
     `)
     .eq('id', session.user.id)
     .single()
+
+  if (profile) {
+    return profile
+  } else {
+    const { data: newProfile } = await supabase
+      .from('profiles')
+      .insert({
+        id: session.user.id,
+        email: session.user.email,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
 
   if (error) {
     console.error('Error fetching profile:', error)
