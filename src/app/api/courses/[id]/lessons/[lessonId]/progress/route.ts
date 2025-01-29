@@ -1,3 +1,9 @@
+/**
+ * @file courses/[id]/lessons/[lessonId]/progress/route.ts
+ * @description API routes for managing lesson progress. Provides endpoints for tracking
+ * and updating a user's progress in specific lessons, including completion status.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -10,6 +16,26 @@ interface RouteParams {
   }
 }
 
+/**
+ * GET /api/courses/[courseId]/lessons/[lessonId]/progress
+ * 
+ * Retrieves the current user's progress for a specific lesson.
+ * 
+ * @requires Authentication
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @returns {Promise<NextResponse>} JSON response containing progress details or error message
+ * 
+ * @example Response
+ * ```json
+ * {
+ *   "completed": true,
+ *   "progress": 100,
+ *   "last_accessed": "2024-01-20T12:00:00Z"
+ * }
+ * ```
+ */
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -25,7 +51,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -41,7 +67,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       .eq('user_id', session.user.id)
       .single()
     
-    if (error && error.code !== 'PGRST116') throw error // PGRST116 = לא נמצא
+    if (error && error.code !== 'PGRST116') throw error // PGRST116 = not found
     
     return NextResponse.json(progress || { completed: false, progress: 0 })
   } catch (error) {
@@ -53,6 +79,26 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 }
 
+/**
+ * POST /api/courses/[courseId]/lessons/[lessonId]/progress
+ * 
+ * Updates the current user's progress for a specific lesson. Also updates overall
+ * course progress when a lesson is completed.
+ * 
+ * @requires Authentication
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @returns {Promise<NextResponse>} JSON response containing updated progress or error message
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "completed": true,
+ *   "progress": 100
+ * }
+ * ```
+ */
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -68,7 +114,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -79,7 +125,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     
     const { completed, progress } = await request.json()
     
-    // בדיקה אם כבר קיימת התקדמות
+    // Check for existing progress record
     const { data: existingProgress } = await supabase
       .from('lesson_progress')
       .select('id')
@@ -90,7 +136,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     let result
     
     if (existingProgress) {
-      // עדכון התקדמות קיימת
+      // Update existing progress
       const { data, error } = await supabase
         .from('lesson_progress')
         .update({
@@ -105,7 +151,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       if (error) throw error
       result = data
     } else {
-      // יצירת התקדמות חדשה
+      // Create new progress record
       const { data, error } = await supabase
         .from('lesson_progress')
         .insert({
@@ -123,7 +169,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       result = data
     }
     
-    // אם השיעור הושלם, נעדכן את ההתקדמות הכללית בקורס
+    // Update overall course progress if lesson is completed
     if (completed) {
       await supabase.rpc('update_course_progress', {
         p_course_id: params.courseId,

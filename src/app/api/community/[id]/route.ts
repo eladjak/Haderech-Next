@@ -1,15 +1,59 @@
-import { NextResponse } from 'next/server'
+/**
+ * @file community/[id]/route.ts
+ * @description API routes for managing individual community posts. Provides endpoints for retrieving,
+ * updating, and deleting specific posts. Includes authentication and authorization checks.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import type { Database } from '@/types/supabase'
 
-// Get specific post
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+interface RouteParams {
+  params: {
+    id: string
+  }
+}
+
+/**
+ * GET /api/community/[id]
+ * 
+ * Retrieves detailed information about a specific post, including author details,
+ * comments, and comment authors.
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the post ID
+ * @returns {Promise<NextResponse>} JSON response containing the post details or error message
+ * 
+ * @example Response
+ * ```json
+ * {
+ *   "id": "post1",
+ *   "title": "Learning Tips",
+ *   "content": "Here are some effective learning strategies...",
+ *   "created_at": "2024-01-20T12:00:00Z",
+ *   "author": {
+ *     "name": "John Doe",
+ *     "avatar_url": "https://..."
+ *   },
+ *   "comments": [
+ *     {
+ *       "id": "comment1",
+ *       "content": "Great tips!",
+ *       "created_at": "2024-01-20T12:30:00Z",
+ *       "author": {
+ *         "name": "Jane Smith",
+ *         "avatar_url": "https://..."
+ *       }
+ *     }
+ *   ]
+ * }
+ * ```
+ */
+export async function GET(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -24,10 +68,7 @@ export async function GET(
     const { data: post, error } = await supabase
       .from('posts')
       .select(`
-        id,
-        title,
-        content,
-        created_at,
+        *,
         author:profiles(id, name, avatar_url),
         comments:post_comments(
           id,
@@ -64,14 +105,30 @@ export async function GET(
   }
 }
 
-// Update post
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+/**
+ * PATCH /api/community/[id]
+ * 
+ * Updates a specific post. Only the post author can update the post.
+ * 
+ * @requires Authentication
+ * @requires Authorization: Post author only
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the post ID
+ * @returns {Promise<NextResponse>} JSON response containing the updated post or error message
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "title": "Updated Title",
+ *   "content": "Updated content..."
+ * }
+ * ```
+ */
+export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -83,7 +140,7 @@ export async function PATCH(
       }
     )
     
-    // Check authentication
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -93,7 +150,7 @@ export async function PATCH(
     }
 
     // Get post data
-    const { title, content } = await req.json()
+    const { title, content } = await request.json()
     if (!title || !content) {
       return NextResponse.json(
         { error: 'Title and content are required' },
@@ -101,7 +158,7 @@ export async function PATCH(
       )
     }
 
-    // Check if user is post author
+    // Verify post author
     const { data: post } = await supabase
       .from('posts')
       .select('author_id')
@@ -148,14 +205,22 @@ export async function PATCH(
   }
 }
 
-// Delete post
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+/**
+ * DELETE /api/community/[id]
+ * 
+ * Deletes a specific post and its associated comments. Only the post author can delete the post.
+ * 
+ * @requires Authentication
+ * @requires Authorization: Post author only
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the post ID
+ * @returns {Promise<NextResponse>} JSON response indicating success or error message
+ */
+export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -167,7 +232,7 @@ export async function DELETE(
       }
     )
     
-    // Check authentication
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -176,7 +241,7 @@ export async function DELETE(
       )
     }
 
-    // Check if user is post author
+    // Verify post author
     const { data: post } = await supabase
       .from('posts')
       .select('author_id')
@@ -197,7 +262,7 @@ export async function DELETE(
       )
     }
 
-    // Delete post and its comments
+    // Delete post and its comments (cascade delete)
     const { error } = await supabase
       .from('posts')
       .delete()

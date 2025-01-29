@@ -1,3 +1,9 @@
+/**
+ * @file courses/[id]/lessons/route.ts
+ * @description API routes for managing course lessons. Provides endpoints for listing all lessons
+ * in a course and creating new lessons. Includes authentication and authorization checks.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -9,6 +15,33 @@ interface RouteParams {
   }
 }
 
+/**
+ * GET /api/courses/[id]/lessons
+ * 
+ * Retrieves all lessons for a specific course, including their content.
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing an array of lessons or error message
+ * 
+ * @example Response
+ * ```json
+ * [
+ *   {
+ *     "id": "lesson1",
+ *     "title": "Introduction",
+ *     "description": "Course overview",
+ *     "duration": "10 minutes",
+ *     "type": "video",
+ *     "order": 1,
+ *     "content": {
+ *       "video_url": "https://...",
+ *       "transcript": "..."
+ *     }
+ *   }
+ * ]
+ * ```
+ */
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -45,6 +78,33 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 }
 
+/**
+ * POST /api/courses/[id]/lessons
+ * 
+ * Creates a new lesson in a course. Only the course instructor can create lessons.
+ * 
+ * @requires Authentication
+ * @requires Authorization: Course instructor only
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing the created lesson or error message
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "title": "New Lesson",
+ *   "description": "Lesson description",
+ *   "duration": "15 minutes",
+ *   "type": "video",
+ *   "order": 2,
+ *   "content": {
+ *     "video_url": "https://...",
+ *     "transcript": "..."
+ *   }
+ * }
+ * ```
+ */
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -60,7 +120,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -69,7 +129,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
     
-    // וידוא שהמשתמש הוא המדריך של הקורס
+    // Verify course instructor
     const { data: course } = await supabase
       .from('courses')
       .select('instructor_id')
@@ -92,7 +152,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       content
     } = await request.json()
     
-    // יצירת השיעור
+    // Create lesson
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
       .insert({
@@ -109,7 +169,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     
     if (lessonError) throw lessonError
     
-    // יצירת תוכן השיעור
+    // Create lesson content
     const { error: contentError } = await supabase
       .from('lesson_content')
       .insert({
@@ -118,7 +178,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       })
     
     if (contentError) {
-      // אם יש שגיאה ביצירת התוכן, נמחק את השיעור שנוצר
+      // If content creation fails, delete the lesson
       await supabase
         .from('lessons')
         .delete()
@@ -127,7 +187,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       throw contentError
     }
     
-    // קבלת השיעור המלא עם התוכן
+    // Get full lesson with content
     const { data: fullLesson, error: fetchError } = await supabase
       .from('lessons')
       .select(`

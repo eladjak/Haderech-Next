@@ -1,8 +1,39 @@
+/**
+ * @file courses/route.ts
+ * @description API routes for managing courses. Provides endpoints for listing all courses
+ * and creating new courses. Includes authentication and role-based access control.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { Database } from '@/types/supabase'
 
+/**
+ * GET /api/courses
+ * 
+ * Retrieves a list of all courses with their basic information, instructor details,
+ * lesson count, and average rating.
+ * 
+ * @returns {Promise<NextResponse>} JSON response containing an array of courses or error message
+ * 
+ * @example Response
+ * ```json
+ * [
+ *   {
+ *     "id": "123",
+ *     "title": "Course Title",
+ *     "description": "Course Description",
+ *     "instructor": {
+ *       "name": "John Doe",
+ *       "avatar_url": "https://..."
+ *     },
+ *     "lessons": { "count": 10 },
+ *     "ratings": { "avg": 4.5 }
+ *   }
+ * ]
+ * ```
+ */
 export async function GET() {
   try {
     const cookieStore = cookies()
@@ -40,6 +71,30 @@ export async function GET() {
   }
 }
 
+/**
+ * POST /api/courses
+ * 
+ * Creates a new course. Only authenticated instructors can create courses.
+ * 
+ * @requires Authentication
+ * @requires Role: 'instructor'
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "title": "Course Title",
+ *   "description": "Course Description",
+ *   "level": "beginner",
+ *   "duration": "10 hours",
+ *   "price": 99.99,
+ *   "thumbnail_url": "https://...",
+ *   "topics": ["topic1", "topic2"],
+ *   "requirements": ["req1", "req2"]
+ * }
+ * ```
+ * 
+ * @returns {Promise<NextResponse>} JSON response containing the created course or error message
+ */
 export async function POST(request: Request) {
   try {
     const cookieStore = cookies()
@@ -55,7 +110,7 @@ export async function POST(request: Request) {
       }
     )
     
-    // וידוא שהמשתמש מחובר ושהוא מדריך
+    // Verify authentication and instructor role
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(

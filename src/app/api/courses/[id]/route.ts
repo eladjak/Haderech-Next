@@ -1,3 +1,9 @@
+/**
+ * @file courses/[id]/route.ts
+ * @description API routes for managing individual courses. Provides endpoints for retrieving,
+ * updating, and deleting specific courses. Includes authentication and authorization checks.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -9,6 +15,47 @@ interface RouteParams {
   }
 }
 
+/**
+ * GET /api/courses/[id]
+ * 
+ * Retrieves detailed information about a specific course, including instructor details,
+ * lessons, and ratings.
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing the course details or error message
+ * 
+ * @example Response
+ * ```json
+ * {
+ *   "id": "123",
+ *   "title": "Course Title",
+ *   "description": "Course Description",
+ *   "instructor": {
+ *     "name": "John Doe",
+ *     "avatar_url": "https://...",
+ *     "bio": "Instructor bio"
+ *   },
+ *   "lessons": [
+ *     {
+ *       "id": "lesson1",
+ *       "title": "Lesson 1",
+ *       "content": { ... }
+ *     }
+ *   ],
+ *   "ratings": [
+ *     {
+ *       "rating": 5,
+ *       "review": "Great course!",
+ *       "user": {
+ *         "name": "Jane Doe",
+ *         "avatar_url": "https://..."
+ *       }
+ *     }
+ *   ]
+ * }
+ * ```
+ */
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -61,6 +108,33 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 }
 
+/**
+ * PATCH /api/courses/[id]
+ * 
+ * Updates a specific course. Only the course instructor can update the course.
+ * 
+ * @requires Authentication
+ * @requires Authorization: Course instructor only
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing the updated course or error message
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "title": "Updated Title",
+ *   "description": "Updated Description",
+ *   "level": "intermediate",
+ *   "duration": "12 hours",
+ *   "price": 129.99,
+ *   "thumbnail_url": "https://...",
+ *   "topics": ["updated-topic"],
+ *   "requirements": ["updated-req"],
+ *   "status": "published"
+ * }
+ * ```
+ */
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -76,7 +150,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -85,7 +159,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       )
     }
     
-    // וידוא שהמשתמש הוא המדריך של הקורס
+    // Verify course instructor
     const { data: course } = await supabase
       .from('courses')
       .select('instructor_id')
@@ -141,6 +215,18 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 }
 
+/**
+ * DELETE /api/courses/[id]
+ * 
+ * Deletes a specific course. Only the course instructor or an admin can delete the course.
+ * 
+ * @requires Authentication
+ * @requires Authorization: Course instructor or admin role
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response indicating success or error message
+ */
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -156,7 +242,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -165,7 +251,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       )
     }
     
-    // וידוא שהמשתמש הוא המדריך של הקורס או מנהל
+    // Verify course instructor or admin role
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')

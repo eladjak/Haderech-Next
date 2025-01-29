@@ -1,12 +1,45 @@
-import { NextResponse } from 'next/server'
+/**
+ * @file community/route.ts
+ * @description API routes for managing community posts. Provides endpoints for listing all posts
+ * and creating new posts. Includes authentication checks and post validation.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import type { Database } from '@/types/supabase'
 
-// Get all posts
+/**
+ * GET /api/community
+ * 
+ * Retrieves all community posts with their author information and comment counts.
+ * Posts are ordered by creation date, with newest posts first.
+ * 
+ * @returns {Promise<NextResponse>} JSON response containing an array of posts or error message
+ * 
+ * @example Response
+ * ```json
+ * [
+ *   {
+ *     "id": "post1",
+ *     "title": "Learning Tips",
+ *     "content": "Here are some effective learning strategies...",
+ *     "created_at": "2024-01-20T12:00:00Z",
+ *     "author": {
+ *       "name": "John Doe",
+ *       "avatar_url": "https://..."
+ *     },
+ *     "comments": {
+ *       "count": 5
+ *     }
+ *   }
+ * ]
+ * ```
+ */
 export async function GET() {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -21,10 +54,7 @@ export async function GET() {
     const { data: posts, error } = await supabase
       .from('posts')
       .select(`
-        id,
-        title,
-        content,
-        created_at,
+        *,
         author:profiles(id, name, avatar_url),
         comments:post_comments(count)
       `)
@@ -48,11 +78,28 @@ export async function GET() {
   }
 }
 
-// Create new post
-export async function POST(req: Request) {
+/**
+ * POST /api/community
+ * 
+ * Creates a new community post. Only authenticated users can create posts.
+ * 
+ * @requires Authentication
+ * 
+ * @param {Request} request - The incoming request object
+ * @returns {Promise<NextResponse>} JSON response containing the created post or error message
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "title": "New Post Title",
+ *   "content": "Post content goes here..."
+ * }
+ * ```
+ */
+export async function POST(request: Request) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -64,7 +111,7 @@ export async function POST(req: Request) {
       }
     )
     
-    // Check authentication
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -74,7 +121,7 @@ export async function POST(req: Request) {
     }
 
     // Get post data from request body
-    const { title, content } = await req.json()
+    const { title, content } = await request.json()
     if (!title || !content) {
       return NextResponse.json(
         { error: 'Title and content are required' },

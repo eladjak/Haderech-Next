@@ -1,3 +1,10 @@
+/**
+ * @file courses/[id]/ratings/route.ts
+ * @description API routes for managing course ratings and reviews. Provides endpoints for
+ * retrieving course ratings and submitting new ratings. Includes authentication checks
+ * and rating validation.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -9,6 +16,31 @@ interface RouteParams {
   }
 }
 
+/**
+ * GET /api/courses/[id]/ratings
+ * 
+ * Retrieves all ratings and reviews for a specific course, including user information
+ * for each rating.
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing an array of ratings or error message
+ * 
+ * @example Response
+ * ```json
+ * [
+ *   {
+ *     "rating": 5,
+ *     "review": "Great course! Very informative.",
+ *     "created_at": "2024-01-20T12:00:00Z",
+ *     "user": {
+ *       "name": "John Doe",
+ *       "avatar_url": "https://..."
+ *     }
+ *   }
+ * ]
+ * ```
+ */
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -45,6 +77,26 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 }
 
+/**
+ * POST /api/courses/[id]/ratings
+ * 
+ * Creates a new rating and review for a course. Users can only rate a course once.
+ * Automatically updates the course's average rating after submission.
+ * 
+ * @requires Authentication
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing the created rating or error message
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "rating": 5,
+ *   "review": "Excellent course content and presentation!"
+ * }
+ * ```
+ */
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -60,7 +112,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -69,7 +121,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
     
-    // וידוא שהקורס קיים
+    // Verify course exists
     const { data: course } = await supabase
       .from('courses')
       .select('id')
@@ -83,7 +135,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
     
-    // בדיקה אם המשתמש כבר דירג את הקורס
+    // Check if user has already rated this course
     const { data: existingRating } = await supabase
       .from('course_ratings')
       .select('id')
@@ -100,6 +152,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     
     const { rating, review } = await request.json()
     
+    // Create new rating
     const { data: newRating, error } = await supabase
       .from('course_ratings')
       .insert({
@@ -117,7 +170,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     
     if (error) throw error
     
-    // עדכון הדירוג הממוצע של הקורס
+    // Update course average rating
     await supabase.rpc('update_course_average_rating', {
       course_id: params.id
     })

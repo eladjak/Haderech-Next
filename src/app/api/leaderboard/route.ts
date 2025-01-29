@@ -1,11 +1,52 @@
-import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+/**
+ * @file leaderboard/route.ts
+ * @description API route for retrieving user rankings based on points and achievements.
+ * Provides a leaderboard of top users with their profiles and scores.
+ */
 
-// Get leaderboard
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import type { Database } from '@/types/supabase'
+
+/**
+ * GET /api/leaderboard
+ * 
+ * Retrieves the top users ranked by their total points and achievements.
+ * Includes user profile information and achievement statistics.
+ * 
+ * @returns {Promise<NextResponse>} JSON response containing an array of ranked users or error message
+ * 
+ * @example Response
+ * ```json
+ * [
+ *   {
+ *     "rank": 1,
+ *     "user": {
+ *       "name": "John Doe",
+ *       "avatar_url": "https://...",
+ *       "points": 1000,
+ *       "achievements_count": 15,
+ *       "completed_courses": 5
+ *     }
+ *   }
+ * ]
+ * ```
+ */
 export async function GET() {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = cookies()
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
     
     const { data: leaderboard, error } = await supabase
       .from('profiles')
@@ -13,11 +54,12 @@ export async function GET() {
         id,
         name,
         avatar_url,
-        score,
-        achievements:user_achievements(count)
+        points,
+        achievements:user_achievements(count),
+        courses:course_enrollments(count)
       `)
-      .order('score', { ascending: false })
-      .limit(10)
+      .order('points', { ascending: false })
+      .limit(100)
 
     if (error) {
       console.error('Error fetching leaderboard:', error)
@@ -27,13 +69,13 @@ export async function GET() {
       )
     }
 
-    // Calculate rank for each user
-    const leaderboardWithRanks = leaderboard.map((user, index) => ({
-      ...user,
-      rank: index + 1
+    // Add rank to each user
+    const rankedLeaderboard = leaderboard.map((user, index) => ({
+      rank: index + 1,
+      user
     }))
 
-    return NextResponse.json(leaderboardWithRanks)
+    return NextResponse.json(rankedLeaderboard)
   } catch (error) {
     console.error('Error in GET /api/leaderboard:', error)
     return NextResponse.json(
@@ -46,7 +88,17 @@ export async function GET() {
 // Update user score
 export async function PATCH(req: Request) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookies().get(name)?.value
+          },
+        },
+      }
+    )
     
     // Check authentication
     const { data: { session } } = await supabase.auth.getSession()

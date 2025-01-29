@@ -1,3 +1,10 @@
+/**
+ * @file courses/[id]/lessons/[lessonId]/route.ts
+ * @description API routes for managing individual lessons within a course. Provides endpoints
+ * for retrieving, updating, and deleting specific lessons. Includes authentication and
+ * authorization checks.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -10,6 +17,37 @@ interface RouteParams {
   }
 }
 
+/**
+ * GET /api/courses/[courseId]/lessons/[lessonId]
+ * 
+ * Retrieves detailed information about a specific lesson, including its content
+ * and course information.
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @returns {Promise<NextResponse>} JSON response containing the lesson details or error message
+ * 
+ * @example Response
+ * ```json
+ * {
+ *   "id": "lesson1",
+ *   "title": "Introduction",
+ *   "description": "Course overview",
+ *   "duration": "10 minutes",
+ *   "type": "video",
+ *   "order": 1,
+ *   "content": {
+ *     "video_url": "https://...",
+ *     "transcript": "..."
+ *   },
+ *   "course": {
+ *     "id": "course1",
+ *     "title": "Course Title",
+ *     "instructor_id": "user123"
+ *   }
+ * }
+ * ```
+ */
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -58,6 +96,33 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 }
 
+/**
+ * PATCH /api/courses/[courseId]/lessons/[lessonId]
+ * 
+ * Updates a specific lesson and its content. Only the course instructor can update lessons.
+ * 
+ * @requires Authentication
+ * @requires Authorization: Course instructor only
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @returns {Promise<NextResponse>} JSON response containing the updated lesson or error message
+ * 
+ * @example Request Body
+ * ```json
+ * {
+ *   "title": "Updated Lesson",
+ *   "description": "Updated description",
+ *   "duration": "12 minutes",
+ *   "type": "video",
+ *   "order": 2,
+ *   "content": {
+ *     "video_url": "https://...",
+ *     "transcript": "Updated transcript"
+ *   }
+ * }
+ * ```
+ */
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const supabase = createServerClient<Database>(
@@ -72,7 +137,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -81,7 +146,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       )
     }
     
-    // וידוא שהמשתמש הוא המדריך של הקורס
+    // Verify course instructor
     const { data: course } = await supabase
       .from('courses')
       .select('instructor_id')
@@ -104,7 +169,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       content
     } = await request.json()
     
-    // עדכון השיעור
+    // Update lesson details
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
       .update({
@@ -121,7 +186,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     
     if (lessonError) throw lessonError
     
-    // עדכון תוכן השיעור
+    // Update lesson content
     const { error: contentError } = await supabase
       .from('lesson_content')
       .update(content)
@@ -129,7 +194,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     
     if (contentError) throw contentError
     
-    // קבלת השיעור המלא עם התוכן המעודכן
+    // Get updated lesson with content
     const { data: fullLesson, error: fetchError } = await supabase
       .from('lessons')
       .select(`
@@ -151,6 +216,18 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 }
 
+/**
+ * DELETE /api/courses/[courseId]/lessons/[lessonId]
+ * 
+ * Deletes a specific lesson and its associated content. Only the course instructor can delete lessons.
+ * 
+ * @requires Authentication
+ * @requires Authorization: Course instructor only
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @returns {Promise<NextResponse>} JSON response indicating success or error message
+ */
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const supabase = createServerClient<Database>(
@@ -165,7 +242,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       }
     )
     
-    // וידוא שהמשתמש מחובר
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -174,7 +251,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       )
     }
     
-    // וידוא שהמשתמש הוא המדריך של הקורס
+    // Verify course instructor
     const { data: course } = await supabase
       .from('courses')
       .select('instructor_id')
@@ -188,7 +265,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       )
     }
     
-    // מחיקת תוכן השיעור
+    // Delete lesson content
     const { error: contentError } = await supabase
       .from('lesson_content')
       .delete()
@@ -196,7 +273,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     
     if (contentError) throw contentError
     
-    // מחיקת השיעור
+    // Delete lesson
     const { error: lessonError } = await supabase
       .from('lessons')
       .delete()
