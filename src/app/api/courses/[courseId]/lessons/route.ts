@@ -1,5 +1,5 @@
 /**
- * @file route.ts
+ * @file courses/[courseId]/lessons/route.ts
  * @description API route handlers for course lessons operations
  */
 
@@ -35,7 +35,7 @@ export async function GET(
       .from('lessons')
       .select(`
         *,
-        progress (*)
+        progress:lesson_progress (*)
       `)
       .eq('course_id', courseId)
       .order('order', { ascending: true })

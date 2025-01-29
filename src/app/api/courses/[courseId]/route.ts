@@ -1,5 +1,5 @@
 /**
- * @file route.ts
+ * @file courses/[courseId]/route.ts
  * @description API route handlers for course operations
  */
 
@@ -35,15 +35,39 @@ export async function GET(
       .from('courses')
       .select(`
         *,
-        lessons (
-          *,
-          progress (*)
-        ),
         instructor:profiles!instructor_id (
           id,
           name,
           avatar_url,
           bio
+        ),
+        lessons (
+          *,
+          progress:lesson_progress (*)
+        ),
+        ratings:course_ratings (
+          *,
+          user:profiles!user_id (
+            id,
+            name,
+            avatar_url
+          )
+        ),
+        comments:course_comments (
+          *,
+          user:profiles!user_id (
+            id,
+            name,
+            avatar_url
+          ),
+          replies!parent_id (
+            *,
+            user:profiles!user_id (
+              id,
+              name,
+              avatar_url
+            )
+          )
         )
       `)
       .eq('id', courseId)
