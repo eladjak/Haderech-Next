@@ -1,4 +1,4 @@
-# 📚 תיעוד API - הדרך
+# 📚 תיעוד API - הדרך 🚀
 
 ## 🔑 אימות
 
@@ -210,3 +210,175 @@ POST /api/upload
 - אופטימיזציה של שאילתות
 - דחיסת תוכן
 - מניעת N+1 queries 
+
+## מבוא
+
+תיעוד זה מתאר את נקודות הקצה של ה-API של פלטפורמת "הדרך". כל הנקודות דורשות אימות משתמש אלא אם צוין אחרת.
+
+## נקודות קצה
+
+### קורסים
+
+#### קבלת רשימת קורסים
+```http
+GET /api/courses
+```
+
+**פרמטרים אופציונליים:**
+- `category` - סינון לפי קטגוריה
+- `level` - סינון לפי רמה
+- `search` - חיפוש טקסט חופשי
+- `instructor` - סינון לפי מדריך
+
+#### קבלת קורס ספציפי
+```http
+GET /api/courses/{id}
+```
+
+#### עדכון קורס
+```http
+PATCH /api/courses/{id}
+```
+דורש הרשאות מדריך.
+
+#### מחיקת קורס
+```http
+DELETE /api/courses/{id}
+```
+דורש הרשאות מדריך או מנהל.
+
+### שיעורים
+
+#### קבלת רשימת שיעורים בקורס
+```http
+GET /api/courses/{id}/lessons
+```
+
+#### קבלת שיעור ספציפי
+```http
+GET /api/courses/{id}/lessons/{lessonId}
+```
+
+#### עדכון שיעור
+```http
+PUT /api/courses/{id}/lessons/{lessonId}
+```
+דורש הרשאות מדריך.
+
+#### מחיקת שיעור
+```http
+DELETE /api/courses/{id}/lessons/{lessonId}
+```
+דורש הרשאות מדריך.
+
+### התקדמות בשיעורים
+
+#### קבלת התקדמות בשיעור
+```http
+GET /api/courses/{id}/lessons/{lessonId}/progress
+```
+
+#### עדכון התקדמות בשיעור
+```http
+PUT /api/courses/{id}/lessons/{lessonId}/progress
+```
+
+### תגובות
+
+#### קבלת תגובות לשיעור
+```http
+GET /api/courses/{id}/lessons/{lessonId}/comments
+```
+
+#### הוספת תגובה לשיעור
+```http
+POST /api/courses/{id}/lessons/{lessonId}/comments
+```
+
+### דירוגים
+
+#### קבלת דירוגים לקורס
+```http
+GET /api/courses/{id}/ratings
+```
+
+#### הוספת דירוג לקורס
+```http
+POST /api/courses/{id}/ratings
+```
+
+### הרשמה לקורס
+
+#### הרשמה לקורס
+```http
+POST /api/courses/{id}/enroll
+```
+
+#### ביטול הרשמה לקורס
+```http
+DELETE /api/courses/{id}/enroll
+```
+
+### חיפוש
+
+#### חיפוש גלובלי
+```http
+GET /api/search?q={query}&type={type}
+```
+**פרמטרים:**
+- `q` - מחרוזת החיפוש (חובה)
+- `type` - סוג התוצאות (אופציונלי): courses, lessons, instructors
+
+### פרופיל
+
+#### קבלת פרופיל משתמש
+```http
+GET /api/profile
+```
+
+#### עדכון פרופיל משתמש
+```http
+PUT /api/profile
+```
+
+### התראות
+
+#### קבלת התראות
+```http
+GET /api/notifications
+```
+
+#### סימון התראה כנקראה
+```http
+PATCH /api/notifications/{id}
+```
+
+## דוגמאות
+
+### דוגמה לבקשת הרשמה לקורס
+```javascript
+const response = await fetch(`/api/courses/${courseId}/enroll`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    payment_method_id: 'pm_123',
+    coupon_code: 'WELCOME10'
+  })
+})
+```
+
+### דוגמה לעדכון התקדמות
+```javascript
+const response = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/progress`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    completed: true,
+    progress: 100
+  })
+})
+``` 

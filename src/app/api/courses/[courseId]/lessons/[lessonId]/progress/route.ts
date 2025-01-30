@@ -13,7 +13,7 @@ import type { Database } from '@/types/supabase'
  */
 export async function GET(
   request: Request,
-  { params }: { params: { courseId: string; lessonId: string } }
+  { params }: { params: { id: string; lessonId: string } }
 ) {
   try {
     const cookieStore = cookies()
@@ -69,7 +69,7 @@ export async function GET(
  */
 export async function PUT(
   request: Request,
-  { params }: { params: { courseId: string; lessonId: string } }
+  { params }: { params: { id: string; lessonId: string } }
 ) {
   try {
     const cookieStore = cookies()
@@ -93,7 +93,7 @@ export async function PUT(
       )
     }
 
-    const { courseId, lessonId } = params
+    const { id, lessonId } = params
     const updates = await request.json()
 
     // Verify lesson exists and belongs to course
@@ -101,7 +101,7 @@ export async function PUT(
       .from('lessons')
       .select('id')
       .eq('id', lessonId)
-      .eq('course_id', courseId)
+      .eq('course_id', id)
       .single()
 
     if (lessonError || !lesson) {
