@@ -1,6 +1,6 @@
 /**
- * @file courses/[id]/lessons/[lessonId]/comments/route.ts
- * @description API routes for managing lesson comments. Provides endpoints for retrieving and creating comments.
+ * @file courses/[id]/comments/route.ts
+ * @description API routes for managing course comments. Provides endpoints for retrieving and creating comments.
  */
 
 import { createServerClient } from '@supabase/ssr'
@@ -11,25 +11,24 @@ import type { Database } from '@/types/supabase'
 interface RouteParams {
   params: {
     id: string
-    lessonId: string
   }
 }
 
 /**
- * GET /api/courses/[id]/lessons/[lessonId]/comments
+ * GET /api/courses/[id]/comments
  * 
- * Retrieves all comments for a specific lesson.
+ * Retrieves all comments for a specific course.
  * 
  * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
- * @returns {Promise<NextResponse>} JSON response containing the lesson comments or error message
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing the course comments or error message
  * 
  * @example Response
  * ```json
  * [
  *   {
  *     "id": "comment1",
- *     "content": "Great explanation!",
+ *     "content": "Great course!",
  *     "created_at": "2024-01-01T12:00:00Z",
  *     "user": {
  *       "name": "John Doe",
@@ -65,7 +64,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     )
 
     const { data: comments, error } = await supabase
-      .from('lesson_comments')
+      .from('course_comments')
       .select(`
         *,
         user:profiles!user_id (
@@ -82,7 +81,7 @@ export async function GET(request: Request, { params }: RouteParams) {
           )
         )
       `)
-      .eq('lesson_id', params.lessonId)
+      .eq('course_id', params.id)
       .is('parent_id', null)
       .order('created_at', { ascending: false })
 
@@ -105,20 +104,21 @@ export async function GET(request: Request, { params }: RouteParams) {
 }
 
 /**
- * POST /api/courses/[id]/lessons/[lessonId]/comments
+ * POST /api/courses/[id]/comments
  * 
- * Creates a new comment or reply for a lesson.
+ * Creates a new comment or reply for a course.
  * 
  * @requires Authentication
+ * @requires Course enrollment
  * 
  * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
+ * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response containing the new comment or error message
  * 
  * @example Request Body
  * ```json
  * {
- *   "content": "Great lesson!",
+ *   "content": "Great course!",
  *   "parent_id": "comment1" // Optional, for replies
  * }
  * ```
@@ -147,6 +147,21 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
+    // Verify course enrollment
+    const { data: enrollment } = await supabase
+      .from('course_enrollments')
+      .select('id')
+      .eq('course_id', params.id)
+      .eq('user_id', session.user.id)
+      .single()
+
+    if (!enrollment) {
+      return NextResponse.json(
+        { error: 'Must be enrolled to comment' },
+        { status: 403 }
+      )
+    }
+
     const { content, parent_id } = await request.json()
 
     // Validate content
@@ -157,28 +172,13 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    // Verify lesson exists
-    const { data: lesson } = await supabase
-      .from('lessons')
-      .select('id')
-      .eq('id', params.lessonId)
-      .eq('course_id', params.id)
-      .single()
-
-    if (!lesson) {
-      return NextResponse.json(
-        { error: 'Lesson not found' },
-        { status: 404 }
-      )
-    }
-
     // If this is a reply, verify parent comment exists
     if (parent_id) {
       const { data: parentComment } = await supabase
-        .from('lesson_comments')
+        .from('course_comments')
         .select('id')
         .eq('id', parent_id)
-        .eq('lesson_id', params.lessonId)
+        .eq('course_id', params.id)
         .single()
 
       if (!parentComment) {
@@ -191,9 +191,9 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Create comment
     const { data: comment, error } = await supabase
-      .from('lesson_comments')
+      .from('course_comments')
       .insert({
-        lesson_id: params.lessonId,
+        course_id: params.id,
         user_id: session.user.id,
         content,
         parent_id

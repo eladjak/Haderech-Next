@@ -1,7 +1,6 @@
 /**
  * @file courses/[id]/lessons/[lessonId]/progress/route.ts
- * @description API routes for managing lesson progress. Provides endpoints for tracking
- * and updating a user's progress in specific lessons, including completion status.
+ * @description API routes for managing lesson progress. Provides endpoints for retrieving and updating progress.
  */
 
 import { createServerClient } from '@supabase/ssr'
@@ -11,28 +10,29 @@ import type { Database } from '@/types/supabase'
 
 interface RouteParams {
   params: {
-    courseId: string
+    id: string
     lessonId: string
   }
 }
 
 /**
- * GET /api/courses/[courseId]/lessons/[lessonId]/progress
+ * GET /api/courses/[id]/lessons/[lessonId]/progress
  * 
- * Retrieves the current user's progress for a specific lesson.
+ * Retrieves the user's progress for a specific lesson.
  * 
  * @requires Authentication
  * 
  * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing course and lesson IDs
- * @returns {Promise<NextResponse>} JSON response containing progress details or error message
+ * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
+ * @returns {Promise<NextResponse>} JSON response containing the progress details or error message
  * 
  * @example Response
  * ```json
  * {
+ *   "id": "progress1",
  *   "completed": true,
- *   "progress": 100,
- *   "last_accessed": "2024-01-20T12:00:00Z"
+ *   "last_position": 120,
+ *   "updated_at": "2024-01-01T12:00:00Z"
  * }
  * ```
  */
@@ -50,56 +50,62 @@ export async function GET(request: Request, { params }: RouteParams) {
         },
       }
     )
-    
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'יש להתחבר כדי לצפות בהתקדמות' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
-    
+
     const { data: progress, error } = await supabase
       .from('lesson_progress')
       .select('*')
       .eq('lesson_id', params.lessonId)
       .eq('user_id', session.user.id)
       .single()
-    
-    if (error && error.code !== 'PGRST116') throw error // PGRST116 = not found
-    
-    return NextResponse.json(progress || { completed: false, progress: 0 })
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      console.error('Error fetching progress:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch progress' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(progress || { completed: false, last_position: 0 })
   } catch (error) {
-    console.error('Error fetching lesson progress:', error)
+    console.error('Progress GET error:', error)
     return NextResponse.json(
-      { error: 'שגיאה בטעינת ההתקדמות' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
 
 /**
- * POST /api/courses/[courseId]/lessons/[lessonId]/progress
+ * PUT /api/courses/[id]/lessons/[lessonId]/progress
  * 
- * Updates the current user's progress for a specific lesson. Also updates overall
- * course progress when a lesson is completed.
+ * Updates the user's progress for a lesson.
  * 
  * @requires Authentication
+ * @requires Course enrollment
  * 
  * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing course and lesson IDs
- * @returns {Promise<NextResponse>} JSON response containing updated progress or error message
+ * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
+ * @returns {Promise<NextResponse>} JSON response containing the updated progress or error message
  * 
  * @example Request Body
  * ```json
  * {
  *   "completed": true,
- *   "progress": 100
+ *   "last_position": 180
  * }
  * ```
  */
-export async function POST(request: Request, { params }: RouteParams) {
+export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(
@@ -113,75 +119,74 @@ export async function POST(request: Request, { params }: RouteParams) {
         },
       }
     )
-    
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'יש להתחבר כדי לעדכן התקדמות' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
-    
-    const { completed, progress } = await request.json()
-    
-    // Check for existing progress record
-    const { data: existingProgress } = await supabase
-      .from('lesson_progress')
+
+    // Verify course enrollment
+    const { data: enrollment } = await supabase
+      .from('course_enrollments')
       .select('id')
-      .eq('lesson_id', params.lessonId)
+      .eq('course_id', params.id)
       .eq('user_id', session.user.id)
       .single()
-    
-    let result
-    
-    if (existingProgress) {
-      // Update existing progress
-      const { data, error } = await supabase
-        .from('lesson_progress')
-        .update({
-          completed,
-          progress,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingProgress.id)
-        .select()
-        .single()
-      
-      if (error) throw error
-      result = data
-    } else {
-      // Create new progress record
-      const { data, error } = await supabase
-        .from('lesson_progress')
-        .insert({
-          lesson_id: params.lessonId,
-          course_id: params.courseId,
-          user_id: session.user.id,
-          completed,
-          progress,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
-      
-      if (error) throw error
-      result = data
+
+    if (!enrollment) {
+      return NextResponse.json(
+        { error: 'Must be enrolled to track progress' },
+        { status: 403 }
+      )
     }
-    
-    // Update overall course progress if lesson is completed
-    if (completed) {
-      await supabase.rpc('update_course_progress', {
-        p_course_id: params.courseId,
-        p_user_id: session.user.id
+
+    // Verify lesson exists and belongs to course
+    const { data: lesson } = await supabase
+      .from('lessons')
+      .select('id')
+      .eq('id', params.lessonId)
+      .eq('course_id', params.id)
+      .single()
+
+    if (!lesson) {
+      return NextResponse.json(
+        { error: 'Lesson not found' },
+        { status: 404 }
+      )
+    }
+
+    const { completed, last_position } = await request.json()
+
+    // Update or create progress
+    const { data: progress, error } = await supabase
+      .from('lesson_progress')
+      .upsert({
+        lesson_id: params.lessonId,
+        user_id: session.user.id,
+        completed,
+        last_position,
+        updated_at: new Date().toISOString()
       })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating progress:', error)
+      return NextResponse.json(
+        { error: 'Failed to update progress' },
+        { status: 500 }
+      )
     }
-    
-    return NextResponse.json(result)
+
+    return NextResponse.json(progress)
   } catch (error) {
-    console.error('Error updating lesson progress:', error)
+    console.error('Progress PUT error:', error)
     return NextResponse.json(
-      { error: 'שגיאה בעדכון ההתקדמות' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

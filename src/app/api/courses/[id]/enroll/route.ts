@@ -1,3 +1,8 @@
+/**
+ * @file courses/[id]/enroll/route.ts
+ * @description API routes for managing course enrollments. Provides endpoints for enrolling in and unenrolling from courses.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -9,6 +14,29 @@ interface RouteParams {
   }
 }
 
+/**
+ * POST /api/courses/[id]/enroll
+ * 
+ * Enrolls the current user in a course.
+ * 
+ * @requires Authentication
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing the enrollment details or error message
+ * 
+ * @example Response
+ * ```json
+ * {
+ *   "id": "enrollment1",
+ *   "created_at": "2024-01-01T12:00:00Z",
+ *   "course": {
+ *     "title": "Course Title",
+ *     "description": "Course Description"
+ *   }
+ * }
+ * ```
+ */
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
@@ -23,106 +51,134 @@ export async function POST(request: Request, { params }: RouteParams) {
         },
       }
     )
-    
-    // וידוא שהמשתמש מחובר
+
+    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'יש להתחבר כדי להירשם לקורס' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
-    
-    // בדיקה אם הקורס קיים
+
+    // Check if course exists
     const { data: course } = await supabase
       .from('courses')
-      .select('id, price')
+      .select('id')
       .eq('id', params.id)
       .single()
-    
+
     if (!course) {
       return NextResponse.json(
-        { error: 'קורס לא נמצא' },
+        { error: 'Course not found' },
         { status: 404 }
       )
     }
-    
-    // בדיקה אם המשתמש כבר רשום לקורס
-    const { data: enrollment } = await supabase
+
+    // Check if already enrolled
+    const { data: existingEnrollment } = await supabase
       .from('course_enrollments')
       .select('id')
       .eq('course_id', params.id)
       .eq('user_id', session.user.id)
       .single()
-    
-    if (enrollment) {
+
+    if (existingEnrollment) {
       return NextResponse.json(
-        { error: 'כבר נרשמת לקורס זה' },
+        { error: 'Already enrolled in this course' },
         { status: 400 }
       )
     }
-    
-    // קבלת פרטי התשלום מהבקשה
-    const { payment_method_id, coupon_code } = await request.json()
-    
-    // חישוב המחיר הסופי (כאן צריך להוסיף לוגיקה של קופונים)
-    const final_price = course.price
-    
-    // יצירת רשומת הרשמה
-    const { data: newEnrollment, error: enrollmentError } = await supabase
+
+    // Create enrollment
+    const { data: enrollment, error } = await supabase
       .from('course_enrollments')
       .insert({
         course_id: params.id,
-        user_id: session.user.id,
-        payment_status: 'pending',
-        payment_amount: final_price,
-        payment_method: payment_method_id,
-        coupon_code,
-        created_at: new Date().toISOString()
+        user_id: session.user.id
       })
-      .select()
+      .select(`
+        *,
+        course:courses (
+          title,
+          description
+        )
+      `)
       .single()
-    
-    if (enrollmentError) throw enrollmentError
-    
-    // כאן צריך להוסיף לוגיקה של עיבוד תשלום
-    // לדוגמה: קריאה לשירות תשלומים חיצוני
-    
-    // עדכון סטטוס התשלום ל"הושלם"
-    const { error: updateError } = await supabase
-      .from('course_enrollments')
-      .update({
-        payment_status: 'completed',
-        completed_at: new Date().toISOString()
-      })
-      .eq('id', newEnrollment.id)
-    
-    if (updateError) throw updateError
-    
-    // יצירת התראה על הרשמה מוצלחת
-    const { error: notificationError } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: session.user.id,
-        title: 'נרשמת בהצלחה לקורס',
-        content: `נרשמת בהצלחה לקורס. אתה יכול להתחיל ללמוד עכשיו!`,
-        type: 'enrollment',
-        read: false,
-        created_at: new Date().toISOString()
-      })
-    
-    if (notificationError) {
-      console.error('Error creating notification:', notificationError)
+
+    if (error) {
+      console.error('Error creating enrollment:', error)
+      return NextResponse.json(
+        { error: 'Failed to create enrollment' },
+        { status: 500 }
+      )
     }
-    
-    return NextResponse.json({
-      message: 'נרשמת בהצלחה לקורס',
-      enrollment: newEnrollment
-    })
+
+    return NextResponse.json(enrollment)
   } catch (error) {
-    console.error('Error enrolling in course:', error)
+    console.error('Enrollment POST error:', error)
     return NextResponse.json(
-      { error: 'שגיאה בהרשמה לקורס' },
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * DELETE /api/courses/[id]/enroll
+ * 
+ * Unenrolls the current user from a course.
+ * 
+ * @requires Authentication
+ * 
+ * @param {Request} request - The incoming request object
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response indicating success or error message
+ */
+export async function DELETE(request: Request, { params }: RouteParams) {
+  try {
+    const cookieStore = cookies()
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
+
+    // Verify authentication
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Delete enrollment
+    const { error } = await supabase
+      .from('course_enrollments')
+      .delete()
+      .eq('course_id', params.id)
+      .eq('user_id', session.user.id)
+
+    if (error) {
+      console.error('Error deleting enrollment:', error)
+      return NextResponse.json(
+        { error: 'Failed to delete enrollment' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ message: 'Successfully unenrolled from course' })
+  } catch (error) {
+    console.error('Enrollment DELETE error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

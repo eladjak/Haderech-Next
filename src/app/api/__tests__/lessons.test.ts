@@ -3,104 +3,77 @@
  * @description Tests for course lessons API endpoints
  */
 
-import { GET, POST, PATCH } from '../courses/[courseId]/lessons/route'
+import { createMocks } from 'node-mocks-http'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse } from 'next/server'
+import { GET, POST, PATCH } from '../courses/[id]/lessons/route'
 
-// Mock Supabase client
-const mockSupabase = {
-  from: jest.fn(() => ({
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    neq: jest.fn().mockReturnThis(),
-    gt: jest.fn().mockReturnThis(),
-    gte: jest.fn().mockReturnThis(),
-    lt: jest.fn().mockReturnThis(),
-    lte: jest.fn().mockReturnThis(),
-    like: jest.fn().mockReturnThis(),
-    ilike: jest.fn().mockReturnThis(),
-    is: jest.fn().mockReturnThis(),
-    in: jest.fn().mockReturnThis(),
-    contains: jest.fn().mockReturnThis(),
-    containedBy: jest.fn().mockReturnThis(),
-    range: jest.fn().mockReturnThis(),
-    textSearch: jest.fn().mockReturnThis(),
-    filter: jest.fn().mockReturnThis(),
-    or: jest.fn().mockReturnThis(),
-    and: jest.fn().mockReturnThis(),
-    not: jest.fn().mockReturnThis(),
-    match: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    offset: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    maybeSingle: jest.fn().mockReturnThis(),
-    csv: jest.fn().mockReturnThis(),
-  })),
-  auth: {
-    getSession: jest.fn(),
-  },
-  storage: {
-    from: jest.fn(() => ({
-      upload: jest.fn(),
-      download: jest.fn(),
-      remove: jest.fn(),
-      createSignedUrl: jest.fn(),
-      getPublicUrl: jest.fn(),
-    })),
-  },
-  rpc: jest.fn(),
-}
+jest.mock('next/headers')
+jest.mock('@supabase/ssr')
 
-// Mock createServerClient
-jest.mock('@supabase/ssr', () => ({
-  createServerClient: jest.fn(() => mockSupabase),
-}))
+describe('Lessons API Routes', () => {
+  let mockCookies: jest.Mock
+  let mockCreateServerClient: jest.Mock
+  let mockSupabase: any
 
-// Mock cookies
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn(() => ({ value: 'mock-cookie' })),
-    getAll: jest.fn(() => []),
-    set: jest.fn(),
-    delete: jest.fn(),
-  })),
-}))
-
-describe('Lessons API', () => {
   beforeEach(() => {
+    mockCookies = cookies as jest.Mock
+    mockCreateServerClient = createServerClient as jest.Mock
+    mockSupabase = {
+      auth: {
+        getSession: jest.fn()
+      },
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn(),
+      delete: jest.fn(),
+      update: jest.fn(),
+      insert: jest.fn()
+    }
+
+    mockCookies.mockReturnValue({
+      get: jest.fn().mockReturnValue({ value: 'mock-cookie' })
+    })
+    mockCreateServerClient.mockReturnValue(mockSupabase)
+  })
+
+  afterEach(() => {
     jest.clearAllMocks()
   })
 
-  describe('GET /api/courses/[courseId]/lessons', () => {
-    it('should return course lessons', async () => {
+  describe('GET /api/courses/[id]/lessons', () => {
+    it('should return lessons for a course', async () => {
       const mockLessons = [
         {
           id: '1',
-          title: 'Test Lesson',
-          description: 'Test Description',
-        },
+          title: 'Lesson 1',
+          description: 'Description 1'
+        }
       ]
 
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockLessons, error: null })
+      mockSupabase.select.mockResolvedValue({ data: mockLessons })
 
-      const request = new Request('http://localhost:3000/api/courses/1/lessons')
-      const response = await GET(request, { params: { courseId: '1' } })
+      const { req } = createMocks({
+        method: 'GET'
+      })
+
+      const response = await GET(req, { params: { id: '1' } })
       const data = await response.json()
 
       expect(response.status).toBe(200)
       expect(data).toEqual(mockLessons)
     })
 
-    it('should handle database error', async () => {
-      mockSupabase.from().select.mockResolvedValueOnce({ 
-        data: null, 
-        error: new Error('Database error') 
+    it('should handle errors', async () => {
+      mockSupabase.select.mockRejectedValue(new Error('Database error'))
+
+      const { req } = createMocks({
+        method: 'GET'
       })
 
-      const request = new Request('http://localhost:3000/api/courses/1/lessons')
-      const response = await GET(request, { params: { courseId: '1' } })
+      const response = await GET(req, { params: { id: '1' } })
       const data = await response.json()
 
       expect(response.status).toBe(500)
@@ -108,174 +81,142 @@ describe('Lessons API', () => {
     })
   })
 
-  describe('POST /api/courses/[courseId]/lessons', () => {
-    it('should create a new lesson for authorized instructor', async () => {
+  describe('POST /api/courses/[id]/lessons', () => {
+    it('should create lesson if user is instructor', async () => {
       const mockSession = {
-        user: { id: 'test-user' },
+        user: { id: 'instructor-id' }
       }
-
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: mockSession } })
 
       const mockCourse = {
-        id: '1',
-        instructor_id: 'test-user',
+        instructor_id: 'instructor-id'
       }
-
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourse, error: null })
 
       const mockLesson = {
         id: '1',
         title: 'New Lesson',
-        description: 'Lesson Description',
+        description: 'New Description'
       }
 
-      mockSupabase.from().insert.mockResolvedValueOnce({ data: mockLesson, error: null })
+      mockSupabase.auth.getSession.mockResolvedValue({ data: { session: mockSession } })
+      mockSupabase.single.mockResolvedValueOnce({ data: mockCourse })
+      mockSupabase.insert.mockResolvedValueOnce({ data: mockLesson })
 
-      const request = new Request('http://localhost:3000/api/courses/1/lessons', {
+      const { req } = createMocks({
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mockLesson),
+        body: {
+          title: 'New Lesson',
+          description: 'New Description'
+        }
       })
 
-      const response = await POST(request, { params: { courseId: '1' } })
+      const response = await POST(req, { params: { id: '1' } })
       const data = await response.json()
 
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(201)
       expect(data).toEqual(mockLesson)
     })
 
-    it('should reject unauthorized creation attempts', async () => {
-      const mockSession = {
-        user: { id: 'other-user' },
-      }
+    it('should return 401 if user not authenticated', async () => {
+      mockSupabase.auth.getSession.mockResolvedValue({ data: { session: null } })
 
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: mockSession } })
-
-      const mockCourse = {
-        id: '1',
-        instructor_id: 'test-user',
-      }
-
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourse, error: null })
-
-      const request = new Request('http://localhost:3000/api/courses/1/lessons', {
+      const { req } = createMocks({
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: 'New Lesson' }),
+        body: {
+          title: 'New Lesson'
+        }
       })
 
-      const response = await POST(request, { params: { courseId: '1' } })
+      const response = await POST(req, { params: { id: '1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(401)
+      expect(data).toEqual({ error: 'Unauthorized' })
+    })
+
+    it('should return 403 if user is not instructor', async () => {
+      const mockSession = {
+        user: { id: 'other-user' }
+      }
+
+      mockSupabase.auth.getSession.mockResolvedValue({ data: { session: mockSession } })
+      mockSupabase.single.mockResolvedValue({ data: { instructor_id: 'instructor-id' } })
+
+      const { req } = createMocks({
+        method: 'POST',
+        body: {
+          title: 'New Lesson'
+        }
+      })
+
+      const response = await POST(req, { params: { id: '1' } })
       const data = await response.json()
 
       expect(response.status).toBe(403)
       expect(data).toEqual({ error: 'Unauthorized' })
-    })
-
-    it('should handle unauthenticated requests', async () => {
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: null } })
-
-      const request = new Request('http://localhost:3000/api/courses/1/lessons', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: 'New Lesson' }),
-      })
-
-      const response = await POST(request, { params: { courseId: '1' } })
-      const data = await response.json()
-
-      expect(response.status).toBe(401)
-      expect(data).toEqual({ error: 'Authentication required' })
     })
   })
 
-  describe('PATCH /api/courses/[courseId]/lessons', () => {
-    it('should reorder lessons for authorized instructor', async () => {
+  describe('PATCH /api/courses/[id]/lessons', () => {
+    it('should update lesson order if user is instructor', async () => {
       const mockSession = {
-        user: { id: 'test-user' },
+        user: { id: 'instructor-id' }
       }
 
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: mockSession } })
+      mockSupabase.auth.getSession.mockResolvedValue({ data: { session: mockSession } })
+      mockSupabase.single.mockResolvedValue({ data: { instructor_id: 'instructor-id' } })
+      mockSupabase.update.mockResolvedValue({ data: null })
 
-      const mockCourse = {
-        id: '1',
-        instructor_id: 'test-user',
-      }
-
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourse, error: null })
-      mockSupabase.from().update.mockResolvedValueOnce({ error: null })
-
-      const request = new Request('http://localhost:3000/api/courses/1/lessons', {
+      const { req } = createMocks({
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          lessonOrder: ['lesson1', 'lesson2', 'lesson3'],
-        }),
+        body: {
+          lessonOrder: ['1', '2', '3']
+        }
       })
 
-      const response = await PATCH(request, { params: { courseId: '1' } })
+      const response = await PATCH(req, { params: { id: '1' } })
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(data).toEqual({ message: 'Lessons reordered successfully' })
+      expect(data).toEqual({ message: 'Lesson order updated successfully' })
     })
 
-    it('should reject unauthorized reorder attempts', async () => {
-      const mockSession = {
-        user: { id: 'other-user' },
-      }
+    it('should return 401 if user not authenticated', async () => {
+      mockSupabase.auth.getSession.mockResolvedValue({ data: { session: null } })
 
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: mockSession } })
-
-      const mockCourse = {
-        id: '1',
-        instructor_id: 'test-user',
-      }
-
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourse, error: null })
-
-      const request = new Request('http://localhost:3000/api/courses/1/lessons', {
+      const { req } = createMocks({
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          lessonOrder: ['lesson1', 'lesson2', 'lesson3'],
-        }),
+        body: {
+          lessonOrder: ['1', '2', '3']
+        }
       })
 
-      const response = await PATCH(request, { params: { courseId: '1' } })
+      const response = await PATCH(req, { params: { id: '1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(401)
+      expect(data).toEqual({ error: 'Unauthorized' })
+    })
+
+    it('should return 403 if user is not instructor', async () => {
+      const mockSession = {
+        user: { id: 'other-user' }
+      }
+
+      mockSupabase.auth.getSession.mockResolvedValue({ data: { session: mockSession } })
+      mockSupabase.single.mockResolvedValue({ data: { instructor_id: 'instructor-id' } })
+
+      const { req } = createMocks({
+        method: 'PATCH',
+        body: {
+          lessonOrder: ['1', '2', '3']
+        }
+      })
+
+      const response = await PATCH(req, { params: { id: '1' } })
       const data = await response.json()
 
       expect(response.status).toBe(403)
       expect(data).toEqual({ error: 'Unauthorized' })
-    })
-
-    it('should handle unauthenticated requests', async () => {
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: null } })
-
-      const request = new Request('http://localhost:3000/api/courses/1/lessons', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          lessonOrder: ['lesson1', 'lesson2', 'lesson3'],
-        }),
-      })
-
-      const response = await PATCH(request, { params: { courseId: '1' } })
-      const data = await response.json()
-
-      expect(response.status).toBe(401)
-      expect(data).toEqual({ error: 'Authentication required' })
     })
   })
 }) 

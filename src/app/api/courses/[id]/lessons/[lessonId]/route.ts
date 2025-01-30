@@ -1,8 +1,7 @@
 /**
  * @file courses/[id]/lessons/[lessonId]/route.ts
- * @description API routes for managing individual lessons within a course. Provides endpoints
- * for retrieving, updating, and deleting specific lessons. Includes authentication and
- * authorization checks.
+ * @description API routes for managing individual lessons. Provides endpoints for retrieving,
+ * updating, and deleting specific lessons.
  */
 
 import { createServerClient } from '@supabase/ssr'
@@ -12,19 +11,18 @@ import type { Database } from '@/types/supabase'
 
 interface RouteParams {
   params: {
-    courseId: string
+    id: string
     lessonId: string
   }
 }
 
 /**
- * GET /api/courses/[courseId]/lessons/[lessonId]
+ * GET /api/courses/[id]/lessons/[lessonId]
  * 
- * Retrieves detailed information about a specific lesson, including its content
- * and course information.
+ * Retrieves a specific lesson's details, including its content.
  * 
  * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
  * @returns {Promise<NextResponse>} JSON response containing the lesson details or error message
  * 
  * @example Response
@@ -33,17 +31,12 @@ interface RouteParams {
  *   "id": "lesson1",
  *   "title": "Introduction",
  *   "description": "Course overview",
- *   "duration": "10 minutes",
- *   "type": "video",
+ *   "duration": 30,
  *   "order": 1,
  *   "content": {
- *     "video_url": "https://...",
- *     "transcript": "..."
- *   },
- *   "course": {
- *     "id": "course1",
- *     "title": "Course Title",
- *     "instructor_id": "user123"
+ *     "type": "video",
+ *     "url": "https://...",
+ *     "transcript": "Lesson transcript..."
  *   }
  * }
  * ```
@@ -62,140 +55,154 @@ export async function GET(request: Request, { params }: RouteParams) {
         },
       }
     )
-    
+
     const { data: lesson, error } = await supabase
       .from('lessons')
       .select(`
         *,
         content:lesson_content(*),
-        course:courses(
-          id,
-          title,
-          instructor_id
-        )
+        progress:lesson_progress(*)
       `)
+      .eq('course_id', params.id)
       .eq('id', params.lessonId)
-      .eq('course_id', params.courseId)
       .single()
-    
-    if (error) throw error
+
+    if (error) {
+      console.error('Error fetching lesson:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch lesson' },
+        { status: 500 }
+      )
+    }
+
     if (!lesson) {
       return NextResponse.json(
-        { error: 'שיעור לא נמצא' },
+        { error: 'Lesson not found' },
         { status: 404 }
       )
     }
-    
+
     return NextResponse.json(lesson)
   } catch (error) {
-    console.error('Error fetching lesson:', error)
+    console.error('Lesson GET error:', error)
     return NextResponse.json(
-      { error: 'שגיאה בטעינת השיעור' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
 
 /**
- * PATCH /api/courses/[courseId]/lessons/[lessonId]
+ * PUT /api/courses/[id]/lessons/[lessonId]
  * 
- * Updates a specific lesson and its content. Only the course instructor can update lessons.
+ * Updates a lesson's details. Only the course instructor can update lessons.
  * 
  * @requires Authentication
  * @requires Authorization: Course instructor only
  * 
  * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
  * @returns {Promise<NextResponse>} JSON response containing the updated lesson or error message
  * 
  * @example Request Body
  * ```json
  * {
- *   "title": "Updated Lesson",
+ *   "title": "Updated Title",
  *   "description": "Updated description",
- *   "duration": "12 minutes",
- *   "type": "video",
+ *   "duration": 45,
  *   "order": 2,
  *   "content": {
- *     "video_url": "https://...",
- *     "transcript": "Updated transcript"
+ *     "type": "video",
+ *     "url": "https://...",
+ *     "transcript": "Updated transcript..."
  *   }
  * }
  * ```
  */
-export async function PATCH(request: Request, { params }: RouteParams) {
+export async function PUT(request: Request, { params }: RouteParams) {
   try {
+    const cookieStore = cookies()
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           get(name: string) {
-            return cookies().get(name)?.value
+            return cookieStore.get(name)?.value
           },
         },
       }
     )
-    
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'יש להתחבר כדי לערוך שיעור' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
-    
+
     // Verify course instructor
     const { data: course } = await supabase
       .from('courses')
-      .select('instructor_id')
-      .eq('id', params.courseId)
+      .select('id')
+      .eq('id', params.id)
+      .eq('instructor_id', session.user.id)
       .single()
-    
-    if (!course || course.instructor_id !== session.user.id) {
+
+    if (!course) {
       return NextResponse.json(
-        { error: 'אין הרשאה לערוך שיעור בקורס זה' },
+        { error: 'Unauthorized' },
         { status: 403 }
       )
     }
-    
-    const {
-      title,
-      description,
-      duration,
-      type,
-      order,
-      content
-    } = await request.json()
-    
-    // Update lesson details
+
+    const { title, description, duration, order, content } = await request.json()
+
+    // Update lesson
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
       .update({
         title,
         description,
         duration,
-        type,
         order,
         updated_at: new Date().toISOString()
       })
       .eq('id', params.lessonId)
+      .eq('course_id', params.id)
       .select()
       .single()
-    
-    if (lessonError) throw lessonError
-    
+
+    if (lessonError) {
+      console.error('Error updating lesson:', lessonError)
+      return NextResponse.json(
+        { error: 'Failed to update lesson' },
+        { status: 500 }
+      )
+    }
+
     // Update lesson content
-    const { error: contentError } = await supabase
-      .from('lesson_content')
-      .update(content)
-      .eq('lesson_id', params.lessonId)
-    
-    if (contentError) throw contentError
-    
-    // Get updated lesson with content
-    const { data: fullLesson, error: fetchError } = await supabase
+    if (content) {
+      const { error: contentError } = await supabase
+        .from('lesson_content')
+        .upsert({
+          lesson_id: params.lessonId,
+          ...content
+        })
+
+      if (contentError) {
+        console.error('Error updating lesson content:', contentError)
+        return NextResponse.json(
+          { error: 'Failed to update lesson content' },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Return complete lesson with content
+    const { data: completeLesson, error: fetchError } = await supabase
       .from('lessons')
       .select(`
         *,
@@ -203,89 +210,96 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       `)
       .eq('id', params.lessonId)
       .single()
-    
-    if (fetchError) throw fetchError
-    
-    return NextResponse.json(fullLesson)
+
+    if (fetchError) {
+      console.error('Error fetching complete lesson:', fetchError)
+      return NextResponse.json(
+        { error: 'Failed to fetch complete lesson' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(completeLesson)
   } catch (error) {
-    console.error('Error updating lesson:', error)
+    console.error('Lesson PUT error:', error)
     return NextResponse.json(
-      { error: 'שגיאה בעדכון השיעור' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
 
 /**
- * DELETE /api/courses/[courseId]/lessons/[lessonId]
+ * DELETE /api/courses/[id]/lessons/[lessonId]
  * 
- * Deletes a specific lesson and its associated content. Only the course instructor can delete lessons.
+ * Deletes a lesson. Only the course instructor can delete lessons.
  * 
  * @requires Authentication
  * @requires Authorization: Course instructor only
  * 
  * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing course and lesson IDs
+ * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
+    const cookieStore = cookies()
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           get(name: string) {
-            return cookies().get(name)?.value
+            return cookieStore.get(name)?.value
           },
         },
       }
     )
-    
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'יש להתחבר כדי למחוק שיעור' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
-    
+
     // Verify course instructor
     const { data: course } = await supabase
       .from('courses')
-      .select('instructor_id')
-      .eq('id', params.courseId)
+      .select('id')
+      .eq('id', params.id)
+      .eq('instructor_id', session.user.id)
       .single()
-    
-    if (!course || course.instructor_id !== session.user.id) {
+
+    if (!course) {
       return NextResponse.json(
-        { error: 'אין הרשאה למחוק שיעור בקורס זה' },
+        { error: 'Unauthorized' },
         { status: 403 }
       )
     }
-    
-    // Delete lesson content
-    const { error: contentError } = await supabase
-      .from('lesson_content')
-      .delete()
-      .eq('lesson_id', params.lessonId)
-    
-    if (contentError) throw contentError
-    
-    // Delete lesson
-    const { error: lessonError } = await supabase
+
+    // Delete lesson (cascade will handle related content)
+    const { error } = await supabase
       .from('lessons')
       .delete()
       .eq('id', params.lessonId)
-    
-    if (lessonError) throw lessonError
-    
-    return NextResponse.json({ message: 'השיעור נמחק בהצלחה' })
+      .eq('course_id', params.id)
+
+    if (error) {
+      console.error('Error deleting lesson:', error)
+      return NextResponse.json(
+        { error: 'Failed to delete lesson' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ message: 'Lesson deleted successfully' })
   } catch (error) {
-    console.error('Error deleting lesson:', error)
+    console.error('Lesson DELETE error:', error)
     return NextResponse.json(
-      { error: 'שגיאה במחיקת השיעור' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
