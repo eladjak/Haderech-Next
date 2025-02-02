@@ -1,6 +1,7 @@
 /**
  * @file courses/[id]/comments/route.ts
- * @description API routes for managing course comments. Provides endpoints for retrieving and creating comments.
+ * @description API routes for managing course comments. Provides endpoints for retrieving,
+ * creating, updating, and deleting comments on courses.
  */
 
 import { createServerClient } from '@supabase/ssr'
@@ -17,38 +18,28 @@ interface RouteParams {
 /**
  * GET /api/courses/[id]/comments
  * 
- * Retrieves all comments for a specific course.
+ * Returns all comments for a specific course.
  * 
- * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the course ID
- * @returns {Promise<NextResponse>} JSON response containing the course comments or error message
+ * @param id - The course ID
+ * @returns List of comments with author information
  * 
- * @example Response
+ * Example response:
  * ```json
  * [
  *   {
- *     "id": "comment1",
- *     "content": "Great course!",
- *     "created_at": "2024-01-01T12:00:00Z",
- *     "user": {
- *       "name": "John Doe",
- *       "avatar_url": "https://..."
- *     },
- *     "replies": [
- *       {
- *         "id": "reply1",
- *         "content": "Thanks!",
- *         "user": {
- *           "name": "Jane Doe",
- *           "avatar_url": "https://..."
- *         }
- *       }
- *     ]
+ *     id: "123",
+ *     content: "Great course!",
+ *     created_at: "2024-02-02T12:00:00Z",
+ *     author: {
+ *       id: "456",
+ *       name: "John Doe",
+ *       avatar_url: "https://..."
+ *     }
  *   }
  * ]
  * ```
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(
@@ -67,22 +58,9 @@ export async function GET(request: Request, { params }: RouteParams) {
       .from('course_comments')
       .select(`
         *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        ),
-        replies!parent_id (
-          *,
-          user:profiles!user_id (
-            id,
-            name,
-            avatar_url
-          )
-        )
+        author:users(id, name, avatar_url)
       `)
       .eq('course_id', params.id)
-      .is('parent_id', null)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -95,7 +73,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(comments)
   } catch (error) {
-    console.error('Comments GET error:', error)
+    console.error('Error in GET /api/courses/[id]/comments:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -106,20 +84,16 @@ export async function GET(request: Request, { params }: RouteParams) {
 /**
  * POST /api/courses/[id]/comments
  * 
- * Creates a new comment or reply for a course.
+ * Creates a new comment on a course.
  * 
- * @requires Authentication
- * @requires Course enrollment
+ * @param request - The request containing the comment data
+ * @param id - The course ID
+ * @returns The created comment
  * 
- * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the course ID
- * @returns {Promise<NextResponse>} JSON response containing the new comment or error message
- * 
- * @example Request Body
+ * Example request body:
  * ```json
  * {
- *   "content": "Great course!",
- *   "parent_id": "comment1" // Optional, for replies
+ *   "content": "This course is amazing!"
  * }
  * ```
  */
@@ -138,55 +112,22 @@ export async function POST(request: Request, { params }: RouteParams) {
       }
     )
 
-    // Verify authentication
+    // Check authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    // Verify course enrollment
-    const { data: enrollment } = await supabase
-      .from('course_enrollments')
-      .select('id')
-      .eq('course_id', params.id)
-      .eq('user_id', session.user.id)
-      .single()
-
-    if (!enrollment) {
+    // Get request body
+    const { content } = await request.json()
+    if (!content) {
       return NextResponse.json(
-        { error: 'Must be enrolled to comment' },
-        { status: 403 }
-      )
-    }
-
-    const { content, parent_id } = await request.json()
-
-    // Validate content
-    if (!content?.trim()) {
-      return NextResponse.json(
-        { error: 'Comment content is required' },
+        { error: 'Content is required' },
         { status: 400 }
       )
-    }
-
-    // If this is a reply, verify parent comment exists
-    if (parent_id) {
-      const { data: parentComment } = await supabase
-        .from('course_comments')
-        .select('id')
-        .eq('id', parent_id)
-        .eq('course_id', params.id)
-        .single()
-
-      if (!parentComment) {
-        return NextResponse.json(
-          { error: 'Parent comment not found' },
-          { status: 404 }
-        )
-      }
     }
 
     // Create comment
@@ -196,15 +137,11 @@ export async function POST(request: Request, { params }: RouteParams) {
         course_id: params.id,
         user_id: session.user.id,
         content,
-        parent_id
+        created_at: new Date().toISOString(),
       })
       .select(`
         *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        )
+        author:users(id, name, avatar_url)
       `)
       .single()
 
@@ -218,7 +155,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(comment)
   } catch (error) {
-    console.error('Comments POST error:', error)
+    console.error('Error in POST /api/courses/[id]/comments:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
