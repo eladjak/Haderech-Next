@@ -104,14 +104,11 @@ export async function GET(_: Request, { params }: RouteParams) {
  * 
  * Updates a specific post. Only the post author can update the post.
  * 
- * @requires Authentication
- * @requires Authorization: Post author only
+ * @param request - The request containing the updated data
+ * @param id - The post ID to update
+ * @returns The updated post or error message
  * 
- * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the post ID
- * @returns {Promise<NextResponse>} JSON response containing the updated post or error message
- * 
- * @example Request Body
+ * Example request body:
  * ```json
  * {
  *   "title": "Updated Title",
@@ -133,8 +130,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         },
       }
     )
-    
-    // Verify authentication
+
+    // Check authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -143,7 +140,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       )
     }
 
-    // Get post data
+    // Get request body
     const { title, content } = await request.json()
     if (!title || !content) {
       return NextResponse.json(
@@ -152,7 +149,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       )
     }
 
-    // Verify post author
+    // Check if user is post author
     const { data: post } = await supabase
       .from('posts')
       .select('author_id')
@@ -161,14 +158,14 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (!post) {
       return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
+        { error: 'Post not found' },
         { status: 404 }
       )
     }
 
     if (post.author_id !== session.user.id) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authorized to update this post' },
         { status: 403 }
       )
     }
@@ -184,7 +181,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (error) {
       console.error('Error updating post:', error)
       return NextResponse.json(
-        { error: 'שגיאה בעדכון הפוסט' },
+        { error: 'Failed to update post' },
         { status: 500 }
       )
     }
