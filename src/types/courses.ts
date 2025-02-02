@@ -78,16 +78,11 @@ export interface LessonProgress {
 
 export interface CourseRating {
   id: string
-  courseId: string
   userId: string
+  courseId: string
   rating: number
-  review?: string
-  user: {
-    id: string
-    name: string
-    avatar_url?: string
-  }
-  created_at: string
+  comment: string
+  createdAt: Date
 }
 
 export interface CourseComment {
