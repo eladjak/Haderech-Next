@@ -11,6 +11,7 @@ interface CourseCommentsProps {
 
 export const CourseComments = ({ course, showAll = false }: CourseCommentsProps) => {
   const comments = course.comments
+  const displayComments = showAll ? comments : comments.slice(0, 3)
   
   const handleReply = (comment: CourseComment) => {
     // Handle reply logic
@@ -28,7 +29,7 @@ export const CourseComments = ({ course, showAll = false }: CourseCommentsProps)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {comments.map((comment) => (
+        {displayComments.map((comment) => (
           <div key={comment.id} className="space-y-4">
             {/* Main Comment */}
             <div className="space-y-2">
@@ -75,6 +76,12 @@ export const CourseComments = ({ course, showAll = false }: CourseCommentsProps)
             )}
           </div>
         ))}
+
+        {!showAll && comments.length > 3 && (
+          <Button variant="outline" className="w-full">
+            הצג עוד תגובות
+          </Button>
+        )}
 
         <Button className="w-full gap-2">
           <MessageCircle className="h-4 w-4" />
