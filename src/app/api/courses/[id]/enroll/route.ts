@@ -68,7 +68,7 @@ export async function POST(_: Request, { params }: RouteParams) {
     }
 
     // Check if already enrolled
-    const { data: enrollment, error: enrollmentError } = await supabase
+    const { data: enrollment } = await supabase
       .from('course_enrollments')
       .select('id')
       .eq('user_id', session.user.id)
