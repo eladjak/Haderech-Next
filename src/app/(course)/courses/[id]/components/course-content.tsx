@@ -22,7 +22,7 @@ export const CourseContent = ({ course, isEnrolled }: CourseContentProps) => {
       <div>
         <h2 className="text-2xl font-bold">תוכן הקורס</h2>
         <p className="text-muted-foreground">
-          {sortedLessons.length} שיעורים • {sortedLessons.reduce((acc, lesson) => acc + (lesson.duration || 0), 0)} דקות • הושלמו {completedLessons} שיעורים
+          {sortedLessons.length} שיעורים • {sortedLessons.reduce((acc, lesson) => acc + (lesson.duration || 0), 0)} דקות • הושלמו {completedLessons} שיעורים • {freeLessons} שיעורים חינמיים
         </p>
       </div>
 
