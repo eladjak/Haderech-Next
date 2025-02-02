@@ -434,4 +434,46 @@ interface SocialLearning {
     badges: BadgeSystem;
     achievements: AchievementSystem;
   };
-} 
+}
+```
+
+## קומפוננטות חדשות 🆕
+
+### קומפוננטות דשבורד
+1. **LatestForumPosts**
+   - מציג את הפוסטים האחרונים מהפורום
+   - מקבל רשימת פוסטים ומציג אותם בכרטיסיות
+   - כולל כותרת, תוכן מקוצר ופרטי המפרסם
+
+2. **RecommendedCoursesPreview**
+   - מציג קורסים מומלצים למשתמש
+   - מקבל רשימת קורסים ומציג אותם בכרטיסיות
+   - כולל תמונה, כותרת ותיאור קצר
+
+3. **ReferralManagement**
+   - מאפשר למשתמש לנהל את קוד ההפניה שלו
+   - מציג את הקוד הנוכחי ומאפשר שיתוף
+   - כולל כפתור לשיתוף מהיר
+
+4. **SocialRecommendations**
+   - מציג משתמשים מומלצים לעקוב אחריהם
+   - מקבל רשימת משתמשים ומציג אותם בכרטיסיות
+   - כולל תמונת פרופיל, שם ותיאור קצר
+
+### קומפוננטות קורס
+1. **CourseContent**
+   - מציג את תוכן הקורס
+   - מקבל אובייקט קורס ומצב הרשמה
+   - מציג רשימת שיעורים עם סטטוס השלמה
+   - מאפשר גישה לשיעורים בהתאם למצב ההרשמה
+
+2. **CourseComments**
+   - מאפשר למשתמשים להגיב על הקורס
+   - מציג את כל התגובות בצורה מדורגת
+   - תומך בתגובות מקוננות
+   - מאפשר הוספת תגובה חדשה
+
+3. **CourseRatings**
+   - מציג את הדירוגים של הקורס
+   - מחשב ומציג דירוג ממוצע
+   - מאפשר למשתמשים לדרג את הקורס 

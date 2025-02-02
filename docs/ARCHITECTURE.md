@@ -1,174 +1,96 @@
-# ארכיטקטורת המערכת - פרויקט "הדרך" 🏗️
+# ארכיטקטורת המערכת 🏗️
 
-## 📋 סקירה כללית
-"הדרך" היא פלטפורמת למידה מודרנית המבוססת על ארכיטקטורת מיקרו-פרונטנד עם Next.js 14 ו-Supabase. המערכת מתוכננת לתמוך בעשרות אלפי משתמשים במקביל, עם דגש על ביצועים, אבטחה, ונוחות שימוש.
+## סקירה כללית 📝
 
-## 🎯 עקרונות ארכיטקטוניים
-1. **Micro-Frontend Architecture**
-   - חלוקה לקומפוננטות עצמאיות
-   - ניהול מצב מבוזר
-   - בידוד לוגי של פיצ'רים
+הדרך היא פלטפורמת למידה מקוונת המבוססת על Next.js 14 ומשתמשת בארכיטקטורת App Router החדשה.
 
-2. **Server-First Approach**
-   - שימוש ב-Server Components
-   - Static Site Generation (SSG)
-   - Incremental Static Regeneration (ISR)
-   - Edge Runtime לביצועים מהירים
+## שכבות המערכת 🔄
 
-3. **Type Safety**
-   - TypeScript בכל שכבות האפליקציה
-   - Zod לוולידציה של סכמות
-   - End-to-end type safety
+### 1. שכבת הממשק (Frontend)
+- **Next.js App Router** - ניתוב ותצוגה
+- **React** - ניהול ממשק המשתמש
+- **Tailwind CSS** - עיצוב ועיצוב רספונסיבי
+- **shadcn/ui** - ספריית UI קומפוננטות
+- **Redux Toolkit** - ניהול מצב גלובלי
+- **React Query** - ניהול מצב שרת וקאש
 
-4. **Security by Design**
-   - Row Level Security (RLS)
-   - JWT Authentication
-   - HTTPS Everywhere
-   - Content Security Policy (CSP)
+### 2. שכבת השרת (Backend)
+- **Next.js API Routes** - נקודות קצה של השרת
+- **Supabase** - בסיס נתונים ואימות
+- **OpenAI API** - שירותי AI וצ'אטבוט
 
-## 🏭 שכבות המערכת
+### 3. שכבת הנתונים (Data)
+- **PostgreSQL** (via Supabase) - בסיס נתונים ראשי
+- **Redis** - קאש וניהול סשנים
+- **Supabase Storage** - אחסון קבצים
 
-### 1️⃣ Frontend Layer
-```typescript
-// שכבת הממשק המשתמש
-interface FrontendLayer {
-  presentation: {
-    pages: 'Next.js App Router Pages',
-    components: 'React Components',
-    layouts: 'Responsive Layouts'
-  },
-  state: {
-    server: 'React Query',
-    client: 'Redux Toolkit',
-    global: 'Context API'
-  },
-  styling: {
-    framework: 'Tailwind CSS',
-    components: 'shadcn/ui',
-    animations: 'Framer Motion'
-  }
-}
-```
+## קומפוננטות ראשיות 🧩
 
-### 2️⃣ Backend Layer
-```typescript
-// שכבת השרת
-interface BackendLayer {
-  api: {
-    routes: 'Next.js API Routes',
-    middleware: 'Edge Runtime',
-    validation: 'Zod'
-  },
-  auth: {
-    provider: 'Supabase Auth',
-    strategy: 'JWT',
-    mfa: 'Two Factor Auth'
-  },
-  storage: {
-    files: 'Supabase Storage',
-    cache: 'Redis',
-    cdn: 'Vercel Edge Network'
-  }
-}
-```
+### דשבורד
+- **LatestForumPosts** - הצגת פוסטים אחרונים
+- **RecommendedCoursesPreview** - קורסים מומלצים
+- **ReferralManagement** - ניהול הפניות
+- **SocialRecommendations** - המלצות חברתיות
 
-### 3️⃣ Database Layer
-```typescript
-// שכבת מסד הנתונים
-interface DatabaseLayer {
-  engine: 'PostgreSQL',
-  provider: 'Supabase',
-  features: {
-    rls: 'Row Level Security',
-    realtime: 'Supabase Realtime',
-    functions: 'PostgreSQL Functions',
-    triggers: 'Database Triggers'
-  }
-}
-```
+### קורסים
+- **CourseContent** - תצוגת תוכן הקורס
+- **CourseComments** - מערכת תגובות
+- **CourseRatings** - מערכת דירוגים
 
-## 🔄 תהליכי ליבה
+### אימות והרשאות
+- **AuthProvider** - ניהול אימות משתמשים
+- **PermissionsProvider** - ניהול הרשאות
 
-### 1. תהליך אימות
+## תזרים נתונים 🔄
+
 ```mermaid
-sequenceDiagram
-    Client->>+Frontend: Login Request
-    Frontend->>+Supabase Auth: Authenticate
-    Supabase Auth->>+Database: Verify Credentials
-    Database->>-Supabase Auth: User Data
-    Supabase Auth->>-Frontend: JWT Token
-    Frontend->>-Client: Login Success
+graph TD
+    A[משתמש] --> B[Next.js Frontend]
+    B --> C[API Routes]
+    C --> D[Supabase]
+    C --> E[OpenAI API]
+    D --> F[PostgreSQL]
+    D --> G[Storage]
 ```
 
-### 2. תהליך למידה
-```mermaid
-sequenceDiagram
-    Student->>+Course: Start Lesson
-    Course->>+Progress: Track Progress
-    Progress->>+Database: Save State
-    Database->>-Progress: Confirm
-    Progress->>-Course: Update UI
-    Course->>-Student: Show Next Step
-```
+## אבטחה 🔒
 
-## 🔌 אינטגרציות חיצוניות
+1. **אימות משתמשים**
+   - Supabase Auth
+   - JWT tokens
+   - OAuth providers
 
-### 1. שירותי ענן
-- **Vercel**: Hosting & Deployment
-- **Supabase**: Database & Auth
-- **OpenAI**: AI Features
-- **Cloudinary**: Media Storage
+2. **הרשאות**
+   - RBAC (Role Based Access Control)
+   - Row Level Security בבסיס הנתונים
 
-### 2. שירותי ניטור
-- **Sentry**: Error Tracking
-- **Vercel Analytics**: Performance
-- **LogRocket**: User Sessions
-- **Uptime Robot**: Availability
+3. **אבטחת מידע**
+   - HTTPS
+   - CORS
+   - Rate Limiting
 
-## 📈 סקלביליות
+## ביצועים ⚡
 
-### 1. אסטרטגיות Scaling
-- **Horizontal Scaling**: Vercel Edge Network
-- **Database Scaling**: Supabase Auto-scaling
-- **Cache Optimization**: Redis & CDN
-- **Load Balancing**: Automatic
+1. **אופטימיזציה**
+   - Server Components
+   - Image Optimization
+   - Code Splitting
 
-### 2. מגבלות וספים
-- **Rate Limiting**: 100 requests/minute
-- **File Upload**: 10MB max
-- **API Timeout**: 10 seconds
-- **Concurrent Users**: 10,000+
+2. **קאש**
+   - React Query
+   - Redis
+   - Static Generation
 
-## 🔒 אבטחה
+## סביבות 🌍
 
-### 1. שכבות הגנה
-- **Network**: HTTPS, CORS, CSP
-- **Application**: Input Validation, XSS Protection
-- **Database**: RLS, Query Sanitization
-- **Authentication**: JWT, MFA
+1. **פיתוח**
+   - Local Development
+   - Staging
+   - Production
 
-### 2. מדיניות גיבוי
-- **Database**: Daily Backups
-- **Files**: Redundant Storage
-- **Configuration**: Version Control
-- **Disaster Recovery**: Multi-region
-
-## 📱 תמיכה במובייל
-
-### 1. Progressive Web App
-- **Service Workers**: Offline Support
-- **Push Notifications**: Real-time Updates
-- **App Shell**: Fast Loading
-- **Responsive Design**: Mobile First
-
-### 2. Native Features
-- **Camera Access**: Profile Pictures
-- **Geolocation**: Local Content
-- **File System**: Offline Storage
-- **Share API**: Social Integration
-
-## 📝 הערות
-- הארכיטקטורה מתוכננת לגמישות ולהרחבה עתידית
-- כל שינוי ארכיטקטוני דורש עדכון של המסמך
-- יש לשמור על עקביות בין המימוש לתיעוד
-- מומלץ לבצע סקירות ארכיטקטורה תקופתיות 
+2. **כלי פיתוח**
+   - TypeScript
+   - ESLint
+   - Prettier
+   - Jest
+   - Playwright 
