@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import type { Database } from '@/types/supabase'
 
 /**
  * Simple tokenizer function that splits text into words
@@ -40,7 +42,7 @@ function findRelevantTopic(input: string): string {
 
 // Log chat interaction to the database
 async function logChatInteraction(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   userId: string,
   input: string,
   response: string
