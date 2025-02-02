@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * @file course-ratings.tsx
  * @description Ratings component for course pages showing user reviews

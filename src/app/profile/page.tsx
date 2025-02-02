@@ -60,13 +60,16 @@ async function getUserProfile(): Promise<Profile | null> {
   
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) {
-    redirect('/auth/login')
+    redirect('/login')
   }
 
   const { data: profile } = await supabase
     .from('profiles')
     .select(`
-      *,
+      id,
+      name,
+      bio,
+      avatar_url,
       courses:course_enrollments(
         course:courses(
           id,
@@ -75,33 +78,10 @@ async function getUserProfile(): Promise<Profile | null> {
         ),
         progress,
         last_accessed
-      ),
-      completed_courses:course_enrollments(
-        count,
-        completed_at
-      ),
-      achievements:user_achievements(count)
+      )
     `)
     .eq('id', session.user.id)
     .single()
-
-  if (profile) {
-    return profile
-  } else {
-    const { data: newProfile } = await supabase
-      .from('profiles')
-      .insert({
-        id: session.user.id,
-        email: session.user.email,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-  if (error) {
-    console.error('Error fetching profile:', error)
-    return null
-  }
 
   return profile
 }
@@ -119,71 +99,37 @@ export default async function Profile() {
   ) / profile.courses.length
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8 flex items-center gap-4">
-        <Avatar className="h-20 w-20">
-          <AvatarImage src={profile.avatar_url || undefined} />
-          <AvatarFallback>{profile.name[0]}</AvatarFallback>
-        </Avatar>
+    <div className="container py-8">
+      <h1 className="text-3xl font-bold">הפרופיל שלי</h1>
+      <div className="mt-8 grid gap-8 md:grid-cols-2">
+        {/* Profile Info */}
         <div>
-          <h1 className="text-3xl font-bold">{profile.name}</h1>
-          <p className="text-muted-foreground">{profile.bio || 'אין ביוגרפיה'}</p>
+          <h2 className="text-xl font-semibold">פרטים אישיים</h2>
+          <div className="mt-4">
+            <p><strong>שם:</strong> {profile.name}</p>
+            {profile.bio && <p><strong>אודות:</strong> {profile.bio}</p>}
+          </div>
+        </div>
+
+        {/* Enrolled Courses */}
+        <div>
+          <h2 className="text-xl font-semibold">הקורסים שלי</h2>
+          <div className="mt-4 space-y-4">
+            {profile.courses.map((enrollment) => (
+              <div key={enrollment.course.id} className="rounded-lg border p-4">
+                <h3 className="font-medium">{enrollment.course.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {enrollment.course.description}
+                </p>
+                <div className="mt-2 text-sm">
+                  <p>התקדמות: {enrollment.progress}%</p>
+                  <p>גישה אחרונה: {new Date(enrollment.last_accessed).toLocaleDateString('he-IL')}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      <Tabs defaultValue="progress">
-        <TabsList>
-          <TabsTrigger value="progress">התקדמות</TabsTrigger>
-          <TabsTrigger value="courses">הקורסים שלי</TabsTrigger>
-          <TabsTrigger value="recommendations">המלצות</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="progress" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>התקדמות כללית</CardTitle>
-              <CardDescription>
-                התקדמות ממוצעת בכל הקורסים
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Progress value={totalProgress * 100} />
-                <p className="text-sm text-muted-foreground">
-                  {Math.round(totalProgress * 100)}% הושלמו
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="courses" className="space-y-4">
-          {profile.courses.map(({ course, progress, last_accessed }) => (
-            <Card key={course.id}>
-              <CardHeader>
-                <CardTitle>{course.title}</CardTitle>
-                <CardDescription>{course.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Progress value={progress * 100} />
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{Math.round(progress * 100)}% הושלמו</span>
-                    <span>
-                      עודכן לאחרונה: {new Date(last_accessed).toLocaleDateString('he-IL')}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="recommendations" className="space-y-8">
-          <RecommendedCoursesPreview />
-          <LatestForumPosts />
-        </TabsContent>
-      </Tabs>
     </div>
   )
 } 

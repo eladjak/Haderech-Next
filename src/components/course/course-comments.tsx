@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * @file course-comments.tsx
  * @description Comments component for course pages showing user discussions
