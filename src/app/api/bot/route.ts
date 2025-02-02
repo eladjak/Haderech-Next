@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import natural from 'natural'
 
-const tokenizer = new natural.WordTokenizer()
+/**
+ * Simple tokenizer function that splits text into words
+ * @param text Text to tokenize
+ * @returns Array of words
+ */
+function tokenizeText(text: string): string[] {
+  return text.toLowerCase().split(/\s+/).filter(Boolean)
+}
 
 // Knowledge base with common relationship topics
 const knowledgeBase = {
@@ -18,7 +23,7 @@ const knowledgeBase = {
 
 // Helper function to find the most relevant topic
 function findRelevantTopic(input: string): string {
-  const tokens = tokenizer.tokenize(input.toLowerCase())
+  const tokens = tokenizeText(input)
   
   if (!tokens || tokens.length === 0) {
     return 'מצטער, לא הצלחתי להבין את השאלה. אנא נסה לנסח אותה מחדש.'
@@ -60,7 +65,7 @@ async function logChatInteraction(
  * Endpoint for generating bot responses to user messages.
  * Validates the input and returns a response based on the bot's knowledge base.
  */
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient(
@@ -85,23 +90,27 @@ export async function POST(req: Request) {
     }
 
     // Get input from request body
-    const { input } = await req.json()
-    if (!input) {
+    const { message } = await request.json()
+    if (!message) {
       return NextResponse.json(
-        { error: 'Input is required' },
+        { error: 'Message is required' },
         { status: 400 }
       )
     }
 
-    // Generate response
-    const response = findRelevantTopic(input)
+    // Tokenize the message
+    const tokens = tokenizeText(message)
+
+    // Process the tokens and generate response
+    // TODO: Add your bot logic here
+    const response = findRelevantTopic(message)
     
     // Log interaction
-    await logChatInteraction(supabase, session.user.id, input, response)
+    await logChatInteraction(supabase, session.user.id, message, response)
 
-    return NextResponse.json({ message: response })
+    return NextResponse.json({ response })
   } catch (error) {
-    console.error('Error in bot response:', error)
+    console.error('Error in bot API:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
