@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 
 // Get comments for a post
 export async function GET(
-  req: Request,
+  _: Request,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -20,22 +20,17 @@ export async function GET(
         },
       }
     )
-    
+
     const { data: comments, error } = await supabase
-      .from('post_comments')
-      .select(`
-        id,
-        content,
-        created_at,
-        author:profiles(id, name, avatar_url)
-      `)
+      .from('comments')
+      .select('*, user:users(id, name, avatar_url)')
       .eq('post_id', params.id)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching comments:', error)
       return NextResponse.json(
-        { error: 'שגיאה בקבלת התגובות' },
+        { error: 'Failed to fetch comments' },
         { status: 500 }
       )
     }
@@ -50,7 +45,7 @@ export async function GET(
   }
 }
 
-// Add comment to a post
+// Add a new comment
 export async function POST(
   req: Request,
   { params }: { params: { id: string } }
@@ -68,7 +63,7 @@ export async function POST(
         },
       }
     )
-    
+
     // Check authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
@@ -78,7 +73,6 @@ export async function POST(
       )
     }
 
-    // Get comment data
     const { content } = await req.json()
     if (!content) {
       return NextResponse.json(
@@ -87,46 +81,26 @@ export async function POST(
       )
     }
 
-    // Check if post exists
-    const { data: post } = await supabase
-      .from('posts')
-      .select('id')
-      .eq('id', params.id)
-      .single()
-
-    if (!post) {
-      return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
-        { status: 404 }
-      )
-    }
-
-    // Create comment
     const { data: comment, error } = await supabase
-      .from('post_comments')
+      .from('comments')
       .insert({
-        content,
         post_id: params.id,
-        author_id: session.user.id,
-        created_at: new Date().toISOString()
-      })
-      .select(`
-        id,
+        user_id: session.user.id,
         content,
-        created_at,
-        author:profiles(id, name, avatar_url)
-      `)
+        created_at: new Date().toISOString(),
+      })
+      .select('*, user:users(id, name, avatar_url)')
       .single()
 
     if (error) {
-      console.error('Error creating comment:', error)
+      console.error('Error adding comment:', error)
       return NextResponse.json(
-        { error: 'שגיאה ביצירת תגובה' },
+        { error: 'Failed to add comment' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(comment, { status: 201 })
+    return NextResponse.json(comment)
   } catch (error) {
     console.error('Error in POST /api/community/[id]/comments:', error)
     return NextResponse.json(
