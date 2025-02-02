@@ -381,4 +381,219 @@ const response = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/progr
     progress: 100
   })
 })
+```
+
+## נקודות קצה 🔌
+
+### קורסים
+
+#### `GET /api/courses`
+מחזיר רשימת קורסים עם אפשרויות סינון ומיון
+```typescript
+interface GetCoursesQuery {
+  search?: string
+  level?: 'beginner' | 'intermediate' | 'advanced'
+  sort?: 'popular' | 'newest' | 'rating'
+  page?: number
+  limit?: number
+}
+
+interface GetCoursesResponse {
+  courses: Course[]
+  total: number
+  hasMore: boolean
+}
+```
+
+#### `GET /api/courses/[id]`
+מחזיר פרטי קורס ספציפי
+```typescript
+interface GetCourseResponse {
+  course: Course & {
+    lessons: Lesson[]
+    ratings: CourseRating[]
+    comments: CourseComment[]
+  }
+}
+```
+
+#### `POST /api/courses/[id]/enroll`
+הרשמה לקורס
+```typescript
+interface EnrollCourseResponse {
+  success: boolean
+  enrollment: CourseEnrollment
+}
+```
+
+### שיעורים
+
+#### `GET /api/lessons/[id]`
+מחזיר פרטי שיעור ספציפי
+```typescript
+interface GetLessonResponse {
+  lesson: Lesson & {
+    progress?: LessonProgress
+  }
+}
+```
+
+#### `POST /api/lessons/[id]/progress`
+עדכון התקדמות בשיעור
+```typescript
+interface UpdateProgressRequest {
+  completed: boolean
+  lastPosition?: number
+}
+
+interface UpdateProgressResponse {
+  success: boolean
+  progress: LessonProgress
+}
+```
+
+### דירוגים ותגובות
+
+#### `POST /api/courses/[id]/rate`
+דירוג קורס
+```typescript
+interface RateCourseRequest {
+  rating: number
+  comment: string
+}
+
+interface RateCourseResponse {
+  success: boolean
+  rating: CourseRating
+}
+```
+
+#### `POST /api/courses/[id]/comment`
+הוספת תגובה לקורס
+```typescript
+interface AddCommentRequest {
+  content: string
+  parentId?: string
+}
+
+interface AddCommentResponse {
+  success: boolean
+  comment: CourseComment
+}
+```
+
+### פורום
+
+#### `GET /api/forum/posts`
+מחזיר רשימת פוסטים בפורום
+```typescript
+interface GetForumPostsQuery {
+  search?: string
+  sort?: 'latest' | 'popular'
+  page?: number
+  limit?: number
+}
+
+interface GetForumPostsResponse {
+  posts: ForumPost[]
+  total: number
+  hasMore: boolean
+}
+```
+
+### משתמשים
+
+#### `GET /api/users/recommendations`
+מחזיר רשימת משתמשים מומלצים לעקוב אחריהם
+```typescript
+interface GetUserRecommendationsResponse {
+  users: User[]
+}
+```
+
+#### `POST /api/users/follow`
+מעקב אחרי משתמש
+```typescript
+interface FollowUserRequest {
+  userId: string
+}
+
+interface FollowUserResponse {
+  success: boolean
+  follow: UserFollow
+}
+```
+
+### הפניות
+
+#### `GET /api/referrals/code`
+מחזיר את קוד ההפניה של המשתמש
+```typescript
+interface GetReferralCodeResponse {
+  code: string
+  usageCount: number
+  pointsEarned: number
+}
+```
+
+#### `POST /api/referrals/use`
+שימוש בקוד הפניה
+```typescript
+interface UseReferralCodeRequest {
+  code: string
+}
+
+interface UseReferralCodeResponse {
+  success: boolean
+  referral: Referral
+}
+```
+
+## סטטוס קודים 🚦
+
+- `200` - הצלחה
+- `201` - נוצר בהצלחה
+- `400` - בקשה לא תקינה
+- `401` - לא מורשה
+- `403` - אין הרשאה
+- `404` - לא נמצא
+- `500` - שגיאת שרת
+
+## אבטחה 🔒
+
+- כל הבקשות דורשות אימות באמצעות JWT
+- יש להעביר את הטוקן בכותרת `Authorization: Bearer <token>`
+- הרשאות מבוססות תפקידים (RBAC)
+- Rate limiting: 100 בקשות לדקה למשתמש
+
+## דוגמאות 📝
+
+### הרשמה לקורס
+```typescript
+const response = await fetch('/api/courses/123/enroll', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+})
+
+const data = await response.json()
+```
+
+### עדכון התקדמות
+```typescript
+const response = await fetch('/api/lessons/456/progress', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    completed: true,
+    lastPosition: 350
+  })
+})
+
+const data = await response.json()
 ``` 
