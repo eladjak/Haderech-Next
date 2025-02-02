@@ -1,4 +1,4 @@
-import { Course, CourseRating } from "@/types/courses"
+import { Course } from "@/types/courses"
 
 interface CourseRatingsProps {
   course: Course
