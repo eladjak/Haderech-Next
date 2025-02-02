@@ -202,16 +202,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 /**
  * DELETE /api/community/[id]
  * 
- * Deletes a specific post and its associated comments. Only the post author can delete the post.
+ * Deletes a specific community post and all its related data (comments, reactions).
+ * Only the post author or an admin can delete a post.
  * 
- * @requires Authentication
- * @requires Authorization: Post author only
- * 
- * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the post ID
- * @returns {Promise<NextResponse>} JSON response indicating success or error message
+ * @param id - The post ID to delete
+ * @returns Success or error message
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(
@@ -225,8 +222,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
         },
       }
     )
-    
-    // Verify authentication
+
+    // Check authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
@@ -235,7 +232,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       )
     }
 
-    // Verify post author
+    // Check if user is post author or admin
     const { data: post } = await supabase
       .from('posts')
       .select('author_id')
@@ -244,19 +241,27 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     if (!post) {
       return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
+        { error: 'Post not found' },
         { status: 404 }
       )
     }
 
     if (post.author_id !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      )
+      const { data: user } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
+
+      if (!user || user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Not authorized to delete this post' },
+          { status: 403 }
+        )
+      }
     }
 
-    // Delete post and its comments (cascade delete)
+    // Delete post and all related data
     const { error } = await supabase
       .from('posts')
       .delete()
@@ -265,12 +270,12 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     if (error) {
       console.error('Error deleting post:', error)
       return NextResponse.json(
-        { error: 'שגיאה במחיקת הפוסט' },
+        { error: 'Failed to delete post' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'פוסט נמחק בהצלחה' })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error in DELETE /api/community/[id]:', error)
     return NextResponse.json(
