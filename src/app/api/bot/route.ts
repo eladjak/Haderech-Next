@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import { WordTokenizer } from 'natural'
+import natural from 'natural'
 
-const tokenizer = new WordTokenizer()
+const tokenizer = new natural.WordTokenizer()
 
 // Knowledge base with common relationship topics
 const knowledgeBase = {
@@ -20,13 +20,17 @@ const knowledgeBase = {
 function findRelevantTopic(input: string): string {
   const tokens = tokenizer.tokenize(input.toLowerCase())
   
+  if (!tokens || tokens.length === 0) {
+    return 'מצטער, לא הצלחתי להבין את השאלה. אנא נסה לנסח אותה מחדש.'
+  }
+  
   for (const [key, value] of Object.entries(knowledgeBase)) {
     if (tokens.includes(key)) {
       return value
     }
   }
   
-  return 'אני לא בטוח איך להגיב לזה. האם תוכל לנסח מחדש את השאלה שלך?'
+  return 'מצטער, לא מצאתי תשובה מתאימה. האם תוכל לנסח את השאלה בצורה אחרת?'
 }
 
 // Log chat interaction to the database
