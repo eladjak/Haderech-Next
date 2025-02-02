@@ -1,33 +1,50 @@
+/**
+ * @file courses.ts
+ * @description Type definitions for course-related data
+ */
+
 export type CourseLevel = "beginner" | "intermediate" | "advanced"
 
 export interface Lesson {
   id: string
+  courseId: string
   title: string
-  description: string
-  videoUrl: string
-  content: string
+  description?: string
   duration: number
   order: number
-  courseId: string
-  completed?: boolean
+  isFree: boolean
+  content?: {
+    type: 'video' | 'text' | 'quiz'
+    url?: string
+    text?: string
+    questions?: any[]
+  }
+  progress?: LessonProgress[]
+  created_at: string
+  updated_at: string
 }
 
 export interface Course {
   id: string
   title: string
   description: string
-  thumbnail: string
+  thumbnail?: string
   duration: number
-  level: CourseLevel
-  lessons: Lesson[]
-  createdAt: string
-  updatedAt: string
-  authorId: string
-  published: boolean
+  level: 'beginner' | 'intermediate' | 'advanced'
   price: number
-  rating: number
+  instructor: {
+    id: string
+    name: string
+    avatar_url?: string
+    bio?: string
+  }
   studentsCount: number
-  tags: string[]
+  lessons: Lesson[]
+  ratings: CourseRating[]
+  comments: CourseComment[]
+  progress?: number
+  created_at: string
+  updated_at: string
 }
 
 export interface CourseProgress {
@@ -47,4 +64,43 @@ export interface CourseReview {
   content: string
   createdAt: string
   updatedAt: string
+}
+
+export interface LessonProgress {
+  id: string
+  userId: string
+  lessonId: string
+  completed: boolean
+  lastPosition: number
+  created_at: string
+  updated_at: string
+}
+
+export interface CourseRating {
+  id: string
+  courseId: string
+  userId: string
+  rating: number
+  review?: string
+  user: {
+    id: string
+    name: string
+    avatar_url?: string
+  }
+  created_at: string
+}
+
+export interface CourseComment {
+  id: string
+  courseId: string
+  userId: string
+  content: string
+  user: {
+    id: string
+    name: string
+    avatar_url?: string
+  }
+  replies?: CourseComment[]
+  created_at: string
+  updated_at: string
 } 
