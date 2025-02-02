@@ -19,25 +19,17 @@ interface RouteParams {
  * 
  * Enrolls the current user in a course.
  * 
- * @requires Authentication
+ * @param id - The course ID
+ * @returns Success message or error
  * 
- * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the course ID
- * @returns {Promise<NextResponse>} JSON response containing the enrollment details or error message
- * 
- * @example Response
+ * Example response:
  * ```json
  * {
- *   "id": "enrollment1",
- *   "created_at": "2024-01-01T12:00:00Z",
- *   "course": {
- *     "title": "Course Title",
- *     "description": "Course Description"
- *   }
+ *   "message": "Successfully enrolled in course"
  * }
  * ```
  */
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(
@@ -52,23 +44,23 @@ export async function POST(request: Request, { params }: RouteParams) {
       }
     )
 
-    // Verify authentication
+    // Check authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
     // Check if course exists
-    const { data: course } = await supabase
+    const { data: course, error: courseError } = await supabase
       .from('courses')
-      .select('id')
+      .select('id, title')
       .eq('id', params.id)
       .single()
 
-    if (!course) {
+    if (courseError || !course) {
       return NextResponse.json(
         { error: 'Course not found' },
         { status: 404 }
@@ -76,14 +68,14 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     // Check if already enrolled
-    const { data: existingEnrollment } = await supabase
+    const { data: enrollment, error: enrollmentError } = await supabase
       .from('course_enrollments')
       .select('id')
-      .eq('course_id', params.id)
       .eq('user_id', session.user.id)
+      .eq('course_id', params.id)
       .single()
 
-    if (existingEnrollment) {
+    if (enrollment) {
       return NextResponse.json(
         { error: 'Already enrolled in this course' },
         { status: 400 }
@@ -91,32 +83,28 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     // Create enrollment
-    const { data: enrollment, error } = await supabase
+    const { error: createError } = await supabase
       .from('course_enrollments')
       .insert({
+        user_id: session.user.id,
         course_id: params.id,
-        user_id: session.user.id
+        enrolled_at: new Date().toISOString(),
+        status: 'active',
       })
-      .select(`
-        *,
-        course:courses (
-          title,
-          description
-        )
-      `)
-      .single()
 
-    if (error) {
-      console.error('Error creating enrollment:', error)
+    if (createError) {
+      console.error('Error creating enrollment:', createError)
       return NextResponse.json(
-        { error: 'Failed to create enrollment' },
+        { error: 'Failed to enroll in course' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(enrollment)
+    return NextResponse.json({
+      message: `Successfully enrolled in ${course.title}`
+    })
   } catch (error) {
-    console.error('Enrollment POST error:', error)
+    console.error('Error in POST /api/courses/[id]/enroll:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
