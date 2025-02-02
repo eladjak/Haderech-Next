@@ -100,11 +100,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Tokenize the message
-    const tokens = tokenizeText(message)
-
-    // Process the tokens and generate response
-    // TODO: Add your bot logic here
+    // Generate response using the knowledge base
     const response = findRelevantTopic(message)
     
     // Log interaction
