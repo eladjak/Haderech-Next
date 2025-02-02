@@ -18,39 +18,28 @@ interface RouteParams {
 /**
  * GET /api/community/[id]
  * 
- * Retrieves detailed information about a specific post, including author details,
- * comments, and comment authors.
+ * Returns a specific community post with its comments and reactions.
  * 
- * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the post ID
- * @returns {Promise<NextResponse>} JSON response containing the post details or error message
+ * @param id - The post ID
+ * @returns The post data with related information
  * 
- * @example Response
+ * Example response:
  * ```json
  * {
- *   "id": "post1",
- *   "title": "Learning Tips",
- *   "content": "Here are some effective learning strategies...",
- *   "created_at": "2024-01-20T12:00:00Z",
- *   "author": {
- *     "name": "John Doe",
- *     "avatar_url": "https://..."
+ *   id: "123",
+ *   title: "Post title",
+ *   content: "Post content",
+ *   author: {
+ *     id: "456",
+ *     name: "John Doe",
+ *     avatar_url: "https://..."
  *   },
- *   "comments": [
- *     {
- *       "id": "comment1",
- *       "content": "Great tips!",
- *       "created_at": "2024-01-20T12:30:00Z",
- *       "author": {
- *         "name": "Jane Smith",
- *         "avatar_url": "https://..."
- *       }
- *     }
- *   ]
+ *   comments: [...],
+ *   reactions: [...]
  * }
  * ```
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(
@@ -64,17 +53,22 @@ export async function GET(request: Request, { params }: RouteParams) {
         },
       }
     )
-    
+
     const { data: post, error } = await supabase
       .from('posts')
       .select(`
         *,
-        author:profiles(id, name, avatar_url),
+        author:users(id, name, avatar_url),
         comments:post_comments(
           id,
           content,
           created_at,
-          author:profiles(id, name, avatar_url)
+          author:users(id, name, avatar_url)
+        ),
+        reactions:post_reactions(
+          id,
+          type,
+          user:users(id, name)
         )
       `)
       .eq('id', params.id)
@@ -83,14 +77,14 @@ export async function GET(request: Request, { params }: RouteParams) {
     if (error) {
       console.error('Error fetching post:', error)
       return NextResponse.json(
-        { error: 'שגיאה בקבלת הפוסט' },
+        { error: 'Failed to fetch post' },
         { status: 500 }
       )
     }
 
     if (!post) {
       return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
+        { error: 'Post not found' },
         { status: 404 }
       )
     }
