@@ -1,3 +1,5 @@
+import { Tables } from './supabase'
+
 export interface Course {
   id: string;
   title: string;
@@ -40,33 +42,54 @@ export interface Course {
   thumbnail?: string;
 }
 
+export interface CourseWithRelations extends Tables<'courses'> {
+  instructor: {
+    id: string;
+    name: string;
+    avatar_url: string | null;
+  };
+  lessons: CourseLesson[];
+  ratings: CourseRating[] | null;
+  comments: CourseComment[] | null;
+  progress?: number;
+}
+
 export interface CourseComment {
   id: string;
-  userId: string;
   content: string;
-  createdAt: Date;
-  updatedAt?: Date;
-  likes?: number;
-  replies?: CourseComment[];
+  user: {
+    id: string;
+    name: string;
+    avatar_url: string | null;
+  };
+  created_at: string;
+  updated_at: string | null;
+  likes: number | null;
+  replies: CourseComment[] | null;
 }
 
 export interface CourseRating {
   id: string;
-  userId: string;
   rating: number;
-  review?: string;
-  createdAt: Date;
+  review: string | null;
+  user: {
+    id: string;
+    name: string;
+    avatar_url: string | null;
+  };
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface CourseProgress {
   id: string;
-  userId: string;
-  courseId: string;
+  user_id: string;
+  course_id: string;
   progress: number;
-  completedLessons: string[];
-  lastAccessedAt: string;
-  createdAt: string;
-  updatedAt: string;
+  completed_lessons: string[];
+  last_accessed: string;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface CourseLesson {
@@ -76,15 +99,20 @@ export interface CourseLesson {
   content: string;
   order: number;
   duration: number;
-  completed?: boolean;
-  videoUrl?: string;
-  attachments?: string[];
+  completed: boolean | null;
+  video_url: string | null;
+  attachments: string[] | null;
+  progress: {
+    completed: boolean;
+    user_id: string;
+  }[] | null;
+  is_free: boolean | null;
 }
 
 export interface CourseFilter {
   search?: string;
   category?: string;
-  level?: Course['level'];
+  level?: CourseWithRelations['level'];
   priceMin?: number;
   priceMax?: number;
   rating?: number;
@@ -96,9 +124,15 @@ export interface CourseFilter {
 }
 
 export interface CourseSearchResults {
-  courses: Course[];
+  courses: CourseWithRelations[];
   total: number;
   page: number;
   totalPages: number;
   hasMore: boolean;
-} 
+}
+
+export type Lesson = CourseLesson;
+export type LessonProgress = {
+  completed: boolean;
+  user_id: string;
+}; 

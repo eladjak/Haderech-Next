@@ -13,7 +13,9 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, className }: CourseCardProps) {
-  const averageRating = course.ratings?.reduce((acc, curr) => acc + curr.rating, 0) / (course.ratings?.length || 1)
+  const averageRating = course.ratings && course.ratings.length > 0
+    ? course.ratings.reduce((acc, curr) => acc + curr.rating, 0) / course.ratings.length
+    : 0
 
   return (
     <Card className={className}>

@@ -14,6 +14,11 @@
 - **Forms**: React Hook Form
 - **Validation**: Zod
 - **API Client**: tRPC
+- **Component Architecture**:
+  - Server Components כברירת מחדל
+  - Client Components מסומנים עם "use client"
+  - הפרדה ברורה בין קומפוננטות שרת וקליינט
+  - אסטרטגיית Hybrid Rendering
 
 ### 2. Backend (Node.js)
 - **Runtime**: Node.js 20
@@ -133,6 +138,11 @@ interface Module {
 - ISR לתוכן סטטי
 - Code splitting אוטומטי
 - Lazy loading לתמונות
+- **Client/Server Components**:
+  - אופטימיזציה של Server Components
+  - מינימום Client Components
+  - הפרדת Event Handlers
+  - Bundle Size אופטימלי
 
 ### 2. Backend
 - Caching מרובד

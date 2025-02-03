@@ -4,26 +4,16 @@
  * updating, and deleting specific lessons.
  */
 
-import { createServerClient } from '@/lib/supabase-server'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase'
 
-type Tables = Database['public']['Tables']
-type Lesson = Tables['lessons']['Row']
-type LessonContent = Tables['lesson_content']['Row']
-type LessonProgress = Tables['lesson_progress']['Row']
-
-interface RouteParams {
-  params: {
-    id: string
-    lessonId: string
-  }
-}
-
-interface LessonWithRelations extends Lesson {
-  content: LessonContent | null
-  progress: LessonProgress[]
+interface LessonUpdate {
+  title?: string
+  description?: string
+  content?: string
+  order?: number
+  status?: 'draft' | 'published'
 }
 
 /**
@@ -49,32 +39,23 @@ interface LessonWithRelations extends Lesson {
  * }
  * ```
  */
-export async function GET(_: Request, { params }: RouteParams) {
+export async function GET(
+  _: Request,
+  { params }: { params: { id: string; lessonId: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
-
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const { data: enrollment } = await supabase
-      .from('course_enrollments')
-      .select('id')
-      .eq('course_id', params.id)
-      .eq('user_id', session.user.id)
-      .single()
-
-    if (!enrollment) {
-      return NextResponse.json(
-        { error: 'Not enrolled in this course' },
-        { status: 403 }
-      )
-    }
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
 
     const { data: lesson, error } = await supabase
       .from('lessons')
@@ -102,7 +83,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       )
     }
 
-    return NextResponse.json(lesson as LessonWithRelations)
+    return NextResponse.json(lesson)
   } catch (error) {
     console.error('Error in GET /api/courses/[id]/lessons/[lessonId]:', error)
     return NextResponse.json(
@@ -110,14 +91,6 @@ export async function GET(_: Request, { params }: RouteParams) {
       { status: 500 }
     )
   }
-}
-
-interface LessonUpdate {
-  title?: string
-  description?: string
-  content?: string
-  order?: number
-  status?: 'draft' | 'published'
 }
 
 /**
@@ -142,59 +115,51 @@ interface LessonUpdate {
  * }
  * ```
  */
-export async function PATCH(request: Request, { params }: RouteParams) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string; lessonId: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
 
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    const { data: course } = await supabase
-      .from('courses')
-      .select('author_id')
-      .eq('id', params.id)
-      .single()
+    const updates: LessonUpdate = await request.json()
 
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      )
-    }
-
-    if (course.author_id !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Not authorized to update this lesson' },
-        { status: 403 }
-      )
-    }
-
-    const updates: Partial<Lesson> = await request.json()
-
-    const { error: updateError } = await supabase
+    const { data: lesson, error } = await supabase
       .from('lessons')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
+      .update(updates)
       .eq('id', params.lessonId)
       .eq('course_id', params.id)
+      .select()
+      .single()
 
-    if (updateError) {
-      console.error('Error updating lesson:', updateError)
+    if (error) {
+      console.error('Error updating lesson:', error)
       return NextResponse.json(
         { error: 'Failed to update lesson' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'Lesson updated successfully' })
+    return NextResponse.json(lesson)
   } catch (error) {
     console.error('Error in PATCH /api/courses/[id]/lessons/[lessonId]:', error)
     return NextResponse.json(
@@ -215,54 +180,50 @@ export async function PATCH(request: Request, { params }: RouteParams) {
  * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
-export async function DELETE(_: Request, { params }: RouteParams) {
+export async function DELETE(
+  _: Request,
+  { params }: { params: { id: string; lessonId: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
 
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    const { data: course } = await supabase
-      .from('courses')
-      .select('author_id')
-      .eq('id', params.id)
-      .single()
-
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      )
-    }
-
-    if (course.author_id !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Not authorized to delete this lesson' },
-        { status: 403 }
-      )
-    }
-
-    const { error: deleteError } = await supabase
+    const { error } = await supabase
       .from('lessons')
       .delete()
       .eq('id', params.lessonId)
       .eq('course_id', params.id)
 
-    if (deleteError) {
-      console.error('Error deleting lesson:', deleteError)
+    if (error) {
+      console.error('Error deleting lesson:', error)
       return NextResponse.json(
         { error: 'Failed to delete lesson' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'Lesson deleted successfully' })
+    return NextResponse.json(
+      { message: 'Lesson deleted successfully' },
+      { status: 200 }
+    )
   } catch (error) {
     console.error('Error in DELETE /api/courses/[id]/lessons/[lessonId]:', error)
     return NextResponse.json(

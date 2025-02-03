@@ -1,5 +1,5 @@
 import { Progress } from '@/components/ui/progress'
-import type { Course, LessonProgress } from '@/types/api'
+import type { Course } from '@/types/api'
 import { useAuth } from '@/hooks/use-auth'
 
 interface CourseProgressProps {

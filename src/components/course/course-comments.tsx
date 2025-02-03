@@ -6,94 +6,91 @@
  */
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { MessageCircle, Reply } from 'lucide-react'
-import type { CourseComment } from '@/types/courses'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { CourseCommentsProps } from '@/types/props'
 
-interface CourseCommentsProps {
-  comments: CourseComment[]
-  courseId: string
-}
-
-export function CourseComments({ comments, courseId }: CourseCommentsProps) {
+export function CourseComments({ comments }: CourseCommentsProps) {
   const [showAll, setShowAll] = useState(false)
+
+  if (!comments?.length) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <p className="text-center text-muted-foreground">אין תגובות עדיין</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const displayComments = showAll ? comments : comments.slice(0, 3)
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>תגובות ודיונים</span>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">תגובות</h3>
           <span className="text-sm text-muted-foreground">
             ({comments.length} תגובות)
           </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {displayComments.map((comment) => (
-          <div key={comment.id} className="space-y-4">
-            {/* Main Comment */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={comment.user.avatar_url || undefined} />
+        </div>
+        <div className="mt-6 space-y-6">
+          {displayComments.map((comment) => (
+            <div key={comment.id} className="space-y-4">
+              <div className="flex items-start space-x-4 rtl:space-x-reverse">
+                <Avatar>
+                  <AvatarImage src={comment.user.avatar_url} alt={comment.user.name} />
                   <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <div className="font-medium">{comment.user.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(comment.created_at).toLocaleDateString('he-IL')}
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium">{comment.user.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {new Date(comment.created_at).toLocaleDateString('he-IL')}
+                    </div>
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    {comment.content}
+                  </p>
+                  {comment.replies && comment.replies.length > 0 && (
+                    <div className="mt-4 space-y-4 border-l-2 pl-4 rtl:border-r-2 rtl:pr-4 rtl:pl-0">
+                      {comment.replies.map((reply) => (
+                        <div key={reply.id} className="flex items-start space-x-4 rtl:space-x-reverse">
+                          <Avatar>
+                            <AvatarImage src={reply.user.avatar_url} alt={reply.user.name} />
+                            <AvatarFallback>{reply.user.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm font-medium">{reply.user.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {new Date(reply.created_at).toLocaleDateString('he-IL')}
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {reply.content}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-              <p className="text-sm">{comment.content}</p>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Reply className="h-4 w-4" />
-                השב
-              </Button>
             </div>
-
-            {/* Replies */}
-            {comment.replies && comment.replies.length > 0 && (
-              <div className="space-y-4 border-r pr-4">
-                {comment.replies.map((reply) => (
-                  <div key={reply.id} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={reply.user.avatar_url || undefined} />
-                        <AvatarFallback>{reply.user.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="text-sm font-medium">{reply.user.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(reply.created_at).toLocaleDateString('he-IL')}
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm">{reply.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+          ))}
+        </div>
+        {!showAll && comments.length > 3 && (
+          <div className="mt-6 text-center">
+            <Button
+              variant="outline"
+              onClick={() => setShowAll(true)}
+            >
+              הצג עוד תגובות
+            </Button>
           </div>
-        ))}
-
-        {comments.length > 3 && (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? 'הצג פחות' : 'הצג הכל'}
-          </Button>
         )}
-
-        <Button className="w-full gap-2">
-          <MessageCircle className="h-4 w-4" />
-          הוסף תגובה
-        </Button>
       </CardContent>
     </Card>
   )

@@ -1,0 +1,82 @@
+{
+  "common": {
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "save": "שמור",
+    "cancel": "בטל",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "back": "חזור",
+    "next": "הבא",
+    "previous": "הקודם",
+    "search": "חיפוש",
+    "filter": "סינון",
+    "sort": "מיון",
+    "view": "צפה",
+    "more": "עוד"
+  },
+  "auth": {
+    "signIn": "התחבר",
+    "signUp": "הרשם",
+    "signOut": "התנתק",
+    "forgotPassword": "שכחת סיסמה?",
+    "resetPassword": "אפס סיסמה",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "confirmPassword": "אימות סיסמה",
+    "name": "שם",
+    "username": "שם משתמש"
+  },
+  "courses": {
+    "title": "קורסים",
+    "myCourses": "הקורסים שלי",
+    "allCourses": "כל הקורסים",
+    "featured": "קורסים מומלצים",
+    "popular": "קורסים פופולריים",
+    "new": "קורסים חדשים",
+    "free": "קורסים חינמיים",
+    "paid": "קורסים בתשלום",
+    "enroll": "הרשם לקורס",
+    "continue": "המשך ללמוד",
+    "start": "התחל ללמוד",
+    "complete": "סיים קורס",
+    "progress": "התקדמות",
+    "rating": "דירוג",
+    "reviews": "ביקורות",
+    "students": "תלמידים",
+    "duration": "משך",
+    "level": {
+      "beginner": "מתחיל",
+      "intermediate": "בינוני",
+      "advanced": "מתקדם"
+    }
+  },
+  "profile": {
+    "title": "פרופיל",
+    "edit": "ערוך פרופיל",
+    "settings": "הגדרות",
+    "notifications": "התראות",
+    "language": "שפה",
+    "theme": "ערכת נושא",
+    "privacy": "פרטיות",
+    "security": "אבטחה",
+    "achievements": "הישגים",
+    "certificates": "תעודות",
+    "stats": "סטטיסטיקות"
+  },
+  "forum": {
+    "title": "פורום",
+    "topics": "נושאים",
+    "posts": "פוסטים",
+    "replies": "תגובות",
+    "newPost": "פוסט חדש",
+    "newReply": "תגובה חדשה",
+    "search": "חפש בפורום",
+    "categories": "קטגוריות",
+    "tags": "תגיות",
+    "popular": "פופולרי",
+    "recent": "אחרון",
+    "unanswered": "ללא מענה"
+  }
+} 

@@ -93,10 +93,10 @@ export const generateResponse = (input: string, bot: Bot): string => {
   const skill = bot.getSkill(topic);
 
   if (skill) {
-    return generateSkillBasedResponse(skill, input);
+    return generateSkillBasedResponse(skill);
   }
 
-  return getFallbackResponse(input);
+  return getFallbackResponse();
 };
 
 /**
@@ -124,7 +124,7 @@ export async function generateBotResponse(input: string): Promise<{ message: str
       max_tokens: 500
     });
 
-    const message = response.choices[0]?.message?.content || getFallbackResponse(input);
+    const message = response.choices[0]?.message?.content || getFallbackResponse();
 
     // שמירת האינטראקציה במסד הנתונים
     const supabase = createClient(
@@ -145,20 +145,20 @@ export async function generateBotResponse(input: string): Promise<{ message: str
     return { message };
   } catch (error) {
     console.error('Error generating bot response:', error);
-    return { message: getFallbackResponse(input) };
+    return { message: getFallbackResponse() };
   }
 }
 
 /**
  * מחזיר תגובת ברירת מחדל במקרה של שגיאה
  */
-function getFallbackResponse(input: string): string {
+function getFallbackResponse(): string {
   const fallbackResponses = [
     "אני מבין את הנקודה שלך. בוא נחשוב יחד על דרכים להתמודד עם זה.",
-    "זה נשמע מאתגר. איך אני יכול לעזור לך בצורה הטובה ביותר?",
-    "תודה ששיתפת. בוא נחשוב על צעדים מעשיים שיכולים לעזור במצב הזה."
+    "זה נשמע מאתגר. אשמח לעזור לך למצוא פתרון.",
+    "תודה ששיתפת. בוא ננסה לחשוב על זה מזווית אחרת.",
+    "אני כאן כדי לעזור. בוא נפרק את זה לצעדים קטנים יותר.",
   ];
-
   return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
 }
 
@@ -176,16 +176,6 @@ function identifyTopic(input: string): string {
   return 'general';
 }
 
-function generateSkillBasedResponse(skill: Skill, input: string): string {
-  const { description, exercises = [] } = skill;
-  const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
-  
-  return `
-    ${description}
-    
-    הנה תרגיל שיכול לעזור:
-    ${randomExercise}
-    
-    רוצה לנסות את זה?
-  `.trim();
+function generateSkillBasedResponse(skill: Skill): string {
+  return skill.description
 } 

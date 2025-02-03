@@ -6,7 +6,6 @@
 import { createMocks } from 'node-mocks-http'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
 import { POST, DELETE } from '../courses/[id]/enroll/route'
 
 jest.mock('next/headers')

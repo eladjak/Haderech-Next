@@ -1,98 +1,74 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import type { SimulatorState as SimState, SimulatorAction } from '@/types/models'
 
-interface Message {
-  id: string
-  content: string
-  speaker: 'user' | 'partner'
-  timestamp: string
-  sentiment: 'positive' | 'neutral' | 'negative'
-}
-
-interface EmotionalState {
-  happiness: number
-  trust: number
-  understanding: number
-  connection: number
-}
-
-interface SimulationState {
-  isActive: boolean
-  scenario: {
-    id: string
-    title: string
-    description: string
-    difficulty: 'easy' | 'medium' | 'hard'
-    tags: string[]
-  } | null
-  messages: Message[]
-  partnerState: EmotionalState
-  feedback: {
-    score: number
-    strengths: string[]
-    improvements: string[]
-    suggestions: string[]
-  } | null
-  isLoading: boolean
+interface SimulatorState {
+  state: SimState
+  actions: SimulatorAction[]
+  currentStep: number
+  isRunning: boolean
+  speed: number
   error: string | null
 }
 
-const initialState: SimulationState = {
-  isActive: false,
-  scenario: null,
-  messages: [],
-  partnerState: {
-    happiness: 50,
-    trust: 50,
-    understanding: 50,
-    connection: 50,
+const initialState: SimulatorState = {
+  state: {
+    registers: {},
+    memory: {},
+    flags: {},
+    programCounter: 0
   },
-  feedback: null,
-  isLoading: false,
-  error: null,
+  actions: [],
+  currentStep: 0,
+  isRunning: false,
+  speed: 1,
+  error: null
 }
 
 export const simulatorSlice = createSlice({
   name: 'simulator',
   initialState,
   reducers: {
-    startSimulation: (state: SimulationState, action: PayloadAction<SimulationState['scenario']>) => {
-      state.isActive = true
-      state.scenario = action.payload
-      state.messages = []
-      state.partnerState = initialState.partnerState
-      state.feedback = null
-      state.error = null
+    setState: (state, action: PayloadAction<SimState>) => {
+      state.state = action.payload
     },
-    addMessage: (state: SimulationState, action: PayloadAction<Message>) => {
-      state.messages.push(action.payload)
+    setActions: (state, action: PayloadAction<SimulatorAction[]>) => {
+      state.actions = action.payload
+      state.currentStep = 0
     },
-    updatePartnerState: (state: SimulationState, action: PayloadAction<Partial<EmotionalState>>) => {
-      state.partnerState = { ...state.partnerState, ...action.payload }
+    step: (state) => {
+      if (state.currentStep < state.actions.length) {
+        state.currentStep += 1
+      }
     },
-    setFeedback: (state: SimulationState, action: PayloadAction<SimulationState['feedback']>) => {
-      state.feedback = action.payload
-      state.isActive = false
+    reset: (state) => {
+      state.currentStep = 0
+      state.state = initialState.state
+      state.isRunning = false
     },
-    setLoading: (state: SimulationState, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload
+    setRunning: (state, action: PayloadAction<boolean>) => {
+      state.isRunning = action.payload
     },
-    setError: (state: SimulationState, action: PayloadAction<string | null>) => {
+    setSpeed: (state, action: PayloadAction<number>) => {
+      state.speed = action.payload
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload
     },
-    resetSimulation: (state: SimulationState) => {
+    resetSimulation: () => {
       return initialState
-    },
-  },
+    }
+  }
 })
 
 export const {
-  startSimulation,
-  addMessage,
-  updatePartnerState,
-  setFeedback,
-  setLoading,
+  setState,
+  setActions,
+  step,
+  reset,
+  setRunning,
+  setSpeed,
   setError,
-  resetSimulation,
+  resetSimulation
 } = simulatorSlice.actions
 
-export const simulatorReducer = simulatorSlice.reducer 
+export default simulatorSlice.reducer 

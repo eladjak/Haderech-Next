@@ -3,46 +3,51 @@
  * @description Content component for course pages showing lessons list and content
  */
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Lock, Play, CheckCircle } from 'lucide-react'
-import type { Course, Lesson } from '@/types/courses'
+import type { CourseWithRelations } from "@/types/courses"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Lock, Play, CheckCircle } from "lucide-react"
 
 interface CourseContentProps {
-  lessons: Lesson[]
+  course: CourseWithRelations
   isEnrolled: boolean
-  isInstructor: boolean
+  isInstructor?: boolean
 }
 
-export function CourseContent({ lessons, isEnrolled, isInstructor }: CourseContentProps) {
+export function CourseContent({ course, isEnrolled, isInstructor }: CourseContentProps) {
+  const sortedLessons = (course.lessons || []).sort((a, b) => a.order - b.order)
+  
+  const completedLessons = sortedLessons.filter(lesson => 
+    lesson.progress?.some(p => p.completed)
+  ).length
+  
+  const freeLessons = sortedLessons.filter(lesson => lesson.is_free).length
+
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold">תוכן הקורס</h2>
         <p className="text-muted-foreground">
-          {lessons.length} שיעורים • {lessons.reduce((acc, lesson) => acc + (lesson.duration || 0), 0)} דקות
+          {sortedLessons.length} שיעורים • {sortedLessons.reduce((acc, lesson) => acc + (lesson.duration || 0), 0)} דקות • הושלמו {completedLessons} שיעורים • {freeLessons} שיעורים חינמיים
         </p>
       </div>
 
       <div className="space-y-4">
-        {lessons.map((lesson, index) => {
+        {sortedLessons.map((lesson) => {
           const isCompleted = lesson.progress?.some(p => p.completed)
-          const isLocked = !isEnrolled && !lesson.isFree && !isInstructor
+          const isLocked = !isEnrolled && !lesson.is_free && !isInstructor
 
           return (
             <Card key={lesson.id} className={isLocked ? 'opacity-75' : ''}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-sm">
-                    {index + 1}
+                    {lesson.order}
                   </span>
                   {lesson.title}
                   {isLocked && <Lock className="h-4 w-4" />}
                   {isCompleted && <CheckCircle className="h-4 w-4 text-green-500" />}
                 </CardTitle>
-                {lesson.description && (
-                  <CardDescription>{lesson.description}</CardDescription>
-                )}
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
@@ -55,7 +60,7 @@ export function CourseContent({ lessons, isEnrolled, isInstructor }: CourseConte
                     className="gap-2"
                     asChild
                   >
-                    <a href={isLocked ? '#' : `/courses/${lesson.courseId}/lessons/${lesson.id}`}>
+                    <a href={isLocked ? '#' : `/courses/${course.id}/lessons/${lesson.id}`}>
                       <Play className="h-4 w-4" />
                       {isLocked ? 'נעול' : 'צפה בשיעור'}
                     </a>

@@ -4,10 +4,11 @@
  */
 
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { setUser, setLoading, setError } from '@/store/slices/userSlice'
 import { supabase } from '@/lib/api'
+import { useToast } from '@/hooks/use-toast'
 
 /**
  * Custom hook that provides authentication state and user session management
@@ -17,7 +18,12 @@ import { supabase } from '@/lib/api'
 export function useAuth() {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { user, isLoading, error } = useAppSelector((state) => state.user)
+  const { user, loading, error } = useAppSelector((state) => ({
+    user: state.user.user,
+    loading: state.user.loading,
+    error: state.user.error
+  }))
+  const { toast } = useToast()
 
   useEffect(() => {
     // Listen for auth state changes
@@ -57,61 +63,77 @@ export function useAuth() {
     }
   }, [dispatch, router])
 
-  const signIn = async (email: string, password: string) => {
-    dispatch(setLoading(true))
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       })
+
       if (error) throw error
+
+      toast({
+        title: 'התחברת בהצלחה',
+        description: 'ברוך הבא חזרה!'
+      })
     } catch (error) {
       console.error('Error signing in:', error)
-      dispatch(setError('שגיאה בהתחברות'))
-    } finally {
-      dispatch(setLoading(false))
+      toast({
+        title: 'שגיאה בהתחברות',
+        description: 'אנא נסה שוב מאוחר יותר'
+      })
     }
-  }
+  }, [toast])
 
-  const signUp = async (email: string, password: string) => {
-    dispatch(setLoading(true))
+  const signUp = useCallback(async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
       })
+
       if (error) throw error
-      router.push('/verify-email')
+
+      toast({
+        title: 'נרשמת בהצלחה',
+        description: 'נשלח אליך מייל אימות'
+      })
     } catch (error) {
       console.error('Error signing up:', error)
-      dispatch(setError('שגיאה בהרשמה'))
-    } finally {
-      dispatch(setLoading(false))
+      toast({
+        title: 'שגיאה בהרשמה',
+        description: 'אנא נסה שוב מאוחר יותר'
+      })
     }
-  }
+  }, [toast])
 
-  const signOut = async () => {
-    dispatch(setLoading(true))
+  const signOut = useCallback(async () => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
+
+      toast({
+        title: 'התנתקת בהצלחה',
+        description: 'להתראות!'
+      })
     } catch (error) {
       console.error('Error signing out:', error)
-      dispatch(setError('שגיאה בהתנתקות'))
-    } finally {
-      dispatch(setLoading(false))
+      toast({
+        title: 'שגיאה בהתנתקות',
+        description: 'אנא נסה שוב מאוחר יותר'
+      })
     }
-  }
+  }, [toast])
 
   return {
     user,
-    isLoading,
+    loading,
     error,
     signIn,
     signUp,
-    signOut,
+    signOut
   }
 } 

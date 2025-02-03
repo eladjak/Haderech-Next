@@ -1,21 +1,24 @@
-import { Course, Lesson, LessonProgress } from "@/types/courses"
+'use client'
+
+import type { CourseWithRelations } from "@/types/courses"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Lock, Play, CheckCircle } from "lucide-react"
 
 interface CourseContentProps {
-  course: Course
+  course: CourseWithRelations
   isEnrolled: boolean
+  isInstructor?: boolean
 }
 
-export const CourseContent = ({ course, isEnrolled }: CourseContentProps) => {
-  const sortedLessons = course.lessons.sort((a: Lesson, b: Lesson) => a.order - b.order)
+export function CourseContent({ course, isEnrolled, isInstructor }: CourseContentProps) {
+  const sortedLessons = (course.lessons || []).sort((a, b) => a.order - b.order)
   
-  const completedLessons = sortedLessons.filter((lesson: Lesson) => 
-    lesson.progress?.some((p: LessonProgress) => p.completed)
+  const completedLessons = sortedLessons.filter(lesson => 
+    lesson.progress?.some(p => p.completed)
   ).length
   
-  const freeLessons = sortedLessons.filter((lesson: Lesson) => lesson.isFree).length
+  const freeLessons = sortedLessons.filter(lesson => lesson.is_free).length
 
   return (
     <div className="space-y-8">
@@ -29,7 +32,7 @@ export const CourseContent = ({ course, isEnrolled }: CourseContentProps) => {
       <div className="space-y-4">
         {sortedLessons.map((lesson, index) => {
           const isCompleted = lesson.progress?.some(p => p.completed)
-          const isLocked = !isEnrolled && !lesson.isFree
+          const isLocked = !isEnrolled && !lesson.is_free && !isInstructor
 
           return (
             <Card key={lesson.id} className={isLocked ? 'opacity-75' : ''}>

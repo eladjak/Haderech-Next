@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ForumPost } from '@/components/forum-post'
 import type { ForumPost as ForumPostType } from '@/types/api'

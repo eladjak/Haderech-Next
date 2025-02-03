@@ -4,78 +4,57 @@
  * updating, and deleting specific courses. Includes authentication and authorization checks.
  */
 
-import { createServerClient } from '@/lib/supabase-server'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase'
 
-type Tables = Database['public']['Tables']
-type Course = Tables['courses']['Row']
-type User = Tables['users']['Row']
-type Lesson = Tables['lessons']['Row']
-type LessonProgress = Tables['lesson_progress']['Row']
-type CourseRating = Tables['course_ratings']['Row']
-
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
-interface CourseWithRelations extends Course {
-  author: User
-  lessons: (Lesson & { progress: LessonProgress[] })[]
-  ratings: (CourseRating & { user: User })[]
+interface UpdateCourseBody {
+  title?: string
+  description?: string
+  image_url?: string | null
+  status?: 'draft' | 'published' | 'archived'
+  level?: 'beginner' | 'intermediate' | 'advanced'
+  duration?: number
+  tags?: string[]
 }
 
 /**
  * GET /api/courses/[id]
  * 
- * Retrieves a specific course with all its details.
- * 
- * @requires Authentication
+ * Retrieves a specific course by ID.
  * 
  * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the course ID
- * @returns {Promise<NextResponse>} JSON response containing the course or error message
- * 
- * @example Response
- * ```json
- * {
- *   "id": "course1",
- *   "title": "Course Title",
- *   "description": "Course description",
- *   "image_url": "https://...",
- *   "status": "published",
- *   "author": {
- *     "name": "John Doe",
- *     "avatar_url": "https://..."
- *   },
- *   "lessons": [
- *     {
- *       "id": "lesson1",
- *       "title": "Lesson 1",
- *       "description": "Lesson description"
- *     }
- *   ]
- * }
- * ```
+ * @returns {Promise<NextResponse>} JSON response with course data or error message
  */
-export async function GET(_: Request, { params }: RouteParams) {
+export async function GET(
+  _: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          }
+        }
+      }
+    )
 
     const { data: course, error } = await supabase
       .from('courses')
       .select(`
         *,
-        author:users(*),
+        instructor:users!instructor_id(*),
         lessons(
           *,
           progress:lesson_progress(*)
         ),
-        ratings:course_ratings(
+        ratings(
           *,
           user:users(*)
         )
@@ -98,7 +77,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       )
     }
 
-    return NextResponse.json(course as CourseWithRelations)
+    return NextResponse.json(course)
   } catch (error) {
     console.error('Error in GET /api/courses/[id]:', error)
     return NextResponse.json(
@@ -106,16 +85,6 @@ export async function GET(_: Request, { params }: RouteParams) {
       { status: 500 }
     )
   }
-}
-
-interface UpdateCourseBody {
-  title?: string
-  description?: string
-  image_url?: string | null
-  status?: 'draft' | 'published' | 'archived'
-  level?: 'beginner' | 'intermediate' | 'advanced'
-  duration?: number
-  tags?: string[]
 }
 
 /**
@@ -138,60 +107,39 @@ interface UpdateCourseBody {
  * }
  * ```
  */
-export async function PATCH(request: Request, { params }: RouteParams) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          }
+        }
+      }
+    )
 
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
-      )
-    }
-
-    const { data: course } = await supabase
-      .from('courses')
-      .select('author_id')
-      .eq('id', params.id)
-      .single()
-
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      )
-    }
-
-    if (course.author_id !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Not authorized to update this course' },
-        { status: 403 }
       )
     }
 
     const updates: UpdateCourseBody = await request.json()
 
-    const { data: updatedCourse, error } = await supabase
+    const { data: course, error } = await supabase
       .from('courses')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
+      .update(updates)
       .eq('id', params.id)
-      .select(`
-        *,
-        author:users(*),
-        lessons(
-          *,
-          progress:lesson_progress(*)
-        ),
-        ratings:course_ratings(
-          *,
-          user:users(*)
-        )
-      `)
+      .select()
       .single()
 
     if (error) {
@@ -202,7 +150,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       )
     }
 
-    return NextResponse.json(updatedCourse as CourseWithRelations)
+    return NextResponse.json(course)
   } catch (error) {
     console.error('Error in PATCH /api/courses/[id]:', error)
     return NextResponse.json(
@@ -223,36 +171,29 @@ export async function PATCH(request: Request, { params }: RouteParams) {
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
-export async function DELETE(_: Request, { params }: RouteParams) {
+export async function DELETE(
+  _: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          }
+        }
+      }
+    )
 
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
-      )
-    }
-
-    const { data: course } = await supabase
-      .from('courses')
-      .select('author_id')
-      .eq('id', params.id)
-      .single()
-
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      )
-    }
-
-    if (course.author_id !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Not authorized to delete this course' },
-        { status: 403 }
       )
     }
 
@@ -269,7 +210,10 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       )
     }
 
-    return NextResponse.json({ message: 'Course deleted successfully' })
+    return NextResponse.json(
+      { message: 'Course deleted successfully' },
+      { status: 200 }
+    )
   } catch (error) {
     console.error('Error in DELETE /api/courses/[id]:', error)
     return NextResponse.json(

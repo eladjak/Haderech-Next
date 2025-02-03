@@ -14,6 +14,54 @@ export const metadata: Metadata = {
   description: 'Advanced learning platform for relationship improvement powered by AI',
 }
 
+function HomeActions() {
+  "use client"
+  return (
+    <div className="flex justify-center gap-4">
+      <Button size="lg">
+        Start Learning
+      </Button>
+      <Button size="lg" variant="outline">
+        Explore Courses
+      </Button>
+    </div>
+  )
+}
+
+function SocialSection() {
+  "use client"
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Community Support</CardTitle>
+        <CardDescription>
+          Connect with others on similar journeys
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <SocialRecommendations users={users} />
+      </CardContent>
+    </Card>
+  )
+}
+
+function ReferralSection() {
+  "use client"
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Practice & Growth</CardTitle>
+        <CardDescription>
+          Interactive scenarios and real-world applications
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ReferralManagement referralCode="ABC123" />
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function Home() {
   return (
     <main className="container mx-auto px-4 py-8">
@@ -25,14 +73,7 @@ export default function Home() {
         <p className="mb-8 text-xl text-muted-foreground">
           Your journey to better relationships starts here
         </p>
-        <div className="flex justify-center gap-4">
-          <Button size="lg">
-            Start Learning
-          </Button>
-          <Button size="lg" variant="outline">
-            Explore Courses
-          </Button>
-        </div>
+        <HomeActions />
       </section>
 
       {/* Features Grid */}
@@ -49,32 +90,8 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Community Support</CardTitle>
-            <CardDescription>
-              Connect with others on similar journeys
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SocialRecommendations users={users} onFollow={(userId) => console.log('Following user:', userId)} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Practice & Growth</CardTitle>
-            <CardDescription>
-              Interactive scenarios and real-world applications
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ReferralManagement
-              referralCode="ABC123"
-              onShare={(code) => console.log('Sharing code:', code)}
-            />
-          </CardContent>
-        </Card>
+        <SocialSection />
+        <ReferralSection />
       </section>
 
       {/* Latest Forum Posts */}

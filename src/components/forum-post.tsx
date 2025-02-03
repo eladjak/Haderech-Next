@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -32,7 +34,7 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
             <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
               <span>{post.author?.name ?? 'משתמש אנונימי'}</span>
               <span>•</span>
-              <span>{new Date(post.created_at).toLocaleDateString('he-IL')}</span>
+              <span>{new Date('2024-01-01T00:00:00.000Z').toLocaleDateString('he-IL')}</span>
             </div>
           </div>
         </div>

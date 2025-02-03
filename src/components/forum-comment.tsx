@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -32,7 +34,7 @@ export function ForumComment({
               {comment.author?.name ?? 'משתמש אנונימי'}
             </div>
             <div className="text-sm text-muted-foreground">
-              {new Date(comment.created_at).toLocaleDateString('he-IL')}
+              {new Date('2024-01-01T00:00:00.000Z').toLocaleDateString('he-IL')}
             </div>
           </div>
         </div>

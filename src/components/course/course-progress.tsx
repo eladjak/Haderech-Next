@@ -6,23 +6,25 @@
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-interface CourseProgressProps {
-  progress: number
+export interface CourseProgressProps {
   completedLessons: number
   totalLessons: number
 }
 
-export function CourseProgress({ progress, completedLessons, totalLessons }: CourseProgressProps) {
+export function CourseProgress({ completedLessons, totalLessons }: CourseProgressProps) {
+  const progress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>התקדמות בקורס</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <Progress value={progress} />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{completedLessons} שיעורים הושלמו</span>
-          <span>{totalLessons} שיעורים סה"כ</span>
+      <CardContent>
+        <div className="flex flex-col gap-2">
+          <Progress value={progress} className="w-full" />
+          <div className="text-sm text-muted-foreground">
+            {completedLessons} מתוך {totalLessons} שיעורים הושלמו
+          </div>
         </div>
       </CardContent>
     </Card>

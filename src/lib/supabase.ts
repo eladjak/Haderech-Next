@@ -29,7 +29,7 @@ export const supabase = createClient<Database>(
  */
 export async function checkDatabaseConnection() {
   try {
-    const { data, error } = await supabase.from('users').select('count').single()
+    const { error } = await supabase.from('users').select('count').single()
     if (error) throw error
     console.log('Database connection successful')
     return true

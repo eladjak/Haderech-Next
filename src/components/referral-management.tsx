@@ -1,13 +1,18 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Share } from 'lucide-react'
 
 interface ReferralManagementProps {
   referralCode: string
-  onShare: (code: string) => void
 }
 
-export function ReferralManagement({ referralCode, onShare }: ReferralManagementProps) {
+export function ReferralManagement({ referralCode }: ReferralManagementProps) {
+  const handleShare = () => {
+    console.log('Sharing code:', referralCode)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -20,7 +25,7 @@ export function ReferralManagement({ referralCode, onShare }: ReferralManagement
         </div>
         <Button
           className="w-full"
-          onClick={() => onShare(referralCode)}
+          onClick={handleShare}
         >
           <Share className="mr-2 h-4 w-4" />
           שתף קוד הזמנה

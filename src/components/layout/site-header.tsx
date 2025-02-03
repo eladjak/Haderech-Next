@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { MainNav } from '@/components/layout/main-nav'
 import { UserNav } from '@/components/layout/user-nav'
 import { LanguageSelector } from '@/components/language-selector'

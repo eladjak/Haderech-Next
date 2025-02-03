@@ -21,7 +21,10 @@ export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.delete(name, options)
+            cookieStore.set(name, '', {
+              ...options,
+              maxAge: 0
+            })
           } catch (error) {
             console.error('Error removing cookie:', error)
           }

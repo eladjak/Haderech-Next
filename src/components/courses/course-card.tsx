@@ -1,5 +1,4 @@
 import Image from "next/image"
-import Link from "next/link"
 import { Clock, Users } from "lucide-react"
 
 import type { Course } from "@/types/courses"

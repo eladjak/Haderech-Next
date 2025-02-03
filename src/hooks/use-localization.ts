@@ -1,10 +1,12 @@
+import { useCallback } from 'react'
 import he from '@/locales/he.json'
 
-type LocaleKey = string
-type LocaleValue = string | Record<string, LocaleValue>
+type LocaleKey = keyof typeof he | (string & {})
+type LocaleValue = string | { [key: string]: string | LocaleObject }
+type LocaleObject = { [key: string]: string | LocaleObject }
 
 function getNestedValue(obj: Record<string, LocaleValue>, path: string[]): string | undefined {
-  let current = obj
+  let current = obj as Record<string, LocaleValue>
   for (const key of path) {
     if (typeof current !== 'object' || current === null) {
       return undefined
@@ -15,11 +17,23 @@ function getNestedValue(obj: Record<string, LocaleValue>, path: string[]): strin
 }
 
 export function useLocalization() {
-  const t = (key: LocaleKey): string => {
+  const t = useCallback((key: LocaleKey, params?: Record<string, string>): string => {
     const path = key.split('.')
-    const value = getNestedValue(he, path)
-    return value || key
-  }
+    let value = getNestedValue(he, path) || key
 
-  return { t }
+    if (params) {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        value = value.replace(`{${paramKey}}`, paramValue)
+      })
+    }
+
+    return value
+  }, [])
+
+  const setLanguage = useCallback((lang: 'he' | 'en') => {
+    document.documentElement.lang = lang
+    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr'
+  }, [])
+
+  return { t, setLanguage }
 } 

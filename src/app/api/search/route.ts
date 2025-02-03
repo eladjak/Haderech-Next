@@ -3,21 +3,16 @@
  * @description API route handler for global search operations
  */
 
-import { createServerClient } from '@/lib/supabase-server'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase'
-
-type Tables = Database['public']['Tables']
-type Course = Tables['courses']['Row']
-type User = Tables['users']['Row']
 
 interface CourseSearchResult {
   id: string
   title: string
   description: string
   image_url: string | null
-  author: {
+  instructor: {
     id: string
     name: string
     avatar_url: string | null
@@ -73,11 +68,11 @@ interface SearchResults {
  */
 export async function GET(request: Request) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
-
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('q')
+    const type = searchParams.get('type') || 'all'
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const offset = parseInt(searchParams.get('offset') || '0')
 
     if (!query) {
       return NextResponse.json(
@@ -86,51 +81,75 @@ export async function GET(request: Request) {
       )
     }
 
-    const { data: courses, error: coursesError } = await supabase
-      .from('courses')
-      .select(`
-        id,
-        title,
-        description,
-        image_url,
-        author:users(
-          id,
-          name,
-          avatar_url
-        )
-      `)
-      .or(`title.ilike.%${query}%, description.ilike.%${query}%`)
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(10)
-
-    if (coursesError) {
-      console.error('Error searching courses:', coursesError)
-      return NextResponse.json(
-        { error: 'Failed to search courses' },
-        { status: 500 }
-      )
-    }
-
-    const { data: instructors, error: instructorsError } = await supabase
-      .from('users')
-      .select('id, name, bio, avatar_url')
-      .or(`name.ilike.%${query}%, bio.ilike.%${query}%`)
-      .eq('role', 'admin')
-      .order('name')
-      .limit(10)
-
-    if (instructorsError) {
-      console.error('Error searching instructors:', instructorsError)
-      return NextResponse.json(
-        { error: 'Failed to search instructors' },
-        { status: 500 }
-      )
-    }
+    const cookieStore = cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          }
+        }
+      }
+    )
 
     const results: SearchResults = {
-      courses: courses as CourseSearchResult[] || [],
-      instructors: instructors as InstructorSearchResult[] || []
+      courses: [],
+      instructors: []
+    }
+
+    if (type === 'all' || type === 'courses') {
+      const { data: courses, error: coursesError } = await supabase
+        .from('courses')
+        .select(`
+          id,
+          title,
+          description,
+          image_url,
+          instructor:users!instructor_id (
+            id,
+            name,
+            avatar_url
+          )
+        `)
+        .textSearch('title', query)
+        .range(offset, offset + limit - 1)
+
+      if (coursesError) {
+        console.error('Error searching courses:', coursesError)
+        return NextResponse.json(
+          { error: 'Failed to search courses' },
+          { status: 500 }
+        )
+      }
+
+      results.courses = courses.map(course => ({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        image_url: course.image_url,
+        instructor: course.instructor[0]
+      }))
+    }
+
+    if (type === 'all' || type === 'instructors') {
+      const { data: instructors, error: instructorsError } = await supabase
+        .from('users')
+        .select('id, name, bio, avatar_url')
+        .eq('role', 'instructor')
+        .textSearch('name', query)
+        .range(offset, offset + limit - 1)
+
+      if (instructorsError) {
+        console.error('Error searching instructors:', instructorsError)
+        return NextResponse.json(
+          { error: 'Failed to search instructors' },
+          { status: 500 }
+        )
+      }
+
+      results.instructors = instructors as InstructorSearchResult[]
     }
 
     return NextResponse.json(results)

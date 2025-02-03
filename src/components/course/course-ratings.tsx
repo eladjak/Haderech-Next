@@ -7,61 +7,62 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { StarIcon } from 'lucide-react'
-import type { CourseRating } from '@/types/api'
+import { Star } from 'lucide-react'
+import type { CourseWithRelations } from "@/types/courses"
 
 interface CourseRatingsProps {
-  ratings: CourseRating[]
+  course: CourseWithRelations
+  showAll?: boolean
 }
 
-export function CourseRatings({ ratings }: CourseRatingsProps) {
-  const averageRating = ratings.length
-    ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
+export function CourseRatings({ course, showAll = false }: CourseRatingsProps) {
+  const ratings = course.ratings || []
+  const averageRating = ratings.length > 0 
+    ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length 
     : 0
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>דירוגים וביקורות</span>
-          <div className="flex items-center gap-2">
-            <StarIcon className="h-5 w-5 text-yellow-400" />
-            <span>{averageRating.toFixed(1)}</span>
-            <span className="text-sm text-muted-foreground">
-              ({ratings.length} דירוגים)
-            </span>
-          </div>
-        </CardTitle>
+        <CardTitle>דירוגים</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {ratings.map((rating) => (
-          <div key={rating.id} className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Avatar>
-                <AvatarImage src={rating.user?.avatar_url} />
-                <AvatarFallback>{rating.user?.name?.[0] ?? '?'}</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">{rating.user?.name ?? 'משתמש אנונימי'}</div>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <StarIcon
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < rating.rating
-                          ? 'text-yellow-400'
-                          : 'text-muted-foreground'
-                      }`}
-                    />
-                  ))}
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold">{averageRating.toFixed(1)}</span>
+            <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+            <span className="text-muted-foreground">({ratings.length} דירוגים)</span>
+          </div>
+          
+          {(showAll ? ratings : ratings.slice(0, 3)).map((rating) => (
+            <div key={rating.id} className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarImage src={rating.user.avatar_url} />
+                  <AvatarFallback>{rating.user.name[0]}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="font-medium">{rating.user.name}</div>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < rating.rating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "fill-gray-200 text-gray-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
+              {rating.review && (
+                <p className="text-sm text-muted-foreground">{rating.review}</p>
+              )}
             </div>
-            {rating.review && (
-              <p className="text-sm text-muted-foreground">{rating.review}</p>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </CardContent>
     </Card>
   )

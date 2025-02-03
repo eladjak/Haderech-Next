@@ -22,11 +22,9 @@ export type Tables = Database['public']['Tables']
 export type Enums = Database['public']['Enums']
 
 // Helper types for common tables
-export type CourseRow = Tables['courses']['Row']
-export type ForumPostRow = Tables['forum_posts']['Row']
+export type UserRow = Tables['users']['Row']
 export type ProfileRow = Tables['profiles']['Row']
 export type LessonRow = Tables['lessons']['Row']
-export type CommentRow = Tables['comments']['Row']
 
 /**
  * Fetches a user's profile by their ID

@@ -1,17 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Notification } from '@/models/types';
+import type { Notification } from '@/types/models';
 
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: NotificationState = {
   notifications: [],
   unreadCount: 0,
-  isLoading: false,
+  loading: false,
   error: null,
 };
 
@@ -21,8 +21,7 @@ export const notificationSlice = createSlice({
   reducers: {
     setNotifications: (state, action: PayloadAction<Notification[]>) => {
       state.notifications = action.payload;
-      state.unreadCount = action.payload.filter(n => !n.read).length;
-      state.error = null;
+      state.unreadCount = action.payload.filter(notification => !notification.read).length;
     },
     addNotification: (state, action: PayloadAction<Notification>) => {
       state.notifications.unshift(action.payload);
@@ -44,23 +43,16 @@ export const notificationSlice = createSlice({
       state.unreadCount = 0;
     },
     deleteNotification: (state, action: PayloadAction<string>) => {
-      const index = state.notifications.findIndex(n => n.id === action.payload);
-      if (index !== -1) {
-        const notification = state.notifications[index];
-        if (!notification.read) {
-          state.unreadCount = Math.max(0, state.unreadCount - 1);
-        }
-        state.notifications.splice(index, 1);
+      const notification = state.notifications.find(n => n.id === action.payload);
+      state.notifications = state.notifications.filter(n => n.id !== action.payload);
+      if (notification && !notification.read) {
+        state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
     },
-    clearAllNotifications: (state) => {
-      state.notifications = [];
-      state.unreadCount = 0;
-    },
     setLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload;
+      state.loading = action.payload;
     },
-    setError: (state, action: PayloadAction<string>) => {
+    setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
   },
@@ -72,7 +64,6 @@ export const {
   markAsRead,
   markAllAsRead,
   deleteNotification,
-  clearAllNotifications,
   setLoading,
   setError,
 } = notificationSlice.actions;

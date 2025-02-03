@@ -3,18 +3,19 @@
  * @description Sidebar component for course pages showing course details and enrollment options
  */
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Clock, Users, BookOpen } from 'lucide-react'
-import type { Course } from '@/types/courses'
+import type { CourseWithRelations } from "@/types/courses"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Clock, Users, BookOpen } from "lucide-react"
 
 interface CourseSidebarProps {
-  course: Course
+  course: CourseWithRelations
   isEnrolled: boolean
+  progress?: number
 }
 
-export function CourseSidebar({ course, isEnrolled }: CourseSidebarProps) {
+export function CourseSidebar({ course, isEnrolled, progress = 0 }: CourseSidebarProps) {
   return (
     <div className="space-y-4">
       {/* Course Stats */}
@@ -29,7 +30,7 @@ export function CourseSidebar({ course, isEnrolled }: CourseSidebarProps) {
           </div>
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{course.studentsCount} תלמידים</span>
+            <span className="text-sm">{course.total_students} תלמידים</span>
           </div>
           <div className="flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -64,15 +65,15 @@ export function CourseSidebar({ course, isEnrolled }: CourseSidebarProps) {
       )}
 
       {/* Progress Card */}
-      {isEnrolled && course.progress && (
+      {isEnrolled && progress > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>התקדמות</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Progress value={course.progress} />
+            <Progress value={progress} />
             <p className="text-sm text-muted-foreground">
-              {Math.round(course.progress)}% הושלמו
+              {Math.round(progress)}% הושלמו
             </p>
           </CardContent>
         </Card>

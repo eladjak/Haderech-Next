@@ -1,15 +1,18 @@
-import { Course } from "@/types/courses"
+import type { CourseWithRelations } from "@/types/courses"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Star } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface CourseRatingsProps {
-  course: Course
+  course: CourseWithRelations
   showAll?: boolean
 }
 
-export const CourseRatings = ({ course, showAll = false }: CourseRatingsProps) => {
-  const ratings = course.ratings
-  const averageRating = ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
+export function CourseRatings({ course, showAll = false }: CourseRatingsProps) {
+  const ratings = course.ratings || []
+  const averageRating = ratings.length > 0 
+    ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length 
+    : 0
 
   return (
     <Card>
@@ -24,25 +27,32 @@ export const CourseRatings = ({ course, showAll = false }: CourseRatingsProps) =
             <span className="text-muted-foreground">({ratings.length} דירוגים)</span>
           </div>
           
-          {(showAll ? ratings : ratings.slice(0, 3)).map((rating, index) => (
-            <div key={index} className="space-y-2">
+          {(showAll ? ratings : ratings.slice(0, 3)).map((rating) => (
+            <div key={rating.id} className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < rating.rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "fill-gray-200 text-gray-200"
-                      }`}
-                    />
-                  ))}
+                <Avatar>
+                  <AvatarImage src={rating.user.avatar_url} />
+                  <AvatarFallback>{rating.user.name[0]}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="font-medium">{rating.user.name}</div>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < rating.rating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "fill-gray-200 text-gray-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {rating.comment}
-                </span>
               </div>
+              {rating.review && (
+                <p className="text-sm text-muted-foreground">{rating.review}</p>
+              )}
             </div>
           ))}
         </div>

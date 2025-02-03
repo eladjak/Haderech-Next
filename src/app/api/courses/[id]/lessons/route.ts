@@ -3,25 +3,16 @@
  * @description API routes for managing course lessons. Provides endpoints for retrieving and creating lessons.
  */
 
-import { createServerClient } from '@/lib/supabase-server'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase'
 
-type Tables = Database['public']['Tables']
-type Lesson = Tables['lessons']['Row']
-type LessonContent = Tables['lesson_content']['Row']
-type LessonProgress = Tables['lesson_progress']['Row']
-
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
-interface LessonWithRelations extends Lesson {
-  content: LessonContent | null
-  progress: LessonProgress[]
+interface CreateLessonBody {
+  title: string
+  description: string
+  content: string
+  order: number
+  status: 'draft' | 'published'
 }
 
 /**
@@ -49,36 +40,24 @@ interface LessonWithRelations extends Lesson {
  * ]
  * ```
  */
-export async function GET(_: Request, { params }: RouteParams) {
+export async function GET(
+  _: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
 
-    // Verify authentication
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Check if user is enrolled in the course
-    const { data: enrollment } = await supabase
-      .from('course_enrollments')
-      .select('id')
-      .eq('course_id', params.id)
-      .eq('user_id', session.user.id)
-      .single()
-
-    if (!enrollment) {
-      return NextResponse.json(
-        { error: 'Not enrolled in this course' },
-        { status: 403 }
-      )
-    }
-
-    // Get lessons
     const { data: lessons, error } = await supabase
       .from('lessons')
       .select(`
@@ -97,7 +76,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       )
     }
 
-    return NextResponse.json(lessons as LessonWithRelations[])
+    return NextResponse.json(lessons)
   } catch (error) {
     console.error('Error in GET /api/courses/[id]/lessons:', error)
     return NextResponse.json(
@@ -129,61 +108,73 @@ export async function GET(_: Request, { params }: RouteParams) {
  * }
  * ```
  */
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
 
-    // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    // Get course details to verify ownership
-    const { data: course } = await supabase
-      .from('courses')
-      .select('author_id')
-      .eq('id', params.id)
-      .single()
+    const body: CreateLessonBody = await request.json()
 
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      )
-    }
-
-    // Verify course ownership
-    if (course.author_id !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Not authorized to create lessons for this course' },
-        { status: 403 }
-      )
-    }
-
-    // Get lesson data from request
-    const lessonData: CreateLessonBody = await request.json()
-
-    // Create lesson
-    const { data: lesson, error } = await supabase
+    const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
       .insert({
-        ...lessonData,
         course_id: params.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        title: body.title,
+        description: body.description,
+        order: body.order,
+        status: body.status,
       })
       .select()
       .single()
 
-    if (error) {
-      console.error('Error creating lesson:', error)
+    if (lessonError) {
+      console.error('Error creating lesson:', lessonError)
       return NextResponse.json(
         { error: 'Failed to create lesson' },
+        { status: 500 }
+      )
+    }
+
+    const { error: contentError } = await supabase
+      .from('lesson_content')
+      .insert({
+        lesson_id: lesson.id,
+        content: body.content,
+        type: 'text',
+        order: 1,
+      })
+
+    if (contentError) {
+      console.error('Error creating lesson content:', contentError)
+      // Cleanup lesson if content creation fails
+      await supabase
+        .from('lessons')
+        .delete()
+        .eq('id', lesson.id)
+
+      return NextResponse.json(
+        { error: 'Failed to create lesson content' },
         { status: 500 }
       )
     }
@@ -201,10 +192,13 @@ export async function POST(request: Request, { params }: RouteParams) {
 /**
  * PATCH handler for updating lesson order
  */
-export async function PATCH(request: Request, { params }: RouteParams) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -219,68 +213,34 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    // Verify user is course instructor
-    const { data: course } = await supabase
-      .from('courses')
-      .select('id')
-      .eq('id', params.id)
-      .eq('instructor_id', session.user.id)
+    const updates = await request.json()
+
+    const { data: lesson, error } = await supabase
+      .from('lessons')
+      .update(updates)
+      .eq('course_id', params.id)
+      .select()
       .single()
 
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      )
-    }
-
-    const { lessonOrder } = await request.json()
-    if (!Array.isArray(lessonOrder)) {
-      return NextResponse.json(
-        { error: 'Invalid lesson order' },
-        { status: 400 }
-      )
-    }
-
-    // Update lesson order
-    const updates = lessonOrder.map((lessonId, index) => ({
-      id: lessonId,
-      order_index: index,
-      updated_at: new Date().toISOString()
-    }))
-
-    const { error } = await supabase
-      .from('lessons')
-      .upsert(updates)
-      .eq('course_id', params.id)
-
     if (error) {
-      console.error('Error updating lesson order:', error)
+      console.error('Error updating lesson:', error)
       return NextResponse.json(
-        { error: 'Failed to update lesson order' },
+        { error: 'Failed to update lesson' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'Lesson order updated successfully' })
+    return NextResponse.json(lesson)
   } catch (error) {
-    console.error('Lessons PATCH error:', error)
+    console.error('Error in PATCH /api/courses/[id]/lessons:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
-}
-
-interface CreateLessonBody {
-  title: string
-  description: string
-  content: string
-  order: number
-  status: 'draft' | 'published'
 } 

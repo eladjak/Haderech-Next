@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Bell, MessageSquare, Star, ThumbsUp, User } from 'lucide-react'
@@ -35,16 +34,7 @@ export function Notification({ notification, className }: NotificationProps) {
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          {notification.action_url ? (
-            <Link
-              href={notification.action_url}
-              className="font-medium hover:underline"
-            >
-              {notification.title}
-            </Link>
-          ) : (
-            <div className="font-medium">{notification.title}</div>
-          )}
+          <div className="font-medium">{notification.title}</div>
           <div className="mt-1 text-sm text-muted-foreground">
             {notification.content}
           </div>

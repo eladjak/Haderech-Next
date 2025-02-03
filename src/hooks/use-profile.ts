@@ -3,104 +3,85 @@
  * @description Custom hook for managing user profile data and operations
  */
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/api'
+import { useCallback } from 'react'
+import { supabase } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 import type { Database } from '@/types/supabase'
 
 type BaseProfile = Database['public']['Tables']['profiles']['Row']
+
 interface Profile extends BaseProfile {
-  avatar_url?: string | null
+  avatar_url: string | null
 }
 
 /**
  * Custom hook for managing user profile data and operations
  * 
  * @returns Object containing:
- * - profile: The current user's profile data
- * - loading: Boolean indicating if profile data is being loaded
- * - error: Any error that occurred during profile operations
+ * - fetchProfile: Function to fetch the user's profile
  * - updateProfile: Function to update the user's profile
  * - uploadAvatar: Function to upload a new avatar image
  * - deleteAvatar: Function to delete the current avatar
  */
 export function useProfile() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const router = useRouter()
+  const { toast } = useToast()
 
-  useEffect(() => {
-    fetchProfile()
-  }, [])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/login')
-        return
-      }
-
-      const { data, error: profileError } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', session.user.id)
+        .eq('id', userId)
         .single()
 
-      if (profileError) throw profileError
+      if (error) throw error
 
-      setProfile(data)
-    } catch (err) {
-      console.error('Error fetching profile:', err)
-      setError(err instanceof Error ? err : new Error('שגיאה בטעינת הפרופיל'))
-    } finally {
-      setLoading(false)
+      return data as Profile
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+      toast({
+        title: 'שגיאה בטעינת הפרופיל',
+        description: 'אנא נסה שוב מאוחר יותר'
+      })
+      return null
     }
-  }
+  }, [toast])
 
-  const updateProfile = async (updates: Partial<Profile>) => {
+  const updateProfile = useCallback(async (userId: string, updates: Partial<Profile>) => {
     try {
-      setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('לא מחובר')
-      }
-
-      const { error: updateError } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', session.user.id)
+        .update(updates)
+        .eq('id', userId)
+        .select()
+        .single()
 
-      if (updateError) throw updateError
+      if (error) throw error
 
-      await fetchProfile()
-    } catch (err) {
-      console.error('Error updating profile:', err)
-      setError(err instanceof Error ? err : new Error('שגיאה בעדכון הפרופיל'))
-      throw err
-    } finally {
-      setLoading(false)
+      toast({
+        title: 'הפרופיל עודכן בהצלחה',
+        description: 'השינויים נשמרו'
+      })
+
+      return data as Profile
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      toast({
+        title: 'שגיאה בעדכון הפרופיל',
+        description: 'אנא נסה שוב מאוחר יותר'
+      })
+      return null
     }
-  }
+  }, [toast])
 
-  const uploadAvatar = async (file: File) => {
+  const uploadAvatar = useCallback(async (file: File) => {
     try {
-      setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('לא מחובר')
-      }
-
       const fileExt = file.name.split('.').pop()
-      const filePath = `${session.user.id}/avatar.${fileExt}`
+      const filePath = `avatars/${Date.now()}.${fileExt}`
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true })
+        .upload(filePath, file)
 
       if (uploadError) throw uploadError
 
@@ -108,39 +89,50 @@ export function useProfile() {
         .from('avatars')
         .getPublicUrl(filePath)
 
-      await updateProfile({ avatar_url: publicUrl })
-    } catch (err) {
-      console.error('Error uploading avatar:', err)
-      setError(err instanceof Error ? err : new Error('שגיאה בהעלאת התמונה'))
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+      toast({
+        title: 'התמונה הועלתה בהצלחה',
+        description: 'התמונה נשמרה בהצלחה'
+      })
 
-  const deleteAvatar = async () => {
+      return publicUrl
+    } catch (error) {
+      console.error('Error uploading avatar:', error)
+      toast({
+        title: 'שגיאה בהעלאת התמונה',
+        description: 'אנא נסה שוב מאוחר יותר'
+      })
+      return null
+    }
+  }, [toast])
+
+  const deleteAvatar = useCallback(async (userId: string) => {
     try {
-      setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('לא מחובר')
-      }
-
-      const { error: deleteError } = await supabase.storage
+      const { error } = await supabase.storage
         .from('avatars')
-        .remove([`${session.user.id}/avatar`])
+        .remove([`avatars/${userId}`])
 
-      if (deleteError) throw deleteError
+      if (error) throw error
 
-      await updateProfile({ avatar_url: null })
-    } catch (err) {
-      console.error('Error deleting avatar:', err)
-      setError(err instanceof Error ? err : new Error('שגיאה במחיקת התמונה'))
-      throw err
-    } finally {
-      setLoading(false)
+      toast({
+        title: 'התמונה נמחקה בהצלחה',
+        description: 'התמונה הוסרה מהפרופיל'
+      })
+
+      return true
+    } catch (error) {
+      console.error('Error deleting avatar:', error)
+      toast({
+        title: 'שגיאה במחיקת התמונה',
+        description: 'אנא נסה שוב מאוחר יותר'
+      })
+      return false
     }
-  }
+  }, [toast])
 
-  return { profile, loading, error, updateProfile, uploadAvatar, deleteAvatar }
+  return {
+    fetchProfile,
+    updateProfile,
+    uploadAvatar,
+    deleteAvatar
+  }
 } 

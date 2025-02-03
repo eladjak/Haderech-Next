@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion"
-import type { HTMLMotionProps } from "framer-motion"
+import { motion, useMotionValue, useSpring, type HTMLMotionProps } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -15,58 +14,73 @@ interface TiltProps extends Omit<HTMLMotionProps<"div">, "scale"> {
   glareOpacity?: number
   glareColor?: string
   glarePosition?: "all" | "top" | "bottom" | "left" | "right"
+  children?: React.ReactNode
 }
 
-const Tilt = React.forwardRef<HTMLDivElement, TiltProps>(
-  ({
-    className,
-    perspective = 1000,
-    scale = 1.05,
-    speed = 500,
-    max = 15,
-    glare = false,
-    glareOpacity = 0.5,
-    glareColor = "#ffffff",
-    glarePosition = "all",
-    children,
-    ...props
-  }, ref) => {
-    const x = useMotionValue(0)
-    const y = useMotionValue(0)
-    const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [max, -max]), {
-      stiffness: speed,
-      damping: 50,
-    })
-    const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-max, max]), {
-      stiffness: speed,
-      damping: 50,
-    })
+export const Tilt = React.forwardRef<HTMLDivElement, TiltProps>(
+  (
+    {
+      children,
+      className,
+      perspective = 1000,
+      scale = 1,
+      speed = 500,
+      max = 25,
+      glare = false,
+      glareOpacity = 0.2,
+      glareColor = "white",
+      glarePosition = "all",
+      style,
+      ...props
+    },
+    ref
+  ) => {
+    const rotateX = useMotionValue(0)
+    const rotateY = useMotionValue(0)
+    const scaleValue = useMotionValue(1)
 
-    const transform = useMotionTemplate`rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scale})`
+    const springConfig = { stiffness: speed, damping: 50, mass: 0.5 }
+
+    const springX = useSpring(rotateX, springConfig)
+    const springY = useSpring(rotateY, springConfig)
+    const springScale = useSpring(scaleValue, springConfig)
 
     function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-      const { left, top, width, height } = currentTarget.getBoundingClientRect()
-      const dx = (clientX - left) / width - 0.5
-      const dy = (clientY - top) / height - 0.5
-      x.set(dx)
-      y.set(dy)
+      const rect = currentTarget.getBoundingClientRect()
+      const width = rect.width
+      const height = rect.height
+      const left = rect.left
+      const top = rect.top
+
+      const mouseX = clientX - left
+      const mouseY = clientY - top
+      const centerX = width / 2
+      const centerY = height / 2
+
+      const rotateXValue = ((mouseY - centerY) / centerY) * max
+      const rotateYValue = ((mouseX - centerX) / centerX) * max
+
+      rotateX.set(-rotateXValue)
+      rotateY.set(rotateYValue)
+      scaleValue.set(scale)
     }
 
     function onMouseLeave() {
-      x.set(0)
-      y.set(0)
+      rotateX.set(0)
+      rotateY.set(0)
+      scaleValue.set(1)
     }
 
     const getGlarePosition = () => {
       switch (glarePosition) {
         case "top":
-          return "inset-x-0 top-0 h-[50%]"
+          return "top-0 left-0 right-0 h-1/2"
         case "bottom":
-          return "inset-x-0 bottom-0 h-[50%]"
+          return "bottom-0 left-0 right-0 h-1/2"
         case "left":
-          return "inset-y-0 left-0 w-[50%]"
+          return "top-0 left-0 bottom-0 w-1/2"
         case "right":
-          return "inset-y-0 right-0 w-[50%]"
+          return "top-0 right-0 bottom-0 w-1/2"
         default:
           return "inset-0"
       }
@@ -76,29 +90,32 @@ const Tilt = React.forwardRef<HTMLDivElement, TiltProps>(
       <motion.div
         ref={ref}
         className={cn("relative", className)}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
         style={{
           perspective,
           transformStyle: "preserve-3d",
+          ...style,
         }}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
         {...props}
       >
         <motion.div
           style={{
-            transform,
+            rotateX: springX,
+            rotateY: springY,
+            scale: springScale,
           }}
         >
           {children}
           {glare && (
             <div
               className={cn(
-                "pointer-events-none absolute bg-gradient-to-tr from-white/0 to-white/80 opacity-0 transition-opacity duration-500 group-hover:opacity-100",
+                "pointer-events-none absolute bg-gradient-to-r from-transparent to-white opacity-0 transition-opacity group-hover:opacity-20",
                 getGlarePosition()
               )}
               style={{
                 opacity: glareOpacity,
-                background: `linear-gradient(to top right, transparent, ${glareColor})`,
+                background: `linear-gradient(90deg, transparent, ${glareColor})`,
               }}
             />
           )}
@@ -107,6 +124,4 @@ const Tilt = React.forwardRef<HTMLDivElement, TiltProps>(
     )
   }
 )
-Tilt.displayName = "Tilt"
-
-export { Tilt } 
+Tilt.displayName = "Tilt" 

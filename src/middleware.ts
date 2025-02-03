@@ -3,9 +3,10 @@
  * @description Middleware for handling authentication and protected routes
  */
 
-import { createServerClient } from '@/lib/supabase-server'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+import type { CookieOptions } from '@supabase/ssr'
+import type { Database } from '@/types/supabase'
 
 /**
  * Array of public routes that don't require authentication
@@ -25,7 +26,7 @@ const publicRoutes = [
  * @param {NextRequest} request - The incoming request
  * @returns {Promise<NextResponse>} The response or redirect
  */
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest): Promise<NextResponse> {
   // Create a response object that we can modify
   let response = NextResponse.next({
     request: {
@@ -34,30 +35,30 @@ export async function middleware(request: NextRequest) {
   })
 
   // Create Supabase client
-  const supabase = createServerClient({
-    get(name: string) {
-      return request.cookies.get(name)?.value
-    },
-    set(name: string, value: string, options: { path: string; maxAge: number }) {
-      // Convert server runtime cookies to response cookies
-      response = NextResponse.next({
-        request: {
-          headers: request.headers,
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
         },
-      })
-      response.cookies.set(name, value, options)
-      return response
-    },
-    remove(name: string, options: { path: string }) {
-      response = NextResponse.next({
-        request: {
-          headers: request.headers,
+        set(name: string, value: string, options: CookieOptions) {
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          })
         },
-      })
-      response.cookies.delete(name)
-      return response
-    },
-  })
+        remove(name: string, options: CookieOptions) {
+          response.cookies.delete({
+            name,
+            ...options,
+          })
+        },
+      },
+    }
+  )
 
   // Refresh session if expired
   await supabase.auth.getSession()
@@ -97,13 +98,12 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except:
+     * Match all request paths except for the ones starting with:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes that don't require authentication
+     * - public (public files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/public).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 } 

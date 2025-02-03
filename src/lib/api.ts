@@ -28,7 +28,7 @@ export async function uploadFile(file: File, bucket: string) {
   const fileExt = file.name.split('.').pop()
   const fileName = `${timestamp}.${fileExt}`
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from(bucket)
     .upload(fileName, file)
 

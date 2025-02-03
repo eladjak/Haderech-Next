@@ -1,63 +1,58 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Course } from '@/models/types';
+import type { Course, Lesson } from '@/types/models';
 
 interface CourseState {
   courses: Course[];
   currentCourse: Course | null;
-  userProgress: Record<string, number>;
-  isLoading: boolean;
+  currentLesson: Lesson | null;
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: CourseState = {
   courses: [],
   currentCourse: null,
-  userProgress: {},
-  isLoading: false,
+  currentLesson: null,
+  loading: false,
   error: null,
 };
 
 export const courseSlice = createSlice({
-  name: 'courses',
+  name: 'course',
   initialState,
   reducers: {
     setCourses: (state, action: PayloadAction<Course[]>) => {
       state.courses = action.payload;
-      state.error = null;
     },
     setCurrentCourse: (state, action: PayloadAction<Course | null>) => {
       state.currentCourse = action.payload;
-      state.error = null;
     },
-    updateProgress: (state, action: PayloadAction<{ courseId: string; progress: number }>) => {
-      const { courseId, progress } = action.payload;
-      state.userProgress[courseId] = progress;
+    setCurrentLesson: (state, action: PayloadAction<Lesson | null>) => {
+      state.currentLesson = action.payload;
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload;
-    },
-    setError: (state, action: PayloadAction<string>) => {
-      state.error = action.payload;
-    },
-    updateCourseRating: (state, action: PayloadAction<{ courseId: string; rating: number }>) => {
-      const { courseId, rating } = action.payload;
-      const course = state.courses.find(c => c.id === courseId);
-      if (course) {
-        course.average_rating = rating;
+    updateCourse: (state, action: PayloadAction<Course>) => {
+      const index = state.courses.findIndex(course => course.id === action.payload.id);
+      if (index !== -1) {
+        state.courses[index] = action.payload;
       }
-      if (state.currentCourse?.id === courseId) {
-        state.currentCourse.average_rating = rating;
+      if (state.currentCourse?.id === action.payload.id) {
+        state.currentCourse = action.payload;
       }
     },
-    incrementStudentCount: (state, action: PayloadAction<string>) => {
-      const courseId = action.payload;
-      const course = state.courses.find(c => c.id === courseId);
+    incrementStudents: (state, action: PayloadAction<string>) => {
+      const course = state.courses.find(course => course.id === action.payload);
       if (course) {
         course.total_students += 1;
       }
-      if (state.currentCourse?.id === courseId) {
+      if (state.currentCourse?.id === action.payload) {
         state.currentCourse.total_students += 1;
       }
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
     },
   },
 });
@@ -65,11 +60,11 @@ export const courseSlice = createSlice({
 export const {
   setCourses,
   setCurrentCourse,
-  updateProgress,
+  setCurrentLesson,
+  updateCourse,
+  incrementStudents,
   setLoading,
   setError,
-  updateCourseRating,
-  incrementStudentCount,
 } = courseSlice.actions;
 
 export default courseSlice.reducer; 
