@@ -17,7 +17,6 @@
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "pre-push": "pnpm type-check && pnpm lint",
     "prepare": "husky",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
@@ -129,10 +128,5 @@
     "node": "20.x",
     "pnpm": "9.x"
   },
-  "packageManager": "pnpm@9.x",
-  "husky": {
-    "hooks": {
-      "pre-push": "pnpm pre-push"
-    }
-  }
+  "packageManager": "pnpm@9.x"
 }
