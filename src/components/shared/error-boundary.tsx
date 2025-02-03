@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useEffect } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { AlertTriangle } from 'lucide-react'
+import { useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 
 interface ErrorBoundaryProps {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }
 
 export function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
   useEffect(() => {
-    console.error('Error:', error)
-  }, [error])
+    console.error("Error:", error);
+  }, [error]);
 
   return (
     <div className="flex h-[50vh] items-center justify-center">
@@ -28,5 +28,5 @@ export function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
         </AlertDescription>
       </Alert>
     </div>
-  )
-} 
+  );
+}

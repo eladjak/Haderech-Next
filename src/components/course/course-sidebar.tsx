@@ -3,19 +3,29 @@
  * @description Sidebar component for course pages showing course details and enrollment options
  */
 
-import type { CourseWithRelations } from "@/types/courses"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Clock, Users, BookOpen } from "lucide-react"
+import type { CourseWithRelations } from "@/types/courses";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Clock, Users, BookOpen } from "lucide-react";
 
 interface CourseSidebarProps {
-  course: CourseWithRelations
-  isEnrolled: boolean
-  progress?: number
+  course: CourseWithRelations;
+  isEnrolled: boolean;
+  progress?: number;
 }
 
-export function CourseSidebar({ course, isEnrolled, progress = 0 }: CourseSidebarProps) {
+export function CourseSidebar({
+  course,
+  isEnrolled,
+  progress = 0,
+}: CourseSidebarProps) {
   return (
     <div className="space-y-4">
       {/* Course Stats */}
@@ -34,7 +44,9 @@ export function CourseSidebar({ course, isEnrolled, progress = 0 }: CourseSideba
           </div>
           <div className="flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{course.lessons?.length || 0} שיעורים</span>
+            <span className="text-sm">
+              {course.lessons?.length || 0} שיעורים
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -47,17 +59,13 @@ export function CourseSidebar({ course, isEnrolled, progress = 0 }: CourseSideba
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {course.price === 0 ? (
-                'חינם'
-              ) : (
-                `₪${course.price}`
-              )}
+              {course.price === 0 ? "חינם" : `₪${course.price}`}
             </div>
           </CardContent>
           <CardFooter>
             <Button className="w-full" asChild>
               <a href={`/courses/${course.id}/enroll`}>
-                {course.price === 0 ? 'הרשם עכשיו' : 'קנה עכשיו'}
+                {course.price === 0 ? "הרשם עכשיו" : "קנה עכשיו"}
               </a>
             </Button>
           </CardFooter>
@@ -79,5 +87,5 @@ export function CourseSidebar({ course, isEnrolled, progress = 0 }: CourseSideba
         </Card>
       )}
     </div>
-  )
-} 
+  );
+}

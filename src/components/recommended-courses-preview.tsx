@@ -1,16 +1,18 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import type { Course } from '@/types/api'
-import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import type { Course } from "@/types/api";
+import Link from "next/link";
 
 interface RecommendedCoursesPreviewProps {
-  courses: Course[]
+  courses: Course[];
 }
 
-export function RecommendedCoursesPreview({ courses }: RecommendedCoursesPreviewProps) {
+export function RecommendedCoursesPreview({
+  courses,
+}: RecommendedCoursesPreviewProps) {
   return (
     <Card>
       <CardHeader>
@@ -34,5 +36,5 @@ export function RecommendedCoursesPreview({ courses }: RecommendedCoursesPreview
         ))}
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

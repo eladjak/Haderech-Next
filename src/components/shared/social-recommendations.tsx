@@ -1,17 +1,20 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { UserPlus } from 'lucide-react'
-import type { User } from '@/types/api'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
+import type { User } from "@/types/api";
 
 interface SocialRecommendationsProps {
-  users: User[]
-  onFollow?: (userId: string) => void
+  users: User[];
+  onFollow?: (userId: string) => void;
 }
 
-export function SocialRecommendations({ users, onFollow }: SocialRecommendationsProps) {
+export function SocialRecommendations({
+  users,
+  onFollow,
+}: SocialRecommendationsProps) {
   return (
     <Card>
       <CardHeader>
@@ -45,5 +48,5 @@ export function SocialRecommendations({ users, onFollow }: SocialRecommendations
         ))}
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

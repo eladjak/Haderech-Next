@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { User, UserPreferences, UserProgress } from '@/types/models';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { User, UserPreferences, UserProgress } from "@/types/models";
 
 interface UserState {
   user: User | null;
@@ -12,27 +12,30 @@ interface UserState {
 const initialState: UserState = {
   user: null,
   preferences: {
-    theme: 'light',
+    theme: "light",
     notifications: true,
-    language: 'he'
+    language: "he",
   },
   progress: {
     completedLessons: [],
     courseProgress: {},
-    achievements: []
+    achievements: [],
   },
   loading: false,
-  error: null
+  error: null,
 };
 
 export const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload;
     },
-    updatePreferences: (state, action: PayloadAction<Partial<UserPreferences>>) => {
+    updatePreferences: (
+      state,
+      action: PayloadAction<Partial<UserPreferences>>,
+    ) => {
       state.preferences = { ...state.preferences, ...action.payload };
     },
     updateProgress: (state, action: PayloadAction<Partial<UserProgress>>) => {
@@ -43,7 +46,10 @@ export const userSlice = createSlice({
         state.progress.completedLessons.push(action.payload);
       }
     },
-    updateCourseProgress: (state, action: PayloadAction<{ courseId: string; progress: number }>) => {
+    updateCourseProgress: (
+      state,
+      action: PayloadAction<{ courseId: string; progress: number }>,
+    ) => {
       const { courseId, progress } = action.payload;
       state.progress.courseProgress[courseId] = progress;
     },
@@ -68,7 +74,10 @@ export const userSlice = createSlice({
       }
     },
     completeCourse: (state, action: PayloadAction<string>) => {
-      if (state.user && !state.user.completed_courses.includes(action.payload)) {
+      if (
+        state.user &&
+        !state.user.completed_courses.includes(action.payload)
+      ) {
         state.user.completed_courses.push(action.payload);
       }
     },
@@ -108,4 +117,4 @@ export const {
   setError,
 } = userSlice.actions;
 
-export default userSlice.reducer; 
+export default userSlice.reducer;

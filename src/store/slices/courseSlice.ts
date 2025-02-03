@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { Course, Lesson } from '@/types/models';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { Course, Lesson } from "@/types/models";
 
 interface CourseState {
   courses: Course[];
@@ -18,7 +18,7 @@ const initialState: CourseState = {
 };
 
 export const courseSlice = createSlice({
-  name: 'course',
+  name: "course",
   initialState,
   reducers: {
     setCourses: (state, action: PayloadAction<Course[]>) => {
@@ -31,7 +31,9 @@ export const courseSlice = createSlice({
       state.currentLesson = action.payload;
     },
     updateCourse: (state, action: PayloadAction<Course>) => {
-      const index = state.courses.findIndex(course => course.id === action.payload.id);
+      const index = state.courses.findIndex(
+        (course) => course.id === action.payload.id,
+      );
       if (index !== -1) {
         state.courses[index] = action.payload;
       }
@@ -40,7 +42,9 @@ export const courseSlice = createSlice({
       }
     },
     incrementStudents: (state, action: PayloadAction<string>) => {
-      const course = state.courses.find(course => course.id === action.payload);
+      const course = state.courses.find(
+        (course) => course.id === action.payload,
+      );
       if (course) {
         course.total_students += 1;
       }
@@ -67,4 +71,4 @@ export const {
   setError,
 } = courseSlice.actions;
 
-export default courseSlice.reducer; 
+export default courseSlice.reducer;

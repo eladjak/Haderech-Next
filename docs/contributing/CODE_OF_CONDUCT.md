@@ -44,4 +44,4 @@
 [homepage]: https://www.contributor-covenant.org
 
 לשאלות נפוצות על קוד התנהגות זה, ראו
-https://www.contributor-covenant.org/faq 
+https://www.contributor-covenant.org/faq

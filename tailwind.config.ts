@@ -1,14 +1,14 @@
 /** @type {import('tailwindcss').Config} */
-import type { Config } from 'tailwindcss'
-import { fontFamily } from "tailwindcss/defaultTheme"
+import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './src/pages/**/*.{ts,tsx}',
-    './src/components/**/*.{ts,tsx}',
-    './src/app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./src/pages/**/*.{ts,tsx}",
+    "./src/components/**/*.{ts,tsx}",
+    "./src/app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -16,10 +16,10 @@ const config = {
       center: true,
       padding: "2rem",
       screens: {
-        "sm": "640px",
-        "md": "768px",
-        "lg": "1024px",
-        "xl": "1280px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
         "2xl": "1400px",
       },
     },
@@ -146,40 +146,40 @@ const config = {
       typography: {
         DEFAULT: {
           css: {
-            maxWidth: '65ch',
-            color: 'var(--tw-prose-body)',
+            maxWidth: "65ch",
+            color: "var(--tw-prose-body)",
             '[class~="lead"]': {
-              color: 'var(--tw-prose-lead)',
+              color: "var(--tw-prose-lead)",
             },
             strong: {
-              color: 'var(--tw-prose-bold)',
+              color: "var(--tw-prose-bold)",
             },
             'ol[type="A"]': {
-              '--list-counter-style': 'upper-alpha',
+              "--list-counter-style": "upper-alpha",
             },
             'ol[type="a"]': {
-              '--list-counter-style': 'lower-alpha',
+              "--list-counter-style": "lower-alpha",
             },
             'ol[type="A" s]': {
-              '--list-counter-style': 'upper-alpha',
+              "--list-counter-style": "upper-alpha",
             },
             'ol[type="a" s]': {
-              '--list-counter-style': 'lower-alpha',
+              "--list-counter-style": "lower-alpha",
             },
             'ol[type="I"]': {
-              '--list-counter-style': 'upper-roman',
+              "--list-counter-style": "upper-roman",
             },
             'ol[type="i"]': {
-              '--list-counter-style': 'lower-roman',
+              "--list-counter-style": "lower-roman",
             },
             'ol[type="I" s]': {
-              '--list-counter-style': 'upper-roman',
+              "--list-counter-style": "upper-roman",
             },
             'ol[type="i" s]': {
-              '--list-counter-style': 'lower-roman',
+              "--list-counter-style": "lower-roman",
             },
             'ol[type="1"]': {
-              '--list-counter-style': 'decimal',
+              "--list-counter-style": "decimal",
             },
           },
         },
@@ -193,6 +193,6 @@ const config = {
     require("@tailwindcss/forms"),
     require("@tailwindcss/aspect-ratio"),
   ],
-} satisfies Config
+} satisfies Config;
 
-export default config 
+export default config;

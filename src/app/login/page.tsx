@@ -1,15 +1,22 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Icons } from '@/components/icons'
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Icons } from "@/components/icons";
 
 export const metadata: Metadata = {
-  title: 'Login - HaDerech',
-  description: 'Login to your HaDerech account',
-}
+  title: "Login - HaDerech",
+  description: "Login to your HaDerech account",
+};
 
 export default function LoginPage() {
   return (
@@ -61,11 +68,9 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button className="w-full">
-            Login
-          </Button>
+          <Button className="w-full">Login</Button>
           <div className="text-sm text-center text-muted-foreground">
-            Don't have an account?{' '}
+            Don't have an account?{" "}
             <Link
               href="/register"
               className="underline underline-offset-4 hover:text-primary"
@@ -82,5 +87,5 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
-  )
-} 
+  );
+}

@@ -2,14 +2,14 @@
  * @file sparkles.tsx
  * @description A component that adds a sparkling effect to its children. Creates animated sparkle
  * elements that appear and disappear around the wrapped content.
- * 
+ *
  * @example
  * ```tsx
  * // Basic usage
  * <Sparkles>
  *   <h1>Sparkly Text</h1>
  * </Sparkles>
- * 
+ *
  * // Custom configuration
  * <Sparkles
  *   color="#FFD700"
@@ -22,30 +22,38 @@
  * ```
  */
 
-'use client'
+"use client";
 
-import { useCallback, useEffect, useState } from 'react'
-import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useCallback, useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 /**
  * Interface defining the style properties for individual sparkle elements
  */
 interface SparkleStyle {
-  position: 'absolute'
-  top: string
-  left: string
-  zIndex: number
+  position: "absolute";
+  top: string;
+  left: string;
+  zIndex: number;
 }
 
 /**
  * Individual sparkle component that renders an animated SVG star
- * 
+ *
  * @param color - The color of the sparkle
  * @param size - The size of the sparkle in pixels
  * @param style - Positioning and z-index styles
  */
-function Sparkle({ color, size, style }: { color: string; size: number; style: SparkleStyle }) {
+function Sparkle({
+  color,
+  size,
+  style,
+}: {
+  color: string;
+  size: number;
+  style: SparkleStyle;
+}) {
   // SVG path for star shape
   const path = `M${size / 2} 0
                L${size / 2 + size / 4} ${size / 2}
@@ -55,7 +63,7 @@ function Sparkle({ color, size, style }: { color: string; size: number; style: S
                L${size / 2 - size / 4} ${size / 2}
                L0 ${size / 2}
                L${size / 2 - size / 4} ${size / 2}
-               Z`
+               Z`;
 
   return (
     <motion.svg
@@ -72,25 +80,25 @@ function Sparkle({ color, size, style }: { color: string; size: number; style: S
       transition={{
         duration: 1,
         repeat: 0,
-        ease: 'easeInOut',
+        ease: "easeInOut",
       }}
       exit={{ scale: 0, rotate: 180 }}
     >
       <path d={path} fill={color} />
     </motion.svg>
-  )
+  );
 }
 
 /**
  * Generates a random number between min and max (inclusive)
  */
 function random(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min)) + min
+  return Math.floor(Math.random() * (max - min)) + min;
 }
 
 /**
  * Generates a sparkle object with random position and size
- * 
+ *
  * @param color - The color of the sparkle
  * @returns A sparkle object with unique ID, creation timestamp, color, size, and positioning
  */
@@ -101,12 +109,12 @@ function generateSparkle(color: string) {
     color,
     size: random(10, 20),
     style: {
-      position: 'absolute' as const,
-      top: random(0, 100) + '%',
-      left: random(0, 100) + '%',
+      position: "absolute" as const,
+      top: random(0, 100) + "%",
+      left: random(0, 100) + "%",
       zIndex: 2,
     },
-  }
+  };
 }
 
 /**
@@ -114,51 +122,53 @@ function generateSparkle(color: string) {
  */
 interface SparklesProps {
   /** The content to wrap with sparkles */
-  children: React.ReactNode
+  children: React.ReactNode;
   /** Additional CSS classes to apply to the container */
-  className?: string
+  className?: string;
   /** The color of the sparkles (default: '#FFD700' - gold) */
-  color?: string
+  color?: string;
   /** Minimum number of sparkles to show at once (default: 3) */
-  minSparkles?: number
+  minSparkles?: number;
   /** Maximum number of sparkles to show at once (default: 5) */
-  maxSparkles?: number
+  maxSparkles?: number;
   /** Time interval in milliseconds between sparkle updates (default: 500) */
-  sparkleInterval?: number
+  sparkleInterval?: number;
 }
 
 /**
  * A component that adds animated sparkles around its children
- * 
+ *
  * @component
  */
 export function Sparkles({
   children,
   className,
-  color = '#FFD700',
+  color = "#FFD700",
   minSparkles = 3,
   maxSparkles = 5,
   sparkleInterval = 500,
 }: SparklesProps) {
-  const [sparkles, setSparkles] = useState<Array<ReturnType<typeof generateSparkle>>>([])
+  const [sparkles, setSparkles] = useState<
+    Array<ReturnType<typeof generateSparkle>>
+  >([]);
 
   const generateSparkles = useCallback(() => {
-    const numSparkles = random(minSparkles, maxSparkles)
-    return Array.from({ length: numSparkles }, () => generateSparkle(color))
-  }, [color, minSparkles, maxSparkles])
+    const numSparkles = random(minSparkles, maxSparkles);
+    return Array.from({ length: numSparkles }, () => generateSparkle(color));
+  }, [color, minSparkles, maxSparkles]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSparkles(generateSparkles())
-    }, sparkleInterval)
+      setSparkles(generateSparkles());
+    }, sparkleInterval);
 
-    return () => clearInterval(interval)
-  }, [generateSparkles, sparkleInterval])
+    return () => clearInterval(interval);
+  }, [generateSparkles, sparkleInterval]);
 
   return (
-    <span className={cn('relative inline-block', className)}>
+    <span className={cn("relative inline-block", className)}>
       <AnimatePresence>
-        {sparkles.map(sparkle => (
+        {sparkles.map((sparkle) => (
           <Sparkle
             key={sparkle.id}
             color={sparkle.color}
@@ -169,5 +179,5 @@ export function Sparkles({
       </AnimatePresence>
       <span className="relative z-1">{children}</span>
     </span>
-  )
-} 
+  );
+}

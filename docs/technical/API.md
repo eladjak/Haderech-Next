@@ -7,6 +7,7 @@ API של הדרך מבוסס על tRPC, המספק type-safety מלא בין ה�
 ## 🔑 אימות
 
 ### הרשמה
+
 ```typescript
 mutation register(input: {
   email: string;
@@ -19,6 +20,7 @@ mutation register(input: {
 ```
 
 ### התחברות
+
 ```typescript
 mutation login(input: {
   email: string;
@@ -30,6 +32,7 @@ mutation login(input: {
 ```
 
 ### התנתקות
+
 ```typescript
 mutation logout() => {
   success: boolean;
@@ -39,6 +42,7 @@ mutation logout() => {
 ## 👤 משתמשים
 
 ### קבלת פרופיל
+
 ```typescript
 query getProfile() => {
   user: User;
@@ -48,6 +52,7 @@ query getProfile() => {
 ```
 
 ### עדכון פרופיל
+
 ```typescript
 mutation updateProfile(input: {
   name?: string;
@@ -59,6 +64,7 @@ mutation updateProfile(input: {
 ```
 
 ### מחיקת חשבון
+
 ```typescript
 mutation deleteAccount() => {
   success: boolean;
@@ -68,6 +74,7 @@ mutation deleteAccount() => {
 ## 📚 קורסים
 
 ### רשימת קורסים
+
 ```typescript
 query getCourses(input: {
   page?: number;
@@ -82,6 +89,7 @@ query getCourses(input: {
 ```
 
 ### קורס בודד
+
 ```typescript
 query getCourse(input: {
   id: string;
@@ -93,6 +101,7 @@ query getCourse(input: {
 ```
 
 ### יצירת קורס
+
 ```typescript
 mutation createCourse(input: {
   title: string;
@@ -105,6 +114,7 @@ mutation createCourse(input: {
 ```
 
 ### עדכון קורס
+
 ```typescript
 mutation updateCourse(input: {
   id: string;
@@ -118,6 +128,7 @@ mutation updateCourse(input: {
 ```
 
 ### מחיקת קורס
+
 ```typescript
 mutation deleteCourse(input: {
   id: string;
@@ -129,6 +140,7 @@ mutation deleteCourse(input: {
 ## 📝 מודולים
 
 ### רשימת מודולים
+
 ```typescript
 query getModules(input: {
   courseId: string;
@@ -138,6 +150,7 @@ query getModules(input: {
 ```
 
 ### מודול בודד
+
 ```typescript
 query getModule(input: {
   id: string;
@@ -149,6 +162,7 @@ query getModule(input: {
 ```
 
 ### יצירת מודול
+
 ```typescript
 mutation createModule(input: {
   courseId: string;
@@ -161,6 +175,7 @@ mutation createModule(input: {
 ```
 
 ### עדכון מודול
+
 ```typescript
 mutation updateModule(input: {
   id: string;
@@ -173,6 +188,7 @@ mutation updateModule(input: {
 ```
 
 ### מחיקת מודול
+
 ```typescript
 mutation deleteModule(input: {
   id: string;
@@ -184,6 +200,7 @@ mutation deleteModule(input: {
 ## 📊 התקדמות
 
 ### קבלת התקדמות
+
 ```typescript
 query getProgress(input: {
   courseId?: string;
@@ -195,6 +212,7 @@ query getProgress(input: {
 ```
 
 ### עדכון התקדמות
+
 ```typescript
 mutation updateProgress(input: {
   courseId: string;
@@ -207,6 +225,7 @@ mutation updateProgress(input: {
 ```
 
 ### איפוס התקדמות
+
 ```typescript
 mutation resetProgress(input: {
   courseId: string;
@@ -218,6 +237,7 @@ mutation resetProgress(input: {
 ## 🔍 חיפוש
 
 ### חיפוש כללי
+
 ```typescript
 query search(input: {
   query: string;
@@ -232,6 +252,7 @@ query search(input: {
 ```
 
 ### השלמה אוטומטית
+
 ```typescript
 query autocomplete(input: {
   query: string;
@@ -244,6 +265,7 @@ query autocomplete(input: {
 ## 📈 אנליטיקס
 
 ### סטטיסטיקות משתמש
+
 ```typescript
 query getUserStats() => {
   completedCourses: number;
@@ -254,6 +276,7 @@ query getUserStats() => {
 ```
 
 ### סטטיסטיקות קורס
+
 ```typescript
 query getCourseStats(input: {
   courseId: string;
@@ -268,6 +291,7 @@ query getCourseStats(input: {
 ## 🔔 התראות
 
 ### קבלת התראות
+
 ```typescript
 query getNotifications(input: {
   page?: number;
@@ -280,6 +304,7 @@ query getNotifications(input: {
 ```
 
 ### סימון כנקרא
+
 ```typescript
 mutation markAsRead(input: {
   id: string;
@@ -289,6 +314,7 @@ mutation markAsRead(input: {
 ```
 
 ### מחיקת התראה
+
 ```typescript
 mutation deleteNotification(input: {
   id: string;
@@ -300,8 +326,9 @@ mutation deleteNotification(input: {
 ## 📝 סיכום
 
 ה-API מספק:
+
 - Type safety מלא
 - Validation אוטומטי
 - תיעוד מובנה
 - ביצועים מעולים
-- אבטחה גבוהה 
+- אבטחה גבוהה

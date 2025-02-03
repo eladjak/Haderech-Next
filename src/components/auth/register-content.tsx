@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import RegisterForm from '@/components/auth/register-form'
+import RegisterForm from "@/components/auth/register-form";
 
 export function RegisterContent() {
   return (
@@ -25,7 +25,8 @@ export function RegisterContent() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;הצטרפתי להדרך לפני חודש ואני כבר מרגיש שינוי משמעותי במערכות היחסים שלי.&rdquo;
+              &ldquo;הצטרפתי להדרך לפני חודש ואני כבר מרגיש שינוי משמעותי
+              במערכות היחסים שלי.&rdquo;
             </p>
             <footer className="text-sm">דוד דוידוב</footer>
           </blockquote>
@@ -53,5 +54,5 @@ export function RegisterContent() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

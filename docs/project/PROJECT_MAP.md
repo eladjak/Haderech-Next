@@ -12,11 +12,11 @@ graph TD
     B --> C[Pages]
     B --> D[Components]
     B --> E[API Routes]
-    
+
     F[Backend] --> G[tRPC Server]
     G --> H[Services]
     G --> I[Models]
-    
+
     J[Database] --> K[Supabase]
     K --> L[Tables]
     K --> M[Functions]
@@ -26,7 +26,9 @@ graph TD
 ## רכיבי המערכת 🔧
 
 ### 1. Frontend
+
 - **Pages**: דפי האפליקציה
+
   - `/`: דף הבית
   - `/courses`: קטלוג קורסים
   - `/course/[id]`: דף קורס
@@ -41,7 +43,9 @@ graph TD
   - `AdminPanel`: פאנל ניהול
 
 ### 2. Backend
+
 - **Services**: שירותי המערכת
+
   - `AuthService`: אימות משתמשים
   - `CourseService`: ניהול קורסים
   - `UserService`: ניהול משתמשים
@@ -56,6 +60,7 @@ graph TD
   - `Payment`: תשלום
 
 ### 3. Database
+
 - **Tables**: טבלאות
   - `users`: משתמשים
   - `courses`: קורסים
@@ -66,6 +71,7 @@ graph TD
 ## תלויות ותקשורת 🔄
 
 ### 1. Frontend-Backend
+
 ```typescript
 // API Call Example
 const getCourse = async (id: string) => {
@@ -75,13 +81,14 @@ const getCourse = async (id: string) => {
 ```
 
 ### 2. Backend-Database
+
 ```typescript
 // Database Query Example
 const getUserCourses = async (userId: string) => {
   const { data, error } = await supabase
-    .from('courses')
-    .select('*')
-    .eq('user_id', userId);
+    .from("courses")
+    .select("*")
+    .eq("user_id", userId);
   return data;
 };
 ```
@@ -89,6 +96,7 @@ const getUserCourses = async (userId: string) => {
 ## תהליכים עיקריים 🔄
 
 ### 1. הרשמה לקורס
+
 ```mermaid
 sequenceDiagram
     User->>Frontend: בחירת קורס
@@ -100,6 +108,7 @@ sequenceDiagram
 ```
 
 ### 2. צפייה בשיעור
+
 ```mermaid
 sequenceDiagram
     User->>Frontend: בחירת שיעור
@@ -113,6 +122,7 @@ sequenceDiagram
 ## אינטגרציות 🔌
 
 ### 1. שירותים חיצוניים
+
 - Stripe: תשלומים
 - OpenAI: AI Assistant
 - SendGrid: אימיילים
@@ -120,6 +130,7 @@ sequenceDiagram
 - Sentry: ניטור
 
 ### 2. כלי פיתוח
+
 - GitHub: קוד
 - Vercel: אירוח
 - Jest: בדיקות
@@ -129,19 +140,21 @@ sequenceDiagram
 ## ניטור וביצועים 📊
 
 ### 1. מדדי ביצוע
+
 ```typescript
 // Performance Monitoring
 const trackPerformance = () => {
   const metrics = {
     pageLoad: performance.now(),
     memory: performance.memory,
-    resources: performance.getEntriesByType('resource'),
+    resources: performance.getEntriesByType("resource"),
   };
   sendToAnalytics(metrics);
 };
 ```
 
 ### 2. לוגים ושגיאות
+
 ```typescript
 // Error Tracking
 const errorHandler = (error: Error) => {
@@ -156,23 +169,25 @@ const errorHandler = (error: Error) => {
 ## אבטחה 🔒
 
 ### 1. הרשאות
+
 ```typescript
 // Permission Check
 const checkAccess = async (userId: string, courseId: string) => {
   const hasAccess = await supabase
-    .from('enrollments')
-    .select('*')
+    .from("enrollments")
+    .select("*")
     .match({ user_id: userId, course_id: courseId });
   return hasAccess.data?.length > 0;
 };
 ```
 
 ### 2. אימות
+
 ```typescript
 // Authentication
 const requireAuth = async (req: NextApiRequest) => {
   const session = await getSession({ req });
-  if (!session) throw new Error('Unauthorized');
+  if (!session) throw new Error("Unauthorized");
   return session;
 };
 ```
@@ -180,12 +195,14 @@ const requireAuth = async (req: NextApiRequest) => {
 ## תחזוקה ועדכונים 🔧
 
 ### 1. גיבויים
+
 ```bash
 # Database Backup
 pg_dump -U postgres -d haderech > backup.sql
 ```
 
 ### 2. עדכוני תשתית
+
 ```bash
 # Dependencies Update
 npm update --save
@@ -194,6 +211,7 @@ npm update --save
 ## סיכום 📝
 
 ### מטרות
+
 1. ארכיטקטורה מודולרית
 2. תקשורת יעילה
 3. אבטחה גבוהה
@@ -201,8 +219,9 @@ npm update --save
 5. תחזוקה פשוטה
 
 ### המלצות
+
 1. שיפור תיעוד
 2. הרחבת בדיקות
 3. אופטימיזציה
 4. שדרוג אבטחה
-5. הוספת ניטור 
+5. הוספת ניטור

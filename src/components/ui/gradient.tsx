@@ -1,37 +1,44 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion"
-import type { HTMLMotionProps } from "framer-motion"
+import * as React from "react";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import type { HTMLMotionProps } from "framer-motion";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface GradientProps extends Omit<HTMLMotionProps<"div">, "children"> {
-  size?: number
-  blur?: number
-  colors?: string[]
-  interactive?: boolean
-  speed?: number
+  size?: number;
+  blur?: number;
+  colors?: string[];
+  interactive?: boolean;
+  speed?: number;
 }
 
 const Gradient = React.forwardRef<HTMLDivElement, GradientProps>(
-  ({
-    className,
-    size = 500,
-    blur = 100,
-    colors = ["#0ea5e9", "#10b981", "#8b5cf6"],
-    interactive = true,
-    speed = 0.5,
-    ...props
-  }, ref) => {
-    const mouseX = useMotionValue(0)
-    const mouseY = useMotionValue(0)
+  (
+    {
+      className,
+      size = 500,
+      blur = 100,
+      colors = ["#0ea5e9", "#10b981", "#8b5cf6"],
+      interactive = true,
+      speed = 0.5,
+      ...props
+    },
+    ref,
+  ) => {
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
 
-    function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-      if (!interactive) return
-      const { left, top } = currentTarget.getBoundingClientRect()
-      mouseX.set(clientX - left)
-      mouseY.set(clientY - top)
+    function handleMouseMove({
+      currentTarget,
+      clientX,
+      clientY,
+    }: React.MouseEvent) {
+      if (!interactive) return;
+      const { left, top } = currentTarget.getBoundingClientRect();
+      mouseX.set(clientX - left);
+      mouseY.set(clientY - top);
     }
 
     const background = useMotionTemplate`
@@ -39,7 +46,7 @@ const Gradient = React.forwardRef<HTMLDivElement, GradientProps>(
         ${size}px circle at ${mouseX}px ${mouseY}px,
         ${colors.join(", ")}
       )
-    `
+    `;
 
     return (
       <motion.div
@@ -47,7 +54,9 @@ const Gradient = React.forwardRef<HTMLDivElement, GradientProps>(
         className={cn("relative overflow-hidden", className)}
         onMouseMove={handleMouseMove}
         animate={{
-          background: interactive ? undefined : `radial-gradient(${colors.join(", ")})`,
+          background: interactive
+            ? undefined
+            : `radial-gradient(${colors.join(", ")})`,
         }}
         transition={{ duration: speed }}
         {...props}
@@ -62,9 +71,9 @@ const Gradient = React.forwardRef<HTMLDivElement, GradientProps>(
           />
         )}
       </motion.div>
-    )
-  }
-)
-Gradient.displayName = "Gradient"
+    );
+  },
+);
+Gradient.displayName = "Gradient";
 
-export { Gradient } 
+export { Gradient };

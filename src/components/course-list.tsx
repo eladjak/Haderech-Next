@@ -1,9 +1,9 @@
-import { CourseCard } from '@/components/course-card'
-import type { Course } from '@/types/api'
+import { CourseCard } from "@/components/course-card";
+import type { Course } from "@/types/api";
 
 interface CourseListProps {
-  courses: Course[]
-  className?: string
+  courses: Course[];
+  className?: string;
 }
 
 export function CourseList({ courses, className }: CourseListProps) {
@@ -13,5 +13,5 @@ export function CourseList({ courses, className }: CourseListProps) {
         <CourseCard key={course.id} course={course} />
       ))}
     </div>
-  )
-} 
+  );
+}

@@ -1,10 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ForumPost } from '@/components/forum-post'
-import type { ForumPost as ForumPostType } from '@/types/api'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ForumPost } from "@/components/forum-post";
+import type { ForumPost as ForumPostType } from "@/types/api";
 
 interface LatestForumPostsProps {
-  posts: ForumPostType[]
-  className?: string
+  posts: ForumPostType[];
+  className?: string;
 }
 
 export function LatestForumPosts({ posts, className }: LatestForumPostsProps) {
@@ -20,7 +20,7 @@ export function LatestForumPosts({ posts, className }: LatestForumPostsProps) {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -34,5 +34,5 @@ export function LatestForumPosts({ posts, className }: LatestForumPostsProps) {
         ))}
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

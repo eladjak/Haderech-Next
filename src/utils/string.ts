@@ -1,6 +1,6 @@
 export const truncate = (str: string, length: number): string => {
   if (str.length <= length) return str;
-  return str.slice(0, length) + '...';
+  return str.slice(0, length) + "...";
 };
 
 export const capitalize = (str: string): string => {
@@ -11,16 +11,17 @@ export const capitalize = (str: string): string => {
 export const slugify = (str: string): string => {
   return str
     .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\u0590-\u05FF\w-]+/g, '')
-    .replace(/--+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
+    .replace(/\s+/g, "-")
+    .replace(/[^\u0590-\u05FF\w-]+/g, "")
+    .replace(/--+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
 };
 
 export const generateRandomString = (length: number): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -47,16 +48,16 @@ export const extractUrls = (str: string): string[] => {
 };
 
 export const removeHtmlTags = (str: string): string => {
-  return str.replace(/<[^>]*>/g, '');
+  return str.replace(/<[^>]*>/g, "");
 };
 
 export const escapeHtml = (str: string): string => {
   const htmlEntities: { [key: string]: string } = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
   };
-  return str.replace(/[&<>"']/g, tag => htmlEntities[tag] || tag);
-}; 
+  return str.replace(/[&<>"']/g, (tag) => htmlEntities[tag] || tag);
+};

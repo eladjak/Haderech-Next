@@ -46,47 +46,53 @@ haderech-next/
 
 ## קבצי תצורה
 
-- `.env.local`             # משתני סביבה מקומיים
-- `.env.production`        # משתני סביבה לייצור
-- `.eslintrc.json`        # הגדרות ESLint
-- `.prettierrc`           # הגדרות Prettier
-- `jest.config.js`        # הגדרות Jest
-- `next.config.js`        # הגדרות Next.js
-- `package.json`          # תלויות ותסריטים
-- `pnpm-lock.yaml`        # נעילת גרסאות
-- `tailwind.config.js`    # הגדרות Tailwind
-- `tsconfig.json`         # הגדרות TypeScript
+- `.env.local` # משתני סביבה מקומיים
+- `.env.production` # משתני סביבה לייצור
+- `.eslintrc.json` # הגדרות ESLint
+- `.prettierrc` # הגדרות Prettier
+- `jest.config.js` # הגדרות Jest
+- `next.config.js` # הגדרות Next.js
+- `package.json` # תלויות ותסריטים
+- `pnpm-lock.yaml` # נעילת גרסאות
+- `tailwind.config.js` # הגדרות Tailwind
+- `tsconfig.json` # הגדרות TypeScript
 
 ## קבצים חשובים
 
 ### קבצי תצורה
+
 - `next.config.js` - הגדרות Next.js
 - `tailwind.config.js` - הגדרות Tailwind CSS
 - `tsconfig.json` - הגדרות TypeScript
 - `.env.local` - משתני סביבה מקומיים
 
 ### קבצי אפליקציה
+
 - `src/app/layout.tsx` - Layout ראשי
 - `src/app/page.tsx` - דף הבית
 - `src/app/providers.tsx` - ספקי Context
 
 ### קבצי API
+
 - `src/app/api/auth/[...nextauth]/route.ts` - אימות
 - `src/app/api/courses/route.ts` - ניהול קורסים
 - `src/app/api/forum/route.ts` - ניהול פורום
 
 ### קומפוננטות חשובות
+
 - `src/components/ui/button.tsx` - כפתור בסיסי
 - `src/components/layout/header.tsx` - כותרת עליונה
 - `src/components/layout/sidebar.tsx` - תפריט צד
 
 ### טיפוסים
+
 - `src/types/supabase.ts` - טיפוסי Supabase
 - `src/types/next-auth.d.ts` - טיפוסי NextAuth
 - `src/types/api.ts` - טיפוסי API
 
 ## הערות
+
 - כל הקבצים מאורגנים לפי תחומי אחריות
 - שימוש ב-TypeScript לכל הקבצים
 - תמיכה מלאה ב-RTL
-- שימוש ב-CSS Modules או Tailwind 
+- שימוש ב-CSS Modules או Tailwind

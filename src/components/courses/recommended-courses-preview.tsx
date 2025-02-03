@@ -1,12 +1,14 @@
-import type { Course } from "@/types/courses"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CourseCard } from "@/components/courses/course-card"
+import type { Course } from "@/types/courses";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CourseCard } from "@/components/courses/course-card";
 
 interface RecommendedCoursesPreviewProps {
-  courses: Course[]
+  courses: Course[];
 }
 
-export function RecommendedCoursesPreview({ courses }: RecommendedCoursesPreviewProps) {
+export function RecommendedCoursesPreview({
+  courses,
+}: RecommendedCoursesPreviewProps) {
   return (
     <Card>
       <CardHeader>
@@ -20,5 +22,5 @@ export function RecommendedCoursesPreview({ courses }: RecommendedCoursesPreview
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

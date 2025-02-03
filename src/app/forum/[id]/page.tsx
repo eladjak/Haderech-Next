@@ -1,16 +1,16 @@
-import type { Metadata } from "next"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { formatDate } from "@/lib/utils"
-import { EXAMPLE_POSTS } from "@/constants/forum"
-import type { ForumPost } from "@/types/forum"
+import type { Metadata } from "next";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { formatDate } from "@/lib/utils";
+import { EXAMPLE_POSTS } from "@/constants/forum";
+import type { ForumPost } from "@/types/forum";
 
 interface ForumPostPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 const EXAMPLE_POST: ForumPost = {
@@ -39,28 +39,28 @@ const EXAMPLE_POST: ForumPost = {
       createdAt: "2024-01-20T12:15:00.000Z",
     },
   ],
-}
+};
 
 export async function generateMetadata({
   params,
 }: ForumPostPageProps): Promise<Metadata> {
-  const post = EXAMPLE_POSTS.find((post) => post.id === params.id)
+  const post = EXAMPLE_POSTS.find((post) => post.id === params.id);
 
   if (!post) {
     return {
       title: "פוסט לא נמצא - פורום הדרך",
       description: "הפוסט המבוקש לא נמצא",
-    }
+    };
   }
 
   return {
     title: `${post.title} - פורום הדרך`,
     description: post.content,
-  }
+  };
 }
 
 export default function ForumPostPage({ params }: ForumPostPageProps) {
-  const post = EXAMPLE_POSTS.find((post) => post.id === params.id)
+  const post = EXAMPLE_POSTS.find((post) => post.id === params.id);
 
   if (!post) {
     return (
@@ -68,7 +68,7 @@ export default function ForumPostPage({ params }: ForumPostPageProps) {
         <h1 className="text-3xl font-bold mb-4">פוסט לא נמצא</h1>
         <p className="text-muted-foreground">הפוסט המבוקש לא נמצא במערכת.</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -96,10 +96,7 @@ export default function ForumPostPage({ params }: ForumPostPageProps) {
         {post.tags && (
           <div className="flex gap-2">
             {post.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-1 text-xs bg-muted rounded-md"
-              >
+              <span key={tag} className="px-2 py-1 text-xs bg-muted rounded-md">
                 {tag}
               </span>
             ))}
@@ -138,12 +135,15 @@ export default function ForumPostPage({ params }: ForumPostPageProps) {
       <div>
         <h2 className="text-xl font-semibold mb-4">הוספת תגובה</h2>
         <div className="grid gap-4">
-          <Textarea placeholder="כתבו את תגובתכם כאן..." className="min-h-[120px]" />
+          <Textarea
+            placeholder="כתבו את תגובתכם כאן..."
+            className="min-h-[120px]"
+          />
           <div className="flex justify-end">
             <Button>שליחת תגובה</Button>
           </div>
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

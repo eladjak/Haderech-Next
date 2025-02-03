@@ -1,11 +1,17 @@
-import Image from "next/image"
-import { Clock, Users } from "lucide-react"
+import Image from "next/image";
+import { Clock, Users } from "lucide-react";
 
-import type { Course } from "@/types/courses"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import type { Course } from "@/types/courses";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface CourseCardProps {
-  course: Course
+  course: Course;
 }
 
 export function CourseCard({ course }: CourseCardProps) {
@@ -40,5 +46,5 @@ export function CourseCard({ course }: CourseCardProps) {
         </div>
       </CardFooter>
     </Card>
-  )
-} 
+  );
+}

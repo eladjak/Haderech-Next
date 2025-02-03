@@ -3,7 +3,7 @@
  * @description Tests for courses API endpoints
  */
 
-import { GET, POST } from '../courses/route'
+import { GET, POST } from "../courses/route";
 
 // Mock Supabase client
 const mockSupabase = {
@@ -51,218 +51,242 @@ const mockSupabase = {
     })),
   },
   rpc: jest.fn(),
-}
+};
 
 // Mock createServerClient
-jest.mock('@supabase/ssr', () => ({
+jest.mock("@supabase/ssr", () => ({
   createServerClient: jest.fn(() => mockSupabase),
-}))
+}));
 
 // Mock cookies
-jest.mock('next/headers', () => ({
+jest.mock("next/headers", () => ({
   cookies: jest.fn(() => ({
-    get: jest.fn(() => ({ value: 'mock-cookie' })),
+    get: jest.fn(() => ({ value: "mock-cookie" })),
     getAll: jest.fn(() => []),
     set: jest.fn(),
     delete: jest.fn(),
   })),
-}))
+}));
 
-describe('Courses API', () => {
+describe("Courses API", () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
-  describe('GET /api/courses', () => {
-    it('should return courses list', async () => {
+  describe("GET /api/courses", () => {
+    it("should return courses list", async () => {
       const mockCourses = [
         {
-          id: '1',
-          title: 'Test Course',
-          description: 'Test Description',
+          id: "1",
+          title: "Test Course",
+          description: "Test Description",
         },
-      ]
+      ];
 
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourses, error: null })
+      mockSupabase
+        .from()
+        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
 
-      const request = new Request('http://localhost:3000/api/courses')
-      const response = await GET(request)
-      const data = await response.json()
+      const request = new Request("http://localhost:3000/api/courses");
+      const response = await GET(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data).toEqual(mockCourses)
-    })
+      expect(response.status).toBe(200);
+      expect(data).toEqual(mockCourses);
+    });
 
-    it('should handle search query', async () => {
+    it("should handle search query", async () => {
       const mockCourses = [
         {
-          id: '1',
-          title: 'Test Course',
-          description: 'Test Description',
+          id: "1",
+          title: "Test Course",
+          description: "Test Description",
         },
-      ]
+      ];
 
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourses, error: null })
+      mockSupabase
+        .from()
+        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
 
-      const request = new Request('http://localhost:3000/api/courses?search=test')
-      const response = await GET(request)
-      const data = await response.json()
+      const request = new Request(
+        "http://localhost:3000/api/courses?search=test",
+      );
+      const response = await GET(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data).toEqual(mockCourses)
-    })
+      expect(response.status).toBe(200);
+      expect(data).toEqual(mockCourses);
+    });
 
-    it('should handle category filter', async () => {
+    it("should handle category filter", async () => {
       const mockCourses = [
         {
-          id: '1',
-          title: 'Test Course',
-          description: 'Test Description',
-          category: 'test',
+          id: "1",
+          title: "Test Course",
+          description: "Test Description",
+          category: "test",
         },
-      ]
+      ];
 
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourses, error: null })
+      mockSupabase
+        .from()
+        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
 
-      const request = new Request('http://localhost:3000/api/courses?category=test')
-      const response = await GET(request)
-      const data = await response.json()
+      const request = new Request(
+        "http://localhost:3000/api/courses?category=test",
+      );
+      const response = await GET(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data).toEqual(mockCourses)
-    })
+      expect(response.status).toBe(200);
+      expect(data).toEqual(mockCourses);
+    });
 
-    it('should handle level filter', async () => {
+    it("should handle level filter", async () => {
       const mockCourses = [
         {
-          id: '1',
-          title: 'Test Course',
-          description: 'Test Description',
-          level: 'beginner',
+          id: "1",
+          title: "Test Course",
+          description: "Test Description",
+          level: "beginner",
         },
-      ]
+      ];
 
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourses, error: null })
+      mockSupabase
+        .from()
+        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
 
-      const request = new Request('http://localhost:3000/api/courses?level=beginner')
-      const response = await GET(request)
-      const data = await response.json()
+      const request = new Request(
+        "http://localhost:3000/api/courses?level=beginner",
+      );
+      const response = await GET(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data).toEqual(mockCourses)
-    })
+      expect(response.status).toBe(200);
+      expect(data).toEqual(mockCourses);
+    });
 
-    it('should handle instructor filter', async () => {
+    it("should handle instructor filter", async () => {
       const mockCourses = [
         {
-          id: '1',
-          title: 'Test Course',
-          description: 'Test Description',
-          instructor_id: 'test-instructor',
+          id: "1",
+          title: "Test Course",
+          description: "Test Description",
+          instructor_id: "test-instructor",
         },
-      ]
+      ];
 
-      mockSupabase.from().select.mockResolvedValueOnce({ data: mockCourses, error: null })
+      mockSupabase
+        .from()
+        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
 
-      const request = new Request('http://localhost:3000/api/courses?instructor=test-instructor')
-      const response = await GET(request)
-      const data = await response.json()
+      const request = new Request(
+        "http://localhost:3000/api/courses?instructor=test-instructor",
+      );
+      const response = await GET(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data).toEqual(mockCourses)
-    })
+      expect(response.status).toBe(200);
+      expect(data).toEqual(mockCourses);
+    });
 
-    it('should handle database error', async () => {
-      mockSupabase.from().select.mockResolvedValueOnce({ 
-        data: null, 
-        error: new Error('Database error') 
-      })
+    it("should handle database error", async () => {
+      mockSupabase.from().select.mockResolvedValueOnce({
+        data: null,
+        error: new Error("Database error"),
+      });
 
-      const request = new Request('http://localhost:3000/api/courses')
-      const response = await GET(request)
-      const data = await response.json()
+      const request = new Request("http://localhost:3000/api/courses");
+      const response = await GET(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(500)
-      expect(data).toEqual({ error: 'Failed to fetch courses' })
-    })
-  })
+      expect(response.status).toBe(500);
+      expect(data).toEqual({ error: "Failed to fetch courses" });
+    });
+  });
 
-  describe('POST /api/courses', () => {
-    it('should create a new course for authenticated instructor', async () => {
+  describe("POST /api/courses", () => {
+    it("should create a new course for authenticated instructor", async () => {
       const mockSession = {
-        user: { id: 'test-user' },
-      }
+        user: { id: "test-user" },
+      };
 
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: mockSession } })
+      mockSupabase.auth.getSession.mockResolvedValueOnce({
+        data: { session: mockSession },
+      });
 
       const mockCourse = {
-        id: '1',
-        title: 'New Course',
-        description: 'Course Description',
-      }
+        id: "1",
+        title: "New Course",
+        description: "Course Description",
+      };
 
-      mockSupabase.from().insert.mockResolvedValueOnce({ 
-        data: mockCourse, 
-        error: null 
-      })
+      mockSupabase.from().insert.mockResolvedValueOnce({
+        data: mockCourse,
+        error: null,
+      });
 
-      const request = new Request('http://localhost:3000/api/courses', {
-        method: 'POST',
+      const request = new Request("http://localhost:3000/api/courses", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(mockCourse),
-      })
+      });
 
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data).toEqual(mockCourse)
-    })
+      expect(response.status).toBe(200);
+      expect(data).toEqual(mockCourse);
+    });
 
-    it('should reject unauthenticated requests', async () => {
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: null } })
+    it("should reject unauthenticated requests", async () => {
+      mockSupabase.auth.getSession.mockResolvedValueOnce({
+        data: { session: null },
+      });
 
-      const request = new Request('http://localhost:3000/api/courses', {
-        method: 'POST',
+      const request = new Request("http://localhost:3000/api/courses", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({}),
-      })
+      });
 
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(401)
-      expect(data).toEqual({ error: 'Unauthorized' })
-    })
+      expect(response.status).toBe(401);
+      expect(data).toEqual({ error: "Unauthorized" });
+    });
 
-    it('should handle database error', async () => {
+    it("should handle database error", async () => {
       const mockSession = {
-        user: { id: 'test-user' },
-      }
+        user: { id: "test-user" },
+      };
 
-      mockSupabase.auth.getSession.mockResolvedValueOnce({ data: { session: mockSession } })
-      mockSupabase.from().insert.mockResolvedValueOnce({ 
-        data: null, 
-        error: new Error('Database error') 
-      })
+      mockSupabase.auth.getSession.mockResolvedValueOnce({
+        data: { session: mockSession },
+      });
+      mockSupabase.from().insert.mockResolvedValueOnce({
+        data: null,
+        error: new Error("Database error"),
+      });
 
-      const request = new Request('http://localhost:3000/api/courses', {
-        method: 'POST',
+      const request = new Request("http://localhost:3000/api/courses", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({}),
-      })
+      });
 
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(500)
-      expect(data).toEqual({ error: 'Failed to create course' })
-    })
-  })
-}) 
+      expect(response.status).toBe(500);
+      expect(data).toEqual({ error: "Failed to create course" });
+    });
+  });
+});

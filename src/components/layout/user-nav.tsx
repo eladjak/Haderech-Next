@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,17 +11,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+} from "@/components/ui/dropdown-menu";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export function UserNav() {
-  const router = useRouter()
-  const supabase = createClientComponentClient()
+  const router = useRouter();
+  const supabase = createClientComponentClient();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.refresh()
-  }
+    await supabase.auth.signOut();
+    router.refresh();
+  };
 
   return (
     <DropdownMenu>
@@ -53,13 +53,13 @@ export function UserNav() {
         <DropdownMenuItem
           className="cursor-pointer"
           onSelect={(event: Event) => {
-            event.preventDefault()
-            handleSignOut()
+            event.preventDefault();
+            handleSignOut();
           }}
         >
           התנתק
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-} 
+  );
+}

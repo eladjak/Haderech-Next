@@ -1,43 +1,43 @@
-"use client"
+"use client";
 
-import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { useAuth } from '@/contexts/auth-context'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function RegisterForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const { signUp } = useAuth()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      await signUp(email, password, username, fullName)
+      await signUp(email, password, username, fullName);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'שגיאה בהרשמה')
+      setError(err instanceof Error ? err.message : "שגיאה בהרשמה");
     }
-  }
+  };
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value)
-  }
+    setEmail(e.target.value);
+  };
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value)
-  }
+    setPassword(e.target.value);
+  };
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value)
-  }
+    setUsername(e.target.value);
+  };
 
   const handleFullNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFullName(e.target.value)
-  }
+    setFullName(e.target.value);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -80,5 +80,5 @@ export default function RegisterForm() {
         הרשמה
       </Button>
     </form>
-  )
-} 
+  );
+}

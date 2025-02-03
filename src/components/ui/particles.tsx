@@ -1,48 +1,51 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion, useAnimation } from "framer-motion"
+import * as React from "react";
+import { motion, useAnimation } from "framer-motion";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface ParticlesProps extends React.HTMLAttributes<HTMLDivElement> {
-  count?: number
-  size?: number
-  speed?: number
-  color?: string
-  minSize?: number
-  maxSize?: number
-  interactive?: boolean
-  interactiveDistance?: number
-  interactiveForce?: number
+  count?: number;
+  size?: number;
+  speed?: number;
+  color?: string;
+  minSize?: number;
+  maxSize?: number;
+  interactive?: boolean;
+  interactiveDistance?: number;
+  interactiveForce?: number;
 }
 
 const Particles = React.forwardRef<HTMLDivElement, ParticlesProps>(
-  ({
-    className,
-    count = 50,
-    size = 3,
-    speed = 1,
-    color = "currentColor",
-    minSize = 1,
-    maxSize = 5,
-    interactive = true,
-    interactiveDistance = 100,
-    interactiveForce = 0.5,
-    ...props
-  }, ref) => {
-    const containerRef = React.useRef<HTMLDivElement>(null)
-    const particlesRef = React.useRef<(HTMLDivElement | null)[]>([])
-    const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 })
-    const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 })
-    const controls = useAnimation()
+  (
+    {
+      className,
+      count = 50,
+      size = 3,
+      speed = 1,
+      color = "currentColor",
+      minSize = 1,
+      maxSize = 5,
+      interactive = true,
+      interactiveDistance = 100,
+      interactiveForce = 0.5,
+      ...props
+    },
+    ref,
+  ) => {
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const particlesRef = React.useRef<(HTMLDivElement | null)[]>([]);
+    const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
+    const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+    const controls = useAnimation();
 
     React.useEffect(() => {
       if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect()
-        setDimensions({ width, height })
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        setDimensions({ width, height });
       }
-    }, [])
+    }, []);
 
     React.useEffect(() => {
       const particles = Array.from({ length: count }).map(() => ({
@@ -51,52 +54,64 @@ const Particles = React.forwardRef<HTMLDivElement, ParticlesProps>(
         size: Math.random() * (maxSize - minSize) + minSize,
         vx: (Math.random() - 0.5) * speed,
         vy: (Math.random() - 0.5) * speed,
-      }))
+      }));
 
       const animate = () => {
         particles.forEach((particle, i) => {
-          const el = particlesRef.current[i]
-          if (!el) return
+          const el = particlesRef.current[i];
+          if (!el) return;
 
           // Update position
-          particle.x += particle.vx
-          particle.y += particle.vy
+          particle.x += particle.vx;
+          particle.y += particle.vy;
 
           // Bounce off walls
-          if (particle.x < 0 || particle.x > dimensions.width) particle.vx *= -1
-          if (particle.y < 0 || particle.y > dimensions.height) particle.vy *= -1
+          if (particle.x < 0 || particle.x > dimensions.width)
+            particle.vx *= -1;
+          if (particle.y < 0 || particle.y > dimensions.height)
+            particle.vy *= -1;
 
           // Interactive force
           if (interactive) {
-            const dx = mousePosition.x - particle.x
-            const dy = mousePosition.y - particle.y
-            const distance = Math.sqrt(dx * dx + dy * dy)
+            const dx = mousePosition.x - particle.x;
+            const dy = mousePosition.y - particle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < interactiveDistance) {
-              const force = (interactiveDistance - distance) * interactiveForce
-              particle.vx -= (dx / distance) * force
-              particle.vy -= (dy / distance) * force
+              const force = (interactiveDistance - distance) * interactiveForce;
+              particle.vx -= (dx / distance) * force;
+              particle.vy -= (dy / distance) * force;
             }
           }
 
           // Apply position
-          el.style.transform = `translate(${particle.x}px, ${particle.y}px)`
-        })
+          el.style.transform = `translate(${particle.x}px, ${particle.y}px)`;
+        });
 
-        requestAnimationFrame(animate)
-      }
+        requestAnimationFrame(animate);
+      };
 
-      animate()
-    }, [dimensions, count, speed, minSize, maxSize, interactive, interactiveDistance, interactiveForce, mousePosition])
+      animate();
+    }, [
+      dimensions,
+      count,
+      speed,
+      minSize,
+      maxSize,
+      interactive,
+      interactiveDistance,
+      interactiveForce,
+      mousePosition,
+    ]);
 
     const handleMouseMove = (e: React.MouseEvent) => {
-      if (!interactive || !containerRef.current) return
-      const rect = containerRef.current.getBoundingClientRect()
+      if (!interactive || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
       setMousePosition({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
-      })
-    }
+      });
+    };
 
     return (
       <div
@@ -114,7 +129,7 @@ const Particles = React.forwardRef<HTMLDivElement, ParticlesProps>(
             <motion.div
               key={i}
               ref={(el) => {
-                particlesRef.current[i] = el
+                particlesRef.current[i] = el;
               }}
               className="absolute left-0 top-0"
               animate={controls}
@@ -129,9 +144,9 @@ const Particles = React.forwardRef<HTMLDivElement, ParticlesProps>(
           ))}
         </div>
       </div>
-    )
-  }
-)
-Particles.displayName = "Particles"
+    );
+  },
+);
+Particles.displayName = "Particles";
 
-export { Particles } 
+export { Particles };

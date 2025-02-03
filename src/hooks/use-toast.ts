@@ -1,12 +1,12 @@
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 interface ToastProps {
-  title: string
-  description?: string
+  title: string;
+  description?: string;
   action?: {
-    label: string
-    onClick: () => void
-  }
+    label: string;
+    onClick: () => void;
+  };
 }
 
 export function useToast() {
@@ -14,11 +14,13 @@ export function useToast() {
     toast: ({ title, description, action }: ToastProps) => {
       toast(title, {
         description,
-        action: action ? {
-          label: action.label,
-          onClick: action.onClick,
-        } : undefined,
-      })
+        action: action
+          ? {
+              label: action.label,
+              onClick: action.onClick,
+            }
+          : undefined,
+      });
     },
-  }
-} 
+  };
+}

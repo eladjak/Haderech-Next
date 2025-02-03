@@ -1,9 +1,9 @@
-import { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface LayoutProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }
 
 export function MainLayout({ children, className }: LayoutProps) {
@@ -25,5 +25,5 @@ export function MainLayout({ children, className }: LayoutProps) {
         </div>
       </footer>
     </div>
-  )
-} 
+  );
+}

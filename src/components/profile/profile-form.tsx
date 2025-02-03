@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,52 +13,52 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/components/ui/use-toast'
-import { updateProfile } from '@/lib/api'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { updateProfile } from "@/lib/api";
 
 const profileFormSchema = z.object({
   username: z.string().min(2).max(30),
   full_name: z.string().min(2).max(50),
   bio: z.string().max(500).optional(),
-})
+});
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 interface ProfileFormProps {
   profile: {
-    username: string
-    full_name: string
-    bio: string | null
-  }
+    username: string;
+    full_name: string;
+    bio: string | null;
+  };
 }
 
 export function ProfileForm({ profile }: ProfileFormProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       username: profile.username,
       full_name: profile.full_name,
-      bio: profile.bio || '',
+      bio: profile.bio || "",
     },
-  })
+  });
 
   async function onSubmit(data: ProfileFormValues) {
     try {
-      await updateProfile(data)
+      await updateProfile(data);
       toast({
-        title: 'הפרופיל עודכן בהצלחה',
-        description: 'השינויים נשמרו בהצלחה',
-      })
+        title: "הפרופיל עודכן בהצלחה",
+        description: "השינויים נשמרו בהצלחה",
+      });
     } catch (error) {
       toast({
-        title: 'שגיאה בעדכון הפרופיל',
-        description: 'אנא נסה שוב מאוחר יותר',
-        variant: 'destructive',
-      })
+        title: "שגיאה בעדכון הפרופיל",
+        description: "אנא נסה שוב מאוחר יותר",
+        variant: "destructive",
+      });
     }
   }
 
@@ -74,9 +74,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormDescription>
-                השם שיוצג לאחרים בפלטפורמה
-              </FormDescription>
+              <FormDescription>השם שיוצג לאחרים בפלטפורמה</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -103,9 +101,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               <FormControl>
                 <Textarea {...field} />
               </FormControl>
-              <FormDescription>
-                ספר לנו קצת על עצמך
-              </FormDescription>
+              <FormDescription>ספר לנו קצת על עצמך</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -113,5 +109,5 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         <Button type="submit">שמור שינויים</Button>
       </form>
     </Form>
-  )
-} 
+  );
+}

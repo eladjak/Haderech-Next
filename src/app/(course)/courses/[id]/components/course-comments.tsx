@@ -1,24 +1,27 @@
-"use client"
+"use client";
 
-import type { CourseWithRelations } from "@/types/courses"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageCircle, Reply } from "lucide-react"
+import type { CourseWithRelations } from "@/types/courses";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MessageCircle, Reply } from "lucide-react";
 
 interface CourseCommentsProps {
-  course: CourseWithRelations
-  showAll?: boolean
+  course: CourseWithRelations;
+  showAll?: boolean;
 }
 
-export function CourseComments({ course, showAll = false }: CourseCommentsProps) {
-  const comments = course.comments || []
-  const displayComments = showAll ? comments : comments.slice(0, 3)
-  
+export function CourseComments({
+  course,
+  showAll = false,
+}: CourseCommentsProps) {
+  const comments = course.comments || [];
+  const displayComments = showAll ? comments : comments.slice(0, 3);
+
   const handleReply = (commentId: string) => {
     // Handle reply logic
-    console.log('Replying to comment:', commentId)
-  }
+    console.log("Replying to comment:", commentId);
+  };
 
   return (
     <Card>
@@ -43,12 +46,19 @@ export function CourseComments({ course, showAll = false }: CourseCommentsProps)
                 <div>
                   <div className="font-medium">{comment.user.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {new Date('2024-01-01T00:00:00.000Z').toLocaleDateString('he-IL')}
+                    {new Date("2024-01-01T00:00:00.000Z").toLocaleDateString(
+                      "he-IL",
+                    )}
                   </div>
                 </div>
               </div>
               <p className="text-sm">{comment.content}</p>
-              <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleReply(comment.id)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={() => handleReply(comment.id)}
+              >
                 <Reply className="h-4 w-4" />
                 השב
               </Button>
@@ -65,9 +75,13 @@ export function CourseComments({ course, showAll = false }: CourseCommentsProps)
                         <AvatarFallback>{reply.user.name[0]}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="text-sm font-medium">{reply.user.name}</div>
+                        <div className="text-sm font-medium">
+                          {reply.user.name}
+                        </div>
                         <div className="text-xs text-muted-foreground">
-                          {new Date('2024-01-01T00:00:00.000Z').toLocaleDateString('he-IL')}
+                          {new Date(
+                            "2024-01-01T00:00:00.000Z",
+                          ).toLocaleDateString("he-IL")}
                         </div>
                       </div>
                     </div>
@@ -91,5 +105,5 @@ export function CourseComments({ course, showAll = false }: CourseCommentsProps)
         </Button>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

@@ -5,6 +5,7 @@
 ## תיעוד 📚
 
 ### מסמכי פרויקט
+
 - [דרישות מערכת](docs/project/REQUIREMENTS.md)
 - [מפרט משתמש](docs/project/USER_SPEC.md)
 - [סטטוס הפרויקט](docs/project/STATUS.md)
@@ -13,20 +14,24 @@
 - [הנחיות AI](docs/project/PROMPT.md)
 
 ### מסמכים טכניים
+
 - [מפרט טכני](docs/technical/TECHNICAL_SPEC.md)
 - [הגדרות Supabase](docs/technical/SUPABASE_CONFIG.md)
 - [דוח ביצועים](docs/technical/PERFORMANCE.md)
 
 ### הנחיות פיתוח
+
 - [הנחיות כלליות](docs/development/GUIDELINES.md)
 - [סקירת קוד](docs/development/CODE_REVIEW.md)
 - [תכנית בדיקות](docs/development/TEST_PLAN.md)
 
 ### תחזוקה
+
 - [תכנית תיקונים](docs/maintenance/FIX_PLAN.md)
 - [מדריך העברה](docs/maintenance/MIGRATION.md)
 
 ### תרומה לפרויקט
+
 - [קוד התנהגות](docs/contributing/CODE_OF_CONDUCT.md)
 - [רישיון](docs/contributing/LICENSE.md)
 

@@ -1,7 +1,7 @@
-import { MainNav } from '@/components/layout/main-nav'
-import { UserNav } from '@/components/layout/user-nav'
-import { LanguageSelector } from '@/components/language-selector'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { MainNav } from "@/components/layout/main-nav";
+import { UserNav } from "@/components/layout/user-nav";
+import { LanguageSelector } from "@/components/language-selector";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader() {
   return (
@@ -17,5 +17,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  )
-} 
+  );
+}

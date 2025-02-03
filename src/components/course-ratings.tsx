@@ -1,21 +1,21 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CourseRating } from '@/components/course-rating'
-import { Star } from 'lucide-react'
-import type { Course } from '@/types/api'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CourseRating } from "@/components/course-rating";
+import { Star } from "lucide-react";
+import type { Course } from "@/types/api";
 
 interface CourseRatingsProps {
-  course: Course
-  className?: string
+  course: Course;
+  className?: string;
 }
 
 export function CourseRatings({ course, className }: CourseRatingsProps) {
   if (!course.ratings?.length) {
-    return null
+    return null;
   }
 
   const averageRating =
     course.ratings.reduce((acc, curr) => acc + curr.rating, 0) /
-    course.ratings.length
+    course.ratings.length;
 
   return (
     <Card className={className}>
@@ -28,8 +28,8 @@ export function CourseRatings({ course, className }: CourseRatingsProps) {
                 key={i}
                 className={`h-5 w-5 ${
                   i < Math.round(averageRating)
-                    ? 'fill-primary text-primary'
-                    : 'fill-muted text-muted-foreground'
+                    ? "fill-primary text-primary"
+                    : "fill-muted text-muted-foreground"
                 }`}
               />
             ))}
@@ -46,5 +46,5 @@ export function CourseRatings({ course, className }: CourseRatingsProps) {
         ))}
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

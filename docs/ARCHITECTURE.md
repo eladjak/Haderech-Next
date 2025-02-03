@@ -7,6 +7,7 @@
 ## שכבות המערכת 🔄
 
 ### 1. שכבת הממשק (Frontend)
+
 - **Next.js App Router** - ניתוב ותצוגה
 - **React** - ניהול ממשק המשתמש
 - **Tailwind CSS** - עיצוב ועיצוב רספונסיבי
@@ -15,11 +16,13 @@
 - **React Query** - ניהול מצב שרת וקאש
 
 ### 2. שכבת השרת (Backend)
+
 - **Next.js API Routes** - נקודות קצה של השרת
 - **Supabase** - בסיס נתונים ואימות
 - **OpenAI API** - שירותי AI וצ'אטבוט
 
 ### 3. שכבת הנתונים (Data)
+
 - **PostgreSQL** (via Supabase) - בסיס נתונים ראשי
 - **Redis** - קאש וניהול סשנים
 - **Supabase Storage** - אחסון קבצים
@@ -27,17 +30,20 @@
 ## קומפוננטות ראשיות 🧩
 
 ### דשבורד
+
 - **LatestForumPosts** - הצגת פוסטים אחרונים
 - **RecommendedCoursesPreview** - קורסים מומלצים
 - **ReferralManagement** - ניהול הפניות
 - **SocialRecommendations** - המלצות חברתיות
 
 ### קורסים
+
 - **CourseContent** - תצוגת תוכן הקורס
 - **CourseComments** - מערכת תגובות
 - **CourseRatings** - מערכת דירוגים
 
 ### אימות והרשאות
+
 - **AuthProvider** - ניהול אימות משתמשים
 - **PermissionsProvider** - ניהול הרשאות
 
@@ -56,11 +62,13 @@ graph TD
 ## אבטחה 🔒
 
 1. **אימות משתמשים**
+
    - Supabase Auth
    - JWT tokens
    - OAuth providers
 
 2. **הרשאות**
+
    - RBAC (Role Based Access Control)
    - Row Level Security בבסיס הנתונים
 
@@ -72,6 +80,7 @@ graph TD
 ## ביצועים ⚡
 
 1. **אופטימיזציה**
+
    - Server Components
    - Image Optimization
    - Code Splitting
@@ -84,6 +93,7 @@ graph TD
 ## סביבות 🌍
 
 1. **פיתוח**
+
    - Local Development
    - Staging
    - Production
@@ -93,4 +103,4 @@ graph TD
    - ESLint
    - Prettier
    - Jest
-   - Playwright 
+   - Playwright

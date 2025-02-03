@@ -1,11 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/supabase";
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL')
+  throw new Error("Missing env.NEXT_PUBLIC_SUPABASE_URL");
 }
 if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  throw new Error("Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY");
 }
 
 /**
@@ -19,23 +19,23 @@ export const supabase = createClient<Database>(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  }
-)
+      detectSessionInUrl: true,
+    },
+  },
+);
 
 /**
  * פונקציית עזר לבדיקת חיבור למסד הנתונים
  */
 export async function checkDatabaseConnection() {
   try {
-    const { error } = await supabase.from('users').select('count').single()
-    if (error) throw error
-    console.log('Database connection successful')
-    return true
+    const { error } = await supabase.from("users").select("count").single();
+    if (error) throw error;
+    console.log("Database connection successful");
+    return true;
   } catch (error) {
-    console.error('Database connection failed:', error)
-    return false
+    console.error("Database connection failed:", error);
+    return false;
   }
 }
 
@@ -44,27 +44,31 @@ export async function checkDatabaseConnection() {
  */
 export async function checkAuthStatus() {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
-    return user
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    if (error) throw error;
+    return user;
   } catch (error) {
-    console.error('Auth status check failed:', error)
-    return null
+    console.error("Auth status check failed:", error);
+    return null;
   }
 }
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
 
 // Helper types for common tables
-export type Profile = Tables<'profiles'>
-export type Course = Tables<'courses'>
-export type Lesson = Tables<'lessons'>
-export type LessonContent = Tables<'lesson_content'>
-export type LessonProgress = Tables<'lesson_progress'>
-export type CourseRating = Tables<'course_ratings'>
-export type CourseEnrollment = Tables<'course_enrollments'>
-export type ForumPost = Tables<'forum_posts'>
-export type ForumComment = Tables<'forum_comments'>
-export type Notification = Tables<'notifications'>
-export type Achievement = Tables<'achievements'>
-export type Upload = Tables<'uploads'> 
+export type Profile = Tables<"profiles">;
+export type Course = Tables<"courses">;
+export type Lesson = Tables<"lessons">;
+export type LessonContent = Tables<"lesson_content">;
+export type LessonProgress = Tables<"lesson_progress">;
+export type CourseRating = Tables<"course_ratings">;
+export type CourseEnrollment = Tables<"course_enrollments">;
+export type ForumPost = Tables<"forum_posts">;
+export type ForumComment = Tables<"forum_comments">;
+export type Notification = Tables<"notifications">;
+export type Achievement = Tables<"achievements">;
+export type Upload = Tables<"uploads">;

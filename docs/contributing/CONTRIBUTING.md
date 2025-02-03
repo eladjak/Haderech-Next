@@ -7,6 +7,7 @@
 ## 🚀 איך להתחיל
 
 ### 1. הגדרת סביבת פיתוח
+
 ```bash
 # שיבוט הפרויקט
 git clone https://github.com/username/haderech.git
@@ -22,6 +23,7 @@ pnpm dev
 ```
 
 ### 2. בדיקת הקוד
+
 ```bash
 # בדיקת טיפוסים
 pnpm type-check
@@ -36,11 +38,13 @@ pnpm test
 ## 📝 תהליך התרומה
 
 ### 1. בחירת משימה
+
 - בדוק את ה-Issues הפתוחים
 - בחר משימה שמעניינת אותך
 - הודע בתגובה שאתה עובד עליה
 
 ### 2. יצירת Branch
+
 ```bash
 # יצירת branch חדש
 git checkout -b feature/your-feature
@@ -50,11 +54,13 @@ git pull origin main
 ```
 
 ### 3. פיתוח
+
 - עקוב אחר הסטנדרטים
 - הוסף טסטים מתאימים
 - וודא שהכל עובד
 
 ### 4. הגשת PR
+
 ```bash
 # דחיפת השינויים
 git add .
@@ -67,6 +73,7 @@ git push origin feature/your-feature
 ## 🎯 סטנדרטים
 
 ### 1. קוד
+
 ```typescript
 // שמות משמעותיים
 const calculateTotal = (items: Item[]): number => {
@@ -82,6 +89,7 @@ const calculateTotal = (items: Item[]): number => {
 ```
 
 ### 2. Commits
+
 ```bash
 # פורמט ברור
 feat: הוספת תכונה חדשה
@@ -91,6 +99,7 @@ test: הוספת טסטים
 ```
 
 ### 3. PR
+
 - תיאור מפורט
 - צילומי מסך אם רלוונטי
 - רשימת שינויים
@@ -99,19 +108,18 @@ test: הוספת טסטים
 ## 🧪 בדיקות
 
 ### 1. Unit Tests
+
 ```typescript
-describe('calculateTotal', () => {
-  it('should calculate total correctly', () => {
-    const items = [
-      { price: 100 },
-      { price: 200 }
-    ];
+describe("calculateTotal", () => {
+  it("should calculate total correctly", () => {
+    const items = [{ price: 100 }, { price: 200 }];
     expect(calculateTotal(items)).toBe(300);
   });
 });
 ```
 
 ### 2. Integration Tests
+
 ```typescript
 describe('ShoppingCart', () => {
   it('should update total on item add', async () => {
@@ -125,6 +133,7 @@ describe('ShoppingCart', () => {
 ## 📚 תיעוד
 
 ### 1. קוד
+
 ```typescript
 /**
  * רכיב להצגת פריט בעגלת קניות
@@ -137,6 +146,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
 ```
 
 ### 2. API
+
 ```typescript
 /**
  * מחזיר את פרטי המשתמש
@@ -152,6 +162,7 @@ const getUser = async (id: string): Promise<User> => {
 ## 🔍 Code Review
 
 ### 1. רשימת תיוג
+
 - [ ] הקוד עובר את כל הבדיקות
 - [ ] הקוד מפורמט נכון
 - [ ] יש טיפוסים מלאים
@@ -161,6 +172,7 @@ const getUser = async (id: string): Promise<User> => {
 - [ ] יש טיפול בשגיאות
 
 ### 2. תהליך
+
 1. בדיקת הקוד
 2. הערות בונות
 3. אישור השינויים
@@ -169,6 +181,7 @@ const getUser = async (id: string): Promise<User> => {
 ## 🎨 עיצוב
 
 ### 1. UI
+
 ```typescript
 // שימוש ב-Tailwind
 const Button = styled.button`
@@ -179,6 +192,7 @@ const Button = styled.button`
 ```
 
 ### 2. UX
+
 - תגובתיות מהירה
 - הודעות ברורות
 - טעינה חלקה
@@ -187,6 +201,7 @@ const Button = styled.button`
 ## 📈 ביצועים
 
 ### 1. אופטימיזציה
+
 ```typescript
 // שימוש ב-useMemo
 const expensiveValue = useMemo(() => {
@@ -200,6 +215,7 @@ const handleClick = useCallback(() => {
 ```
 
 ### 2. טעינה
+
 ```typescript
 // טעינה מושהית
 const HeavyComponent = lazy(() => import('./HeavyComponent'));
@@ -213,6 +229,7 @@ const HeavyComponent = lazy(() => import('./HeavyComponent'));
 ## 🔒 אבטחה
 
 ### 1. אימות קלט
+
 ```typescript
 // שימוש ב-Zod
 const schema = z.object({
@@ -222,6 +239,7 @@ const schema = z.object({
 ```
 
 ### 2. הרשאות
+
 ```typescript
 // בדיקת הרשאות
 const checkPermission = (user: User, action: Action): boolean => {
@@ -232,8 +250,9 @@ const checkPermission = (user: User, action: Action): boolean => {
 ## 📝 סיכום
 
 תודה על תרומתך! זכור:
+
 - לעקוב אחר הסטנדרטים
 - לבדוק את הקוד
 - לתעד היטב
 - לשתף פעולה
-- ליהנות מהתהליך 
+- ליהנות מהתהליך

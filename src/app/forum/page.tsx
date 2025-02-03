@@ -1,16 +1,16 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { formatDate } from "@/lib/utils"
-import { EXAMPLE_POSTS, EXAMPLE_CATEGORIES } from "@/constants/forum"
+import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { formatDate } from "@/lib/utils";
+import { EXAMPLE_POSTS, EXAMPLE_CATEGORIES } from "@/constants/forum";
 
 export const metadata: Metadata = {
   title: "פורום - הדרך",
   description: "פורום לשיתוף ודיון בנושאי זוגיות ומערכות יחסים",
   keywords: "פורום, זוגיות, מערכות יחסים, דיון, קהילה",
-}
+};
 
 export default function ForumPage() {
   return (
@@ -89,5 +89,5 @@ export default function ForumPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   useEffect(() => {
     // אופציונלי: שליחת השגיאה לשירות ניטור
-    console.error(error)
-  }, [error])
+    console.error(error);
+  }, [error]);
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4">
@@ -23,12 +23,9 @@ export default function Error({
           אנחנו מצטערים, אבל נראה שהתרחשה שגיאה. אנא נסו שוב.
         </p>
       </div>
-      <Button
-        variant="outline"
-        onClick={() => reset()}
-      >
+      <Button variant="outline" onClick={() => reset()}>
         נסו שוב
       </Button>
     </div>
-  )
-} 
+  );
+}

@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import confetti from "canvas-confetti"
+import * as React from "react";
+import confetti from "canvas-confetti";
 
 interface ConfettiProps {
-  onComplete?: () => void
-  duration?: number
-  particleCount?: number
-  spread?: number
-  origin?: { x: number; y: number }
+  onComplete?: () => void;
+  duration?: number;
+  particleCount?: number;
+  spread?: number;
+  origin?: { x: number; y: number };
 }
 
 const Confetti = ({
@@ -19,7 +19,7 @@ const Confetti = ({
   origin = { x: 0.5, y: 0.5 },
 }: ConfettiProps) => {
   React.useEffect(() => {
-    const end = Date.now() + duration
+    const end = Date.now() + duration;
 
     const frame = () => {
       confetti({
@@ -27,24 +27,24 @@ const Confetti = ({
         spread,
         origin,
         disableForReducedMotion: true,
-      })
+      });
 
       if (Date.now() < end) {
-        requestAnimationFrame(frame)
+        requestAnimationFrame(frame);
       } else {
-        onComplete?.()
+        onComplete?.();
       }
-    }
+    };
 
-    frame()
+    frame();
 
     return () => {
-      confetti.reset()
-    }
-  }, [duration, onComplete, particleCount, spread, origin])
+      confetti.reset();
+    };
+  }, [duration, onComplete, particleCount, spread, origin]);
 
-  return null
-}
-Confetti.displayName = "Confetti"
+  return null;
+};
+Confetti.displayName = "Confetti";
 
-export { Confetti } 
+export { Confetti };

@@ -1,18 +1,18 @@
 /**
  * Providers Component
- * 
+ *
  * A component that wraps the application with various providers.
  * Currently includes the theme provider for dark/light mode support.
  */
 
-'use client';
+"use client";
 
-import { ThemeProvider } from 'next-themes';
-import { Provider } from 'react-redux';
-import { store } from '@/store/store';
+import { ThemeProvider } from "next-themes";
+import { Provider } from "react-redux";
+import { store } from "@/store/store";
 
 interface ProvidersProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
@@ -23,9 +23,7 @@ export function Providers({ children }: ProvidersProps) {
       enableSystem
       disableTransitionOnChange
     >
-      <Provider store={store}>
-        {children}
-      </Provider>
+      <Provider store={store}>{children}</Provider>
     </ThemeProvider>
   );
-} 
+}

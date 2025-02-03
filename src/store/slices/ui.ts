@@ -1,18 +1,18 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface Toast {
-  id: string
-  type: 'success' | 'error' | 'info' | 'warning'
-  message: string
-  duration?: number
+  id: string;
+  type: "success" | "error" | "info" | "warning";
+  message: string;
+  duration?: number;
 }
 
 interface UIState {
-  toast: Toast | null
-  isLoading: boolean
-  isSidebarOpen: boolean
-  isSearchOpen: boolean
-  currentModal: string | null
+  toast: Toast | null;
+  isLoading: boolean;
+  isSidebarOpen: boolean;
+  isSearchOpen: boolean;
+  currentModal: string | null;
 }
 
 const initialState: UIState = {
@@ -21,35 +21,35 @@ const initialState: UIState = {
   isSidebarOpen: false,
   isSearchOpen: false,
   currentModal: null,
-}
+};
 
 export const uiSlice = createSlice({
-  name: 'ui',
+  name: "ui",
   initialState,
   reducers: {
     showToast: (state: UIState, action: PayloadAction<Toast>) => {
-      state.toast = action.payload
+      state.toast = action.payload;
     },
     clearToast: (state: UIState) => {
-      state.toast = null
+      state.toast = null;
     },
     setLoading: (state: UIState, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload
+      state.isLoading = action.payload;
     },
     toggleSidebar: (state: UIState) => {
-      state.isSidebarOpen = !state.isSidebarOpen
+      state.isSidebarOpen = !state.isSidebarOpen;
     },
     toggleSearch: (state: UIState) => {
-      state.isSearchOpen = !state.isSearchOpen
+      state.isSearchOpen = !state.isSearchOpen;
     },
     openModal: (state: UIState, action: PayloadAction<string>) => {
-      state.currentModal = action.payload
+      state.currentModal = action.payload;
     },
     closeModal: (state: UIState) => {
-      state.currentModal = null
+      state.currentModal = null;
     },
   },
-})
+});
 
 export const {
   showToast,
@@ -59,6 +59,6 @@ export const {
   toggleSearch,
   openModal,
   closeModal,
-} = uiSlice.actions
+} = uiSlice.actions;
 
-export const uiReducer = uiSlice.reducer 
+export const uiReducer = uiSlice.reducer;

@@ -1,9 +1,11 @@
 # מפרט טכני - פרויקט "הדרך" 🛠️
 
 ## 📋 סקירה כללית
+
 "הדרך" היא פלטפורמת למידה חדשנית המתמקדת בשיפור מערכות יחסים וכישורים חברתיים. המערכת משלבת קורסים אינטראקטיביים, קהילה תומכת, וכלים מעשיים ליישום הנלמד.
 
 ## 🎯 מטרות המערכת
+
 1. הנגשת ידע מקצועי בתחום מערכות יחסים
 2. יצירת סביבת למידה אינטראקטיבית ותומכת
 3. מתן כלים פרקטיים לשיפור מערכות יחסים
@@ -11,6 +13,7 @@
 5. מעקב והערכת התקדמות אישית
 
 ## 👥 קהל יעד
+
 - זוגות בתחילת דרכם
 - אנשים המחפשים לשפר את מערכות היחסים שלהם
 - מטפלים ויועצים זוגיים
@@ -20,10 +23,11 @@
 ## 🏗️ ארכיטקטורה טכנית
 
 ### Frontend
+
 - **Framework**: Next.js 14 עם App Router
 - **שפה**: TypeScript
 - **סגנון**: Tailwind CSS + shadcn/ui
-- **ניהול מצב**: 
+- **ניהול מצב**:
   - React Query לניהול מצב שרת
   - Redux Toolkit לניהול מצב לקוח
   - Context API למצבים גלובליים
@@ -32,6 +36,7 @@
 - **אנימציות**: Framer Motion
 
 ### Backend
+
 - **שרת**: Next.js API Routes
 - **מסד נתונים**: Supabase (PostgreSQL)
 - **אימות**: Supabase Auth
@@ -40,6 +45,7 @@
 - **Edge Functions**: Vercel Edge Runtime
 
 ### Database
+
 - **מערכת**: PostgreSQL (via Supabase)
 - **אבטחה**: Row Level Security (RLS)
 - **עדכונים בזמן אמת**: Supabase Realtime
@@ -53,7 +59,9 @@
 ## 🔧 פונקציונליות עיקרית
 
 ### מערכת משתמשים
+
 1. **הרשמה והתחברות**
+
    - רישום עם אימייל וסיסמה
    - אימות דו-שלבי
    - שחזור סיסמה
@@ -66,7 +74,9 @@
    - העדפות למידה
 
 ### מערכת קורסים
+
 1. **צפייה בקורסים**
+
    - רשימת קורסים
    - פרטי קורס
    - תצוגת שיעורים
@@ -79,7 +89,9 @@
    - בחנים ומבחנים
 
 ### פורום קהילתי
+
 1. **דיונים**
+
    - יצירת נושאים
    - תגובות
    - חיפוש
@@ -94,6 +106,7 @@
 ## 🎨 ממשק משתמש
 
 ### עיצוב
+
 - עיצוב מודרני ונקי
 - תמיכה מלאה בעברית ו-RTL
 - רספונסיביות מלאה
@@ -101,6 +114,7 @@
 - נגישות לפי תקן WCAG 2.1
 
 ### חוויית משתמש
+
 - ניווט אינטואיטיבי
 - טעינה מהירה
 - משוב מיידי
@@ -109,6 +123,7 @@
 ## 🔒 אבטחה ופרטיות
 
 ### אבטחת מידע
+
 - HTTPS בכל הדפים
 - הצפנת מידע רגיש
 - JWT לאימות
@@ -119,6 +134,7 @@
   - DDoS
 
 ### פרטיות
+
 - תאימות GDPR
 - מדיניות פרטיות ברורה
 - שליטה מלאה בנתונים אישיים
@@ -127,18 +143,21 @@
 ## 📊 ניטור ותחזוקה
 
 ### ניטור
+
 - Vercel Analytics למדדי ביצועים
 - Sentry לניטור שגיאות
 - Supabase Dashboard לניטור מסד הנתונים
 - התראות אוטומטיות על תקלות
 
 ### תחזוקה
+
 - גיבויים אוטומטיים יומיים
 - עדכוני אבטחה שוטפים
 - ניהול גרסאות מסודר
 - תיעוד שינויים
 
 ## 📈 מדדי הצלחה
+
 - מספר משתמשים פעילים
 - זמן שימוש ממוצע
 - שיעור השלמת קורסים
@@ -148,12 +167,14 @@
 ## 🚀 תהליך פיתוח
 
 ### CI/CD
+
 - GitHub Actions לבדיקות אוטומטיות
 - Vercel ל-deployment אוטומטי
 - בדיקות אוטומטיות לפני כל deployment
 - גרסאות בטא למשתמשים נבחרים
 
 ### בדיקות
+
 - Unit Tests
 - Integration Tests
 - E2E Tests
@@ -161,13 +182,15 @@
 - Security Tests
 
 ## 📝 הערות
+
 - המפרט הטכני הזה הוא מסמך חי שמתעדכן באופן שוטף
 - כל שינוי משמעותי במערכת צריך להיות מתועד כאן
-- יש לשמור על עקביות בין המפרט לבין היישום בפועל 
+- יש לשמור על עקביות בין המפרט לבין היישום בפועל
 
 ## 🔌 ממשקי API
 
 ### אימות והרשאות
+
 ```typescript
 /**
  * הרשמת משתמש חדש
@@ -190,6 +213,7 @@ interface LoginRequest {
 ```
 
 ### ניהול משתמשים
+
 ```typescript
 /**
  * קבלת פרטי משתמש
@@ -218,6 +242,7 @@ interface UpdateUserRequest {
 ```
 
 ### ניהול קורסים
+
 ```typescript
 /**
  * קבלת רשימת קורסים
@@ -247,6 +272,7 @@ interface CourseResponse extends Course {
 ```
 
 ### ניהול שיעורים
+
 ```typescript
 /**
  * יצירת שיעור חדש
@@ -265,6 +291,7 @@ interface CreateLessonRequest {
 ```
 
 ### פורום ותקשורת
+
 ```typescript
 /**
  * קבלת רשימת פוסטים
@@ -293,6 +320,7 @@ interface CreateCommentRequest {
 ```
 
 ### מעקב התקדמות
+
 ```typescript
 /**
  * עדכון התקדמות בשיעור
@@ -302,13 +330,14 @@ interface CreateCommentRequest {
 interface UpdateProgressRequest {
   courseId: string;
   lessonId: string;
-  status: 'not_started' | 'in_progress' | 'completed';
+  status: "not_started" | "in_progress" | "completed";
   progressPercent: number;
   lastPosition?: number;
 }
 ```
 
 ### חיפוש
+
 ```typescript
 /**
  * חיפוש בכל המערכת
@@ -327,7 +356,9 @@ interface SearchResponse {
 ## 📊 ביצועים ואופטימיזציה
 
 ### מדדי ביצועים מרכזיים
+
 - **זמני טעינה**:
+
   - דף ראשי: < 2 שניות
   - דפי תוכן: < 1.5 שניות
   - API Endpoints: < 200ms
@@ -338,7 +369,9 @@ interface SearchResponse {
   - CLS (Cumulative Layout Shift): < 0.1
 
 ### אופטימיזציות
+
 - **Frontend**:
+
   - Code Splitting
   - Lazy Loading
   - Image Optimization
@@ -351,7 +384,9 @@ interface SearchResponse {
   - Load Balancing
 
 ### ניטור וניתוח
+
 - **כלי ניטור**:
+
   - Vercel Analytics
   - Google Analytics
   - Sentry
@@ -361,11 +396,12 @@ interface SearchResponse {
   - זמני תגובה
   - שימוש במשאבים
   - שגיאות ותקלות
-  - התנהגות משתמשים 
+  - התנהגות משתמשים
 
 ## 🤖 תכונות מתקדמות
 
 ### מערכת AI
+
 ```typescript
 interface AISystem {
   // המלצות תוכן
@@ -373,13 +409,13 @@ interface AISystem {
     userId: string,
     context: UserContext
   ): Promise<Recommendation[]>;
-  
+
   // עוזר וירטואלי
   async getAssistantResponse(
     query: string,
     history: ChatHistory
   ): Promise<AIResponse>;
-  
+
   // ניתוח התקדמות
   async analyzeProgress(
     userId: string,
@@ -389,19 +425,20 @@ interface AISystem {
 ```
 
 ### פקודות קוליות
+
 ```typescript
 interface VoiceSystem {
   // זיהוי פקודות
   async recognizeCommand(
     audioInput: AudioStream
   ): Promise<Command>;
-  
+
   // המרת טקסט לדיבור
   async textToSpeech(
     text: string,
     preferences: VoicePreferences
   ): Promise<Audio>;
-  
+
   // נגישות קולית
   accessibility: {
     screenReader: boolean;
@@ -412,6 +449,7 @@ interface VoiceSystem {
 ```
 
 ### למידה חברתית
+
 ```typescript
 interface SocialLearning {
   // קבוצות למידה
@@ -420,14 +458,14 @@ interface SocialLearning {
     join(groupId: string): void;
     share(content: Content): void;
   };
-  
+
   // מנטורינג
   mentoring: {
     findMentor(): Mentor[];
     scheduleMeeting(): Meeting;
     provideFeedback(): Feedback;
   };
-  
+
   // תגמול ומוטיבציה
   rewards: {
     points: PointSystem;
@@ -440,17 +478,21 @@ interface SocialLearning {
 ## קומפוננטות חדשות 🆕
 
 ### קומפוננטות דשבורד
+
 1. **LatestForumPosts**
+
    - מציג את הפוסטים האחרונים מהפורום
    - מקבל רשימת פוסטים ומציג אותם בכרטיסיות
    - כולל כותרת, תוכן מקוצר ופרטי המפרסם
 
 2. **RecommendedCoursesPreview**
+
    - מציג קורסים מומלצים למשתמש
    - מקבל רשימת קורסים ומציג אותם בכרטיסיות
    - כולל תמונה, כותרת ותיאור קצר
 
 3. **ReferralManagement**
+
    - מאפשר למשתמש לנהל את קוד ההפניה שלו
    - מציג את הקוד הנוכחי ומאפשר שיתוף
    - כולל כפתור לשיתוף מהיר
@@ -461,13 +503,16 @@ interface SocialLearning {
    - כולל תמונת פרופיל, שם ותיאור קצר
 
 ### קומפוננטות קורס
+
 1. **CourseContent**
+
    - מציג את תוכן הקורס
    - מקבל אובייקט קורס ומצב הרשמה
    - מציג רשימת שיעורים עם סטטוס השלמה
    - מאפשר גישה לשיעורים בהתאם למצב ההרשמה
 
 2. **CourseComments**
+
    - מאפשר למשתמשים להגיב על הקורס
    - מציג את כל התגובות בצורה מדורגת
    - תומך בתגובות מקוננות
@@ -476,4 +521,4 @@ interface SocialLearning {
 3. **CourseRatings**
    - מציג את הדירוגים של הקורס
    - מחשב ומציג דירוג ממוצע
-   - מאפשר למשתמשים לדרג את הקורס 
+   - מאפשר למשתמשים לדרג את הקורס

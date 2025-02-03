@@ -1,35 +1,38 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion } from "framer-motion"
+import * as React from "react";
+import { motion } from "framer-motion";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface MarqueeProps extends React.HTMLAttributes<HTMLDivElement> {
-  pauseOnHover?: boolean
-  reverse?: boolean
-  speed?: number
-  spacing?: number
+  pauseOnHover?: boolean;
+  reverse?: boolean;
+  speed?: number;
+  spacing?: number;
 }
 
 const Marquee = React.forwardRef<HTMLDivElement, MarqueeProps>(
-  ({
-    className,
-    children,
-    pauseOnHover = false,
-    reverse = false,
-    speed = 50,
-    spacing = 16,
-    ...props
-  }, ref) => {
-    const [contentWidth, setContentWidth] = React.useState(0)
-    const contentRef = React.useRef<HTMLDivElement>(null)
+  (
+    {
+      className,
+      children,
+      pauseOnHover = false,
+      reverse = false,
+      speed = 50,
+      spacing = 16,
+      ...props
+    },
+    ref,
+  ) => {
+    const [contentWidth, setContentWidth] = React.useState(0);
+    const contentRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
       if (contentRef.current) {
-        setContentWidth(contentRef.current.scrollWidth)
+        setContentWidth(contentRef.current.scrollWidth);
       }
-    }, [children])
+    }, [children]);
 
     return (
       <div
@@ -49,17 +52,23 @@ const Marquee = React.forwardRef<HTMLDivElement, MarqueeProps>(
             ...(pauseOnHover && { paused: true }),
           }}
         >
-          <div ref={contentRef} className="flex shrink-0 items-center gap-[var(--gap)]">
+          <div
+            ref={contentRef}
+            className="flex shrink-0 items-center gap-[var(--gap)]"
+          >
             {children}
           </div>
-          <div aria-hidden className="flex shrink-0 items-center gap-[var(--gap)]">
+          <div
+            aria-hidden
+            className="flex shrink-0 items-center gap-[var(--gap)]"
+          >
             {children}
           </div>
         </motion.div>
       </div>
-    )
-  }
-)
-Marquee.displayName = "Marquee"
+    );
+  },
+);
+Marquee.displayName = "Marquee";
 
-export { Marquee } 
+export { Marquee };

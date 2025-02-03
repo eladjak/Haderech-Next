@@ -1,11 +1,11 @@
-import { Metadata } from "next"
-import { CourseCard } from "@/components/course-card"
-import { courses } from "@/constants/courses"
+import { Metadata } from "next";
+import { CourseCard } from "@/components/course-card";
+import { courses } from "@/constants/courses";
 
 export const metadata: Metadata = {
   title: "קורסים",
   description: "גלה את הקורסים שלנו",
-}
+};
 
 export default function CoursesPage() {
   return (
@@ -22,5 +22,5 @@ export default function CoursesPage() {
         ))}
       </div>
     </div>
-  )
-} 
+  );
+}

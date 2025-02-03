@@ -1,11 +1,11 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Profile } from '@/types/models'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Profile } from "@/types/models";
 
 interface ProfileHeaderProps {
-  profile: Profile
-  isCurrentUser?: boolean
+  profile: Profile;
+  isCurrentUser?: boolean;
 }
 
 export function ProfileHeader({ profile, isCurrentUser }: ProfileHeaderProps) {
@@ -35,5 +35,5 @@ export function ProfileHeader({ profile, isCurrentUser }: ProfileHeaderProps) {
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

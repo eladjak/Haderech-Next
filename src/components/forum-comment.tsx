@@ -1,16 +1,21 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { MessageSquare, ThumbsUp, User } from 'lucide-react'
-import type { ForumComment } from '@/types/api'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, ThumbsUp, User } from "lucide-react";
+import type { ForumComment } from "@/types/api";
 
 interface ForumCommentProps {
-  comment: ForumComment
-  onLike?: (commentId: string) => void
-  onReply?: (commentId: string) => void
-  className?: string
+  comment: ForumComment;
+  onLike?: (commentId: string) => void;
+  onReply?: (commentId: string) => void;
+  className?: string;
 }
 
 export function ForumComment({
@@ -31,10 +36,10 @@ export function ForumComment({
           </Avatar>
           <div className="flex-1">
             <div className="font-medium">
-              {comment.author?.name ?? 'משתמש אנונימי'}
+              {comment.author?.name ?? "משתמש אנונימי"}
             </div>
             <div className="text-sm text-muted-foreground">
-              {new Date('2024-01-01T00:00:00.000Z').toLocaleDateString('he-IL')}
+              {new Date("2024-01-01T00:00:00.000Z").toLocaleDateString("he-IL")}
             </div>
           </div>
         </div>
@@ -53,7 +58,7 @@ export function ForumComment({
             >
               <ThumbsUp
                 className={`h-4 w-4 ${
-                  comment.likes > 0 ? 'fill-primary text-primary' : ''
+                  comment.likes > 0 ? "fill-primary text-primary" : ""
                 }`}
               />
               <span>{comment.likes}</span>
@@ -73,5 +78,5 @@ export function ForumComment({
         </div>
       </CardFooter>
     </Card>
-  )
-} 
+  );
+}

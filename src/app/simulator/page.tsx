@@ -1,10 +1,10 @@
-import { Metadata } from 'next'
-import { SimulatorChat } from '@/components/simulator/chat'
+import { Metadata } from "next";
+import { SimulatorChat } from "@/components/simulator/chat";
 
 export const metadata: Metadata = {
-  title: 'סימולטור דייטינג',
-  description: 'תרגל את כישורי הדייטינג שלך בסביבה בטוחה ומבוקרת',
-}
+  title: "סימולטור דייטינג",
+  description: "תרגל את כישורי הדייטינג שלך בסביבה בטוחה ומבוקרת",
+};
 
 export default function SimulatorPage() {
   return (
@@ -23,5 +23,5 @@ export default function SimulatorPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

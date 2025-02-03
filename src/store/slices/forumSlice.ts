@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { ForumPost, ForumComment } from '@/types/models';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { ForumPost, ForumComment } from "@/types/models";
 
 interface ForumState {
   posts: ForumPost[];
@@ -16,7 +16,7 @@ const initialState: ForumState = {
 };
 
 export const forumSlice = createSlice({
-  name: 'forum',
+  name: "forum",
   initialState,
   reducers: {
     setPosts: (state, action: PayloadAction<ForumPost[]>) => {
@@ -26,45 +26,68 @@ export const forumSlice = createSlice({
       state.posts.push(action.payload);
     },
     updatePost: (state, action: PayloadAction<ForumPost>) => {
-      const index = state.posts.findIndex(post => post.id === action.payload.id);
+      const index = state.posts.findIndex(
+        (post) => post.id === action.payload.id,
+      );
       if (index !== -1) {
         state.posts[index] = action.payload;
       }
     },
     deletePost: (state, action: PayloadAction<string>) => {
-      state.posts = state.posts.filter(post => post.id !== action.payload);
+      state.posts = state.posts.filter((post) => post.id !== action.payload);
       delete state.replies[action.payload];
     },
     likePost: (state, action: PayloadAction<string>) => {
-      const post = state.posts.find((post: ForumPost) => post.id === action.payload);
+      const post = state.posts.find(
+        (post: ForumPost) => post.id === action.payload,
+      );
       if (post) {
         post.likes += 1;
       }
     },
     unlikePost: (state, action: PayloadAction<string>) => {
-      const post = state.posts.find((post: ForumPost) => post.id === action.payload);
+      const post = state.posts.find(
+        (post: ForumPost) => post.id === action.payload,
+      );
       if (post && post.likes > 0) {
         post.likes -= 1;
       }
     },
-    addReply: (state, action: PayloadAction<{ postId: string; reply: ForumComment }>) => {
+    addReply: (
+      state,
+      action: PayloadAction<{ postId: string; reply: ForumComment }>,
+    ) => {
       const { postId, reply } = action.payload;
       if (!state.replies[postId]) {
         state.replies[postId] = [];
       }
       state.replies[postId].push(reply);
     },
-    updateReply: (state, action: PayloadAction<{ postId: string; replyId: string; content: string }>) => {
+    updateReply: (
+      state,
+      action: PayloadAction<{
+        postId: string;
+        replyId: string;
+        content: string;
+      }>,
+    ) => {
       const { postId, replyId, content } = action.payload;
-      const reply = state.replies[postId]?.find((reply: ForumComment) => reply.id === replyId);
+      const reply = state.replies[postId]?.find(
+        (reply: ForumComment) => reply.id === replyId,
+      );
       if (reply) {
         reply.content = content;
       }
     },
-    deleteReply: (state, action: PayloadAction<{ postId: string; replyId: string }>) => {
+    deleteReply: (
+      state,
+      action: PayloadAction<{ postId: string; replyId: string }>,
+    ) => {
       const { postId, replyId } = action.payload;
       if (state.replies[postId]) {
-        state.replies[postId] = state.replies[postId].filter(reply => reply.id !== replyId);
+        state.replies[postId] = state.replies[postId].filter(
+          (reply) => reply.id !== replyId,
+        );
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -90,4 +113,4 @@ export const {
   setError,
 } = forumSlice.actions;
 
-export default forumSlice.reducer; 
+export default forumSlice.reducer;

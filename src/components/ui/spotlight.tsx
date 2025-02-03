@@ -1,24 +1,28 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion"
+import * as React from "react";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface SpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
-  size?: number
+  size?: number;
 }
 
 const Spotlight = React.forwardRef<HTMLDivElement, SpotlightProps>(
   ({ className, size = 400, children, ...props }, ref) => {
-    const mouseX = useMotionValue(0)
-    const mouseY = useMotionValue(0)
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
 
-    function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-      const { left, top } = currentTarget.getBoundingClientRect()
+    function handleMouseMove({
+      currentTarget,
+      clientX,
+      clientY,
+    }: React.MouseEvent) {
+      const { left, top } = currentTarget.getBoundingClientRect();
 
-      mouseX.set(clientX - left)
-      mouseY.set(clientY - top)
+      mouseX.set(clientX - left);
+      mouseY.set(clientY - top);
     }
 
     return (
@@ -42,9 +46,9 @@ const Spotlight = React.forwardRef<HTMLDivElement, SpotlightProps>(
         />
         {children}
       </div>
-    )
-  }
-)
-Spotlight.displayName = "Spotlight"
+    );
+  },
+);
+Spotlight.displayName = "Spotlight";
 
-export { Spotlight } 
+export { Spotlight };

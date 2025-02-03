@@ -1,21 +1,24 @@
-import { Share } from "lucide-react"
+import { Share } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface ReferralManagementProps {
-  referralCode: string
-  onShare: () => void
+  referralCode: string;
+  onShare: () => void;
 }
 
-export function ReferralManagement({ referralCode, onShare }: ReferralManagementProps) {
+export function ReferralManagement({
+  referralCode,
+  onShare,
+}: ReferralManagementProps) {
   return (
     <Card>
       <CardHeader>
@@ -26,21 +29,13 @@ export function ReferralManagement({ referralCode, onShare }: ReferralManagement
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2">
-          <Input
-            value={referralCode}
-            readOnly
-            className="font-mono"
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onShare}
-          >
+          <Input value={referralCode} readOnly className="font-mono" />
+          <Button variant="outline" size="icon" onClick={onShare}>
             <Share className="h-4 w-4" />
             <span className="sr-only">שתף קוד הזמנה</span>
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

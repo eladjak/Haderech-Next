@@ -7,6 +7,7 @@
 ## 📊 ניטור
 
 ### 1. מטריקות מערכת
+
 ```bash
 # בדיקת שימוש במשאבים
 pm2 monit
@@ -19,19 +20,21 @@ pnpm performance
 ```
 
 ### 2. מטריקות עסקיות
+
 - משתמשים פעילים
 - זמן שימוש ממוצע
 - שיעורי המרה
 - דפים נצפים
 
 ### 3. התראות
+
 ```typescript
 // הגדרת התראה
 const alert = {
-  type: 'error',
+  type: "error",
   threshold: 100,
-  interval: '5m',
-  action: 'notify-team'
+  interval: "5m",
+  action: "notify-team",
 };
 
 // בדיקת התראות
@@ -46,6 +49,7 @@ const checkAlerts = async () => {
 ## 🔄 עדכונים
 
 ### 1. תלויות
+
 ```bash
 # בדיקת עדכונים
 pnpm outdated
@@ -58,6 +62,7 @@ git diff package.json
 ```
 
 ### 2. אבטחה
+
 ```bash
 # סריקת פגיעויות
 pnpm audit
@@ -70,6 +75,7 @@ pnpm update --latest
 ```
 
 ### 3. גרסאות
+
 ```bash
 # יצירת גרסה חדשה
 pnpm version patch
@@ -84,13 +90,14 @@ curl https://api.haderech.co.il/version
 ## 🛠️ טיפול בתקלות
 
 ### 1. לוגים
+
 ```typescript
 // רמות לוג
 enum LogLevel {
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error',
-  DEBUG = 'debug'
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
+  DEBUG = "debug",
 }
 
 // פונקציית לוג
@@ -99,12 +106,13 @@ const log = (level: LogLevel, message: string, meta?: object) => {
     level,
     message,
     timestamp: new Date(),
-    ...meta
+    ...meta,
   });
 };
 ```
 
 ### 2. שגיאות נפוצות
+
 ```typescript
 // טיפול בשגיאות
 try {
@@ -121,6 +129,7 @@ try {
 ```
 
 ### 3. תהליך פתרון
+
 1. זיהוי הבעיה
 2. איסוף מידע
 3. שחזור התקלה
@@ -132,6 +141,7 @@ try {
 ## 🔒 גיבויים
 
 ### 1. בסיס נתונים
+
 ```bash
 # גיבוי ידני
 pg_dump -Fc > backup.dump
@@ -144,6 +154,7 @@ pg_restore -d database_name backup.dump
 ```
 
 ### 2. קבצים
+
 ```bash
 # גיבוי לאחסון
 aws s3 sync ./public s3://bucket-name
@@ -158,6 +169,7 @@ cp .env.production .env.backup
 ## 📈 אופטימיזציה
 
 ### 1. בסיס נתונים
+
 ```sql
 -- ניתוח ביצועים
 EXPLAIN ANALYZE
@@ -172,6 +184,7 @@ VACUUM ANALYZE users;
 ```
 
 ### 2. קוד
+
 ```typescript
 // אופטימיזציית זיכרון
 const cache = new Map<string, Data>();
@@ -186,6 +199,7 @@ const MemoizedComponent = React.memo(Component);
 ## 🔍 ניטור אבטחה
 
 ### 1. לוגים
+
 ```typescript
 // ניטור גישה
 const accessLog = {
@@ -193,26 +207,27 @@ const accessLog = {
   user: request.user,
   action: request.method,
   ip: request.ip,
-  userAgent: request.headers['user-agent']
+  userAgent: request.headers["user-agent"],
 };
 
 // ניטור שגיאות
 const securityLog = {
   timestamp: new Date(),
-  type: 'security_violation',
+  type: "security_violation",
   details: error,
-  user: request.user
+  user: request.user,
 };
 ```
 
 ### 2. התראות
+
 ```typescript
 // התראת אבטחה
 const securityAlert = {
-  level: 'high',
-  type: 'brute_force',
+  level: "high",
+  type: "brute_force",
   threshold: 5,
-  window: '5m'
+  window: "5m",
 };
 
 // בדיקת התראות
@@ -227,48 +242,57 @@ const checkSecurityAlerts = async () => {
 ## 📝 תיעוד
 
 ### 1. שינויים
+
 ```markdown
 # יומן שינויים
 
 ## [1.2.0] - 2024-01-15
+
 ### הוספות
+
 - תכונה חדשה א
 - תכונה חדשה ב
 
 ### תיקונים
+
 - תיקון באג X
 - שיפור ביצועים Y
 ```
 
 ### 2. תקלות
+
 ```markdown
 # דוח תקלה
 
 ## תיאור
+
 תקלת התחברות למערכת
 
 ## צעדי שחזור
+
 1. ניסיון התחברות
 2. קבלת שגיאה 500
 3. בדיקת לוגים
 
 ## פתרון
+
 עדכון תצורת Redis
 ```
 
 ## 📊 דוחות
 
 ### 1. ביצועים
+
 ```typescript
 // דוח ביצועים
 const performanceReport = {
-  period: 'daily',
+  period: "daily",
   metrics: {
     responseTime: [],
     errorRate: [],
     userCount: [],
-    cpuUsage: []
-  }
+    cpuUsage: [],
+  },
 };
 
 // יצירת דוח
@@ -279,16 +303,17 @@ const generateReport = async () => {
 ```
 
 ### 2. שימוש
+
 ```typescript
 // דוח שימוש
 const usageReport = {
-  period: 'monthly',
+  period: "monthly",
   metrics: {
     activeUsers: [],
     pageViews: [],
     conversions: [],
-    engagement: []
-  }
+    engagement: [],
+  },
 };
 
 // שליחת דוח
@@ -301,8 +326,9 @@ const sendReport = async (report: Report) => {
 ## 📝 סיכום
 
 תהליכי התחזוקה מבטיחים:
+
 - זמינות גבוהה
 - ביצועים טובים
 - אבטחה מיטבית
 - יציבות מערכת
-- שיפור מתמיד 
+- שיפור מתמיד

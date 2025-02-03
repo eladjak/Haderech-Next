@@ -3,6 +3,7 @@
 ## 🎯 עקרונות כלליים
 
 ### 1. ארכיטקטורה
+
 - שימוש ב-Next.js App Router
 - Server Components כברירת מחדל
 - Client Components רק כשנדרש
@@ -10,6 +11,7 @@
 - מודולריות ותחזוקתיות
 
 ### 2. קוד נקי
+
 - שמות משמעותיים
 - פונקציות קצרות וממוקדות
 - DRY (Don't Repeat Yourself)
@@ -17,6 +19,7 @@
 - תיעוד ברור
 
 ### 3. טיפוסים
+
 - TypeScript בכל הקוד
 - הגדרות טיפוסים מדויקות
 - שימוש ב-zod לוולידציה
@@ -26,7 +29,9 @@
 ## 🔧 סטנדרטים טכניים
 
 ### 1. Frontend
+
 - **Components**:
+
   - "use client" בקומפוננטות קליינט
   - Props מוגדרות היטב
   - חלוקה לוגית לתיקיות
@@ -40,7 +45,9 @@
   - Props Drilling מינימלי
 
 ### 2. Backend
+
 - **API**:
+
   - tRPC לתקשורת type-safe
   - REST כשנדרש
   - GraphQL לשאילתות מורכבות
@@ -53,6 +60,7 @@
   - Backup אוטומטי
 
 ### 3. Testing
+
 - Jest ליחידות
 - Cypress לאינטגרציה
 - Playwright ל-E2E
@@ -61,6 +69,7 @@
 ## 📝 סטנדרטים לקוד
 
 ### 1. Naming
+
 ```typescript
 // רע ❌
 const x = 5;
@@ -74,6 +83,7 @@ function calculateTotalScore() {}
 ```
 
 ### 2. Functions
+
 ```typescript
 // רע ❌
 function doStuff(data) {
@@ -89,6 +99,7 @@ function processUserData(userData: UserData): ProcessedData {
 ```
 
 ### 3. Components
+
 ```typescript
 // רע ❌
 function Component(props) {
@@ -116,6 +127,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 ## 🔍 Code Review
 
 ### 1. תהליך
+
 - בדיקת קוד לפני PR
 - שימוש ב-ESLint
 - בדיקת טיפוסים
@@ -123,6 +135,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - בדיקת אבטחה
 
 ### 2. Checklist
+
 - [ ] הקוד עובד
 - [ ] הטיפוסים מדויקים
 - [ ] יש בדיקות
@@ -130,6 +143,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - [ ] הקוד נקי ומאורגן
 
 ### 3. משוב
+
 - בונה ומכבד
 - ממוקד בקוד
 - עם דוגמאות
@@ -139,6 +153,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 ## 📈 ביצועים
 
 ### 1. Frontend
+
 - Lazy loading
 - Code splitting
 - Image optimization
@@ -146,6 +161,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - Time to Interactive < 3s
 
 ### 2. Backend
+
 - Response time < 100ms
 - Cache hit ratio > 80%
 - Error rate < 1%
@@ -153,6 +169,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - Resource usage < 70%
 
 ### 3. Database
+
 - Query time < 50ms
 - Connection pooling
 - Proper indexing
@@ -162,6 +179,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 ## 🔒 אבטחה
 
 ### 1. Authentication
+
 - NextAuth.js
 - JWT secure
 - Session management
@@ -169,6 +187,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - CSRF protection
 
 ### 2. Authorization
+
 - RBAC
 - Row Level Security
 - Middleware checks
@@ -176,6 +195,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - Least privilege
 
 ### 3. Data Protection
+
 - HTTPS only
 - Data encryption
 - Input validation
@@ -185,15 +205,25 @@ function Component({ title, description, onAction }: ComponentProps) {
 ## 📱 Responsive Design
 
 ### 1. Breakpoints
+
 ```css
 /* Mobile First */
-@media (min-width: 640px) { /* sm */ }
-@media (min-width: 768px) { /* md */ }
-@media (min-width: 1024px) { /* lg */ }
-@media (min-width: 1280px) { /* xl */ }
+@media (min-width: 640px) {
+  /* sm */
+}
+@media (min-width: 768px) {
+  /* md */
+}
+@media (min-width: 1024px) {
+  /* lg */
+}
+@media (min-width: 1280px) {
+  /* xl */
+}
 ```
 
 ### 2. Layout
+
 - Flexbox/Grid
 - Container queries
 - Fluid typography
@@ -201,6 +231,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - Mobile navigation
 
 ### 3. Testing
+
 - Multiple devices
 - Multiple browsers
 - Multiple resolutions
@@ -210,6 +241,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 ## 🌐 Internationalization
 
 ### 1. Text
+
 - RTL support
 - Translation files
 - Dynamic loading
@@ -217,6 +249,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - Format handling
 
 ### 2. Numbers
+
 - Currency format
 - Date format
 - Number format
@@ -224,6 +257,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - Time zones
 
 ### 3. Content
+
 - Cultural adaptation
 - Image localization
 - Color meanings
@@ -233,6 +267,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 ## 📦 Dependencies
 
 ### 1. Management
+
 - pnpm workspace
 - Version locking
 - Regular updates
@@ -240,6 +275,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - Dependency pruning
 
 ### 2. Selection
+
 - Active maintenance
 - Good documentation
 - Type support
@@ -247,6 +283,7 @@ function Component({ title, description, onAction }: ComponentProps) {
 - License check
 
 ### 3. Updates
+
 - Scheduled updates
 - Breaking changes
 - Migration guides
@@ -256,13 +293,15 @@ function Component({ title, description, onAction }: ComponentProps) {
 ## 🔄 Git Workflow
 
 ### 1. Branches
+
 - main/master
 - development
-- feature/*
-- bugfix/*
-- release/*
+- feature/\*
+- bugfix/\*
+- release/\*
 
 ### 2. Commits
+
 ```bash
 # Format
 type(scope): description
@@ -274,6 +313,7 @@ docs(api): update endpoints
 ```
 
 ### 3. PRs
+
 - Clear title
 - Description template
 - Linked issues
@@ -283,6 +323,7 @@ docs(api): update endpoints
 ## 📝 סיכום
 
 ### עקרונות מנחים:
+
 1. איכות קוד גבוהה
 2. ביצועים מעולים
 3. אבטחה קפדנית
@@ -290,8 +331,9 @@ docs(api): update endpoints
 5. תחזוקתיות פשוטה
 
 ### תהליך עבודה:
+
 1. תכנון מקדים
 2. פיתוח מסודר
 3. בדיקות מקיפות
 4. Code review קפדני
-5. שיפור מתמיד 
+5. שיפור מתמיד

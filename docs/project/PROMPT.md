@@ -7,10 +7,11 @@
 ## הגדרות בסיסיות ⚙️
 
 ### 1. מודל
+
 ```typescript
 // הגדרות OpenAI
 const config = {
-  model: 'gpt-4',
+  model: "gpt-4",
   temperature: 0.7,
   max_tokens: 2000,
   top_p: 1,
@@ -20,10 +21,11 @@ const config = {
 ```
 
 ### 2. הקשר
+
 ```typescript
 // הגדרת הקשר
 const context = {
-  role: 'system',
+  role: "system",
   content: `אתה עוזר לימודי בפלטפורמת הדרך.
   תפקידך לסייע בלמידה, לענות על שאלות,
   ולתת משוב בונה. עליך להיות:
@@ -37,6 +39,7 @@ const context = {
 ## תבניות הנחיה 📝
 
 ### 1. שאלות ותשובות
+
 ```typescript
 // תבנית לשאלות ותשובות
 const qaTemplate = `
@@ -56,6 +59,7 @@ const qaTemplate = `
 ```
 
 ### 2. משוב על תרגילים
+
 ```typescript
 // תבנית למשוב
 const feedbackTemplate = `
@@ -79,15 +83,16 @@ const feedbackTemplate = `
 ## דוגמאות שימוש 🎯
 
 ### 1. שאלה ותשובה
+
 ```typescript
 // דוגמה לשאלה ותשובה
 const question = {
-  role: 'user',
-  content: 'מהי תקשורת אפקטיבית בזוגיות?',
+  role: "user",
+  content: "מהי תקשורת אפקטיבית בזוגיות?",
 };
 
 const answer = {
-  role: 'assistant',
+  role: "assistant",
   content: `
 תשובה קצרה:
 תקשורת אפקטיבית היא היכולת להעביר ולקבל מסרים בצורה ברורה ומכבדת.
@@ -113,10 +118,11 @@ const answer = {
 ```
 
 ### 2. משוב על תרגיל
+
 ```typescript
 // דוגמה למשוב
 const exercise = {
-  role: 'user',
+  role: "user",
   content: `
 תרגיל: תרגול הקשבה פעילה
 פתרון: שיקפתי את דברי בן/בת הזוג והצעתי פתרון
@@ -124,7 +130,7 @@ const exercise = {
 };
 
 const feedback = {
-  role: 'assistant',
+  role: "assistant",
   content: `
 ציון: 85
 
@@ -154,71 +160,65 @@ const feedback = {
 ## כללי שימוש 📋
 
 ### 1. הנחיות כלליות
+
 ```typescript
 // כללים לשימוש ב-AI
 const guidelines = {
   do: [
-    'השתמש בשפה פשוטה וברורה',
-    'תן דוגמאות מעשיות',
-    'הצע פתרונות יישומיים',
-    'עודד חשיבה עצמאית',
-    'שמור על פרטיות',
+    "השתמש בשפה פשוטה וברורה",
+    "תן דוגמאות מעשיות",
+    "הצע פתרונות יישומיים",
+    "עודד חשיבה עצמאית",
+    "שמור על פרטיות",
   ],
   dont: [
-    'אל תיתן עצות רפואיות',
-    'אל תחליף ייעוץ מקצועי',
-    'אל תשפוט או תבקר',
-    'אל תחשוף מידע אישי',
-    'אל תיצור תלות',
+    "אל תיתן עצות רפואיות",
+    "אל תחליף ייעוץ מקצועי",
+    "אל תשפוט או תבקר",
+    "אל תחשוף מידע אישי",
+    "אל תיצור תלות",
   ],
 };
 ```
 
 ### 2. מגבלות
+
 ```typescript
 // מגבלות השימוש
 const limitations = {
-  maxQuestions: 5,    // מקסימום שאלות ברצף
-  maxTime: 30,        // מקסימום דקות לשיחה
-  topicsToAvoid: [
-    'רפואה',
-    'משפטים',
-    'פסיכיאטריה',
-    'מצבי חירום',
-  ],
+  maxQuestions: 5, // מקסימום שאלות ברצף
+  maxTime: 30, // מקסימום דקות לשיחה
+  topicsToAvoid: ["רפואה", "משפטים", "פסיכיאטריה", "מצבי חירום"],
 };
 ```
 
 ## אבטחה ופרטיות 🔒
 
 ### 1. הגנה על מידע
+
 ```typescript
 // הגנה על מידע
 const security = {
   // הסרת מידע אישי
   sanitizeInput: (text: string) => {
-    return text.replace(
-      /\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b/g,
-      '[EMAIL]'
-    );
+    return text.replace(/\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b/g, "[EMAIL]");
   },
-  
+
   // בדיקת תוכן רגיש
   checkSensitiveContent: (text: string) => {
     const sensitivePatterns = [
-      /\b\d{9}\b/,          // תעודת זהות
-      /\b\d{16}\b/,         // כרטיס אשראי
-      /\b\d{10}\b/,         // טלפון
+      /\b\d{9}\b/, // תעודת זהות
+      /\b\d{16}\b/, // כרטיס אשראי
+      /\b\d{10}\b/, // טלפון
     ];
-    
-    return sensitivePatterns.some(pattern => 
-      pattern.test(text)
-    );
+
+    return sensitivePatterns.some((pattern) => pattern.test(text));
   },
 };
 ```
 
 ### 2. הרשאות
+
 ```typescript
 // ניהול הרשאות
 const permissions = {
@@ -243,6 +243,7 @@ const permissions = {
 ## ניטור ושיפור 📊
 
 ### 1. מדדי שימוש
+
 ```typescript
 // מדידת שימוש
 const metrics = {
@@ -259,15 +260,16 @@ const metrics = {
 ```
 
 ### 2. משוב משתמשים
+
 ```typescript
 // איסוף משוב
 const feedback = {
   collectFeedback: async (session: Session) => {
     return {
-      helpful: await askUser('האם התשובה עזרה?'),
-      clear: await askUser('האם התשובה הייתה ברורה?'),
-      actionable: await askUser('האם קיבלת כלים מעשיים?'),
-      comments: await askUser('הערות נוספות?'),
+      helpful: await askUser("האם התשובה עזרה?"),
+      clear: await askUser("האם התשובה הייתה ברורה?"),
+      actionable: await askUser("האם קיבלת כלים מעשיים?"),
+      comments: await askUser("הערות נוספות?"),
     };
   },
 };
@@ -276,6 +278,7 @@ const feedback = {
 ## סיכום 📝
 
 ### מטרות
+
 1. תמיכה בלמידה
 2. מתן משוב בונה
 3. עידוד חשיבה עצמאית
@@ -283,8 +286,9 @@ const feedback = {
 5. שיפור מתמיד
 
 ### המלצות
+
 1. עדכון הנחיות
 2. הרחבת תבניות
 3. שיפור אבטחה
 4. ניטור שימוש
-5. איסוף משוב 
+5. איסוף משוב

@@ -1,56 +1,59 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion } from "framer-motion"
+import * as React from "react";
+import { motion } from "framer-motion";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Carousel3DProps extends React.HTMLAttributes<HTMLDivElement> {
-  items: React.ReactNode[]
-  initialActive?: number
-  perspective?: number
-  radius?: number
-  showControls?: boolean
-  autoRotate?: boolean
-  rotateInterval?: number
+  items: React.ReactNode[];
+  initialActive?: number;
+  perspective?: number;
+  radius?: number;
+  showControls?: boolean;
+  autoRotate?: boolean;
+  rotateInterval?: number;
 }
 
 const Carousel3D = React.forwardRef<HTMLDivElement, Carousel3DProps>(
-  ({
-    className,
-    items,
-    initialActive = 0,
-    perspective = 1000,
-    radius = 400,
-    showControls = true,
-    autoRotate = false,
-    rotateInterval = 3000,
-    ...props
-  }, ref) => {
-    const [active, setActive] = React.useState(initialActive)
-    const itemCount = items.length
-    const theta = 360 / itemCount
-    const containerRef = React.useRef<HTMLDivElement>(null)
+  (
+    {
+      className,
+      items,
+      initialActive = 0,
+      perspective = 1000,
+      radius = 400,
+      showControls = true,
+      autoRotate = false,
+      rotateInterval = 3000,
+      ...props
+    },
+    ref,
+  ) => {
+    const [active, setActive] = React.useState(initialActive);
+    const itemCount = items.length;
+    const theta = 360 / itemCount;
+    const containerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
       if (autoRotate) {
         const timer = setInterval(() => {
-          setActive((prev) => (prev + 1) % itemCount)
-        }, rotateInterval)
-        return () => clearInterval(timer)
+          setActive((prev) => (prev + 1) % itemCount);
+        }, rotateInterval);
+        return () => clearInterval(timer);
       }
-    }, [autoRotate, itemCount, rotateInterval])
+    }, [autoRotate, itemCount, rotateInterval]);
 
     const rotate = (direction: number) => {
       setActive((prev) => {
-        let next = prev + direction
-        if (next >= itemCount) next = 0
-        if (next < 0) next = itemCount - 1
-        return next
-      })
-    }
+        let next = prev + direction;
+        if (next >= itemCount) next = 0;
+        if (next < 0) next = itemCount - 1;
+        return next;
+      });
+    };
 
     return (
       <div
@@ -115,9 +118,9 @@ const Carousel3D = React.forwardRef<HTMLDivElement, Carousel3DProps>(
           </div>
         )}
       </div>
-    )
-  }
-)
-Carousel3D.displayName = "Carousel3D"
+    );
+  },
+);
+Carousel3D.displayName = "Carousel3D";
 
-export { Carousel3D } 
+export { Carousel3D };

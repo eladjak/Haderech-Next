@@ -1,22 +1,22 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { EXAMPLE_CATEGORIES } from "@/constants/forum"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { EXAMPLE_CATEGORIES } from "@/constants/forum";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
 export const metadata: Metadata = {
   title: "יצירת דיון חדש - פורום הדרך",
   description: "פתיחת דיון חדש בפורום",
-}
+};
 
 export default function NewForumPostPage() {
   return (
@@ -87,5 +87,5 @@ export default function NewForumPostPage() {
         </Card>
       </div>
     </div>
-  )
-} 
+  );
+}

@@ -1,10 +1,10 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { Trophy } from 'lucide-react'
-import type { Achievement as AchievementType } from '@/types/api'
+import { Card, CardContent } from "@/components/ui/card";
+import { Trophy } from "lucide-react";
+import type { Achievement as AchievementType } from "@/types/api";
 
 interface AchievementProps {
-  achievement: AchievementType
-  className?: string
+  achievement: AchievementType;
+  className?: string;
 }
 
 export function Achievement({ achievement, className }: AchievementProps) {
@@ -20,10 +20,10 @@ export function Achievement({ achievement, className }: AchievementProps) {
             {achievement.description}
           </div>
           <div className="mt-1 text-sm text-muted-foreground">
-            הושג ב-{new Date(achievement.earned_at).toLocaleDateString('he-IL')}
+            הושג ב-{new Date(achievement.earned_at).toLocaleDateString("he-IL")}
           </div>
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

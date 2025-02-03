@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 export function MainNav() {
   return (
@@ -7,5 +7,5 @@ export function MainNav() {
         <span className="inline-block font-bold">הדרך</span>
       </Link>
     </div>
-  )
-} 
+  );
+}

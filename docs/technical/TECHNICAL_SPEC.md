@@ -7,6 +7,7 @@
 ## ארכיטקטורה 🏗️
 
 ### 1. Frontend
+
 ```typescript
 // Next.js App Router
 import { AppRouter } from 'next/router';
@@ -23,24 +24,25 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 ```
 
 ### 2. Backend
+
 ```typescript
 // tRPC API Routes
-import { createRouter } from '@trpc/server';
-import { z } from 'zod';
+import { createRouter } from "@trpc/server";
+import { z } from "zod";
 
-export const appRouter = createRouter()
-  .query('courses', {
-    input: z.object({
-      limit: z.number().min(1).max(100).optional(),
-      cursor: z.string().optional(),
-    }),
-    async resolve({ input }) {
-      // Implementation
-    },
-  });
+export const appRouter = createRouter().query("courses", {
+  input: z.object({
+    limit: z.number().min(1).max(100).optional(),
+    cursor: z.string().optional(),
+  }),
+  async resolve({ input }) {
+    // Implementation
+  },
+});
 ```
 
 ### 3. Database
+
 ```sql
 -- Supabase Schema
 CREATE TABLE courses (
@@ -56,6 +58,7 @@ CREATE TABLE courses (
 ## טכנולוגיות 💻
 
 ### 1. Frontend
+
 - Next.js 14
 - React 18
 - TypeScript 5
@@ -64,6 +67,7 @@ CREATE TABLE courses (
 - tRPC Client
 
 ### 2. Backend
+
 - Node.js 20
 - tRPC
 - Supabase
@@ -72,6 +76,7 @@ CREATE TABLE courses (
 - OpenAI API
 
 ### 3. DevOps
+
 - Vercel
 - GitHub Actions
 - Docker
@@ -81,6 +86,7 @@ CREATE TABLE courses (
 ## תהליכי פיתוח 🔄
 
 ### 1. CI/CD
+
 ```yaml
 # GitHub Actions
 name: CI
@@ -99,13 +105,14 @@ jobs:
 ```
 
 ### 2. Testing
+
 ```typescript
 // Jest Tests
-describe('CourseService', () => {
-  it('should create course', async () => {
+describe("CourseService", () => {
+  it("should create course", async () => {
     const course = await createCourse({
-      title: 'Test Course',
-      description: 'Test Description',
+      title: "Test Course",
+      description: "Test Description",
     });
     expect(course).toBeDefined();
   });
@@ -113,6 +120,7 @@ describe('CourseService', () => {
 ```
 
 ### 3. Deployment
+
 ```bash
 # Vercel Deployment
 vercel deploy --prod
@@ -121,10 +129,11 @@ vercel deploy --prod
 ## אבטחה 🔒
 
 ### 1. Authentication
+
 ```typescript
 // NextAuth.js Configuration
-import NextAuth from 'next-auth';
-import { SupabaseAdapter } from '@next-auth/supabase-adapter';
+import NextAuth from "next-auth";
+import { SupabaseAdapter } from "@next-auth/supabase-adapter";
 
 export default NextAuth({
   providers: [
@@ -137,6 +146,7 @@ export default NextAuth({
 ```
 
 ### 2. Authorization
+
 ```typescript
 // Role-based Access Control
 const checkPermission = (user: User, action: Action): boolean => {
@@ -147,6 +157,7 @@ const checkPermission = (user: User, action: Action): boolean => {
 ## ביצועים ⚡
 
 ### 1. Caching
+
 ```typescript
 // Redis Caching
 const cache = new Redis();
@@ -154,7 +165,7 @@ const cache = new Redis();
 const getCachedData = async (key: string) => {
   const cached = await cache.get(key);
   if (cached) return JSON.parse(cached);
-  
+
   const data = await fetchData();
   await cache.set(key, JSON.stringify(data));
   return data;
@@ -162,6 +173,7 @@ const getCachedData = async (key: string) => {
 ```
 
 ### 2. Optimization
+
 ```typescript
 // Image Optimization
 import Image from 'next/image';
@@ -183,24 +195,26 @@ const OptimizedImage = ({ src, alt }: ImageProps) => {
 ## ניטור 📊
 
 ### 1. Logging
+
 ```typescript
 // Winston Logger
-import winston from 'winston';
+import winston from "winston";
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: "info",
   format: winston.format.json(),
   transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' }),
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log" }),
   ],
 });
 ```
 
 ### 2. Monitoring
+
 ```typescript
 // Sentry Integration
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -211,17 +225,20 @@ Sentry.init({
 ## אינטגרציות 🔌
 
 ### 1. OpenAI
+
 ```typescript
 // OpenAI Integration
-import { Configuration, OpenAIApi } from 'openai';
+import { Configuration, OpenAIApi } from "openai";
 
-const openai = new OpenAIApi(new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-}));
+const openai = new OpenAIApi(
+  new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  }),
+);
 
 const generateResponse = async (prompt: string) => {
   const response = await openai.createCompletion({
-    model: 'gpt-4',
+    model: "gpt-4",
     prompt,
   });
   return response.data.choices[0].text;
@@ -229,16 +246,17 @@ const generateResponse = async (prompt: string) => {
 ```
 
 ### 2. Stripe
+
 ```typescript
 // Stripe Integration
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const createPayment = async (amount: number) => {
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
-    currency: 'ils',
+    currency: "ils",
   });
   return paymentIntent;
 };
@@ -247,6 +265,7 @@ const createPayment = async (amount: number) => {
 ## תיעוד 📚
 
 ### 1. API Documentation
+
 ```typescript
 /**
  * Creates a new course
@@ -260,7 +279,8 @@ const createCourse = async (input: CourseInput): Promise<Course> => {
 ```
 
 ### 2. Component Documentation
-```typescript
+
+````typescript
 /**
  * CourseCard Component
  * @component
@@ -272,11 +292,12 @@ const createCourse = async (input: CourseInput): Promise<Course> => {
 const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   // Implementation
 };
-```
+````
 
 ## סיכום 📝
 
 ### מטרות טכניות
+
 1. ביצועים מעולים
 2. אבטחה גבוהה
 3. יכולת הרחבה
@@ -284,8 +305,9 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 5. אמינות גבוהה
 
 ### המלצות
+
 1. שדרוג תשתיות
 2. שיפור ביצועים
 3. הרחבת בדיקות
 4. שיפור ניטור
-5. עדכון תיעוד 
+5. עדכון תיעוד

@@ -1,131 +1,131 @@
-"use client"
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface Message {
-  speaker: 'user' | 'partner'
-  content: string
-  timestamp: string
+  speaker: "user" | "partner";
+  content: string;
+  timestamp: string;
 }
 
 interface EmotionalState {
-  mood: 'positive' | 'neutral' | 'negative'
-  interest: number
-  comfort: number
+  mood: "positive" | "neutral" | "negative";
+  interest: number;
+  comfort: number;
 }
 
 interface SimulationState {
-  context: string
-  messages: Message[]
-  currentSpeaker: 'user' | 'partner'
-  emotionalState: EmotionalState
+  context: string;
+  messages: Message[];
+  currentSpeaker: "user" | "partner";
+  emotionalState: EmotionalState;
 }
 
 export function SimulatorChat() {
-  const { toast } = useToast()
-  const [context, setContext] = useState('')
-  const [message, setMessage] = useState('')
-  const [state, setState] = useState<SimulationState | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast();
+  const [context, setContext] = useState("");
+  const [message, setMessage] = useState("");
+  const [state, setState] = useState<SimulationState | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Start a new simulation
   async function startSimulation() {
     if (!context) {
       toast({
-        title: 'שגיאה',
-        description: 'יש להזין קונטקסט לסימולציה',
-      })
-      return
+        title: "שגיאה",
+        description: "יש להזין קונטקסט לסימולציה",
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/simulator/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/simulator/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ context }),
-      })
+      });
 
-      if (!response.ok) throw new Error('Failed to start simulation')
+      if (!response.ok) throw new Error("Failed to start simulation");
 
-      const newState = await response.json()
-      setState(newState)
+      const newState = await response.json();
+      setState(newState);
     } catch (error) {
       toast({
-        title: 'שגיאה',
-        description: 'לא ניתן להתחיל את הסימולציה',
-      })
+        title: "שגיאה",
+        description: "לא ניתן להתחיל את הסימולציה",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   // Send a message in the simulation
   async function sendMessage() {
-    if (!state || !message) return
+    if (!state || !message) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/simulator/message', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/simulator/message", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ state, message }),
-      })
+      });
 
-      if (!response.ok) throw new Error('Failed to send message')
+      if (!response.ok) throw new Error("Failed to send message");
 
-      const newState = await response.json()
-      setState(newState)
-      setMessage('')
+      const newState = await response.json();
+      setState(newState);
+      setMessage("");
     } catch (error) {
       toast({
-        title: 'שגיאה',
-        description: 'לא ניתן לשלוח את ההודעה',
-      })
+        title: "שגיאה",
+        description: "לא ניתן לשלוח את ההודעה",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   // Save simulation results
   async function saveResults() {
-    if (!state) return
+    if (!state) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/simulator/save', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/simulator/save", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ state }),
-      })
+      });
 
-      if (!response.ok) throw new Error('Failed to save results')
+      if (!response.ok) throw new Error("Failed to save results");
 
       toast({
-        title: 'נשמר בהצלחה',
-        description: 'תוצאות הסימולציה נשמרו',
-      })
+        title: "נשמר בהצלחה",
+        description: "תוצאות הסימולציה נשמרו",
+      });
     } catch (error) {
       toast({
-        title: 'שגיאה',
-        description: 'לא ניתן לשמור את התוצאות',
-      })
+        title: "שגיאה",
+        description: "לא ניתן לשמור את התוצאות",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   // Reset the simulation
   function resetSimulation() {
-    setState(null)
-    setContext('')
-    setMessage('')
+    setState(null);
+    setContext("");
+    setMessage("");
   }
 
   if (!state) {
@@ -145,7 +145,7 @@ export function SimulatorChat() {
           התחל סימולציה
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -160,19 +160,23 @@ export function SimulatorChat() {
           <div
             key={i}
             className={cn(
-              'flex w-max max-w-[80%] items-end gap-2 rounded-lg p-4',
-              msg.speaker === 'user'
-                ? 'mr-auto bg-primary text-primary-foreground'
-                : 'bg-muted'
+              "flex w-max max-w-[80%] items-end gap-2 rounded-lg p-4",
+              msg.speaker === "user"
+                ? "mr-auto bg-primary text-primary-foreground"
+                : "bg-muted",
             )}
           >
             <Avatar className="h-6 w-6">
               <AvatarImage
-                src={msg.speaker === 'user' ? '/avatars/user.png' : '/avatars/partner.png'}
+                src={
+                  msg.speaker === "user"
+                    ? "/avatars/user.png"
+                    : "/avatars/partner.png"
+                }
                 alt={msg.speaker}
               />
               <AvatarFallback>
-                {msg.speaker === 'user' ? 'א' : 'ב'}
+                {msg.speaker === "user" ? "א" : "ב"}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-1">
@@ -190,11 +194,11 @@ export function SimulatorChat() {
           placeholder="הקלד הודעה..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <Button
           onClick={sendMessage}
-          disabled={isLoading || !message || state.currentSpeaker !== 'user'}
+          disabled={isLoading || !message || state.currentSpeaker !== "user"}
         >
           שלח
         </Button>
@@ -208,11 +212,7 @@ export function SimulatorChat() {
         >
           סימולציה חדשה
         </Button>
-        <Button
-          variant="secondary"
-          onClick={saveResults}
-          disabled={isLoading}
-        >
+        <Button variant="secondary" onClick={saveResults} disabled={isLoading}>
           שמור תוצאות
         </Button>
       </div>
@@ -223,11 +223,11 @@ export function SimulatorChat() {
           <div className="flex justify-between">
             <span>מצב רוח:</span>
             <span>
-              {state.emotionalState.mood === 'positive'
-                ? '😊 חיובי'
-                : state.emotionalState.mood === 'negative'
-                ? '😟 שלילי'
-                : '😐 ניטרלי'}
+              {state.emotionalState.mood === "positive"
+                ? "😊 חיובי"
+                : state.emotionalState.mood === "negative"
+                  ? "😟 שלילי"
+                  : "😐 ניטרלי"}
             </span>
           </div>
           <div className="flex justify-between">
@@ -241,5 +241,5 @@ export function SimulatorChat() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

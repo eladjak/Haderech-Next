@@ -1,15 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Achievement } from '@/components/achievement'
-import type { Achievement as AchievementType } from '@/types/api'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Achievement } from "@/components/achievement";
+import type { Achievement as AchievementType } from "@/types/api";
 
 interface AchievementsProps {
-  achievements: AchievementType[]
-  className?: string
+  achievements: AchievementType[];
+  className?: string;
 }
 
 export function Achievements({ achievements, className }: AchievementsProps) {
   if (!achievements.length) {
-    return null
+    return null;
   }
 
   return (
@@ -23,5 +23,5 @@ export function Achievements({ achievements, className }: AchievementsProps) {
         ))}
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

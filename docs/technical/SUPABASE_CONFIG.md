@@ -9,6 +9,7 @@
 ### טבלאות
 
 #### 1. משתמשים (users)
+
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -26,6 +27,7 @@ CREATE INDEX users_role_idx ON users(role);
 ```
 
 #### 2. קורסים (courses)
+
 ```sql
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -45,6 +47,7 @@ CREATE INDEX courses_status_idx ON courses(status);
 ```
 
 #### 3. שיעורים (lessons)
+
 ```sql
 CREATE TABLE lessons (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -63,6 +66,7 @@ CREATE INDEX lessons_order_idx ON lessons(order_num);
 ```
 
 #### 4. התקדמות (progress)
+
 ```sql
 CREATE TABLE progress (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -83,6 +87,7 @@ CREATE INDEX progress_lesson_idx ON progress(lesson_id);
 ## מדיניות אבטחה 🔒
 
 ### 1. הרשאות טבלאות
+
 ```sql
 -- מדיניות משתמשים
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -108,6 +113,7 @@ CREATE POLICY "מחברים יכולים לערוך את הקורסים שלהם
 ```
 
 ### 2. פונקציות אבטחה
+
 ```sql
 -- בדיקת הרשאות
 CREATE OR REPLACE FUNCTION check_course_access(course_id UUID)
@@ -126,6 +132,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ## פונקציות מותאמות 🛠️
 
 ### 1. חישוב התקדמות
+
 ```sql
 CREATE OR REPLACE FUNCTION calculate_course_progress(
   p_user_id UUID,
@@ -139,7 +146,7 @@ BEGIN
   SELECT COUNT(*) INTO total_lessons
   FROM lessons
   WHERE course_id = p_course_id;
-  
+
   -- ספירת שיעורים שהושלמו
   SELECT COUNT(*) INTO completed_lessons
   FROM progress p
@@ -147,9 +154,9 @@ BEGIN
   WHERE p.user_id = p_user_id
   AND l.course_id = p_course_id
   AND p.status = 'completed';
-  
+
   -- חישוב אחוז
-  RETURN CASE 
+  RETURN CASE
     WHEN total_lessons = 0 THEN 0
     ELSE (completed_lessons::DECIMAL / total_lessons) * 100
   END;
@@ -158,6 +165,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
 ### 2. עדכון אוטומטי
+
 ```sql
 -- עדכון זמן עדכון אחרון
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -178,18 +186,20 @@ CREATE TRIGGER update_users_updated_at
 ## אינדקסים וביצועים 🚀
 
 ### 1. אינדקסים מורכבים
+
 ```sql
 -- אינדקס משולב להתקדמות
-CREATE INDEX progress_compound_idx 
+CREATE INDEX progress_compound_idx
 ON progress(user_id, lesson_id, status);
 
 -- אינדקס חלקי לקורסים פעילים
-CREATE INDEX active_courses_idx 
-ON courses(created_at) 
+CREATE INDEX active_courses_idx
+ON courses(created_at)
 WHERE status = 'published';
 ```
 
 ### 2. מטמון
+
 ```sql
 -- הגדרות מטמון
 ALTER TABLE courses
@@ -202,6 +212,7 @@ VACUUM ANALYZE courses;
 ## גיבויים ושחזור 💾
 
 ### 1. גיבוי אוטומטי
+
 ```bash
 #!/bin/bash
 # גיבוי יומי
@@ -214,6 +225,7 @@ pg_dump $DATABASE_URL \
 ```
 
 ### 2. שחזור
+
 ```bash
 #!/bin/bash
 # שחזור מגיבוי
@@ -229,6 +241,7 @@ pg_restore \
 ## ניטור וביצועים 📊
 
 ### 1. שאילתות איטיות
+
 ```sql
 -- ניטור שאילתות
 CREATE EXTENSION pg_stat_statements;
@@ -240,6 +253,7 @@ LIMIT 10;
 ```
 
 ### 2. סטטיסטיקות
+
 ```sql
 -- סטטיסטיקות טבלאות
 SELECT schemaname, relname, n_live_tup, n_dead_tup
@@ -250,6 +264,7 @@ ORDER BY n_live_tup DESC;
 ## סיכום 📝
 
 ### מטרות
+
 1. ביצועים מיטביים
 2. אבטחה חזקה
 3. גיבוי אמין
@@ -257,8 +272,9 @@ ORDER BY n_live_tup DESC;
 5. ניטור יעיל
 
 ### המלצות
+
 1. ניטור ביצועים
 2. עדכון אינדקסים
 3. בדיקת אבטחה
 4. גיבוי תקופתי
-5. ניקוי נתונים 
+5. ניקוי נתונים

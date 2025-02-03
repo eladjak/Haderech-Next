@@ -7,6 +7,7 @@
 ## 🔄 תהליך הפיתוח
 
 ### 1. ניהול טיפוסים
+
 ```typescript
 // לפני: טיפוסים מפוזרים
 interface User {
@@ -21,6 +22,7 @@ export interface User {
 ```
 
 ### 2. בדיקות מקדימות
+
 ```bash
 # לפני: בדיקות ידניות
 npm run build
@@ -31,6 +33,7 @@ pnpm precommit
 ```
 
 ### 3. תיעוד
+
 ```typescript
 // לפני: תיעוד חסר
 const calculateTotal = (items) => {
@@ -52,6 +55,7 @@ const calculateTotal = (items: Item[]): number => {
 ## 🏗️ ארכיטקטורה
 
 ### 1. מודולריות
+
 ```typescript
 // לפני: קוד מונוליתי
 const app = {
@@ -59,12 +63,13 @@ const app = {
 };
 
 // אחרי: מודולים נפרדים
-import { auth } from './auth';
-import { courses } from './courses';
-import { users } from './users';
+import { auth } from "./auth";
+import { courses } from "./courses";
+import { users } from "./users";
 ```
 
 ### 2. ניהול מצב
+
 ```typescript
 // לפני: ניהול מצב מבוזר
 const [state1, setState1] = useState();
@@ -77,6 +82,7 @@ const useStore = create((set) => ({
 ```
 
 ### 3. טיפול בשגיאות
+
 ```typescript
 // לפני: טיפול בסיסי
 try {
@@ -102,15 +108,17 @@ try {
 ## 📈 ביצועים
 
 ### 1. טעינה מושהית
+
 ```typescript
 // לפני: טעינה מיידית
-import HeavyComponent from './HeavyComponent';
+import HeavyComponent from "./HeavyComponent";
 
 // אחרי: טעינה מושהית
-const HeavyComponent = lazy(() => import('./HeavyComponent'));
+const HeavyComponent = lazy(() => import("./HeavyComponent"));
 ```
 
 ### 2. מטמון
+
 ```typescript
 // לפני: ללא מטמון
 const getData = async () => {
@@ -130,10 +138,11 @@ const getData = async () => {
 ## 🔒 אבטחה
 
 ### 1. אימות קלט
+
 ```typescript
 // לפני: אימות בסיסי
 if (!email || !password) {
-  throw new Error('Invalid input');
+  throw new Error("Invalid input");
 }
 
 // אחרי: אימות מקיף
@@ -148,9 +157,10 @@ const validateInput = (data: unknown) => {
 ```
 
 ### 2. הרשאות
+
 ```typescript
 // לפני: בדיקות פשוטות
-if (user.role === 'admin') {
+if (user.role === "admin") {
   // ...
 }
 
@@ -163,6 +173,7 @@ const checkPermission = (user: User, action: Action): boolean => {
 ## 📱 חווית משתמש
 
 ### 1. טעינה
+
 ```typescript
 // לפני: טעינה פשוטה
 const Loading = () => <div>Loading...</div>;
@@ -178,23 +189,25 @@ const Loading = () => (
 ```
 
 ### 2. שגיאות
+
 ```typescript
 // לפני: הודעות פשוטות
-alert('Error!');
+alert("Error!");
 
 // אחרי: הודעות מתקדמות
-toast.error('משהו השתבש', {
-  description: 'נא לנסות שוב מאוחר יותר',
+toast.error("משהו השתבש", {
+  description: "נא לנסות שוב מאוחר יותר",
   action: {
-    label: 'נסה שוב',
-    onClick: retry
-  }
+    label: "נסה שוב",
+    onClick: retry,
+  },
 });
 ```
 
 ## 📝 תיעוד
 
 ### 1. קוד
+
 ```typescript
 // לפני: תיעוד מינימלי
 // פונקציה לחישוב
@@ -215,16 +228,17 @@ function calc() {
 function calculateFinalGrade(
   assignments: number[],
   exam: number,
-  weights: Weights
+  weights: Weights,
 ): number {
   // ...
 }
 ```
 
 ### 2. API
+
 ```typescript
 // לפני: תיעוד חסר
-router.post('/api/users', createUser);
+router.post("/api/users", createUser);
 
 // אחרי: תיעוד מלא
 /**
@@ -236,12 +250,13 @@ router.post('/api/users', createUser);
  * @apiSuccess {Object} user פרטי המשתמש שנוצר
  * @apiError {Object} error פרטי השגיאה
  */
-router.post('/api/users', createUser);
+router.post("/api/users", createUser);
 ```
 
 ## 🔄 תהליכי עבודה
 
 ### 1. בקרת גרסאות
+
 ```bash
 # לפני: קומיטים לא מאורגנים
 git commit -m "fix"
@@ -251,23 +266,24 @@ git commit -m "fix(auth): תיקון באג בתהליך ההתחברות"
 ```
 
 ### 2. בדיקות
+
 ```typescript
 // לפני: בדיקות בסיסיות
-test('it works', () => {
+test("it works", () => {
   expect(true).toBe(true);
 });
 
 // אחרי: בדיקות מקיפות
-describe('AuthService', () => {
+describe("AuthService", () => {
   beforeEach(() => {
     // הגדרות
   });
 
-  it('should authenticate valid credentials', async () => {
+  it("should authenticate valid credentials", async () => {
     // ...
   });
 
-  it('should reject invalid credentials', async () => {
+  it("should reject invalid credentials", async () => {
     // ...
   });
 });
@@ -276,6 +292,7 @@ describe('AuthService', () => {
 ## 📝 סיכום
 
 ### לקחים עיקריים:
+
 1. חשיבות התכנון המוקדם
 2. חשיבות הטיפוסים והבדיקות
 3. חשיבות התיעוד המקיף
@@ -283,6 +300,7 @@ describe('AuthService', () => {
 5. חשיבות הביצועים והאבטחה
 
 ### המלצות לעתיד:
+
 1. השקעה בתשתית
 2. בדיקות אוטומטיות
 3. תיעוד שוטף
@@ -292,12 +310,15 @@ describe('AuthService', () => {
 ## Next.js ו-React
 
 ### Client Components
+
 1. **חשיבות הסימון המפורש**
+
    - כל קומפוננטה שמשתמשת ב-hooks או event handlers חייבת להיות מסומנת כ-"use client"
    - חשוב לזהות מוקדם את הצורך בקומפוננטות קליינט
    - הימנעות משימוש ב-client components בדפי שרת
 
 2. **אופטימיזציה**
+
    - הפרדת לוגיקת קליינט לקומפוננטות נפרדות
    - שימוש ב-server components כברירת מחדל
    - מינימום שימוש ב-client components
@@ -310,7 +331,9 @@ describe('AuthService', () => {
    - תיעוד ברור של הסיבות לשימוש ב-client components
 
 ### תובנות כלליות
+
 1. **ביצועים**
+
    - חשיבות האיזון בין SSR ו-CSR
    - אופטימיזציה של גודל ה-bundle
    - שימוש נכון ב-lazy loading
@@ -320,4 +343,4 @@ describe('AuthService', () => {
    - חשיבות התיעוד המפורט
    - שמירה על קוד נקי ומאורגן
    - הימנעות מכפילויות
-   - עדכון מסמכי הפרויקט 
+   - עדכון מסמכי הפרויקט

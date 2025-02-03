@@ -1,7 +1,7 @@
-import { createServerClient as createClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import type { Database } from '@/types/supabase'
-import type { CookieOptions } from '@supabase/ssr'
+import { createServerClient as createClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import type { Database } from "@/types/supabase";
+import type { CookieOptions } from "@supabase/ssr";
 
 export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
   return createClient<Database>(
@@ -10,23 +10,23 @@ export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value
+          return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, value, options)
+            cookieStore.set(name, value, options);
           } catch (error) {
-            console.error('Error setting cookie:', error)
+            console.error("Error setting cookie:", error);
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, '', {
+            cookieStore.set(name, "", {
               ...options,
-              maxAge: 0
-            })
+              maxAge: 0,
+            });
           } catch (error) {
-            console.error('Error removing cookie:', error)
+            console.error("Error removing cookie:", error);
           }
         },
       },
@@ -34,6 +34,6 @@ export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
         detectSessionInUrl: true,
         persistSession: true,
       },
-    }
-  )
-} 
+    },
+  );
+}

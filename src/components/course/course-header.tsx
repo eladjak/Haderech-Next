@@ -3,11 +3,11 @@
  * @description Header component for course pages showing course title, instructor, and enrollment status
  */
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { CourseHeaderProps } from '@/types/props'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CourseHeaderProps } from "@/types/props";
 
 export function CourseHeader({ course, isEnrolled }: CourseHeaderProps) {
   return (
@@ -17,12 +17,12 @@ export function CourseHeader({ course, isEnrolled }: CourseHeaderProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Badge variant="secondary">{course.level}</Badge>
-              {course.price === 0 && (
-                <Badge variant="success">חינם</Badge>
-              )}
+              {course.price === 0 && <Badge variant="success">חינם</Badge>}
             </div>
             <CardTitle>{course.title}</CardTitle>
-            <p className="text-sm text-muted-foreground">{course.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {course.description}
+            </p>
           </div>
         </div>
       </CardHeader>
@@ -31,7 +31,10 @@ export function CourseHeader({ course, isEnrolled }: CourseHeaderProps) {
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Avatar>
-                <AvatarImage src={course.instructor.avatar_url} alt={course.instructor.name} />
+                <AvatarImage
+                  src={course.instructor.avatar_url}
+                  alt={course.instructor.name}
+                />
                 <AvatarFallback>{course.instructor.name[0]}</AvatarFallback>
               </Avatar>
               <div>
@@ -52,11 +55,11 @@ export function CourseHeader({ course, isEnrolled }: CourseHeaderProps) {
               </div>
             </div>
           </div>
-          <Button variant={isEnrolled ? 'secondary' : 'default'}>
-            {isEnrolled ? 'המשך ללמוד' : 'הרשם לקורס'}
+          <Button variant={isEnrolled ? "secondary" : "default"}>
+            {isEnrolled ? "המשך ללמוד" : "הרשם לקורס"}
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

@@ -1,5 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { SimulatorState as SimState, SimulatorAction } from '@/types/models';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type {
+  SimulatorState as SimState,
+  SimulatorAction,
+} from "@/types/models";
 
 interface SimulatorState {
   state: SimState;
@@ -15,17 +18,17 @@ const initialState: SimulatorState = {
     registers: {},
     memory: {},
     flags: {},
-    programCounter: 0
+    programCounter: 0,
   },
   actions: [],
   currentStep: 0,
   isRunning: false,
   speed: 1,
-  error: null
+  error: null,
 };
 
 export const simulatorSlice = createSlice({
-  name: 'simulator',
+  name: "simulator",
   initialState,
   reducers: {
     setState: (state, action: PayloadAction<SimState>) => {
@@ -53,8 +56,8 @@ export const simulatorSlice = createSlice({
     },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
-    }
-  }
+    },
+  },
 });
 
 export const {
@@ -64,7 +67,7 @@ export const {
   reset,
   setRunning,
   setSpeed,
-  setError
+  setError,
 } = simulatorSlice.actions;
 
-export default simulatorSlice.reducer; 
+export default simulatorSlice.reducer;

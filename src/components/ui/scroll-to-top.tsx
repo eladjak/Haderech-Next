@@ -1,37 +1,37 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronUp } from "lucide-react"
+import * as React from "react";
+import { ChevronUp } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface ScrollToTopProps extends React.HTMLAttributes<HTMLButtonElement> {
-  showAfter?: number
+  showAfter?: number;
 }
 
 const ScrollToTop = React.forwardRef<HTMLButtonElement, ScrollToTopProps>(
   ({ className, showAfter = 100, ...props }, ref) => {
-    const [show, setShow] = React.useState(false)
+    const [show, setShow] = React.useState(false);
 
     React.useEffect(() => {
       const handleScroll = () => {
         if (window.scrollY > showAfter) {
-          setShow(true)
+          setShow(true);
         } else {
-          setShow(false)
+          setShow(false);
         }
-      }
+      };
 
-      window.addEventListener("scroll", handleScroll)
-      return () => window.removeEventListener("scroll", handleScroll)
-    }, [showAfter])
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
+    }, [showAfter]);
 
     const handleClick = () => {
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
-    if (!show) return null
+    if (!show) return null;
 
     return (
       <Button
@@ -40,7 +40,7 @@ const ScrollToTop = React.forwardRef<HTMLButtonElement, ScrollToTopProps>(
         size="icon"
         className={cn(
           "fixed bottom-4 left-4 z-50 rounded-full shadow-md transition-opacity duration-300",
-          className
+          className,
         )}
         onClick={handleClick}
         {...props}
@@ -48,9 +48,9 @@ const ScrollToTop = React.forwardRef<HTMLButtonElement, ScrollToTopProps>(
         <ChevronUp className="h-4 w-4" />
         <span className="sr-only">גלול למעלה</span>
       </Button>
-    )
-  }
-)
-ScrollToTop.displayName = "ScrollToTop"
+    );
+  },
+);
+ScrollToTop.displayName = "ScrollToTop";
 
-export { ScrollToTop } 
+export { ScrollToTop };

@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { ThemeProvider } from 'next-themes'
-import { AuthProvider } from '@/providers/auth-provider'
-import { Toaster } from '@/components/ui/toaster'
+import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "@/providers/auth-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 interface ProvidersProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
@@ -21,5 +21,5 @@ export function Providers({ children }: ProvidersProps) {
         <Toaster />
       </AuthProvider>
     </ThemeProvider>
-  )
-} 
+  );
+}

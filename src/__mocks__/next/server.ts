@@ -1,17 +1,17 @@
 export class NextResponse {
   constructor(body: any, init?: ResponseInit) {
-    return new Response(body, init)
+    return new Response(body, init);
   }
 
   static json(data: any, init?: ResponseInit) {
-    const jsonStr = JSON.stringify(data)
+    const jsonStr = JSON.stringify(data);
     return new Response(jsonStr, {
       ...init,
       headers: {
         ...init?.headers,
-        'content-type': 'application/json',
+        "content-type": "application/json",
       },
-    })
+    });
   }
 
   static redirect(url: string | URL, init?: ResponseInit) {
@@ -22,6 +22,6 @@ export class NextResponse {
         ...init?.headers,
         Location: url.toString(),
       },
-    })
+    });
   }
-} 
+}

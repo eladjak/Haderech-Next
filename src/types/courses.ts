@@ -1,4 +1,4 @@
-import { Tables } from './supabase'
+import { Tables } from "./supabase";
 
 export interface Course {
   id: string;
@@ -10,7 +10,7 @@ export interface Course {
     name: string;
     avatar?: string;
   };
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   createdAt: string;
   updatedAt: string;
   comments?: CourseComment[];
@@ -37,12 +37,12 @@ export interface Course {
   }[];
   studentsCount?: number;
   duration?: number;
-  level?: 'beginner' | 'intermediate' | 'advanced';
+  level?: "beginner" | "intermediate" | "advanced";
   price?: number;
   thumbnail?: string;
 }
 
-export interface CourseWithRelations extends Tables<'courses'> {
+export interface CourseWithRelations extends Tables<"courses"> {
   instructor: {
     id: string;
     name: string;
@@ -102,23 +102,25 @@ export interface CourseLesson {
   completed: boolean | null;
   video_url: string | null;
   attachments: string[] | null;
-  progress: {
-    completed: boolean;
-    user_id: string;
-  }[] | null;
+  progress:
+    | {
+        completed: boolean;
+        user_id: string;
+      }[]
+    | null;
   is_free: boolean | null;
 }
 
 export interface CourseFilter {
   search?: string;
   category?: string;
-  level?: CourseWithRelations['level'];
+  level?: CourseWithRelations["level"];
   priceMin?: number;
   priceMax?: number;
   rating?: number;
   language?: string;
   featured?: boolean;
-  sort?: 'price' | 'rating' | 'students' | 'newest';
+  sort?: "price" | "rating" | "students" | "newest";
   page?: number;
   limit?: number;
 }
@@ -135,4 +137,4 @@ export type Lesson = CourseLesson;
 export type LessonProgress = {
   completed: boolean;
   user_id: string;
-}; 
+};

@@ -13,4 +13,4 @@
     "**/*.spec.tsx",
     "jest.setup.js"
   ]
-} 
+}

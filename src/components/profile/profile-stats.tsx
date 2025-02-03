@@ -4,22 +4,22 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface ProfileStatsProps {
   stats: {
-    coursesCompleted: number
-    totalCourses: number
-    averageScore: number
-    totalTime: number
-    achievements: number
-    certificatesEarned: number
-  }
+    coursesCompleted: number;
+    totalCourses: number;
+    averageScore: number;
+    totalTime: number;
+    achievements: number;
+    certificatesEarned: number;
+  };
 }
 
 export function ProfileStats({ stats }: ProfileStatsProps) {
-  const completionRate = (stats.coursesCompleted / stats.totalCourses) * 100
+  const completionRate = (stats.coursesCompleted / stats.totalCourses) * 100;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -71,5 +71,5 @@ export function ProfileStats({ stats }: ProfileStatsProps) {
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}

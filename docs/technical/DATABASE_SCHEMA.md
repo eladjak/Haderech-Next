@@ -7,6 +7,7 @@
 ## 📊 טבלאות
 
 ### users
+
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -22,6 +23,7 @@ CREATE TYPE user_role AS ENUM ('student', 'teacher', 'admin');
 ```
 
 ### user_settings
+
 ```sql
 CREATE TABLE user_settings (
   user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
@@ -35,6 +37,7 @@ CREATE TABLE user_settings (
 ```
 
 ### courses
+
 ```sql
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -51,6 +54,7 @@ CREATE TYPE course_status AS ENUM ('draft', 'published', 'archived');
 ```
 
 ### modules
+
 ```sql
 CREATE TABLE modules (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -64,6 +68,7 @@ CREATE TABLE modules (
 ```
 
 ### content
+
 ```sql
 CREATE TABLE content (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -80,6 +85,7 @@ CREATE TYPE content_type AS ENUM ('text', 'video', 'quiz', 'exercise');
 ```
 
 ### progress
+
 ```sql
 CREATE TABLE progress (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -97,6 +103,7 @@ CREATE TYPE progress_status AS ENUM ('not_started', 'in_progress', 'completed');
 ```
 
 ### prerequisites
+
 ```sql
 CREATE TABLE prerequisites (
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
@@ -107,6 +114,7 @@ CREATE TABLE prerequisites (
 ```
 
 ### enrollments
+
 ```sql
 CREATE TABLE enrollments (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -121,6 +129,7 @@ CREATE TYPE enrollment_status AS ENUM ('active', 'completed', 'dropped');
 ```
 
 ### notifications
+
 ```sql
 CREATE TABLE notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -138,6 +147,7 @@ CREATE TYPE notification_type AS ENUM ('system', 'course', 'achievement');
 ## 🔒 Row Level Security
 
 ### users
+
 ```sql
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
@@ -151,6 +161,7 @@ CREATE POLICY "Users can update their own data"
 ```
 
 ### courses
+
 ```sql
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
 
@@ -168,6 +179,7 @@ CREATE POLICY "Courses can be updated by creator"
 ```
 
 ### progress
+
 ```sql
 ALTER TABLE progress ENABLE ROW LEVEL SECURITY;
 
@@ -183,24 +195,28 @@ CREATE POLICY "Users can update their own progress"
 ## 📈 אינדקסים
 
 ### users
+
 ```sql
 CREATE INDEX users_email_idx ON users (email);
 CREATE INDEX users_role_idx ON users (role);
 ```
 
 ### courses
+
 ```sql
 CREATE INDEX courses_status_idx ON courses (status);
 CREATE INDEX courses_created_by_idx ON courses (created_by);
 ```
 
 ### modules
+
 ```sql
 CREATE INDEX modules_course_id_idx ON modules (course_id);
 CREATE INDEX modules_order_idx ON modules (course_id, order_index);
 ```
 
 ### content
+
 ```sql
 CREATE INDEX content_module_id_idx ON content (module_id);
 CREATE INDEX content_type_idx ON content (type);
@@ -208,6 +224,7 @@ CREATE INDEX content_order_idx ON content (module_id, order_index);
 ```
 
 ### progress
+
 ```sql
 CREATE INDEX progress_user_id_idx ON progress (user_id);
 CREATE INDEX progress_content_id_idx ON progress (content_id);
@@ -217,6 +234,7 @@ CREATE INDEX progress_status_idx ON progress (status);
 ## 🔄 Functions
 
 ### calculate_course_progress
+
 ```sql
 CREATE OR REPLACE FUNCTION calculate_course_progress(
   p_user_id UUID,
@@ -248,6 +266,7 @@ $$ LANGUAGE plpgsql;
 ```
 
 ### update_course_status
+
 ```sql
 CREATE OR REPLACE FUNCTION update_course_status()
 RETURNS TRIGGER AS $$
@@ -275,7 +294,7 @@ BEGIN
     WHERE m.course_id = enrollments.course_id
     AND (p.status IS NULL OR p.status != 'completed')
   );
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -289,8 +308,9 @@ EXECUTE FUNCTION update_course_status();
 ## 📝 סיכום
 
 הסכמה מספקת:
+
 - אבטחה ברמת השורה
 - יעילות בשאילתות
 - גמישות בהרחבה
 - שלמות נתונים
-- ביצועים מעולים 
+- ביצועים מעולים

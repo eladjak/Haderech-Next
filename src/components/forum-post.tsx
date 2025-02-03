@@ -1,16 +1,21 @@
-"use client"
+"use client";
 
-import Link from 'next/link'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { MessageSquare, ThumbsUp, User } from 'lucide-react'
-import type { ForumPost } from '@/types/api'
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, ThumbsUp, User } from "lucide-react";
+import type { ForumPost } from "@/types/api";
 
 interface ForumPostProps {
-  post: ForumPost
-  onLike?: (postId: string) => void
-  className?: string
+  post: ForumPost;
+  onLike?: (postId: string) => void;
+  className?: string;
 }
 
 export function ForumPost({ post, onLike, className }: ForumPostProps) {
@@ -32,9 +37,13 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
               {post.title}
             </Link>
             <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-              <span>{post.author?.name ?? 'משתמש אנונימי'}</span>
+              <span>{post.author?.name ?? "משתמש אנונימי"}</span>
               <span>•</span>
-              <span>{new Date('2024-01-01T00:00:00.000Z').toLocaleDateString('he-IL')}</span>
+              <span>
+                {new Date("2024-01-01T00:00:00.000Z").toLocaleDateString(
+                  "he-IL",
+                )}
+              </span>
             </div>
           </div>
         </div>
@@ -53,18 +62,13 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
             >
               <ThumbsUp
                 className={`h-4 w-4 ${
-                  post.likes > 0 ? 'fill-primary text-primary' : ''
+                  post.likes > 0 ? "fill-primary text-primary" : ""
                 }`}
               />
               <span>{post.likes}</span>
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-            asChild
-          >
+          <Button variant="ghost" size="sm" className="gap-2" asChild>
             <Link href={`/community/${post.id}`}>
               <MessageSquare className="h-4 w-4" />
               <span>{post.comments?.length || 0}</span>
@@ -73,5 +77,5 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
         </div>
       </CardFooter>
     </Card>
-  )
-} 
+  );
+}

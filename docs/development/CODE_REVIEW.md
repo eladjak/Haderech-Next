@@ -3,12 +3,14 @@
 ## מטרות סקירת קוד 🎯
 
 ### 1. איכות קוד
+
 - בדיקת איכות הקוד
 - זיהוי באגים פוטנציאליים
 - שיפור ביצועים
 - שמירה על סטנדרטים
 
 ### 2. שיתוף ידע
+
 - למידה הדדית
 - שיתוף פתרונות
 - העברת ידע
@@ -17,6 +19,7 @@
 ## רשימת תיוג לסקירה ✅
 
 ### 1. כללי
+
 - [ ] הקוד עומד בסטנדרטים
 - [ ] התיעוד מעודכן
 - [ ] יש בדיקות מתאימות
@@ -24,6 +27,7 @@
 - [ ] אין קוד כפול
 
 ### 2. פונקציונליות
+
 - [ ] הקוד מבצע את המשימה
 - [ ] טיפול בשגיאות
 - [ ] תנאי קצה מטופלים
@@ -31,6 +35,7 @@
 - [ ] אבטחה נשמרת
 
 ### 3. תחזוקתיות
+
 - [ ] הקוד מודולרי
 - [ ] שמות משמעותיים
 - [ ] אין קוד מת
@@ -40,6 +45,7 @@
 ## דוגמאות לסקירה 📝
 
 ### 1. טיפוסים
+
 ```typescript
 // ❌ לא טוב
 function getData(id) {
@@ -50,13 +56,14 @@ function getData(id) {
 async function getData(id: string): Promise<Data> {
   const response = await fetch(`/api/data/${id}`);
   if (!response.ok) {
-    throw new APIError('Failed to fetch data');
+    throw new APIError("Failed to fetch data");
   }
   return response.json();
 }
 ```
 
 ### 2. טיפול בשגיאות
+
 ```typescript
 // ❌ לא טוב
 try {
@@ -70,36 +77,38 @@ try {
   await saveData(data);
 } catch (error) {
   if (error instanceof ValidationError) {
-    toast.error('נתונים לא תקינים');
+    toast.error("נתונים לא תקינים");
   } else if (error instanceof NetworkError) {
-    toast.error('בעיית תקשורת');
+    toast.error("בעיית תקשורת");
   } else {
     logger.error(error);
-    toast.error('שגיאה לא צפויה');
+    toast.error("שגיאה לא צפויה");
   }
 }
 ```
 
 ### 3. ביצועים
+
 ```typescript
 // ❌ לא טוב
-const data = users.map(user => {
-  const posts = getPosts(user.id);  // בקשת API לכל משתמש
+const data = users.map((user) => {
+  const posts = getPosts(user.id); // בקשת API לכל משתמש
   return { ...user, posts };
 });
 
 // ✅ טוב
-const userIds = users.map(user => user.id);
-const posts = await getPostsByUsers(userIds);  // בקשת API אחת
-const data = users.map(user => ({
+const userIds = users.map((user) => user.id);
+const posts = await getPostsByUsers(userIds); // בקשת API אחת
+const data = users.map((user) => ({
   ...user,
-  posts: posts.filter(post => post.userId === user.id),
+  posts: posts.filter((post) => post.userId === user.id),
 }));
 ```
 
 ## תהליך הסקירה 🔄
 
 ### 1. לפני הסקירה
+
 ```typescript
 // בדיקת לינטינג
 npm run lint
@@ -112,12 +121,13 @@ npm run test
 ```
 
 ### 2. במהלך הסקירה
+
 ```typescript
 // דוגמה להערה בונה
 /**
  * הצעה לשיפור:
  * אפשר להשתמש ב-useMemo כאן כדי למנוע חישובים מיותרים
- * 
+ *
  * const memoizedValue = useMemo(
  *   () => computeExpensiveValue(a, b),
  *   [a, b],
@@ -126,6 +136,7 @@ npm run test
 ```
 
 ### 3. אחרי הסקירה
+
 ```typescript
 // דוגמה לסיכום סקירה
 /**
@@ -140,6 +151,7 @@ npm run test
 ## תבניות תגובה 💬
 
 ### 1. בקשת שינויים
+
 ```
 נראה טוב! כמה הערות קטנות:
 1. אפשר להוסיף טיפוסים ל-props
@@ -148,6 +160,7 @@ npm run test
 ```
 
 ### 2. אישור שינויים
+
 ```
 מעולה! הקוד נקי ומאורגן היטב.
 - ✅ הטיפוסים מוגדרים היטב
@@ -159,13 +172,11 @@ LGTM 👍
 ## כלים מומלצים 🛠️
 
 ### 1. לינטינג
+
 ```json
 // .eslintrc
 {
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   "rules": {
     "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/no-unused-vars": "error"
@@ -174,6 +185,7 @@ LGTM 👍
 ```
 
 ### 2. פורמטינג
+
 ```json
 // .prettierrc
 {
@@ -185,6 +197,7 @@ LGTM 👍
 ```
 
 ### 3. Git Hooks
+
 ```json
 // package.json
 {
@@ -195,10 +208,7 @@ LGTM 👍
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "*.{ts,tsx}": ["eslint --fix", "prettier --write"]
   }
 }
 ```
@@ -206,6 +216,7 @@ LGTM 👍
 ## סיכום 📝
 
 ### מטרות
+
 1. שיפור איכות הקוד
 2. מניעת באגים
 3. שיתוף ידע
@@ -213,8 +224,9 @@ LGTM 👍
 5. למידה מתמדת
 
 ### המלצות
+
 1. סקירה יסודית
 2. משוב בונה
 3. תיעוד הערות
 4. מעקב אחר תיקונים
-5. שיתוף פעולה 
+5. שיתוף פעולה

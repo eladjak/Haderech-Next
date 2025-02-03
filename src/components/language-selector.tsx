@@ -1,19 +1,19 @@
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 
 const languages = [
-  { code: 'he', name: 'עברית' },
-  { code: 'en', name: 'English' },
-]
+  { code: "he", name: "עברית" },
+  { code: "en", name: "English" },
+];
 
 export function LanguageSelector() {
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation();
 
   return (
     <Select
@@ -31,5 +31,5 @@ export function LanguageSelector() {
         ))}
       </SelectContent>
     </Select>
-  )
-} 
+  );
+}

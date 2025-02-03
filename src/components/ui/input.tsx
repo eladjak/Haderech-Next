@@ -1,22 +1,22 @@
 /**
  * Input Component
- * 
+ *
  * A reusable input component with RTL support and consistent styling.
  * Supports all standard HTML input attributes plus custom styling options.
- * 
+ *
  * @example
  * ```tsx
- * <Input 
- *   type="text" 
+ * <Input
+ *   type="text"
  *   placeholder="Enter your name"
- *   onChange={(e) => console.log(e.target.value)} 
+ *   onChange={(e) => console.log(e.target.value)}
  * />
  * ```
  */
 
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 // Input props interface extending HTML input attributes
 export interface InputProps
@@ -26,7 +26,7 @@ export interface InputProps
 
 /**
  * Input component with consistent styling and RTL support
- * 
+ *
  * @param props - Standard HTML input attributes plus any custom props
  * @returns A styled input component
  */
@@ -42,14 +42,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "rtl:text-right",
-          className
+          className,
         )}
         ref={ref}
         {...props}
       />
-    )
-  }
-)
-Input.displayName = "Input"
+    );
+  },
+);
+Input.displayName = "Input";
 
-export { Input } 
+export { Input };

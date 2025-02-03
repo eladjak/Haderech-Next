@@ -3,16 +3,20 @@
  * @description Progress component for course pages showing completion status
  */
 
-import { Progress } from '@/components/ui/progress'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface CourseProgressProps {
-  completedLessons: number
-  totalLessons: number
+  completedLessons: number;
+  totalLessons: number;
 }
 
-export function CourseProgress({ completedLessons, totalLessons }: CourseProgressProps) {
-  const progress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
+export function CourseProgress({
+  completedLessons,
+  totalLessons,
+}: CourseProgressProps) {
+  const progress =
+    totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
   return (
     <Card>
@@ -28,5 +32,5 @@ export function CourseProgress({ completedLessons, totalLessons }: CourseProgres
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

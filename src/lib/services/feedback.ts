@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 interface Feedback {
   id: string;
@@ -13,7 +13,7 @@ interface Feedback {
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
 export const createFeedback = async (
@@ -21,16 +21,16 @@ export const createFeedback = async (
   courseId: string,
   lessonId: string,
   rating: number,
-  comment: string
+  comment: string,
 ): Promise<Feedback> => {
   try {
     // Validate rating is between 1-5
     if (rating < 1 || rating > 5) {
-      throw new Error('דירוג חייב להיות בין 1 ל-5');
+      throw new Error("דירוג חייב להיות בין 1 ל-5");
     }
 
     const { data: feedback, error } = await supabase
-      .from('feedback')
+      .from("feedback")
       .insert({
         user_id: userId,
         course_id: courseId,
@@ -38,7 +38,7 @@ export const createFeedback = async (
         rating,
         comment,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -50,54 +50,62 @@ export const createFeedback = async (
 
     return feedback;
   } catch (error) {
-    console.error('Error creating feedback:', error);
-    throw new Error('שגיאה ביצירת משוב');
+    console.error("Error creating feedback:", error);
+    throw new Error("שגיאה ביצירת משוב");
   }
 };
 
-export const getFeedbackForLesson = async (lessonId: string): Promise<Feedback[]> => {
+export const getFeedbackForLesson = async (
+  lessonId: string,
+): Promise<Feedback[]> => {
   try {
     const { data: feedbacks, error } = await supabase
-      .from('feedback')
-      .select(`
+      .from("feedback")
+      .select(
+        `
         *,
         user:user_id (
           id,
           name,
           avatar_url
         )
-      `)
-      .eq('lesson_id', lessonId)
-      .order('created_at', { ascending: false });
+      `,
+      )
+      .eq("lesson_id", lessonId)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return feedbacks;
   } catch (error) {
-    console.error('Error fetching lesson feedback:', error);
-    throw new Error('שגיאה בטעינת משובים לשיעור');
+    console.error("Error fetching lesson feedback:", error);
+    throw new Error("שגיאה בטעינת משובים לשיעור");
   }
 };
 
-export const getFeedbackForCourse = async (courseId: string): Promise<Feedback[]> => {
+export const getFeedbackForCourse = async (
+  courseId: string,
+): Promise<Feedback[]> => {
   try {
     const { data: feedbacks, error } = await supabase
-      .from('feedback')
-      .select(`
+      .from("feedback")
+      .select(
+        `
         *,
         user:user_id (
           id,
           name,
           avatar_url
         )
-      `)
-      .eq('course_id', courseId)
-      .order('created_at', { ascending: false });
+      `,
+      )
+      .eq("course_id", courseId)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return feedbacks;
   } catch (error) {
-    console.error('Error fetching course feedback:', error);
-    throw new Error('שגיאה בטעינת משובים לקורס');
+    console.error("Error fetching course feedback:", error);
+    throw new Error("שגיאה בטעינת משובים לקורס");
   }
 };
 
@@ -105,27 +113,28 @@ const updateCourseRating = async (courseId: string): Promise<void> => {
   try {
     // Get all feedback for the course
     const { data: feedbacks } = await supabase
-      .from('feedback')
-      .select('rating')
-      .eq('course_id', courseId);
+      .from("feedback")
+      .select("rating")
+      .eq("course_id", courseId);
 
     if (!feedbacks?.length) return;
 
     // Calculate average rating
-    const averageRating = feedbacks.reduce((acc, curr) => acc + curr.rating, 0) / feedbacks.length;
+    const averageRating =
+      feedbacks.reduce((acc, curr) => acc + curr.rating, 0) / feedbacks.length;
 
     // Update course with new average rating
     const { error } = await supabase
-      .from('courses')
-      .update({ 
+      .from("courses")
+      .update({
         average_rating: averageRating,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq('id', courseId);
+      .eq("id", courseId);
 
     if (error) throw error;
   } catch (error) {
-    console.error('Error updating course rating:', error);
-    throw new Error('שגיאה בעדכון דירוג הקורס');
+    console.error("Error updating course rating:", error);
+    throw new Error("שגיאה בעדכון דירוג הקורס");
   }
-}; 
+};

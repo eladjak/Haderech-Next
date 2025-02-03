@@ -1,4 +1,4 @@
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from "next/navigation";
 
 export function useNavigation() {
   const router = useRouter();
@@ -27,4 +27,4 @@ export function useNavigation() {
     isActiveParent,
     currentPath: pathname,
   };
-} 
+}

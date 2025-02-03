@@ -7,12 +7,14 @@
 ## שינויים עיקריים 🔄
 
 ### 1. ארכיטקטורה
+
 - מעבר ל-Next.js 14 עם App Router
 - שימוש ב-TypeScript
 - אינטגרציה עם Supabase
 - תמיכה ב-PWA
 
 ### 2. בסיס נתונים
+
 ```sql
 -- העברת טבלאות
 CREATE TABLE users_new (
@@ -26,11 +28,11 @@ CREATE TABLE users_new (
 
 -- העתקת נתונים
 INSERT INTO users_new (id, email, full_name, role)
-SELECT 
+SELECT
   uuid_generate_v4(),
   email,
   CONCAT(first_name, ' ', last_name),
-  CASE 
+  CASE
     WHEN is_admin THEN 'admin'
     WHEN is_teacher THEN 'teacher'
     ELSE 'user'
@@ -41,6 +43,7 @@ FROM users_old;
 ## תהליך העברה 📦
 
 ### 1. גיבוי
+
 ```bash
 #!/bin/bash
 # גיבוי בסיס נתונים
@@ -51,13 +54,14 @@ tar -czf files_backup.tar.gz ./uploads
 ```
 
 ### 2. העברת נתונים
+
 ```typescript
 // העברת משתמשים
 async function migrateUsers() {
-  const oldUsers = await oldDb.query('SELECT * FROM users');
-  
+  const oldUsers = await oldDb.query("SELECT * FROM users");
+
   for (const user of oldUsers) {
-    await supabase.from('users').insert({
+    await supabase.from("users").insert({
       email: user.email,
       full_name: `${user.first_name} ${user.last_name}`,
       role: mapRole(user.role),
@@ -71,10 +75,10 @@ async function migrateUsers() {
 
 // העברת קורסים
 async function migrateCourses() {
-  const oldCourses = await oldDb.query('SELECT * FROM courses');
-  
+  const oldCourses = await oldDb.query("SELECT * FROM courses");
+
   for (const course of oldCourses) {
-    await supabase.from('courses').insert({
+    await supabase.from("courses").insert({
       title: course.title,
       description: course.description,
       author_id: await mapUserId(course.author_id),
@@ -87,27 +91,21 @@ async function migrateCourses() {
 ## בדיקות העברה ✅
 
 ### 1. בדיקת שלמות
+
 ```typescript
 // בדיקת שלמות נתונים
 async function verifyMigration() {
   // בדיקת מספר רשומות
-  const oldCount = await oldDb.query(
-    'SELECT COUNT(*) FROM users'
-  );
-  const newCount = await supabase
-    .from('users')
-    .select('count');
-    
+  const oldCount = await oldDb.query("SELECT COUNT(*) FROM users");
+  const newCount = await supabase.from("users").select("count");
+
   if (oldCount !== newCount) {
-    throw new Error('Data count mismatch');
+    throw new Error("Data count mismatch");
   }
-  
+
   // בדיקת תקינות נתונים
-  const sample = await supabase
-    .from('users')
-    .select()
-    .limit(100);
-    
+  const sample = await supabase.from("users").select().limit(100);
+
   for (const user of sample) {
     validateUserData(user);
   }
@@ -115,23 +113,22 @@ async function verifyMigration() {
 ```
 
 ### 2. בדיקות פונקציונליות
+
 ```typescript
 // בדיקת פונקציונליות
-describe('Migration Tests', () => {
-  it('should maintain user permissions', async () => {
+describe("Migration Tests", () => {
+  it("should maintain user permissions", async () => {
     const oldUser = await getOldUser(testId);
     const newUser = await getNewUser(testId);
-    
-    expect(mapRole(oldUser.role))
-      .toBe(newUser.role);
+
+    expect(mapRole(oldUser.role)).toBe(newUser.role);
   });
-  
-  it('should preserve course relationships', async () => {
+
+  it("should preserve course relationships", async () => {
     const oldCourse = await getOldCourse(testId);
     const newCourse = await getNewCourse(testId);
-    
-    expect(await mapUserId(oldCourse.author_id))
-      .toBe(newCourse.author_id);
+
+    expect(await mapUserId(oldCourse.author_id)).toBe(newCourse.author_id);
   });
 });
 ```
@@ -139,6 +136,7 @@ describe('Migration Tests', () => {
 ## טיפול בשגיאות 🚨
 
 ### 1. שגיאות העברה
+
 ```typescript
 // טיפול בשגיאות העברה
 class MigrationError extends Error {
@@ -146,43 +144,44 @@ class MigrationError extends Error {
     message: string,
     public entity: string,
     public oldId: string,
-    public details: any
+    public details: any,
   ) {
     super(message);
-    this.name = 'MigrationError';
+    this.name = "MigrationError";
   }
 }
 
 async function handleMigrationError(error: MigrationError) {
   // תיעוד השגיאה
   await logger.error({
-    type: 'migration_error',
+    type: "migration_error",
     entity: error.entity,
     old_id: error.oldId,
     details: error.details,
     timestamp: new Date(),
   });
-  
+
   // ניסיון תיקון
-  if (error.entity === 'user') {
+  if (error.entity === "user") {
     await fixUserMigration(error.oldId);
   }
 }
 ```
 
 ### 2. שחזור
+
 ```typescript
 // שחזור מגיבוי
 async function rollback() {
   // שחזור בסיס נתונים
-  await exec('pg_restore backup.sql');
-  
+  await exec("pg_restore backup.sql");
+
   // שחזור קבצים
-  await exec('tar -xzf files_backup.tar.gz');
-  
+  await exec("tar -xzf files_backup.tar.gz");
+
   // תיעוד
   await logger.info({
-    type: 'migration_rollback',
+    type: "migration_rollback",
     timestamp: new Date(),
   });
 }
@@ -191,6 +190,7 @@ async function rollback() {
 ## תחזוקה לאחר העברה 🔧
 
 ### 1. ניקוי נתונים
+
 ```typescript
 // ניקוי נתונים ישנים
 async function cleanupOldData() {
@@ -199,19 +199,20 @@ async function cleanupOldData() {
     DROP TABLE IF EXISTS users_old CASCADE;
     DROP TABLE IF EXISTS courses_old CASCADE;
   `);
-  
+
   // מחיקת קבצים ישנים
-  await fs.rm('./old_uploads', { recursive: true });
+  await fs.rm("./old_uploads", { recursive: true });
 }
 ```
 
 ### 2. אופטימיזציה
+
 ```typescript
 // אופטימיזציית בסיס נתונים
 async function optimizeDatabase() {
   // עדכון סטטיסטיקות
-  await supabase.query('ANALYZE VERBOSE');
-  
+  await supabase.query("ANALYZE VERBOSE");
+
   // rebuild אינדקסים
   await supabase.query(`
     REINDEX TABLE users;
@@ -223,31 +224,33 @@ async function optimizeDatabase() {
 ## תיעוד שינויים 📝
 
 ### 1. לוג שינויים
+
 ```typescript
 // תיעוד שינויים
 const migrationLog = {
-  version: '2.0.0',
-  date: '2024-02-20',
+  version: "2.0.0",
+  date: "2024-02-20",
   changes: [
-    'מעבר ל-Next.js 14',
-    'שדרוג בסיס נתונים',
-    'שיפור אבטחה',
-    'תמיכה ב-PWA',
+    "מעבר ל-Next.js 14",
+    "שדרוג בסיס נתונים",
+    "שיפור אבטחה",
+    "תמיכה ב-PWA",
   ],
   breaking_changes: [
-    'שינוי מבנה טבלאות',
-    'שינוי API endpoints',
-    'שינוי מערכת הרשאות',
+    "שינוי מבנה טבלאות",
+    "שינוי API endpoints",
+    "שינוי מערכת הרשאות",
   ],
 };
 ```
 
 ### 2. מעקב התקדמות
+
 ```typescript
 // מעקב התקדמות
 const migrationProgress = {
   trackProgress: async (stage: string, status: string) => {
-    await supabase.from('migration_log').insert({
+    await supabase.from("migration_log").insert({
       stage,
       status,
       timestamp: new Date(),
@@ -263,6 +266,7 @@ const migrationProgress = {
 ## סיכום 📊
 
 ### שלבי העברה
+
 1. גיבוי מלא
 2. העברת נתונים
 3. בדיקות מקיפות
@@ -270,8 +274,9 @@ const migrationProgress = {
 5. אופטימיזציה
 
 ### המלצות
+
 1. תכנון מפורט
 2. גיבוי כפול
 3. בדיקות מקיפות
 4. ניטור צמוד
-5. תיעוד מדויק 
+5. תיעוד מדויק

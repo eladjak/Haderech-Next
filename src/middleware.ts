@@ -3,26 +3,26 @@
  * @description Middleware for handling authentication and protected routes
  */
 
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
-import type { CookieOptions } from '@supabase/ssr'
-import type { Database } from '@/types/supabase'
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import type { CookieOptions } from "@supabase/ssr";
+import type { Database } from "@/types/supabase";
 
 /**
  * Array of public routes that don't require authentication
  */
 const publicRoutes = [
-  '/',
-  '/login',
-  '/signup',
-  '/reset-password',
-  '/verify-email',
-  '/auth/callback',
-]
+  "/",
+  "/login",
+  "/signup",
+  "/reset-password",
+  "/verify-email",
+  "/auth/callback",
+];
 
 /**
  * Middleware to handle authentication and authorization.
- * 
+ *
  * @param {NextRequest} request - The incoming request
  * @returns {Promise<NextResponse>} The response or redirect
  */
@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     request: {
       headers: request.headers,
     },
-  })
+  });
 
   // Create Supabase client
   const supabase = createServerClient<Database>(
@@ -41,55 +41,58 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     {
       cookies: {
         get(name: string) {
-          return request.cookies.get(name)?.value
+          return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
           response.cookies.set({
             name,
             value,
             ...options,
-          })
+          });
         },
         remove(name: string, options: CookieOptions) {
           response.cookies.delete({
             name,
             ...options,
-          })
+          });
         },
       },
-    }
-  )
+    },
+  );
 
   // Refresh session if expired
-  await supabase.auth.getSession()
+  await supabase.auth.getSession();
 
   // Check if the route is public
-  const isPublicRoute = publicRoutes.some(route => 
-    request.nextUrl.pathname === route || 
-    request.nextUrl.pathname.startsWith('/api/')
-  )
+  const isPublicRoute = publicRoutes.some(
+    (route) =>
+      request.nextUrl.pathname === route ||
+      request.nextUrl.pathname.startsWith("/api/"),
+  );
 
   // Get user session
-  const { data: { session } } = await supabase.auth.getSession()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // Allow access to public routes
   if (isPublicRoute) {
     // Redirect logged-in users away from auth pages
-    if (session && ['/login', '/signup'].includes(request.nextUrl.pathname)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+    if (session && ["/login", "/signup"].includes(request.nextUrl.pathname)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    return response
+    return response;
   }
 
   // Protect private routes
   if (!session) {
-    const redirectUrl = new URL('/login', request.url)
-    redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
+    const redirectUrl = new URL("/login", request.url);
+    redirectUrl.searchParams.set("redirectedFrom", request.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   // Continue to protected route
-  return response
+  return response;
 }
 
 /**
@@ -104,6 +107,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public (public files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+    "/((?!_next/static|_next/image|favicon.ico|public).*)",
   ],
-} 
+};

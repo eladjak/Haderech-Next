@@ -1,9 +1,9 @@
-import { ReactNode } from 'react'
-import { SiteHeader } from '@/components/layout/site-header'
-import { SiteFooter } from '@/components/layout/site-footer'
+import { ReactNode } from "react";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 interface SiteLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export function SiteLayout({ children }: SiteLayoutProps) {
@@ -13,5 +13,5 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       <main className="flex-1">{children}</main>
       <SiteFooter />
     </div>
-  )
-} 
+  );
+}

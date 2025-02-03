@@ -1,30 +1,30 @@
 /**
  * Supabase Service
- * 
+ *
  * This module provides a centralized interface for interacting with our Supabase backend.
  * It includes type definitions, the main client instance, and helper functions for common operations.
- * 
+ *
  * @module services/supabase
  */
 
-import { createClient } from '@supabase/supabase-js'
-import { Database } from '@/types/supabase'
-import { env } from '@/env.mjs'
+import { createClient } from "@supabase/supabase-js";
+import { Database } from "@/types/supabase";
+import { env } from "@/env.mjs";
 
 // Initialize Supabase client with environment variables
 export const supabase = createClient<Database>(
   env.NEXT_PUBLIC_SUPABASE_URL,
-  env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+  env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+);
 
 // Type exports for database schema
-export type Tables = Database['public']['Tables']
-export type Enums = Database['public']['Enums']
+export type Tables = Database["public"]["Tables"];
+export type Enums = Database["public"]["Enums"];
 
 // Helper types for common tables
-export type UserRow = Tables['users']['Row']
-export type ProfileRow = Tables['profiles']['Row']
-export type LessonRow = Tables['lessons']['Row']
+export type UserRow = Tables["users"]["Row"];
+export type ProfileRow = Tables["profiles"]["Row"];
+export type LessonRow = Tables["lessons"]["Row"];
 
 /**
  * Fetches a user's profile by their ID
@@ -34,13 +34,13 @@ export type LessonRow = Tables['lessons']['Row']
  */
 export async function getUserProfile(userId: string): Promise<ProfileRow> {
   const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single()
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
 
-  if (error) throw error
-  return data
+  if (error) throw error;
+  return data;
 }
 
 /**
@@ -51,18 +51,18 @@ export async function getUserProfile(userId: string): Promise<ProfileRow> {
  * @throws Will throw an error if the database query fails
  */
 export async function updateUserProfile(
-  userId: string, 
-  updates: Partial<ProfileRow>
+  userId: string,
+  updates: Partial<ProfileRow>,
 ): Promise<ProfileRow> {
   const { data, error } = await supabase
-    .from('profiles')
+    .from("profiles")
     .update(updates)
-    .eq('id', userId)
+    .eq("id", userId)
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
-  return data
+  if (error) throw error;
+  return data;
 }
 
 /**
@@ -73,8 +73,9 @@ export async function updateUserProfile(
  */
 export async function getCourse(courseId: string) {
   const { data, error } = await supabase
-    .from('courses')
-    .select(`
+    .from("courses")
+    .select(
+      `
       *,
       lessons (*),
       author:profiles (
@@ -84,24 +85,25 @@ export async function getCourse(courseId: string) {
         bio,
         expertise
       )
-    `)
-    .eq('id', courseId)
-    .single()
+    `,
+    )
+    .eq("id", courseId)
+    .single();
 
-  if (error) throw error
-  return data
+  if (error) throw error;
+  return data;
 }
 
 /**
  * Interface for course filtering options
  */
 export interface CourseFilters {
-  published?: boolean
-  authorId?: string
-  level?: string
-  category?: string
-  searchQuery?: string
-  sortBy?: 'newest' | 'popular' | 'rating'
+  published?: boolean;
+  authorId?: string;
+  level?: string;
+  category?: string;
+  searchQuery?: string;
+  sortBy?: "newest" | "popular" | "rating";
 }
 
 /**
@@ -111,7 +113,7 @@ export interface CourseFilters {
  * @throws Will throw an error if the database query fails
  */
 export async function getCourses(filters?: CourseFilters) {
-  let query = supabase.from('courses').select(`
+  let query = supabase.from("courses").select(`
     *,
     author:profiles (
       id,
@@ -122,48 +124,48 @@ export async function getCourses(filters?: CourseFilters) {
     lessons (count),
     average_rating,
     total_students
-  `)
+  `);
 
   // Apply filters
   if (filters?.published !== undefined) {
-    query = query.eq('published', filters.published)
+    query = query.eq("published", filters.published);
   }
 
   if (filters?.authorId) {
-    query = query.eq('author_id', filters.authorId)
+    query = query.eq("author_id", filters.authorId);
   }
 
   if (filters?.level) {
-    query = query.eq('level', filters.level)
+    query = query.eq("level", filters.level);
   }
 
   if (filters?.category) {
-    query = query.eq('category', filters.category)
+    query = query.eq("category", filters.category);
   }
 
   if (filters?.searchQuery) {
-    query = query.textSearch('title', filters.searchQuery)
+    query = query.textSearch("title", filters.searchQuery);
   }
 
   // Apply sorting
   if (filters?.sortBy) {
     switch (filters.sortBy) {
-      case 'newest':
-        query = query.order('created_at', { ascending: false })
-        break
-      case 'popular':
-        query = query.order('total_students', { ascending: false })
-        break
-      case 'rating':
-        query = query.order('average_rating', { ascending: false })
-        break
+      case "newest":
+        query = query.order("created_at", { ascending: false });
+        break;
+      case "popular":
+        query = query.order("total_students", { ascending: false });
+        break;
+      case "rating":
+        query = query.order("average_rating", { ascending: false });
+        break;
     }
   }
 
-  const { data, error } = await query
+  const { data, error } = await query;
 
-  if (error) throw error
-  return data
+  if (error) throw error;
+  return data;
 }
 
 /**
@@ -175,17 +177,17 @@ export async function getCourses(filters?: CourseFilters) {
  */
 export async function enrollInCourse(userId: string, courseId: string) {
   const { data, error } = await supabase
-    .from('enrollments')
+    .from("enrollments")
     .insert({
       user_id: userId,
       course_id: courseId,
-      enrolled_at: new Date().toISOString()
+      enrolled_at: new Date().toISOString(),
     })
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
-  return data
+  if (error) throw error;
+  return data;
 }
 
 /**
@@ -200,22 +202,22 @@ export async function updateLessonProgress(
   userId: string,
   lessonId: string,
   progress: {
-    completed: boolean
-    last_position?: number
-    notes?: string
-  }
+    completed: boolean;
+    last_position?: number;
+    notes?: string;
+  },
 ) {
   const { data, error } = await supabase
-    .from('lesson_progress')
+    .from("lesson_progress")
     .upsert({
       user_id: userId,
       lesson_id: lessonId,
       ...progress,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
-  return data
-} 
+  if (error) throw error;
+  return data;
+}

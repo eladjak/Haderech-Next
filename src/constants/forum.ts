@@ -1,4 +1,4 @@
-import { ForumPost, ForumCategory } from "@/types/forum"
+import { ForumPost, ForumCategory } from "@/types/forum";
 
 export const EXAMPLE_POSTS: ForumPost[] = [
   {
@@ -49,7 +49,7 @@ export const EXAMPLE_POSTS: ForumPost[] = [
     likes: 32,
     views: 203,
   },
-]
+];
 
 export const EXAMPLE_CATEGORIES: ForumCategory[] = [
   {
@@ -73,4 +73,4 @@ export const EXAMPLE_CATEGORIES: ForumCategory[] = [
     postsCount: 124,
     lastPost: EXAMPLE_POSTS[1],
   },
-] 
+];
