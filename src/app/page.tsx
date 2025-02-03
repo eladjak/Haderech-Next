@@ -5,6 +5,9 @@ import { RecommendedCoursesPreview } from '@/components/recommended-courses-prev
 import { SocialRecommendations } from '@/components/social-recommendations'
 import { ReferralManagement } from '@/components/referral-management'
 import { LatestForumPosts } from '@/components/latest-forum-posts'
+import { courses } from '@/constants/courses'
+import { users } from '@/constants/users'
+import { posts } from '@/constants/posts'
 
 export const metadata: Metadata = {
   title: 'HaDerech - Advanced Learning Platform',
@@ -42,7 +45,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RecommendedCoursesPreview />
+            <RecommendedCoursesPreview courses={courses} />
           </CardContent>
         </Card>
 
@@ -54,7 +57,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SocialRecommendations />
+            <SocialRecommendations users={users} onFollow={(userId) => console.log('Following user:', userId)} />
           </CardContent>
         </Card>
 
@@ -66,7 +69,10 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ReferralManagement />
+            <ReferralManagement
+              referralCode="ABC123"
+              onShare={(code) => console.log('Sharing code:', code)}
+            />
           </CardContent>
         </Card>
       </section>
@@ -81,7 +87,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LatestForumPosts />
+            <LatestForumPosts posts={posts} />
           </CardContent>
         </Card>
       </section>

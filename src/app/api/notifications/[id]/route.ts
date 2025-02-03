@@ -5,10 +5,14 @@
  * authorization checks.
  */
 
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { Database } from '@/types/supabase'
+
+type Tables = Database['public']['Tables']
+type Notification = Tables['notifications']['Row']
+type User = Tables['users']['Row']
 
 interface RouteParams {
   params: {
@@ -16,43 +20,36 @@ interface RouteParams {
   }
 }
 
+interface NotificationWithUser extends Notification {
+  user: User
+}
+
 /**
  * PATCH /api/notifications/[id]
  * 
- * Marks a specific notification as read. Only the notification recipient can mark it as read.
+ * Marks a notification as read.
  * 
- * @requires Authentication
- * @requires Authorization: Notification recipient only
+ * @requires Authentication & Authorization (Notification Owner)
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the notification ID
  * @returns {Promise<NextResponse>} JSON response containing the updated notification or error message
  */
-export async function PATCH(request: Request, { params }: RouteParams) {
+export async function PATCH(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
-    
+    const supabase = createServerClient(cookieStore)
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Verify notification ownership
+    // Get notification to verify ownership
     const { data: notification } = await supabase
       .from('notifications')
       .select('user_id')
@@ -61,14 +58,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (!notification) {
       return NextResponse.json(
-        { error: 'התראה לא נמצאה' },
+        { error: 'Notification not found' },
         { status: 404 }
       )
     }
 
+    // Verify notification ownership
     if (notification.user_id !== session.user.id) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authorized to update this notification' },
         { status: 403 }
       )
     }
@@ -76,20 +74,25 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // Mark notification as read
     const { data: updatedNotification, error } = await supabase
       .from('notifications')
-      .update({ read: true })
+      .update({
+        read_at: new Date().toISOString()
+      })
       .eq('id', params.id)
-      .select()
+      .select(`
+        *,
+        user:users(*)
+      `)
       .single()
 
     if (error) {
       console.error('Error updating notification:', error)
       return NextResponse.json(
-        { error: 'שגיאה בעדכון ההתראה' },
+        { error: 'Failed to update notification' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(updatedNotification)
+    return NextResponse.json(updatedNotification as NotificationWithUser)
   } catch (error) {
     console.error('Error in PATCH /api/notifications/[id]:', error)
     return NextResponse.json(
@@ -102,40 +105,29 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 /**
  * DELETE /api/notifications/[id]
  * 
- * Deletes a specific notification. Only the notification recipient can delete it.
+ * Deletes a notification.
  * 
- * @requires Authentication
- * @requires Authorization: Notification recipient only
+ * @requires Authentication & Authorization (Notification Owner)
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the notification ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
-    
+    const supabase = createServerClient(cookieStore)
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Verify notification ownership
+    // Get notification to verify ownership
     const { data: notification } = await supabase
       .from('notifications')
       .select('user_id')
@@ -144,14 +136,15 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     if (!notification) {
       return NextResponse.json(
-        { error: 'התראה לא נמצאה' },
+        { error: 'Notification not found' },
         { status: 404 }
       )
     }
 
+    // Verify notification ownership
     if (notification.user_id !== session.user.id) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authorized to delete this notification' },
         { status: 403 }
       )
     }
@@ -165,12 +158,12 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     if (error) {
       console.error('Error deleting notification:', error)
       return NextResponse.json(
-        { error: 'שגיאה במחיקת ההתראה' },
+        { error: 'Failed to delete notification' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'התראה נמחקה בהצלחה' })
+    return NextResponse.json({ message: 'Notification deleted successfully' })
   } catch (error) {
     console.error('Error in DELETE /api/notifications/[id]:', error)
     return NextResponse.json(

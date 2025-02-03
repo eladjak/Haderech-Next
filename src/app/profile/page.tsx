@@ -5,8 +5,8 @@
  */
 
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
+import { redirect, notFound } from 'next/navigation'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,8 @@ import { LatestForumPosts } from '@/components/latest-forum-posts'
 import { ProfileForm } from '@/components/profile/profile-form'
 import { ProfileStats } from '@/components/profile/profile-stats'
 import { ProfileHeader } from '@/components/profile/profile-header'
+import { UserProfile } from '@/components/user-profile'
+import type { User } from '@/types/api'
 
 export const metadata: Metadata = {
   title: 'הפרופיל שלי | הדרך',
@@ -46,21 +48,11 @@ interface Profile {
 
 async function getUserProfile(): Promise<Profile | null> {
   const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    }
-  )
+  const supabase = createServerClient(cookieStore)
   
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) {
-    redirect('/login')
+    notFound()
   }
 
   const { data: profile } = await supabase
@@ -86,48 +78,35 @@ async function getUserProfile(): Promise<Profile | null> {
   return profile
 }
 
-export default async function Profile() {
-  const profile = await getUserProfile()
+export default async function ProfilePage() {
+  const cookieStore = cookies()
+  const supabase = createServerClient(cookieStore)
 
-  if (!profile) {
-    redirect('/login')
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    notFound()
   }
 
-  const totalProgress = profile.courses.reduce(
-    (acc: number, curr: CourseEnrollment) => acc + (curr.progress || 0),
-    0
-  ) / profile.courses.length
+  const { data: user } = await supabase
+    .from('users')
+    .select(`
+      *,
+      courses:course_enrollments(
+        course:courses(*)
+      )
+    `)
+    .eq('id', session.user.id)
+    .single()
+
+  if (!user) {
+    notFound()
+  }
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold">הפרופיל שלי</h1>
-      <div className="mt-8 grid gap-8 md:grid-cols-2">
-        {/* Profile Info */}
-        <div>
-          <h2 className="text-xl font-semibold">פרטים אישיים</h2>
-          <div className="mt-4">
-            <p><strong>שם:</strong> {profile.name}</p>
-            {profile.bio && <p><strong>אודות:</strong> {profile.bio}</p>}
-          </div>
-        </div>
-
-        {/* Enrolled Courses */}
-        <div>
-          <h2 className="text-xl font-semibold">הקורסים שלי</h2>
-          <div className="mt-4 space-y-4">
-            {profile.courses.map((enrollment) => (
-              <div key={enrollment.course.id} className="rounded-lg border p-4">
-                <h3 className="font-medium">{enrollment.course.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {enrollment.course.description}
-                </p>
-                <div className="mt-2 text-sm">
-                  <p>התקדמות: {enrollment.progress}%</p>
-                  <p>גישה אחרונה: {new Date(enrollment.last_accessed).toLocaleDateString('he-IL')}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-8 lg:col-span-2">
+          <UserProfile user={user as User} />
         </div>
       </div>
     </div>

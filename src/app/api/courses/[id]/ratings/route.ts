@@ -3,10 +3,9 @@
  * @description API routes for managing course ratings. Provides endpoints for retrieving and submitting ratings.
  */
 
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase'
 
 interface RouteParams {
   params: {
@@ -19,9 +18,11 @@ interface RouteParams {
  * 
  * Retrieves all ratings for a specific course.
  * 
- * @param {Request} request - The incoming request object
+ * @requires Authentication
+ * 
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the course ID
- * @returns {Promise<NextResponse>} JSON response containing the course ratings or error message
+ * @returns {Promise<NextResponse>} JSON response containing the ratings or error message
  * 
  * @example Response
  * ```json
@@ -39,30 +40,16 @@ interface RouteParams {
  * ]
  * ```
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
+    const supabase = createServerClient(cookieStore)
 
     const { data: ratings, error } = await supabase
       .from('course_ratings')
       .select(`
         *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        )
+        user:users(*)
       `)
       .eq('course_id', params.id)
       .order('created_at', { ascending: false })
@@ -77,7 +64,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(ratings)
   } catch (error) {
-    console.error('Ratings GET error:', error)
+    console.error('Error in GET /api/courses/[id]/ratings:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -88,37 +75,26 @@ export async function GET(request: Request, { params }: RouteParams) {
 /**
  * POST /api/courses/[id]/ratings
  * 
- * Submits a new rating for a course. Users can only rate courses they are enrolled in.
+ * Creates a new rating for a course.
  * 
- * @requires Authentication
- * @requires Course enrollment
+ * @requires Authentication & Course Enrollment
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} request - The request object containing the rating data
  * @param {RouteParams} params - Route parameters containing the course ID
- * @returns {Promise<NextResponse>} JSON response containing the new rating or error message
+ * @returns {Promise<NextResponse>} JSON response containing the created rating or error message
  * 
- * @example Request Body
+ * @example Request
  * ```json
  * {
  *   "rating": 5,
- *   "review": "Excellent course content and instruction!"
+ *   "review": "Great course!"
  * }
  * ```
  */
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
+    const supabase = createServerClient(cookieStore)
 
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
@@ -129,7 +105,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    // Verify course enrollment
+    // Check if user is enrolled in the course
     const { data: enrollment } = await supabase
       .from('course_enrollments')
       .select('id')
@@ -139,22 +115,12 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     if (!enrollment) {
       return NextResponse.json(
-        { error: 'Must be enrolled to rate course' },
+        { error: 'Must be enrolled in the course to rate it' },
         { status: 403 }
       )
     }
 
-    const { rating, review } = await request.json()
-
-    // Validate rating
-    if (!rating || rating < 1 || rating > 5) {
-      return NextResponse.json(
-        { error: 'Rating must be between 1 and 5' },
-        { status: 400 }
-      )
-    }
-
-    // Check for existing rating
+    // Check if user has already rated the course
     const { data: existingRating } = await supabase
       .from('course_ratings')
       .select('id')
@@ -164,7 +130,18 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     if (existingRating) {
       return NextResponse.json(
-        { error: 'User has already rated this course' },
+        { error: 'You have already rated this course' },
+        { status: 400 }
+      )
+    }
+
+    // Get rating data from request
+    const { rating, review } = await request.json()
+
+    // Validate rating
+    if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+      return NextResponse.json(
+        { error: 'Rating must be a number between 1 and 5' },
         { status: 400 }
       )
     }
@@ -176,15 +153,13 @@ export async function POST(request: Request, { params }: RouteParams) {
         course_id: params.id,
         user_id: session.user.id,
         rating,
-        review
+        review,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select(`
         *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        )
+        user:users(*)
       `)
       .single()
 
@@ -198,7 +173,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(newRating)
   } catch (error) {
-    console.error('Ratings POST error:', error)
+    console.error('Error in POST /api/courses/[id]/ratings:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -209,28 +184,18 @@ export async function POST(request: Request, { params }: RouteParams) {
 /**
  * DELETE /api/courses/[id]/ratings
  * 
- * Deletes a user's rating for a course. Users can only delete their own ratings.
+ * Deletes a user's rating for a course.
  * 
  * @requires Authentication
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
+    const supabase = createServerClient(cookieStore)
 
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
@@ -258,7 +223,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ message: 'Rating deleted successfully' })
   } catch (error) {
-    console.error('Ratings DELETE error:', error)
+    console.error('Error in DELETE /api/courses/[id]/ratings:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

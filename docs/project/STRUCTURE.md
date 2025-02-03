@@ -42,6 +42,7 @@ haderech-next/
 │   └── unit/               # בדיקות יחידה
 ├── docs/                   # תיעוד
 └── scripts/                # סקריפטים
+```
 
 ## קבצי תצורה
 
@@ -55,7 +56,6 @@ haderech-next/
 - `pnpm-lock.yaml`        # נעילת גרסאות
 - `tailwind.config.js`    # הגדרות Tailwind
 - `tsconfig.json`         # הגדרות TypeScript
-```
 
 ## קבצים חשובים
 

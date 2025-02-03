@@ -1,173 +1,228 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@/lib/supabase-server'
+import { cookies } from 'next/headers'
 
 interface AnalyticsEvent {
-  id: string;
-  user_id: string;
-  action: AnalyticsAction;
-  type: RecommendationType;
-  item_id: string;
-  effective?: boolean;
-  created_at: string;
+  id: string
+  type: string
+  user_id: string
+  course_id?: string
+  lesson_id?: string
+  data: Record<string, string | number | boolean | null>
+  created_at: string
 }
-
-type AnalyticsAction = 
-  | 'view'
-  | 'click'
-  | 'complete'
-  | 'like'
-  | 'share'
-  | 'save'
-  | 'dismiss';
-
-type RecommendationType = 
-  | 'course'
-  | 'book'
-  | 'podcast'
-  | 'article'
-  | 'forum_post'
-  | 'simulation';
 
 interface EffectivenessMetric {
-  type: RecommendationType;
-  interactions: {
-    action: AnalyticsAction;
-    count: number;
-  }[];
-  effectiveness?: number;
+  type: string
+  total: number
+  success: number
+  rate: number
+  trend: 'up' | 'down' | 'stable'
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+interface UserEngagement {
+  user_id: string
+  total_time: number
+  sessions: number
+  completed_lessons: number
+  active_days: number
+}
 
-export const trackRecommendationInteraction = async (
-  userId: string,
-  type: RecommendationType,
-  itemId: string,
-  action: AnalyticsAction
-): Promise<void> => {
+interface CourseMetrics {
+  course_id: string
+  enrollments: number
+  completion_rate: number
+  average_rating: number
+  total_time: number
+}
+
+export async function trackEvent(
+  type: string,
+  user_id: string,
+  data: Record<string, string | number | boolean | null>,
+  course_id?: string,
+  lesson_id?: string
+) {
   try {
+    const cookieStore = cookies()
+    const supabase = createServerClient(cookieStore)
+
+    const event = {
+      type,
+      user_id,
+      course_id,
+      lesson_id,
+      data,
+      created_at: new Date().toISOString()
+    }
+
     const { error } = await supabase
-      .from('analytics')
-      .insert({
-        user_id: userId,
-        action,
-        type,
-        item_id: itemId,
-        created_at: new Date().toISOString()
-      });
+      .from('analytics_events')
+      .insert(event)
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error tracking event:', error)
+    }
   } catch (error) {
-    console.error('Error tracking recommendation interaction:', error);
-    throw new Error('שגיאה בתיעוד האינטראקציה');
+    console.error('Error in trackEvent:', error)
   }
-};
+}
 
-export const getRecommendationEffectiveness = async (): Promise<EffectivenessMetric[]> => {
+export async function getUserEngagement(user_id: string): Promise<UserEngagement | null> {
   try {
+    const cookieStore = cookies()
+    const supabase = createServerClient(cookieStore)
+
     const { data: events, error } = await supabase
-      .from('analytics')
-      .select('*');
-
-    if (error) throw error;
-
-    // Group events by type and action
-    const effectiveness = events.reduce((acc: { [key: string]: { [key: string]: number } }, event) => {
-      if (!acc[event.type]) {
-        acc[event.type] = {};
-      }
-      if (!acc[event.type][event.action]) {
-        acc[event.type][event.action] = 0;
-      }
-      acc[event.type][event.action]++;
-      return acc;
-    }, {});
-
-    // Convert to array format
-    return Object.entries(effectiveness).map(([type, actions]) => ({
-      type: type as RecommendationType,
-      interactions: Object.entries(actions).map(([action, count]) => ({
-        action: action as AnalyticsAction,
-        count
-      }))
-    }));
-  } catch (error) {
-    console.error('Error getting recommendation effectiveness:', error);
-    throw new Error('שגיאה בטעינת נתוני אפקטיביות');
-  }
-};
-
-export const trackRecommendationEffectiveness = async (
-  userId: string,
-  type: RecommendationType,
-  itemId: string,
-  action: AnalyticsAction,
-  effective: boolean
-): Promise<void> => {
-  try {
-    const { error } = await supabase
-      .from('analytics')
-      .insert({
-        user_id: userId,
-        action,
-        type,
-        item_id: itemId,
-        effective,
-        created_at: new Date().toISOString()
-      });
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error tracking recommendation effectiveness:', error);
-    throw new Error('שגיאה בתיעוד אפקטיביות ההמלצה');
-  }
-};
-
-export const getDetailedRecommendationEffectiveness = async (): Promise<EffectivenessMetric[]> => {
-  try {
-    const { data: events, error } = await supabase
-      .from('analytics')
+      .from('analytics_events')
       .select('*')
-      .not('effective', 'is', null);
+      .eq('user_id', user_id)
+      .order('created_at', { ascending: true })
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching user events:', error)
+      return null
+    }
 
-    // Group events by type
-    const effectiveness = events.reduce((acc: { [key: string]: any }, event) => {
-      if (!acc[event.type]) {
-        acc[event.type] = {
-          totalInteractions: 0,
-          effectiveInteractions: 0,
-          actionCounts: {}
-        };
+    const engagement: UserEngagement = {
+      user_id,
+      total_time: 0,
+      sessions: 0,
+      completed_lessons: 0,
+      active_days: 0
+    }
+
+    const activeDays = new Set<string>()
+
+    events.forEach((event: AnalyticsEvent) => {
+      const date = event.created_at.split('T')[0]
+      activeDays.add(date)
+
+      if (event.type === 'session_start') {
+        engagement.sessions++
       }
 
-      acc[event.type].totalInteractions++;
-      if (event.effective) {
-        acc[event.type].effectiveInteractions++;
+      if (event.type === 'lesson_complete') {
+        engagement.completed_lessons++
       }
 
-      if (!acc[event.type].actionCounts[event.action]) {
-        acc[event.type].actionCounts[event.action] = 0;
+      if (event.type === 'time_spent' && typeof event.data.duration === 'number') {
+        engagement.total_time += event.data.duration
       }
-      acc[event.type].actionCounts[event.action]++;
+    })
 
-      return acc;
-    }, {});
+    engagement.active_days = activeDays.size
 
-    // Convert to array format with effectiveness percentage
-    return Object.entries(effectiveness).map(([type, data]: [string, any]) => ({
-      type: type as RecommendationType,
-      interactions: Object.entries(data.actionCounts).map(([action, count]) => ({
-        action: action as AnalyticsAction,
-        count: count as number
-      })),
-      effectiveness: (data.effectiveInteractions / data.totalInteractions) * 100
-    }));
+    return engagement
   } catch (error) {
-    console.error('Error getting detailed recommendation effectiveness:', error);
-    throw new Error('שגיאה בטעינת נתוני אפקטיביות מפורטים');
+    console.error('Error in getUserEngagement:', error)
+    return null
   }
-}; 
+}
+
+export async function getCourseMetrics(course_id: string): Promise<CourseMetrics | null> {
+  try {
+    const cookieStore = cookies()
+    const supabase = createServerClient(cookieStore)
+
+    const { data: events, error } = await supabase
+      .from('analytics_events')
+      .select('*')
+      .eq('course_id', course_id)
+
+    if (error) {
+      console.error('Error fetching course events:', error)
+      return null
+    }
+
+    const metrics: CourseMetrics = {
+      course_id,
+      enrollments: 0,
+      completion_rate: 0,
+      average_rating: 0,
+      total_time: 0
+    }
+
+    let totalRatings = 0
+    let ratingSum = 0
+    let completions = 0
+
+    events.forEach((event: AnalyticsEvent) => {
+      if (event.type === 'course_enroll') {
+        metrics.enrollments++
+      }
+
+      if (event.type === 'course_complete') {
+        completions++
+      }
+
+      if (event.type === 'course_rate' && typeof event.data.rating === 'number') {
+        totalRatings++
+        ratingSum += event.data.rating
+      }
+
+      if (event.type === 'time_spent' && typeof event.data.duration === 'number') {
+        metrics.total_time += event.data.duration
+      }
+    })
+
+    metrics.completion_rate = metrics.enrollments > 0 ? (completions / metrics.enrollments) * 100 : 0
+    metrics.average_rating = totalRatings > 0 ? ratingSum / totalRatings : 0
+
+    return metrics
+  } catch (error) {
+    console.error('Error in getCourseMetrics:', error)
+    return null
+  }
+}
+
+export async function getEffectivenessMetrics(): Promise<EffectivenessMetric[]> {
+  try {
+    const cookieStore = cookies()
+    const supabase = createServerClient(cookieStore)
+
+    const { data: events, error } = await supabase
+      .from('analytics_events')
+      .select('*')
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching events:', error)
+      return []
+    }
+
+    const effectiveness: Record<string, { total: number; success: number; history: boolean[] }> = {}
+
+    events.forEach((event: AnalyticsEvent) => {
+      if (!effectiveness[event.type]) {
+        effectiveness[event.type] = { total: 0, success: 0, history: [] }
+      }
+
+      effectiveness[event.type].total++
+
+      if (event.data.success === true) {
+        effectiveness[event.type].success++
+      }
+
+      effectiveness[event.type].history.push(event.data.success === true)
+    })
+
+    return Object.entries(effectiveness).map(([type, data]) => {
+      const rate = data.total > 0 ? (data.success / data.total) * 100 : 0
+      const recentHistory = data.history.slice(-10)
+      const recentRate = recentHistory.length > 0
+        ? (recentHistory.filter(Boolean).length / recentHistory.length) * 100
+        : 0
+
+      return {
+        type,
+        total: data.total,
+        success: data.success,
+        rate,
+        trend: recentRate > rate ? 'up' : recentRate < rate ? 'down' : 'stable'
+      }
+    })
+  } catch (error) {
+    console.error('Error in getEffectivenessMetrics:', error)
+    return []
+  }
+} 

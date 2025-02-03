@@ -5,7 +5,7 @@
 
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { CourseHeader } from '@/components/course/course-header'
 import { CourseSidebar } from '@/components/course/course-sidebar'
@@ -14,26 +14,18 @@ import { CourseProgress } from '@/components/course/course-progress'
 import { CourseRatings } from '@/components/course/course-ratings'
 import { CourseComments } from '@/components/course/course-comments'
 import { Database } from '@/types/supabase'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-interface CoursePageProps {
+interface RouteParams {
   params: {
     id: string
   }
 }
 
-export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: RouteParams): Promise<Metadata> {
   const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    }
-  )
+  const supabase = createServerClient(cookieStore)
 
   const { data: course } = await supabase
     .from('courses')
@@ -44,122 +36,127 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
   if (!course) {
     return {
       title: 'קורס לא נמצא',
-      description: 'הקורס המבוקש לא נמצא',
+      description: 'הקורס המבוקש לא נמצא'
     }
   }
 
   return {
     title: course.title,
-    description: course.description,
+    description: course.description
   }
 }
 
-export default async function CoursePage({ params }: CoursePageProps) {
+export default async function CoursePage({ params }: RouteParams) {
   const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    }
-  )
+  const supabase = createServerClient(cookieStore)
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  const { data: course, error: courseError } = await supabase
+  const { data: course, error } = await supabase
     .from('courses')
     .select(`
       *,
-      instructor:profiles!instructor_id (
-        id,
-        name,
-        avatar_url,
-        bio
-      ),
-      lessons (
+      author:users(*),
+      lessons:lessons(
         *,
-        content:lesson_content(*),
-        progress:lesson_progress(*)
+        progress:progress(*)
       ),
-      ratings:course_ratings (
+      ratings:course_ratings(
         *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        )
-      ),
-      comments:course_comments (
-        *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        ),
-        replies!parent_id (
-          *,
-          user:profiles!user_id (
-            id,
-            name,
-            avatar_url
-          )
-        )
+        user:users(*)
       )
     `)
     .eq('id', params.id)
     .single()
 
-  if (courseError || !course) {
-    console.error('Error fetching course:', courseError)
-    return notFound()
+  if (error || !course) {
+    notFound()
   }
 
-  // בדיקה אם המשתמש רשום לקורס
-  let isEnrolled = false
-  if (session) {
-    const { data: enrollment } = await supabase
-      .from('course_enrollments')
-      .select('id')
-      .eq('course_id', params.id)
-      .eq('user_id', session.user.id)
-      .single()
+  const { data: enrollment } = await supabase
+    .from('course_enrollments')
+    .select('*')
+    .eq('course_id', params.id)
+    .eq('user_id', session?.user.id)
+    .single()
 
-    isEnrolled = !!enrollment
-  }
+  const completedLessons = course.lessons?.filter((lesson: any) => {
+    const progress = lesson.progress?.find((p: any) => p.user_id === session?.user.id)
+    return progress?.completed
+  })?.length || 0
 
-  // חישוב התקדמות כללית בקורס
-  const totalLessons = course.lessons.length
-  const completedLessons = course.lessons.filter(lesson => 
-    lesson.progress?.some(p => p.user_id === session?.user.id && p.completed)
-  ).length
-
+  const totalLessons = course.lessons?.length || 0
   const progress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <CourseHeader
-        course={course}
-        isEnrolled={isEnrolled}
-        isInstructor={session?.user.id === course.instructor_id}
-      />
-      <div className="flex-1 container grid gap-6 md:grid-cols-7 lg:gap-10 py-8">
-        <div className="md:col-span-5">
-          <CourseContent
-            lessons={course.lessons}
-            isEnrolled={isEnrolled}
-            isInstructor={session?.user.id === course.instructor_id}
-          />
-          <CourseProgress progress={progress} completedLessons={completedLessons} totalLessons={totalLessons} />
-          <CourseRatings ratings={course.ratings} courseId={course.id} />
-          <CourseComments comments={course.comments} courseId={course.id} />
+    <div className="container py-8">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-8 lg:col-span-2">
+          <div>
+            <h1 className="mb-2 text-3xl font-bold">{course.title}</h1>
+            <p className="text-muted-foreground">{course.description}</p>
+          </div>
+
+          <div>
+            <h2 className="mb-4 text-2xl font-bold">תוכן הקורס</h2>
+            <div className="space-y-4">
+              {course.lessons?.map((lesson: any) => (
+                <Card key={lesson.id}>
+                  <CardHeader>
+                    <CardTitle>{lesson.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{lesson.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <CourseRatings course={course} />
         </div>
-        <aside className="md:col-span-2">
-          <CourseSidebar course={course} isEnrolled={isEnrolled} />
-        </aside>
+
+        <div className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>התקדמות בקורס</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {enrollment ? (
+                <CourseProgress course={course} />
+              ) : (
+                <div className="text-center">
+                  <p className="mb-4 text-muted-foreground">
+                    הירשם לקורס כדי להתחיל ללמוד
+                  </p>
+                  <Button className="w-full">
+                    הירשם לקורס
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>פרטי הקורס</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <div className="text-sm font-medium">רמה</div>
+                <div className="text-muted-foreground">{course.level}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium">משך</div>
+                <div className="text-muted-foreground">{course.duration} דקות</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium">תגיות</div>
+                <div className="text-muted-foreground">{course.tags.join(', ')}</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

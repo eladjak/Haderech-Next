@@ -12,166 +12,104 @@ export interface Database {
       users: {
         Row: {
           id: string
+          name: string
           email: string
-          full_name: string | null
           avatar_url: string | null
-          created_at: string
-          last_login: string | null
-          role: string
-          is_active: boolean
-          settings: Json | null
-          metadata: Json | null
-        }
-        Insert: {
-          id?: string
-          email: string
-          full_name?: string | null
-          avatar_url?: string | null
-          created_at?: string
-          last_login?: string | null
-          role?: string
-          is_active?: boolean
-          settings?: Json | null
-          metadata?: Json | null
-        }
-        Update: {
-          id?: string
-          email?: string
-          full_name?: string | null
-          avatar_url?: string | null
-          created_at?: string
-          last_login?: string | null
-          role?: string
-          is_active?: boolean
-          settings?: Json | null
-          metadata?: Json | null
-        }
-      }
-      profiles: {
-        Row: {
-          id: string
-          user_id: string
           bio: string | null
-          website: string | null
-          social_links: Json | null
-          preferences: Json | null
           created_at: string
           updated_at: string
+          role: 'admin' | 'user'
+          settings: {
+            notifications: boolean
+            language: string
+            theme: 'light' | 'dark' | 'system'
+          }
         }
-        Insert: {
-          id?: string
-          user_id: string
-          bio?: string | null
-          website?: string | null
-          social_links?: Json | null
-          preferences?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          bio?: string | null
-          website?: string | null
-          social_links?: Json | null
-          preferences?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['users']['Insert']>
       }
       courses: {
         Row: {
           id: string
           title: string
-          description: string | null
-          thumbnail: string | null
-          duration: number | null
-          level: string
+          description: string
+          image_url: string | null
+          status: 'draft' | 'published' | 'archived'
           author_id: string
           created_at: string
           updated_at: string
-          published: boolean
-          price: number | null
-          rating: number | null
-          students_count: number
-          metadata: Json | null
+          level: 'beginner' | 'intermediate' | 'advanced'
+          duration: number
+          tags: string[]
         }
-        Insert: {
-          id?: string
-          title: string
-          description?: string | null
-          thumbnail?: string | null
-          duration?: number | null
-          level: string
-          author_id: string
-          created_at?: string
-          updated_at?: string
-          published?: boolean
-          price?: number | null
-          rating?: number | null
-          students_count?: number
-          metadata?: Json | null
-        }
-        Update: {
-          id?: string
-          title?: string
-          description?: string | null
-          thumbnail?: string | null
-          duration?: number | null
-          level?: string
-          author_id?: string
-          created_at?: string
-          updated_at?: string
-          published?: boolean
-          price?: number | null
-          rating?: number | null
-          students_count?: number
-          metadata?: Json | null
-        }
+        Insert: Omit<Database['public']['Tables']['courses']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['courses']['Insert']>
       }
       lessons: {
         Row: {
           id: string
           course_id: string
           title: string
-          description: string | null
-          video_url: string | null
-          content: string | null
-          duration: number | null
-          order_index: number
+          description: string
+          order: number
+          status: 'draft' | 'published'
           created_at: string
           updated_at: string
-          is_free: boolean
-          metadata: Json | null
         }
-        Insert: {
-          id?: string
+        Insert: Omit<Database['public']['Tables']['lessons']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['lessons']['Insert']>
+      }
+      lesson_content: {
+        Row: {
+          id: string
+          lesson_id: string
+          content: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['lesson_content']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['lesson_content']['Insert']>
+      }
+      lesson_progress: {
+        Row: {
+          id: string
+          user_id: string
+          lesson_id: string
+          completed: boolean
+          last_accessed: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['lesson_progress']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['lesson_progress']['Insert']>
+      }
+      course_enrollments: {
+        Row: {
+          id: string
           course_id: string
-          title: string
-          description?: string | null
-          video_url?: string | null
-          content?: string | null
-          duration?: number | null
-          order_index: number
-          created_at?: string
-          updated_at?: string
-          is_free?: boolean
-          metadata?: Json | null
+          user_id: string
+          enrolled_at: string
+          status: 'active' | 'completed' | 'dropped'
+          progress: number
+          last_accessed: string | null
+          created_at: string
+          updated_at: string
         }
-        Update: {
-          id?: string
-          course_id?: string
-          title?: string
-          description?: string | null
-          video_url?: string | null
-          content?: string | null
-          duration?: number | null
-          order_index?: number
-          created_at?: string
-          updated_at?: string
-          is_free?: boolean
-          metadata?: Json | null
+        Insert: Omit<Database['public']['Tables']['course_enrollments']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['course_enrollments']['Insert']>
+      }
+      course_ratings: {
+        Row: {
+          id: string
+          course_id: string
+          user_id: string
+          rating: number
+          review: string | null
+          created_at: string
+          updated_at: string
         }
+        Insert: Omit<Database['public']['Tables']['course_ratings']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['course_ratings']['Insert']>
       }
       forum_posts: {
         Row: {
@@ -181,114 +119,56 @@ export interface Database {
           author_id: string
           created_at: string
           updated_at: string
-          views_count: number
-          likes_count: number
-          comments_count: number
-          tags: string[] | null
-          is_pinned: boolean
-          is_locked: boolean
-          metadata: Json | null
+          tags: string[]
+          status: 'draft' | 'published' | 'archived'
+          likes: number
+          views: number
         }
-        Insert: {
-          id?: string
+        Insert: Omit<Database['public']['Tables']['forum_posts']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['forum_posts']['Insert']>
+      }
+      forum_comments: {
+        Row: {
+          id: string
+          post_id: string
+          author_id: string
+          parent_id: string | null
+          content: string
+          created_at: string
+          updated_at: string
+          likes: number
+        }
+        Insert: Omit<Database['public']['Tables']['forum_comments']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['forum_comments']['Insert']>
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
           title: string
           content: string
-          author_id: string
-          created_at?: string
-          updated_at?: string
-          views_count?: number
-          likes_count?: number
-          comments_count?: number
-          tags?: string[] | null
-          is_pinned?: boolean
-          is_locked?: boolean
-          metadata?: Json | null
-        }
-        Update: {
-          id?: string
-          title?: string
-          content?: string
-          author_id?: string
-          created_at?: string
-          updated_at?: string
-          views_count?: number
-          likes_count?: number
-          comments_count?: number
-          tags?: string[] | null
-          is_pinned?: boolean
-          is_locked?: boolean
-          metadata?: Json | null
-        }
-      }
-      comments: {
-        Row: {
-          id: string
-          post_id: string
-          author_id: string
-          content: string
-          created_at: string
-          updated_at: string
-          likes_count: number
-          parent_id: string | null
-          is_solution: boolean
-        }
-        Insert: {
-          id?: string
-          post_id: string
-          author_id: string
-          content: string
-          created_at?: string
-          updated_at?: string
-          likes_count?: number
-          parent_id?: string | null
-          is_solution?: boolean
-        }
-        Update: {
-          id?: string
-          post_id?: string
-          author_id?: string
-          content?: string
-          created_at?: string
-          updated_at?: string
-          likes_count?: number
-          parent_id?: string | null
-          is_solution?: boolean
-        }
-      }
-      progress: {
-        Row: {
-          id: string
-          user_id: string
-          course_id: string
-          lesson_id: string
-          status: string
-          progress_percent: number
-          last_position: number
+          type: 'info' | 'success' | 'warning' | 'error'
+          read_at: string | null
           created_at: string
           updated_at: string
         }
-        Insert: {
-          id?: string
+        Insert: Omit<Database['public']['Tables']['notifications']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['notifications']['Insert']>
+      }
+      achievements: {
+        Row: {
+          id: string
           user_id: string
-          course_id: string
-          lesson_id: string
-          status?: string
-          progress_percent?: number
-          last_position?: number
-          created_at?: string
-          updated_at?: string
+          title: string
+          description: string
+          type: string
+          earned_at: string
+          icon_url: string | null
+          created_at: string
+          updated_at: string
         }
-        Update: {
-          id?: string
-          user_id?: string
-          course_id?: string
-          lesson_id?: string
-          status?: string
-          progress_percent?: number
-          last_position?: number
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: Omit<Database['public']['Tables']['achievements']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['achievements']['Insert']>
       }
     }
     Views: {
@@ -301,4 +181,9 @@ export interface Database {
       [_ in never]: never
     }
   }
-} 
+}
+
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T]
+export type Functions<T extends keyof Database['public']['Functions']> = Database['public']['Functions'][T]
+export type Views<T extends keyof Database['public']['Views']> = Database['public']['Views'][T] 

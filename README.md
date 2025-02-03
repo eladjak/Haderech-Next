@@ -1,82 +1,84 @@
-# הדרך - פלטפורמת למידה מקוונת 🎓
+# HaDerech Next 🚀
 
-פלטפורמת למידה מקוונת מתקדמת המאפשרת למידה אינטראקטיבית, שיתוף ידע וצמיחה אישית.
+פלטפורמת למידה מתקדמת לשיפור מערכות יחסים, המשלבת AI לחוויית למידה מותאמת אישית.
 
-## 🌟 תכונות עיקריות
+## תיעוד 📚
 
-- **קורסים אינטראקטיביים** - מגוון קורסים בנושאים שונים
-- **למידה מותאמת אישית** - התקדמות בקצב אישי ומעקב אחר ההתקדמות
-- **קהילה תומכת** - פורומים, תגובות ושיתוף ידע
-- **ממשק משתמש מודרני** - חווית משתמש נוחה ואינטואיטיבית
-- **תמיכה בעברית** - ממשק מלא בעברית כולל RTL
+### מסמכי פרויקט
+- [דרישות מערכת](docs/project/REQUIREMENTS.md)
+- [מפרט משתמש](docs/project/USER_SPEC.md)
+- [סטטוס הפרויקט](docs/project/STATUS.md)
+- [מבנה הפרויקט](docs/project/STRUCTURE.md)
+- [מפת הפרויקט](docs/project/PROJECT_MAP.md)
+- [הנחיות AI](docs/project/PROMPT.md)
 
-## 🛠️ טכנולוגיות
+### מסמכים טכניים
+- [מפרט טכני](docs/technical/TECHNICAL_SPEC.md)
+- [הגדרות Supabase](docs/technical/SUPABASE_CONFIG.md)
+- [דוח ביצועים](docs/technical/PERFORMANCE.md)
 
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **UI Components**: Radix UI, Shadcn UI
-- **State Management**: Redux Toolkit
-- **Internationalization**: i18next
-- **Testing**: Jest, React Testing Library
-- **CI/CD**: Vercel, GitHub Actions
+### הנחיות פיתוח
+- [הנחיות כלליות](docs/development/GUIDELINES.md)
+- [סקירת קוד](docs/development/CODE_REVIEW.md)
+- [תכנית בדיקות](docs/development/TEST_PLAN.md)
 
-## 📦 התקנה
+### תחזוקה
+- [תכנית תיקונים](docs/maintenance/FIX_PLAN.md)
+- [מדריך העברה](docs/maintenance/MIGRATION.md)
+
+### תרומה לפרויקט
+- [קוד התנהגות](docs/contributing/CODE_OF_CONDUCT.md)
+- [רישיון](docs/contributing/LICENSE.md)
+
+## התקנה 🛠️
 
 ```bash
-# שיבוט המאגר
-git clone https://github.com/eladjak/haderech-next.git
-cd haderech-next
-
 # התקנת תלויות
-npm install
+pnpm install
 
 # הגדרת משתני סביבה
 cp .env.example .env.local
-# עריכת .env.local עם הערכים המתאימים
 
-# הרצת הפרויקט בסביבת פיתוח
-npm run dev
+# הרצת הפרויקט
+pnpm dev
 ```
 
-## 🗺️ מפת דרכים
+## טכנולוגיות 💻
 
-ראה [ROADMAP.md](ROADMAP.md) לפירוט מלא של תכנית הפיתוח.
+- Next.js 14
+- TypeScript
+- Supabase
+- Tailwind CSS
+- OpenAI
 
-## 📚 תיעוד
+## תכונות עיקריות ⭐
 
-- [תיעוד API](docs/api.md)
-- [מדריך למפתח](docs/developer-guide.md)
-- [ארכיטקטורה](docs/architecture.md)
-- [מדריך תרומה](CONTRIBUTING.md)
+- מערכת קורסים אינטראקטיבית
+- AI מותאם אישית
+- קהילה תומכת
+- מעקב התקדמות
+- תמיכה בעברית ואנגלית
 
-## 🧪 בדיקות
+## פיתוח 🔧
 
 ```bash
-# הרצת כל הבדיקות
-npm test
+# בדיקות
+pnpm test
 
-# הרצת בדיקות עם כיסוי
-npm run test:coverage
+# בדיקת טיפוסים
+pnpm type-check
 
-# הרצת בדיקות בזמן פיתוח
-npm run test:watch
+# בדיקת לינטינג
+pnpm lint
+
+# בנייה לייצור
+pnpm build
 ```
 
-## 🤝 תרומה
+## תרומה 🤝
 
-אנחנו מעריכים כל תרומה! אנא קראו את [מדריך התרומה](CONTRIBUTING.md) לפני שתתחילו.
+אנחנו מזמינים אתכם לתרום לפרויקט! אנא קראו את [הנחיות התרומה](docs/contributing/CONTRIBUTING.md) לפני שאתם מתחילים.
 
-## 📄 רישיון
+## רישיון 📄
 
-פרויקט זה מופץ תחת רישיון MIT. ראה קובץ [LICENSE](LICENSE) לפרטים נוספים.
-
-## 👥 צוות
-
-- **אלעד ג'קובס** - מייסד ומפתח ראשי
-- תרומות נוספות מהקהילה
-
-## 📞 יצירת קשר
-
-- אימייל: [eladjak@gmail.com](mailto:eladjak@gmail.com)
-- טוויטר: [@eladjak](https://twitter.com/eladjak)
-- אתר: [haderech.co.il](https://haderech.co.il)
+פרויקט זה מופץ תחת רישיון MIT. ראו [LICENSE.md](docs/contributing/LICENSE.md) למידע נוסף.

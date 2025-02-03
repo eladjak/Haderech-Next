@@ -1,24 +1,25 @@
-import { useCallback } from 'react';
-import { he } from '@/locales/he';
+import he from '@/locales/he.json'
 
-type TranslationKey = keyof typeof he | string;
+type LocaleKey = string
+type LocaleValue = string | Record<string, LocaleValue>
 
-export const useLocalization = () => {
-  const t = useCallback((key: TranslationKey, params?: Record<string, string | number>) => {
-    let translation = key.split('.').reduce((obj: any, k) => obj?.[k], he) || key;
-
-    if (params) {
-      Object.entries(params).forEach(([param, value]) => {
-        translation = translation.replace(`{{${param}}}`, value.toString());
-      });
+function getNestedValue(obj: Record<string, LocaleValue>, path: string[]): string | undefined {
+  let current = obj
+  for (const key of path) {
+    if (typeof current !== 'object' || current === null) {
+      return undefined
     }
+    current = current[key] as Record<string, LocaleValue>
+  }
+  return typeof current === 'string' ? current : undefined
+}
 
-    return translation;
-  }, []);
+export function useLocalization() {
+  const t = (key: LocaleKey): string => {
+    const path = key.split('.')
+    const value = getNestedValue(he, path)
+    return value || key
+  }
 
-  return {
-    t,
-    currentLocale: 'he',
-    direction: 'rtl' as const,
-  };
-}; 
+  return { t }
+} 

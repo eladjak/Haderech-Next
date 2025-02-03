@@ -1,18 +1,10 @@
-import { Share } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Share } from 'lucide-react'
 
 interface ReferralManagementProps {
   referralCode: string
-  onShare: () => void
+  onShare: (code: string) => void
 }
 
 export function ReferralManagement({ referralCode, onShare }: ReferralManagementProps) {
@@ -20,26 +12,19 @@ export function ReferralManagement({ referralCode, onShare }: ReferralManagement
     <Card>
       <CardHeader>
         <CardTitle>הזמן חברים</CardTitle>
-        <CardDescription>
-          שתף את קוד ההזמנה שלך וקבל הטבות מיוחדות כשחברים מצטרפים
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Input
-            value={referralCode}
-            readOnly
-            className="font-mono"
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onShare}
-          >
-            <Share className="h-4 w-4" />
-            <span className="sr-only">שתף קוד הזמנה</span>
-          </Button>
+        <div className="rounded-lg border p-4">
+          <div className="text-sm font-medium">קוד הזמנה</div>
+          <div className="mt-1 text-2xl font-bold">{referralCode}</div>
         </div>
+        <Button
+          className="w-full"
+          onClick={() => onShare(referralCode)}
+        >
+          <Share className="mr-2 h-4 w-4" />
+          שתף קוד הזמנה
+        </Button>
       </CardContent>
     </Card>
   )

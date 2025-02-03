@@ -22,7 +22,7 @@ interface RouteParams {
  * 
  * @requires Authentication
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
  * @returns {Promise<NextResponse>} JSON response containing the progress details or error message
  * 
@@ -36,7 +36,7 @@ interface RouteParams {
  * }
  * ```
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(

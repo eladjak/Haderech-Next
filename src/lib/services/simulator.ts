@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 import { createClient } from '@supabase/supabase-js'
 import { env } from '@/env.mjs'
+import type { ChatCompletionMessageParam } from 'openai/resources/chat'
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -91,23 +92,27 @@ export async function processUserMessage(
  */
 async function generatePartnerResponse(state: SimulationState): Promise<SimulationState> {
   try {
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: 'system',
+        content: `אתה משתתף בסימולציית דייט. 
+        הקונטקסט הוא: ${state.context}
+        עליך להגיב כבן/בת הזוג בצורה טבעית ואותנטית.
+        התשובות צריכות להיות קצרות (2-3 משפטים) ולשקף את מצב הרוח הנוכחי:
+        מצב רוח: ${state.emotionalState.mood}
+        רמת עניין: ${state.emotionalState.interest}
+        רמת נוחות: ${state.emotionalState.comfort}`,
+        name: 'system'
+      },
+      ...state.messages.map(msg => ({
+        role: msg.speaker === 'user' ? 'user' : 'assistant',
+        content: msg.content,
+        name: msg.speaker === 'user' ? 'user' : 'assistant'
+      }))
+    ]
+
     const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: `אתה משתתף בסימולציית דייט. 
-          הקונטקסט הוא: ${state.context}
-          עליך להגיב כבן/בת הזוג בצורה טבעית ואותנטית.
-          התשובות צריכות להיות קצרות (2-3 משפטים) ולשקף את מצב הרוח הנוכחי:
-          מצב רוח: ${state.emotionalState.mood}
-          רמת עניין: ${state.emotionalState.interest}
-          רמת נוחות: ${state.emotionalState.comfort}`
-        },
-        ...state.messages.map(msg => ({
-          role: msg.speaker === 'user' ? 'user' : 'assistant',
-          content: msg.content
-        }))
-      ],
+      messages,
       model: 'gpt-4',
       temperature: 0.7,
       max_tokens: 150
@@ -146,26 +151,30 @@ async function updateEmotionalState(
   lastResponse: string
 ): Promise<EmotionalState> {
   try {
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: 'system',
+        content: `נתח את השיחה האחרונה וקבע את המצב הרגשי החדש.
+        התייחס למצב הקודם:
+        מצב רוח: ${state.emotionalState.mood}
+        רמת עניין: ${state.emotionalState.interest}
+        רמת נוחות: ${state.emotionalState.comfort}
+        
+        החזר תשובה בפורמט הבא בדיוק:
+        mood: positive/neutral/negative
+        interest: 0-100
+        comfort: 0-100`,
+        name: 'system'
+      },
+      {
+        role: 'user',
+        content: `התגובה האחרונה הייתה: ${lastResponse}`,
+        name: 'user'
+      }
+    ]
+
     const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: `נתח את השיחה האחרונה וקבע את המצב הרגשי החדש.
-          התייחס למצב הקודם:
-          מצב רוח: ${state.emotionalState.mood}
-          רמת עניין: ${state.emotionalState.interest}
-          רמת נוחות: ${state.emotionalState.comfort}
-          
-          החזר תשובה בפורמט הבא בדיוק:
-          mood: positive/neutral/negative
-          interest: 0-100
-          comfort: 0-100`
-        },
-        {
-          role: 'user',
-          content: `התגובה האחרונה הייתה: ${lastResponse}`
-        }
-      ],
+      messages,
       model: 'gpt-4',
       temperature: 0.3,
       max_tokens: 50

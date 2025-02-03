@@ -4,10 +4,9 @@
  * updating, and deleting specific posts. Includes authentication and authorization checks.
  */
 
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase'
 
 interface RouteParams {
   params: {
@@ -18,20 +17,21 @@ interface RouteParams {
 /**
  * GET /api/forum/[id]
  * 
- * Retrieves detailed information about a specific forum post, including author details,
- * comments, and comment authors.
+ * Retrieves a specific forum post with all its details.
  * 
- * @param {Request} request - The incoming request object
+ * @requires Authentication
+ * 
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the post ID
- * @returns {Promise<NextResponse>} JSON response containing the post details or error message
+ * @returns {Promise<NextResponse>} JSON response containing the post or error message
  * 
  * @example Response
  * ```json
  * {
  *   "id": "post1",
- *   "title": "Discussion Topic",
- *   "content": "Let's discuss this topic...",
- *   "created_at": "2024-01-20T12:00:00Z",
+ *   "title": "Post Title",
+ *   "content": "Post content...",
+ *   "created_at": "2024-01-01T12:00:00Z",
  *   "author": {
  *     "name": "John Doe",
  *     "avatar_url": "https://..."
@@ -39,10 +39,9 @@ interface RouteParams {
  *   "comments": [
  *     {
  *       "id": "comment1",
- *       "content": "Great discussion!",
- *       "created_at": "2024-01-20T12:30:00Z",
+ *       "content": "Great post!",
  *       "author": {
- *         "name": "Jane Smith",
+ *         "name": "Jane Doe",
  *         "avatar_url": "https://..."
  *       }
  *     }
@@ -50,47 +49,39 @@ interface RouteParams {
  * }
  * ```
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
-    
+    const supabase = createServerClient(cookieStore)
+
     const { data: post, error } = await supabase
       .from('forum_posts')
       .select(`
         *,
-        author:profiles(id, name, avatar_url),
+        author:users(*),
         comments:forum_comments(
-          id,
-          content,
-          created_at,
-          author:profiles(id, name, avatar_url)
+          *,
+          author:users(*),
+          replies:forum_comments(
+            *,
+            author:users(*)
+          )
         )
       `)
       .eq('id', params.id)
       .single()
 
     if (error) {
-      console.error('Error fetching forum post:', error)
+      console.error('Error fetching post:', error)
       return NextResponse.json(
-        { error: 'שגיאה בקבלת הפוסט' },
+        { error: 'Failed to fetch post' },
         { status: 500 }
       )
     }
 
     if (!post) {
       return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
+        { error: 'Post not found' },
         { status: 404 }
       )
     }
@@ -108,57 +99,37 @@ export async function GET(request: Request, { params }: RouteParams) {
 /**
  * PATCH /api/forum/[id]
  * 
- * Updates a specific forum post. Only the post author can update the post.
+ * Updates a forum post.
  * 
- * @requires Authentication
- * @requires Authorization: Post author only
+ * @requires Authentication & Authorization (Post Author)
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} request - The request object containing the updated post data
  * @param {RouteParams} params - Route parameters containing the post ID
  * @returns {Promise<NextResponse>} JSON response containing the updated post or error message
  * 
- * @example Request Body
+ * @example Request
  * ```json
  * {
- *   "title": "Updated Topic",
- *   "content": "Updated discussion content..."
+ *   "title": "Updated Title",
+ *   "content": "Updated content..."
  * }
  * ```
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
-    
+    const supabase = createServerClient(cookieStore)
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get post data
-    const { title, content } = await request.json()
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: 'Title and content are required' },
-        { status: 400 }
-      )
-    }
-
-    // Verify post author
+    // Get post to verify ownership
     const { data: post } = await supabase
       .from('forum_posts')
       .select('author_id')
@@ -167,30 +138,48 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (!post) {
       return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
+        { error: 'Post not found' },
         { status: 404 }
       )
     }
 
+    // Verify post ownership
     if (post.author_id !== session.user.id) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authorized to update this post' },
         { status: 403 }
       )
     }
 
+    // Get update data from request
+    const updates = await request.json()
+
     // Update post
     const { data: updatedPost, error } = await supabase
       .from('forum_posts')
-      .update({ title, content })
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', params.id)
-      .select()
+      .select(`
+        *,
+        author:users(*),
+        comments:forum_comments(
+          *,
+          author:users(*),
+          replies:forum_comments(
+            *,
+            author:users(*)
+          )
+        )
+      `)
       .single()
 
     if (error) {
-      console.error('Error updating forum post:', error)
+      console.error('Error updating post:', error)
       return NextResponse.json(
-        { error: 'שגיאה בעדכון הפוסט' },
+        { error: 'Failed to update post' },
         { status: 500 }
       )
     }
@@ -208,40 +197,29 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 /**
  * DELETE /api/forum/[id]
  * 
- * Deletes a specific forum post and its associated comments. Only the post author can delete the post.
+ * Deletes a forum post.
  * 
- * @requires Authentication
- * @requires Authorization: Post author only
+ * @requires Authentication & Authorization (Post Author)
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the post ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
-    
+    const supabase = createServerClient(cookieStore)
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Verify post author
+    // Get post to verify ownership
     const { data: post } = await supabase
       .from('forum_posts')
       .select('author_id')
@@ -250,33 +228,34 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     if (!post) {
       return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
+        { error: 'Post not found' },
         { status: 404 }
       )
     }
 
+    // Verify post ownership
     if (post.author_id !== session.user.id) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Not authorized to delete this post' },
         { status: 403 }
       )
     }
 
-    // Delete post and its comments (cascade delete)
+    // Delete post (cascade will handle related records)
     const { error } = await supabase
       .from('forum_posts')
       .delete()
       .eq('id', params.id)
 
     if (error) {
-      console.error('Error deleting forum post:', error)
+      console.error('Error deleting post:', error)
       return NextResponse.json(
-        { error: 'שגיאה במחיקת הפוסט' },
+        { error: 'Failed to delete post' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'פוסט נמחק בהצלחה' })
+    return NextResponse.json({ message: 'Post deleted successfully' })
   } catch (error) {
     console.error('Error in DELETE /api/forum/[id]:', error)
     return NextResponse.json(

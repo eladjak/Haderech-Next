@@ -4,10 +4,14 @@
  * comments for a post and adding new comments. Includes authentication checks and comment validation.
  */
 
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { Database } from '@/types/supabase'
+
+type Tables = Database['public']['Tables']
+type ForumComment = Tables['forum_comments']['Row']
+type User = Tables['users']['Row']
 
 interface RouteParams {
   params: {
@@ -15,64 +19,75 @@ interface RouteParams {
   }
 }
 
+interface CommentWithRelations extends ForumComment {
+  author: User
+  replies: (ForumComment & { author: User })[]
+}
+
 /**
  * GET /api/forum/[id]/comments
  * 
- * Retrieves all comments for a specific forum post, including author information for each comment.
- * Comments are ordered by creation date, with oldest comments first.
+ * Retrieves all comments for a specific forum post.
  * 
- * @param {Request} request - The incoming request object
+ * @requires Authentication
+ * 
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the post ID
- * @returns {Promise<NextResponse>} JSON response containing an array of comments or error message
+ * @returns {Promise<NextResponse>} JSON response containing the comments or error message
  * 
  * @example Response
  * ```json
  * [
  *   {
  *     "id": "comment1",
- *     "content": "Great discussion!",
- *     "created_at": "2024-01-20T12:00:00Z",
+ *     "content": "Great post!",
+ *     "created_at": "2024-01-01T12:00:00Z",
  *     "author": {
  *       "name": "John Doe",
  *       "avatar_url": "https://..."
- *     }
+ *     },
+ *     "replies": [
+ *       {
+ *         "id": "reply1",
+ *         "content": "Thanks!",
+ *         "author": {
+ *           "name": "Jane Doe",
+ *           "avatar_url": "https://..."
+ *         }
+ *       }
+ *     ]
  *   }
  * ]
  * ```
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
-    
+    const supabase = createServerClient(cookieStore)
+
     const { data: comments, error } = await supabase
       .from('forum_comments')
       .select(`
         *,
-        author:profiles(name, avatar_url)
+        author:users(*),
+        replies:forum_comments(
+          *,
+          author:users(*)
+        )
       `)
       .eq('post_id', params.id)
-      .order('created_at', { ascending: true })
-    
+      .is('parent_id', null)
+      .order('created_at', { ascending: false })
+
     if (error) {
       console.error('Error fetching comments:', error)
       return NextResponse.json(
-        { error: 'שגיאה בקבלת התגובות' },
+        { error: 'Failed to fetch comments' },
         { status: 500 }
       )
     }
-    
-    return NextResponse.json(comments)
+
+    return NextResponse.json(comments as CommentWithRelations[])
   } catch (error) {
     console.error('Error in GET /api/forum/[id]/comments:', error)
     return NextResponse.json(
@@ -85,92 +100,100 @@ export async function GET(request: Request, { params }: RouteParams) {
 /**
  * POST /api/forum/[id]/comments
  * 
- * Creates a new comment on a forum post. Only authenticated users can comment.
+ * Creates a new comment on a forum post.
  * 
  * @requires Authentication
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} request - The request object containing the comment data
  * @param {RouteParams} params - Route parameters containing the post ID
  * @returns {Promise<NextResponse>} JSON response containing the created comment or error message
  * 
- * @example Request Body
+ * @example Request
  * ```json
  * {
- *   "content": "This is my comment..."
+ *   "content": "Great post!",
+ *   "parent_id": "comment1" // Optional, for replies
  * }
  * ```
  */
+interface CreateCommentBody {
+  content: string
+  parent_id?: string | null
+}
+
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-        },
-      }
-    )
-    
+    const supabase = createServerClient(cookieStore)
+
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
-    
-    // Get comment data
-    const { content } = await request.json()
+
+    // Get comment data from request
+    const { content, parent_id }: CreateCommentBody = await request.json()
+
+    // Validate content
     if (!content) {
       return NextResponse.json(
-        { error: 'Content is required' },
+        { error: 'Comment content is required' },
         { status: 400 }
       )
     }
-    
-    // Verify post exists
-    const { data: post } = await supabase
-      .from('forum_posts')
-      .select('id')
-      .eq('id', params.id)
-      .single()
-    
-    if (!post) {
-      return NextResponse.json(
-        { error: 'פוסט לא נמצא' },
-        { status: 404 }
-      )
+
+    // If this is a reply, verify parent comment exists
+    if (parent_id) {
+      const { data: parentComment } = await supabase
+        .from('forum_comments')
+        .select('id')
+        .eq('id', parent_id)
+        .eq('post_id', params.id)
+        .single()
+
+      if (!parentComment) {
+        return NextResponse.json(
+          { error: 'Parent comment not found' },
+          { status: 404 }
+        )
+      }
     }
-    
+
     // Create comment
     const { data: comment, error } = await supabase
       .from('forum_comments')
       .insert({
-        content,
         post_id: params.id,
         author_id: session.user.id,
-        created_at: new Date().toISOString()
+        content,
+        parent_id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        likes: 0
       })
       .select(`
         *,
-        author:profiles(name, avatar_url)
+        author:users(*),
+        replies:forum_comments(
+          *,
+          author:users(*)
+        )
       `)
       .single()
-    
+
     if (error) {
       console.error('Error creating comment:', error)
       return NextResponse.json(
-        { error: 'שגיאה ביצירת תגובה' },
+        { error: 'Failed to create comment' },
         { status: 500 }
       )
     }
-    
-    return NextResponse.json(comment, { status: 201 })
+
+    return NextResponse.json(comment as CommentWithRelations)
   } catch (error) {
     console.error('Error in POST /api/forum/[id]/comments:', error)
     return NextResponse.json(

@@ -20,7 +20,7 @@ interface RouteParams {
  * 
  * Retrieves all comments for a specific lesson.
  * 
- * @param {Request} request - The incoming request object
+ * @param {Request} _ - The request object (unused)
  * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
  * @returns {Promise<NextResponse>} JSON response containing the lesson comments or error message
  * 
@@ -49,7 +49,7 @@ interface RouteParams {
  * ]
  * ```
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(
@@ -66,37 +66,21 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     const { data: comments, error } = await supabase
       .from('lesson_comments')
-      .select(`
-        *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        ),
-        replies!parent_id (
-          *,
-          user:profiles!user_id (
-            id,
-            name,
-            avatar_url
-          )
-        )
-      `)
+      .select('*, author:profiles(*)')
       .eq('lesson_id', params.lessonId)
-      .is('parent_id', null)
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching comments:', error)
+      console.error('Error fetching lesson comments:', error)
       return NextResponse.json(
-        { error: 'Failed to fetch comments' },
+        { error: 'Failed to fetch lesson comments' },
         { status: 500 }
       )
     }
 
     return NextResponse.json(comments)
   } catch (error) {
-    console.error('Comments GET error:', error)
+    console.error('Error in GET /api/courses/[id]/lessons/[lessonId]/comments:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

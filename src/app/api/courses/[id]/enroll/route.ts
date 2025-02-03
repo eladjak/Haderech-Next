@@ -123,7 +123,7 @@ export async function POST(_: Request, { params }: RouteParams) {
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies()
     const supabase = createServerClient<Database>(
