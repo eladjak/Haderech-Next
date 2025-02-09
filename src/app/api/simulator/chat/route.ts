@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { scenarioId, message, sessionId } = body;
+    const { scenarioId, message } = body;
 
     if (!scenarioId || !message) {
       return NextResponse.json({ error: "חסרים פרטים בבקשה" }, { status: 400 });
@@ -106,40 +106,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "תרחיש לא נמצא" }, { status: 404 });
     }
 
-    // בדיקה אם יש סשן קיים או שצריך ליצור חדש
-    let currentSessionId = sessionId;
-    if (!currentSessionId) {
-      const { data: newSession, error: sessionError } = await supabase
-        .from("simulator_sessions")
-        .insert({
-          user_id: session.user.id,
-          scenario_id: scenarioId,
-          status: "active",
-          messages: [],
-        })
-        .select()
-        .single();
-
-      if (sessionError) {
-        throw new Error("שגיאה ביצירת סשן חדש");
-      }
-
-      currentSessionId = newSession.id;
-    }
-
-    // שליפת ההיסטוריה של ההודעות מהסשן
-    const { data: sessionData, error: historyError } = await supabase
-      .from("simulator_sessions")
-      .select("messages")
-      .eq("id", currentSessionId)
-      .single();
-
-    if (historyError) {
-      throw new Error("שגיאה בשליפת היסטוריית ההודעות");
-    }
-
-    const previousMessages = sessionData.messages as Message[];
-
     // יצירת הנחיות מערכת מותאמות אישית
     const systemPrompt = createSystemPrompt(
       scenario.title,
@@ -149,10 +115,6 @@ export async function POST(request: Request) {
 
     const messages: ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
-      ...previousMessages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
       { role: "user", content: message },
     ];
 
@@ -258,38 +220,17 @@ export async function POST(request: Request) {
       assistantMessage.function_call.arguments,
     );
 
-    // עדכון היסטוריית ההודעות בסשן
-    const updatedMessages: Message[] = [
-      ...previousMessages.map((msg) =>
-        convertToMessage(
-          msg.content || "",
-          msg.role as "user" | "assistant" | "system",
-        ),
-      ),
-      convertToMessage(message, "user"),
-      convertToMessage(
-        assistantMessage.content || "",
-        "assistant",
-        assistantMessage.function_call,
-      ),
-    ];
-
-    const { error: updateError } = await supabase
-      .from("simulator_sessions")
-      .update({
-        messages: updatedMessages,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", currentSessionId);
-
-    if (updateError) {
-      throw new Error("שגיאה בעדכון היסטוריית ההודעות");
-    }
-
     const currentState: SimulationState = {
-      id: currentSessionId,
+      id: uuidv4(),
       scenario,
-      messages: updatedMessages,
+      messages: [
+        convertToMessage(message, "user"),
+        convertToMessage(
+          assistantMessage.content || "",
+          "assistant",
+          assistantMessage.function_call,
+        ),
+      ],
       status: "active",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
