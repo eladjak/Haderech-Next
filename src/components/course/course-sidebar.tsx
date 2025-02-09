@@ -3,7 +3,8 @@
  * @description Sidebar component for course pages showing course details and enrollment options
  */
 
-import type { CourseWithRelations } from "@/types/courses";
+import { Clock, Users, BookOpen } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,7 +14,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Clock, Users, BookOpen } from "lucide-react";
+
+import type { CourseWithRelations } from "@/types/courses";
+
 
 interface CourseSidebarProps {
   course: CourseWithRelations;
@@ -63,7 +66,10 @@ export function CourseSidebar({
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" asChild>
+            <Button
+              className="w-full"
+              asChild
+            >
               <a href={`/courses/${course.id}/enroll`}>
                 {course.price === 0 ? "הרשם עכשיו" : "קנה עכשיו"}
               </a>

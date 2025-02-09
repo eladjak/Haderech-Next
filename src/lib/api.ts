@@ -5,6 +5,8 @@
  */
 
 import { createBrowserClient } from "@supabase/ssr";
+import { createSupabaseClient } from "./supabase";
+
 import type { Database } from "@/types/supabase";
 
 /**
@@ -207,3 +209,139 @@ export async function getLatestForumPosts(): Promise<ForumPost[]> {
     replies_count: post.replies_count[0]?.count || 0,
   }));
 }
+
+type ApiResponse<T> = {
+  data: T | null;
+  error: Error | null;
+};
+
+const supabaseClient = createSupabaseClient();
+
+export const fetchCourses = async (): Promise<
+  ApiResponse<Database["public"]["Tables"]["courses"]["Row"][]>
+> => {
+  try {
+    const { data, error } = await supabaseClient.from("courses").select("*");
+
+    if (error) {
+      console.error("Error fetching courses:", error.message);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Unexpected error fetching courses:", error);
+    return { data: null, error: error as Error };
+  }
+};
+
+export const fetchCourse = async (
+  id: string,
+): Promise<ApiResponse<Database["public"]["Tables"]["courses"]["Row"]>> => {
+  try {
+    const { data, error } = await supabaseClient
+      .from("courses")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching course:", error.message);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Unexpected error fetching course:", error);
+    return { data: null, error: error as Error };
+  }
+};
+
+export const fetchLessons = async (
+  courseId: string,
+): Promise<ApiResponse<Database["public"]["Tables"]["lessons"]["Row"][]>> => {
+  try {
+    const { data, error } = await supabaseClient
+      .from("lessons")
+      .select("*")
+      .eq("course_id", courseId);
+
+    if (error) {
+      console.error("Error fetching lessons:", error.message);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Unexpected error fetching lessons:", error);
+    return { data: null, error: error as Error };
+  }
+};
+
+export const fetchLesson = async (
+  id: string,
+): Promise<ApiResponse<Database["public"]["Tables"]["lessons"]["Row"]>> => {
+  try {
+    const { data, error } = await supabaseClient
+      .from("lessons")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching lesson:", error.message);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Unexpected error fetching lesson:", error);
+    return { data: null, error: error as Error };
+  }
+};
+
+export const searchContent = async (
+  query: string,
+  filters?: {
+    type?: string;
+    category?: string;
+    level?: string;
+    limit?: number;
+  },
+): Promise<ApiResponse<Database["public"]["Tables"]["courses"]["Row"][]>> => {
+  try {
+    let queryBuilder = supabaseClient.from("courses").select("*");
+
+    if (query) {
+      queryBuilder = queryBuilder.ilike("title", `%${query}%`);
+    }
+
+    if (filters?.type) {
+      queryBuilder = queryBuilder.eq("type", filters.type);
+    }
+
+    if (filters?.category) {
+      queryBuilder = queryBuilder.eq("category", filters.category);
+    }
+
+    if (filters?.level) {
+      queryBuilder = queryBuilder.eq("level", filters.level);
+    }
+
+    if (filters?.limit) {
+      queryBuilder = queryBuilder.limit(filters.limit);
+    }
+
+    const { data, error } = await queryBuilder;
+
+    if (error) {
+      console.error("Error searching content:", error.message);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Unexpected error during search:", error);
+    return { data: null, error: error as Error };
+  }
+};

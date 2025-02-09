@@ -1,148 +1,222 @@
-import type { Metadata } from "next";
-import Image from "next/image";
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { ForumComment } from "@/components/forum-comment";
+import { ForumPost } from "@/components/forum-post";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { formatDate } from "@/lib/utils";
-import { EXAMPLE_POSTS } from "@/constants/forum";
-import type { ForumPost } from "@/types/forum";
+import { useToast } from "@/components/ui/use-toast";
 
-interface ForumPostPageProps {
-  params: {
-    id: string;
-  };
-}
+import type { ForumPost as ForumPostType } from "@/types/api";
 
-const EXAMPLE_POST: ForumPost = {
-  ...EXAMPLE_POSTS[0],
-  comments: [
-    {
-      id: "1",
-      content:
-        "חשוב מאוד לתרגל הקשבה פעילה. נסו להבין את נקודת המבט של בן/בת הזוג מבלי לשפוט או להתגונן.",
-      author: {
-        id: "2",
-        name: "יוסי לוי",
-        avatar: "/avatars/2.jpg",
-      },
-      createdAt: "2024-01-20T11:30:00.000Z",
+const formSchema = z.object({
+  content: z
+    .string()
+    .min(2, {
+      message: "התוכן חייב להכיל לפחות 2 תווים",
+    })
+    .max(1000, {
+      message: "התוכן יכול להכיל עד 1000 תווים",
+    }),
+});
+
+const EXAMPLE_POST: ForumPostType = {
+  id: "1",
+  title: "איך להתחיל ללמוד תכנות?",
+  content:
+    "אני רוצה להתחיל ללמוד תכנות אבל לא יודע מאיפה להתחיל. אשמח להמלצות!",
+  author: {
+    id: "1",
+    name: "יוסי כהן",
+    email: "yossi@example.com",
+    avatar_url: null,
+    bio: null,
+  },
+  user: {
+    id: "1",
+    name: "יוסי כהן",
+    email: "yossi@example.com",
+    avatar_url: null,
+    bio: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    role: "user",
+    settings: {
+      notifications: true,
+      language: "he",
+      theme: "light",
     },
-    {
-      id: "2",
-      content:
-        "אנחנו משתמשים בטכניקת 'זמן שקט' - כשאנחנו מרגישים שהדיון מתלהט, לוקחים הפסקה של 20 דקות להירגע ולחשוב.",
-      author: {
-        id: "3",
-        name: "מיכל ברק",
-        avatar: "/avatars/3.jpg",
-      },
-      createdAt: "2024-01-20T12:15:00.000Z",
-    },
-  ],
+  },
+  userId: "1",
+  createdAt: new Date("2024-01-01T00:00:00Z"),
+  updatedAt: new Date("2024-01-01T00:00:00Z"),
+  likes: 5,
+  likes_count: 5,
+  comments_count: 2,
+  comments: [],
+  tags: ["תכנות", "התחלה", "המלצות"],
+  is_liked: false,
 };
 
-export async function generateMetadata({
-  params,
-}: ForumPostPageProps): Promise<Metadata> {
-  const post = EXAMPLE_POSTS.find((post) => post.id === params.id);
+export default function Page({ params }: { params: { id: string } }) {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [post, setPost] = useState<ForumPostType>(EXAMPLE_POST);
+  const [isLoading, setIsLoading] = useState(false);
 
-  if (!post) {
-    return {
-      title: "פוסט לא נמצא - פורום הדרך",
-      description: "הפוסט המבוקש לא נמצא",
-    };
-  }
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      content: "",
+    },
+  });
 
-  return {
-    title: `${post.title} - פורום הדרך`,
-    description: post.content,
-  };
-}
+  useEffect(() => {
+    async function fetchPost() {
+      try {
+        const response = await fetch(`/api/posts/${params.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch post");
+        }
+        const data = await response.json();
+        setPost(data);
+      } catch (error) {
+        console.error("Error fetching post:", error);
+        toast({
+          title: "שגיאה",
+          description: "אירעה שגיאה בטעינת הפוסט",
+          variant: "destructive",
+        });
+      }
+    }
 
-export default function ForumPostPage({ params }: ForumPostPageProps) {
-  const post = EXAMPLE_POSTS.find((post) => post.id === params.id);
+    fetchPost();
+  }, [params.id, toast]);
 
-  if (!post) {
-    return (
-      <div className="container py-8">
-        <h1 className="text-3xl font-bold mb-4">פוסט לא נמצא</h1>
-        <p className="text-muted-foreground">הפוסט המבוקש לא נמצא במערכת.</p>
-      </div>
-    );
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsLoading(true);
+
+      if (!session?.user) {
+        router.push("/login");
+        return;
+      }
+
+      const response = await fetch(`/api/posts/${params.id}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response?.ok) {
+        toast({
+          title: "שגיאה",
+          description: "אירעה שגיאה בשליחת התגובה",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const comment = await response.json();
+
+      setPost((prev) => ({
+        ...prev,
+        comments: [...prev.comments, comment],
+      }));
+
+      form.reset();
+
+      toast({
+        title: "התגובה נשלחה בהצלחה",
+        description: "התגובה שלך נוספה לדיון",
+      });
+    } catch (error) {
+      toast({
+        title: "שגיאה",
+        description: "אירעה שגיאה בשליחת התגובה",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <div className="container py-8">
-      <Card className="p-6 mb-8">
-        <div className="flex items-start gap-4 mb-6">
-          <Image
-            src={post.author.avatar}
-            alt={post.author.name}
-            width={40}
-            height={40}
-            className="rounded-full"
-          />
-          <div>
-            <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>{post.author.name}</span>
-              <span>{formatDate(post.createdAt)}</span>
-              <span>{post.views} צפיות</span>
-              <span>{post.likes} לייקים</span>
-            </div>
-          </div>
-        </div>
-        <p className="text-lg mb-6">{post.content}</p>
-        {post.tags && (
-          <div className="flex gap-2">
-            {post.tags.map((tag) => (
-              <span key={tag} className="px-2 py-1 text-xs bg-muted rounded-md">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </Card>
+      <div className="space-y-8">
+        <ForumPost post={post} />
 
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">תגובות</h2>
-        <div className="grid gap-6">
-          {EXAMPLE_POST.comments?.map((comment) => (
-            <Card key={comment.id} className="p-4">
-              <div className="flex items-start gap-4">
-                <Image
-                  src={comment.author.avatar}
-                  alt={comment.author.name}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
+        <Card>
+          <CardHeader>
+            <CardTitle>תגובות</CardTitle>
+            <CardDescription>הוסף את התגובה שלך לדיון</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          placeholder="הוסף תגובה..."
+                          className="h-32 resize-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <div>
-                  <div className="flex items-center gap-2 text-sm mb-2">
-                    <span className="font-medium">{comment.author.name}</span>
-                    <span className="text-muted-foreground">
-                      {formatDate(comment.createdAt)}
-                    </span>
-                  </div>
-                  <p>{comment.content}</p>
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "שולח..." : "הוסף תגובה"}
+                  </Button>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+              </form>
+            </Form>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-4">הוספת תגובה</h2>
-        <div className="grid gap-4">
-          <Textarea
-            placeholder="כתבו את תגובתכם כאן..."
-            className="min-h-[120px]"
-          />
-          <div className="flex justify-end">
-            <Button>שליחת תגובה</Button>
-          </div>
-        </div>
+            <div className="mt-8 space-y-4">
+              {post.comments.map((comment) => (
+                <ForumComment
+                  key={comment.id}
+                  comment={comment}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

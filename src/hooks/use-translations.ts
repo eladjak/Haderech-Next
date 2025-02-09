@@ -6,6 +6,7 @@
  */
 
 import { useTranslation } from "react-i18next";
+
 import type { AvailableLanguages } from "@/locales";
 
 export function useTranslations() {

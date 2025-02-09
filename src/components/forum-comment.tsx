@@ -1,14 +1,17 @@
 "use client";
 
+import { MessageSquare, ThumbsUp, User } from "lucide-react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { MessageSquare, ThumbsUp, User } from "lucide-react";
+
+
 import type { ForumComment } from "@/types/api";
 
 interface ForumCommentProps {
@@ -29,7 +32,7 @@ export function ForumComment({
       <CardHeader>
         <div className="flex items-center gap-4">
           <Avatar>
-            <AvatarImage src={comment.author?.avatar_url} />
+            <AvatarImage src={comment.author?.avatar_url || undefined} />
             <AvatarFallback>
               {comment.author?.name?.[0] ?? <User className="h-4 w-4" />}
             </AvatarFallback>

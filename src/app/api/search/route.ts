@@ -7,7 +7,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface CourseSearchResult {
   id: string;
@@ -133,7 +133,11 @@ export async function GET(request: Request) {
         title: course.title,
         description: course.description,
         image_url: course.image_url,
-        instructor: course.instructor[0],
+        instructor: course.instructor[0] || {
+          id: "default",
+          name: "Unknown Instructor",
+          avatar_url: null,
+        },
       }));
     }
 

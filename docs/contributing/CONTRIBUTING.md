@@ -1,258 +1,233 @@
-# מדריך תרומה לפרויקט
-
-## 👋 ברוכים הבאים
-
-אנחנו שמחים שבחרת לתרום לפרויקט הדרך! מסמך זה יעזור לך להבין את תהליך התרומה ואת הסטנדרטים שלנו.
-
-## 🚀 איך להתחיל
-
-### 1. הגדרת סביבת פיתוח
-
-```bash
-# שיבוט הפרויקט
-git clone https://github.com/username/haderech.git
-
-# התקנת תלויות
-pnpm install
-
-# הגדרת משתני סביבה
-cp .env.example .env.local
-
-# הפעלת הפרויקט
-pnpm dev
-```
-
-### 2. בדיקת הקוד
-
-```bash
-# בדיקת טיפוסים
-pnpm type-check
-
-# בדיקת לינטינג
-pnpm lint
-
-# הרצת טסטים
-pnpm test
-```
-
-## 📝 תהליך התרומה
-
-### 1. בחירת משימה
-
-- בדוק את ה-Issues הפתוחים
-- בחר משימה שמעניינת אותך
-- הודע בתגובה שאתה עובד עליה
-
-### 2. יצירת Branch
-
-```bash
-# יצירת branch חדש
-git checkout -b feature/your-feature
-
-# עדכון מ-main
-git pull origin main
-```
-
-### 3. פיתוח
-
-- עקוב אחר הסטנדרטים
-- הוסף טסטים מתאימים
-- וודא שהכל עובד
-
-### 4. הגשת PR
-
-```bash
-# דחיפת השינויים
-git add .
-git commit -m "תיאור השינויים"
-git push origin feature/your-feature
-
-# יצירת PR ב-GitHub
-```
-
-## 🎯 סטנדרטים
-
-### 1. קוד
-
-```typescript
-// שמות משמעותיים
-const calculateTotal = (items: Item[]): number => {
-  return items.reduce((sum, item) => sum + item.price, 0);
-};
-
-// תיעוד ברור
-/**
- * מחשב את הסכום הכולל של הפריטים
- * @param items רשימת פריטים
- * @returns הסכום הכולל
- */
-```
-
-### 2. Commits
-
-```bash
-# פורמט ברור
-feat: הוספת תכונה חדשה
-fix: תיקון באג בלוגין
-docs: עדכון תיעוד
-test: הוספת טסטים
-```
-
-### 3. PR
-
-- תיאור מפורט
-- צילומי מסך אם רלוונטי
-- רשימת שינויים
-- תיוג מתאים
-
-## 🧪 בדיקות
-
-### 1. Unit Tests
-
-```typescript
-describe("calculateTotal", () => {
-  it("should calculate total correctly", () => {
-    const items = [{ price: 100 }, { price: 200 }];
-    expect(calculateTotal(items)).toBe(300);
-  });
-});
-```
-
-### 2. Integration Tests
-
-```typescript
-describe('ShoppingCart', () => {
-  it('should update total on item add', async () => {
-    const { getByText, findByText } = render(<ShoppingCart />);
-    await userEvent.click(getByText('הוסף פריט'));
-    expect(await findByText('סה"כ: ₪300')).toBeInTheDocument();
-  });
-});
-```
-
-## 📚 תיעוד
-
-### 1. קוד
-
-```typescript
-/**
- * רכיב להצגת פריט בעגלת קניות
- * @param item פריט לתצוגה
- * @param onRemove פונקציה להסרת הפריט
- */
-const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
-  // ...
-};
-```
-
-### 2. API
-
-```typescript
-/**
- * מחזיר את פרטי המשתמש
- * @param id מזהה המשתמש
- * @returns פרטי המשתמש
- * @throws אם המשתמש לא נמצא
- */
-const getUser = async (id: string): Promise<User> => {
-  // ...
-};
-```
-
-## 🔍 Code Review
-
-### 1. רשימת תיוג
-
-- [ ] הקוד עובר את כל הבדיקות
-- [ ] הקוד מפורמט נכון
-- [ ] יש טיפוסים מלאים
-- [ ] יש תיעוד מספק
-- [ ] אין קוד כפול
-- [ ] הקוד יעיל
-- [ ] יש טיפול בשגיאות
-
-### 2. תהליך
-
-1. בדיקת הקוד
-2. הערות בונות
-3. אישור השינויים
-4. מיזוג ל-main
-
-## 🎨 עיצוב
-
-### 1. UI
-
-```typescript
-// שימוש ב-Tailwind
-const Button = styled.button`
-  @apply bg-blue-500 text-white px-4 py-2 rounded;
-  @apply hover:bg-blue-600;
-  @apply focus:outline-none focus:ring-2;
-`;
-```
-
-### 2. UX
-
-- תגובתיות מהירה
-- הודעות ברורות
-- טעינה חלקה
-- נגישות מלאה
-
-## 📈 ביצועים
-
-### 1. אופטימיזציה
-
-```typescript
-// שימוש ב-useMemo
-const expensiveValue = useMemo(() => {
-  return computeExpensiveValue(prop);
-}, [prop]);
-
-// שימוש ב-useCallback
-const handleClick = useCallback(() => {
-  doSomething(prop);
-}, [prop]);
-```
-
-### 2. טעינה
-
-```typescript
-// טעינה מושהית
-const HeavyComponent = lazy(() => import('./HeavyComponent'));
-
-// טעינה מקדימה
-<Link href="/page" prefetch>
-  Go to Page
-</Link>
-```
-
-## 🔒 אבטחה
-
-### 1. אימות קלט
-
-```typescript
-// שימוש ב-Zod
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-```
-
-### 2. הרשאות
-
-```typescript
-// בדיקת הרשאות
-const checkPermission = (user: User, action: Action): boolean => {
-  return user.permissions.includes(action);
-};
-```
-
-## 📝 סיכום
-
-תודה על תרומתך! זכור:
-
-- לעקוב אחר הסטנדרטים
-- לבדוק את הקוד
-- לתעד היטב
-- לשתף פעולה
-- ליהנות מהתהליך
+# Contributing to HaDerech
+
+Thank you for your interest in contributing to HaDerech! This document provides guidelines and instructions for contributing to our educational platform.
+
+## Educational Mission
+
+Our mission is to create an engaging, effective learning platform that helps people improve their relationships and communication skills. When contributing, keep in mind:
+
+- Focus on user learning experience
+- Maintain educational integrity
+- Support diverse learning styles
+- Ensure content accuracy
+- Promote positive engagement
+
+## Development Setup
+
+1. **Prerequisites**
+
+   - Node.js 18+
+   - pnpm
+   - Git
+   - Understanding of educational principles
+
+2. **Local Setup**
+
+   ```bash
+   git clone https://github.com/your-username/haderech.git
+   cd haderech
+   pnpm install
+   pnpm dev
+   ```
+
+3. **Environment Variables**
+   Copy `.env.example` to `.env.local` and fill in the required values:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+   OPENAI_API_KEY=your_openai_key
+   ```
+
+## Development Workflow
+
+1. **Branch Naming**
+
+   - Feature: `feature/description`
+   - Bug fix: `fix/description`
+   - Documentation: `docs/description`
+   - Performance: `perf/description`
+   - Content: `content/description`
+   - Learning: `learn/description`
+
+2. **Commit Messages**
+   Follow conventional commits:
+
+   ```
+   feat: add new learning module
+   fix: improve feedback clarity
+   docs: update learning guides
+   content: add relationship scenarios
+   learn: enhance exercise flow
+   ai: improve response quality
+   ```
+
+3. **Code Style**
+
+   - Use TypeScript
+   - Follow ESLint rules
+   - Format with Prettier
+   - Write JSDoc comments
+   - Use meaningful variable names
+   - Keep functions small and focused
+   - Add educational context in comments
+
+4. **Testing**
+
+   - Write unit tests for components
+   - Test learning effectiveness
+   - Validate AI responses
+   - Check accessibility
+   - Test different learning paths
+
+   ```bash
+   pnpm test
+   pnpm test:e2e
+   pnpm test:ai
+   ```
+
+5. **Documentation**
+   - Update technical docs
+   - Document learning flows
+   - Add usage examples
+   - Include educational context
+   - Update learning guides
+
+## Educational Guidelines
+
+1. **Content Creation**
+
+   - Focus on clear learning objectives
+   - Support multiple learning styles
+   - Provide meaningful feedback
+   - Include practical examples
+   - Consider cultural sensitivity
+
+2. **AI Integration**
+
+   - Ensure response quality
+   - Maintain educational value
+   - Check for bias
+   - Support learning goals
+   - Monitor effectiveness
+
+3. **User Experience**
+
+   - Clear learning paths
+   - Intuitive navigation
+   - Meaningful feedback
+   - Progress tracking
+   - Engagement features
+
+4. **Accessibility**
+   - Support all learners
+   - Clear instructions
+   - Alternative formats
+   - Language support
+   - Cultural inclusion
+
+## Component Guidelines
+
+1. **Learning Components**
+
+   - Clear purpose
+   - Consistent structure
+   - Progress tracking
+   - Feedback mechanisms
+   - Accessibility support
+
+2. **UI Components**
+
+   - Follow design system
+   - Support RTL
+   - Implement proper types
+   - Add accessibility
+   - Consider learning context
+
+3. **Performance**
+   - Quick response times
+   - Efficient loading
+   - Smooth interactions
+   - Resource optimization
+   - Learning flow priority
+
+## Testing Guidelines
+
+1. **Educational Testing**
+
+   ```typescript
+   describe("LearningModule", () => {
+     it("should provide clear feedback", () => {
+       // Test implementation
+     });
+     it("should track progress correctly", () => {
+       // Test implementation
+     });
+   });
+   ```
+
+2. **AI Testing**
+
+   - Response quality
+   - Learning effectiveness
+   - Safety and appropriateness
+   - Performance metrics
+   - User satisfaction
+
+3. **User Testing**
+   - Learning outcomes
+   - User engagement
+   - Accessibility
+   - Cultural fit
+   - Technical performance
+
+## Review Process
+
+1. **Code Review**
+
+   - Technical quality
+   - Educational value
+   - User experience
+   - Performance impact
+   - Security considerations
+
+2. **Content Review**
+
+   - Educational accuracy
+   - Cultural sensitivity
+   - Language clarity
+   - Learning effectiveness
+   - User engagement
+
+3. **AI Review**
+   - Response quality
+   - Safety checks
+   - Performance metrics
+   - Learning impact
+   - User feedback
+
+## Deployment
+
+1. **Testing Environment**
+
+   - Feature validation
+   - Learning flow testing
+   - Performance checks
+   - AI validation
+   - User testing
+
+2. **Production**
+   - Staged rollout
+   - Monitoring setup
+   - Feedback collection
+   - Performance tracking
+   - Learning analytics
+
+## Need Help?
+
+- Check documentation
+- Join our Discord
+- Review learning guides
+- Ask in discussions
+- Contact mentors
+
+Thank you for contributing to better education! 🎓

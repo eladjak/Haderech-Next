@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ interface BreadcrumbsProps extends React.HTMLAttributes<HTMLElement> {
 
 const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(
   ({ segments, separator, className, ...props }, ref) => {
-    const defaultSeparator = <ChevronLeft className="h-4 w-4 mx-2" />;
+    const defaultSeparator = <ChevronLeft className="mx-2 h-4 w-4" />;
 
     return (
       <nav
@@ -37,7 +37,7 @@ const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(
                 href={segment.href}
                 className={cn(
                   "transition-colors hover:text-foreground",
-                  isLast && "text-foreground font-medium pointer-events-none",
+                  isLast && "pointer-events-none font-medium text-foreground",
                 )}
                 aria-current={isLast ? "page" : undefined}
               >

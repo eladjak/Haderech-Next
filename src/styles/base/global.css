@@ -1,0 +1,121 @@
+/* Import Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Assistant:wght@300;400;500;600;700&display=swap");
+
+/* Import Base Styles */
+@import "./variables.css";
+@import "./reset.css";
+
+/* Import Utils */
+@import "../utils/animations.css";
+@import "../utils/utilities.css";
+
+/* RTL Support */
+html {
+  direction: rtl;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-dark);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--brand-primary);
+  color: white;
+}
+
+/* Focus Ring */
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  @page {
+    margin: 2cm;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #404040;
+
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-tertiary: #bdbdbd;
+
+    --border-light: #404040;
+    --border-medium: #595959;
+    --border-dark: #737373;
+  }
+
+  img {
+    opacity: 0.8;
+    transition: opacity var(--transition-fast);
+  }
+
+  img:hover {
+    opacity: 1;
+  }
+}
+
+/* High Contrast Mode */
+@media (forced-colors: active) {
+  :root {
+    --brand-primary: CanvasText;
+    --brand-secondary: CanvasText;
+    --text-primary: CanvasText;
+    --text-secondary: CanvasText;
+    --text-tertiary: CanvasText;
+    --border-light: CanvasText;
+    --border-medium: CanvasText;
+    --border-dark: CanvasText;
+  }
+
+  * {
+    forced-color-adjust: none;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

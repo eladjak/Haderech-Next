@@ -8,8 +8,9 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { Database } from "@/types/supabase";
+
 import { env } from "@/env.mjs";
+import { Database } from "@/types/supabase";
 
 // Initialize Supabase client with environment variables
 export const supabase = createClient<Database>(

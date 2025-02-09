@@ -5,9 +5,11 @@
  * @description Ratings component for course pages showing user reviews
  */
 
+import { Star } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star } from "lucide-react";
+
 import type { CourseWithRelations } from "@/types/courses";
 
 interface CourseRatingsProps {
@@ -40,10 +42,13 @@ export function CourseRatings({ course, showAll = false }: CourseRatingsProps) {
           </div>
 
           {(showAll ? ratings : ratings.slice(0, 3)).map((rating) => (
-            <div key={rating.id} className="space-y-2">
+            <div
+              key={rating.id}
+              className="space-y-2"
+            >
               <div className="flex items-center gap-2">
                 <Avatar>
-                  <AvatarImage src={rating.user.avatar_url} />
+                  <AvatarImage src={rating.user.avatar_url || undefined} />
                   <AvatarFallback>{rating.user.name[0]}</AvatarFallback>
                 </Avatar>
                 <div>

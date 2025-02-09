@@ -1,6 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CourseRating } from "@/components/course-rating";
 import { Star } from "lucide-react";
+
+import { CourseRating } from "@/components/course-rating";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import type { Course } from "@/types/api";
 
 interface CourseRatingsProps {
@@ -42,7 +44,10 @@ export function CourseRatings({ course, className }: CourseRatingsProps) {
       </CardHeader>
       <CardContent className="grid gap-4">
         {course.ratings.map((rating) => (
-          <CourseRating key={rating.id} rating={rating} />
+          <CourseRating
+            key={rating.id}
+            rating={rating}
+          />
         ))}
       </CardContent>
     </Card>

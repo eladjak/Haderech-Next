@@ -1,93 +1,106 @@
 "use client";
 
-import type { CourseWithRelations } from "@/types/courses";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronDown, ChevronUp, Play } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Lock, Play, CheckCircle } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+import type { Course, Section, Lesson } from "@/types/api";
 
 interface CourseContentProps {
-  course: CourseWithRelations;
-  isEnrolled: boolean;
-  isInstructor?: boolean;
+  course: Course;
+  className?: string;
 }
 
-export function CourseContent({
-  course,
-  isEnrolled,
-  isInstructor,
-}: CourseContentProps) {
-  const sortedLessons = (course.lessons || []).sort(
-    (a, b) => a.order - b.order,
-  );
+export function CourseContent({ course, className }: CourseContentProps) {
+  const router = useRouter();
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  const completedLessons = sortedLessons.filter((lesson) =>
-    lesson.progress?.some((p) => p.completed),
-  ).length;
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections((prev) =>
+      prev.includes(sectionId)
+        ? prev.filter((id) => id !== sectionId)
+        : [...prev, sectionId],
+    );
+  };
 
-  const freeLessons = sortedLessons.filter((lesson) => lesson.is_free).length;
+  const handleLessonClick = (lessonId: string) => {
+    router.push(`/courses/${course.id}/lessons/${lessonId}`);
+  };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold">תוכן הקורס</h2>
-        <p className="text-muted-foreground">
-          {sortedLessons.length} שיעורים •{" "}
-          {sortedLessons.reduce(
-            (acc, lesson) => acc + (lesson.duration || 0),
-            0,
-          )}{" "}
-          דקות • הושלמו {completedLessons} שיעורים • {freeLessons} שיעורים
-          חינמיים
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        {sortedLessons.map((lesson, index) => {
-          const isCompleted = lesson.progress?.some((p) => p.completed);
-          const isLocked = !isEnrolled && !lesson.is_free && !isInstructor;
-
-          return (
-            <Card key={lesson.id} className={isLocked ? "opacity-75" : ""}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-sm">
-                    {index + 1}
-                  </span>
-                  {lesson.title}
-                  {isLocked && <Lock className="h-4 w-4" />}
-                  {isCompleted && (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {lesson.duration} דקות
-                  </div>
-                  <Button
-                    variant={isLocked ? "outline" : "default"}
-                    size="sm"
-                    className="gap-2"
-                    asChild
+    <div className={cn("space-y-4", className)}>
+      {course.sections.map((section: Section) => (
+        <Card key={section.id}>
+          <CardHeader
+            className="cursor-pointer"
+            onClick={() => toggleSection(section.id)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{section.title}</CardTitle>
+                <CardDescription>{section.description}</CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+              >
+                {expandedSections.includes(section.id) ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </CardHeader>
+          {expandedSections.includes(section.id) && (
+            <CardContent>
+              <div className="space-y-2">
+                {section.lessons.map((lesson: Lesson) => (
+                  <div
+                    key={lesson.id}
+                    className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"
                   >
-                    <a
-                      href={
-                        isLocked
-                          ? "#"
-                          : `/courses/${course.id}/lessons/${lesson.id}`
-                      }
-                    >
-                      <Play className="h-4 w-4" />
-                      {isLocked ? "נעול" : "צפה בשיעור"}
-                    </a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleLessonClick(lesson.id)}
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
+                      <div>
+                        <h4 className="font-medium">{lesson.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {lesson.description}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-muted-foreground">
+                        {Math.floor(lesson.duration / 60)}:
+                        {String(lesson.duration % 60).padStart(2, "0")}
+                      </span>
+                      {lesson.isCompleted && (
+                        <span className="text-sm text-success">✓</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      ))}
     </div>
   );
 }

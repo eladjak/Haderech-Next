@@ -4,15 +4,18 @@
  */
 
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { createServerClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
-import { CourseHeader } from "@/components/course/course-header";
+import { notFound } from "next/navigation";
+import React from "react";
+
+import { CourseComments } from "@/components/course/course-comments";
 import { CourseContent } from "@/components/course/course-content";
-import { CourseSidebar } from "@/components/course/course-sidebar";
+import { CourseHeader } from "@/components/course/course-header";
 import { CourseProgress } from "@/components/course/course-progress";
 import { CourseRatings } from "@/components/course/course-ratings";
-import { CourseComments } from "@/components/course/course-comments";
+import { CourseSidebar } from "@/components/course/course-sidebar";
+import { createServerClient } from "@/lib/supabase-server";
+
 import type { CourseWithRelations } from "@/types/courses";
 
 interface RouteParams {
@@ -46,7 +49,11 @@ export async function generateMetadata({
   };
 }
 
-export default async function CoursePage({ params }: RouteParams) {
+export default async function CoursePage({
+  params,
+}: {
+  params: { id: string };
+}): Promise<React.ReactElement> {
   const cookieStore = cookies();
   const supabase = createServerClient(cookieStore);
 
@@ -82,7 +89,7 @@ export default async function CoursePage({ params }: RouteParams) {
   let isEnrolled = false;
   let progress = 0;
   let completedLessons = 0;
-  let totalLessons = typedCourse.lessons?.length || 0;
+  const totalLessons = typedCourse.lessons?.length || 0;
 
   if (session) {
     const { data: enrollment } = await supabase
@@ -109,9 +116,15 @@ export default async function CoursePage({ params }: RouteParams) {
   return (
     <div className="container py-8">
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
-          <CourseHeader course={typedCourse} isEnrolled={isEnrolled} />
-          <CourseContent course={typedCourse} isEnrolled={isEnrolled} />
+        <div className="space-y-8 lg:col-span-2">
+          <CourseHeader
+            course={typedCourse}
+            isEnrolled={isEnrolled}
+          />
+          <CourseContent
+            course={typedCourse}
+            isEnrolled={isEnrolled}
+          />
           <CourseRatings course={typedCourse} />
           <CourseComments
             comments={typedCourse.comments}

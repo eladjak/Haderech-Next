@@ -24,9 +24,10 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
+
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
 
 /**
  * Interface defining the style properties for individual sparkle elements
@@ -66,34 +67,71 @@ function Sparkle({
                Z`;
 
   return (
-    <motion.svg
+    <span
+      className="animate-sparkle-spin absolute block"
       style={style}
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      fill="none"
-      initial={{ scale: 0, rotate: 0 }}
-      animate={{
-        scale: [0, 1, 0],
-        rotate: [0, 90, 180],
-      }}
-      transition={{
-        duration: 1,
-        repeat: 0,
-        ease: "easeInOut",
-      }}
-      exit={{ scale: 0, rotate: 180 }}
     >
-      <path d={path} fill={color} />
-    </motion.svg>
+      <svg
+        className="animate-sparkle-ping absolute inset-0"
+        style={{
+          display: "block",
+          width: size,
+          height: size,
+        }}
+        viewBox="0 0 68 68"
+        fill="none"
+      >
+        <path
+          d={path}
+          fill={color}
+        />
+      </svg>
+    </span>
   );
 }
 
 /**
  * Generates a random number between min and max (inclusive)
  */
-function random(min: number, max: number) {
+function random(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function useRandomInterval(
+  callback: () => void,
+  minDelay: number | null,
+  maxDelay: number | null,
+): () => void {
+  const timeoutId = React.useRef<number | null>(null);
+  const savedCallback = React.useRef(callback);
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    if (typeof minDelay === "number" && typeof maxDelay === "number") {
+      const handleTick = () => {
+        const nextTickAt = random(minDelay, maxDelay);
+        timeoutId.current = window.setTimeout(() => {
+          savedCallback.current();
+          handleTick();
+        }, nextTickAt);
+      };
+      handleTick();
+    }
+    return () => {
+      if (timeoutId.current) {
+        window.clearTimeout(timeoutId.current);
+      }
+    };
+  }, [minDelay, maxDelay]);
+
+  return React.useCallback(() => {
+    if (timeoutId.current) {
+      window.clearTimeout(timeoutId.current);
+    }
+  }, []);
 }
 
 /**
@@ -102,19 +140,29 @@ function random(min: number, max: number) {
  * @param color - The color of the sparkle
  * @returns A sparkle object with unique ID, creation timestamp, color, size, and positioning
  */
-function generateSparkle(color: string) {
-  return {
+function generateSparkle(color: string): {
+  id: string;
+  createdAt: number;
+  color: string;
+  size: number;
+  style: {
+    top: string;
+    left: string;
+    zIndex: number;
+  };
+} {
+  const sparkle = {
     id: String(random(10000, 99999)),
     createdAt: Date.now(),
     color,
     size: random(10, 20),
     style: {
-      position: "absolute" as const,
       top: random(0, 100) + "%",
       left: random(0, 100) + "%",
       zIndex: 2,
     },
   };
+  return sparkle;
 }
 
 /**
@@ -152,32 +200,30 @@ export function Sparkles({
     Array<ReturnType<typeof generateSparkle>>
   >([]);
 
-  const generateSparkles = useCallback(() => {
+  const generateSparkles = React.useCallback(() => {
     const numSparkles = random(minSparkles, maxSparkles);
     return Array.from({ length: numSparkles }, () => generateSparkle(color));
   }, [color, minSparkles, maxSparkles]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const stopInterval = useRandomInterval(
+    () => {
       setSparkles(generateSparkles());
-    }, sparkleInterval);
-
-    return () => clearInterval(interval);
-  }, [generateSparkles, sparkleInterval]);
+    },
+    sparkleInterval,
+    null,
+  );
 
   return (
     <span className={cn("relative inline-block", className)}>
-      <AnimatePresence>
-        {sparkles.map((sparkle) => (
-          <Sparkle
-            key={sparkle.id}
-            color={sparkle.color}
-            size={sparkle.size}
-            style={sparkle.style}
-          />
-        ))}
-      </AnimatePresence>
-      <span className="relative z-1">{children}</span>
+      {sparkles.map((sparkle) => (
+        <Sparkle
+          key={sparkle.id}
+          color={sparkle.color}
+          size={sparkle.size}
+          style={sparkle.style}
+        />
+      ))}
+      <span className="z-1 relative">{children}</span>
     </span>
   );
 }

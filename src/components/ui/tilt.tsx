@@ -1,20 +1,22 @@
 "use client";
 
-import * as React from "react";
 import {
   motion,
   useMotionValue,
   useSpring,
   type HTMLMotionProps,
 } from "framer-motion";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface TiltProps extends Omit<HTMLMotionProps<"div">, "scale"> {
+interface TiltProps extends React.HTMLAttributes<HTMLDivElement> {
   perspective?: number;
   scale?: number;
   speed?: number;
   max?: number;
+  reset?: boolean;
+  easing?: string;
   glare?: boolean;
   glareOpacity?: number;
   glareColor?: string;
@@ -22,115 +24,99 @@ interface TiltProps extends Omit<HTMLMotionProps<"div">, "scale"> {
   children?: React.ReactNode;
 }
 
-export const Tilt = React.forwardRef<HTMLDivElement, TiltProps>(
-  (
-    {
-      children,
-      className,
-      perspective = 1000,
-      scale = 1,
-      speed = 500,
-      max = 25,
-      glare = false,
-      glareOpacity = 0.2,
-      glareColor = "white",
-      glarePosition = "all",
-      style,
-      ...props
-    },
-    ref,
-  ) => {
-    const rotateX = useMotionValue(0);
-    const rotateY = useMotionValue(0);
-    const scaleValue = useMotionValue(1);
+function Tilt({
+  children,
+  className,
+  perspective = 1000,
+  scale = 1,
+  speed = 500,
+  max = 15,
+  reset = true,
+  easing = "cubic-bezier(.03,.98,.52,.99)",
+  glare = false,
+  glareOpacity = 0.2,
+  glareColor = "white",
+  glarePosition = "all",
+  ...props
+}: TiltProps): React.ReactElement {
+  const [tiltStyle, setTiltStyle] = React.useState({
+    transform: `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) scale3d(${scale}, ${scale}, ${scale})`,
+    transition: `${speed}ms ${easing}`,
+  });
 
-    const springConfig = { stiffness: speed, damping: 50, mass: 0.5 };
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
-    const springX = useSpring(rotateX, springConfig);
-    const springY = useSpring(rotateY, springConfig);
-    const springScale = useSpring(scaleValue, springConfig);
+  const handleMouseMove = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!containerRef.current) return;
 
-    function onMouseMove({
-      currentTarget,
-      clientX,
-      clientY,
-    }: React.MouseEvent) {
-      const rect = currentTarget.getBoundingClientRect();
+      const element = containerRef.current;
+      const rect = element.getBoundingClientRect();
       const width = rect.width;
       const height = rect.height;
-      const left = rect.left;
-      const top = rect.top;
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const x = (mouseY / height - 0.5) * 2;
+      const y = (mouseX / width - 0.5) * -2;
+      const rotateX = (max * x).toFixed(2);
+      const rotateY = (max * y).toFixed(2);
 
-      const mouseX = clientX - left;
-      const mouseY = clientY - top;
-      const centerX = width / 2;
-      const centerY = height / 2;
+      setTiltStyle({
+        transform: `perspective(${perspective}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${scale}, ${scale}, ${scale})`,
+        transition: `${speed}ms ${easing}`,
+      });
+    },
+    [max, perspective, scale, speed, easing],
+  );
 
-      const rotateXValue = ((mouseY - centerY) / centerY) * max;
-      const rotateYValue = ((mouseX - centerX) / centerX) * max;
+  const handleMouseLeave = React.useCallback(() => {
+    if (!reset) return;
 
-      rotateX.set(-rotateXValue);
-      rotateY.set(rotateYValue);
-      scaleValue.set(scale);
+    setTiltStyle({
+      transform: `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) scale3d(${scale}, ${scale}, ${scale})`,
+      transition: `${speed}ms ${easing}`,
+    });
+  }, [reset, perspective, scale, speed, easing]);
+
+  const getGlarePosition = () => {
+    switch (glarePosition) {
+      case "top":
+        return "top-0 left-0 right-0 h-1/2";
+      case "bottom":
+        return "bottom-0 left-0 right-0 h-1/2";
+      case "left":
+        return "top-0 left-0 bottom-0 w-1/2";
+      case "right":
+        return "top-0 right-0 bottom-0 w-1/2";
+      default:
+        return "inset-0";
     }
+  };
 
-    function onMouseLeave() {
-      rotateX.set(0);
-      rotateY.set(0);
-      scaleValue.set(1);
-    }
-
-    const getGlarePosition = () => {
-      switch (glarePosition) {
-        case "top":
-          return "top-0 left-0 right-0 h-1/2";
-        case "bottom":
-          return "bottom-0 left-0 right-0 h-1/2";
-        case "left":
-          return "top-0 left-0 bottom-0 w-1/2";
-        case "right":
-          return "top-0 right-0 bottom-0 w-1/2";
-        default:
-          return "inset-0";
-      }
-    };
-
-    return (
-      <motion.div
-        ref={ref}
-        className={cn("relative", className)}
-        style={{
-          perspective,
-          transformStyle: "preserve-3d",
-          ...style,
-        }}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-        {...props}
-      >
-        <motion.div
-          style={{
-            rotateX: springX,
-            rotateY: springY,
-            scale: springScale,
-          }}
-        >
-          {children}
-          {glare && (
-            <div
-              className={cn(
-                "pointer-events-none absolute bg-gradient-to-r from-transparent to-white opacity-0 transition-opacity group-hover:opacity-20",
-                getGlarePosition(),
-              )}
-              style={{
-                opacity: glareOpacity,
-                background: `linear-gradient(90deg, transparent, ${glareColor})`,
-              }}
-            />
+  return (
+    <div
+      ref={containerRef}
+      className={cn("relative", className)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={tiltStyle}
+      {...props}
+    >
+      {children}
+      {glare && (
+        <div
+          className={cn(
+            "pointer-events-none absolute bg-gradient-to-r from-transparent to-white opacity-0 transition-opacity group-hover:opacity-20",
+            getGlarePosition(),
           )}
-        </motion.div>
-      </motion.div>
-    );
-  },
-);
-Tilt.displayName = "Tilt";
+          style={{
+            opacity: glareOpacity,
+            background: `linear-gradient(90deg, transparent, ${glareColor})`,
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+export { Tilt };

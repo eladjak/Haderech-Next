@@ -3,9 +3,10 @@
  * @description API routes for managing course ratings. Provides endpoints for retrieving and submitting ratings.
  */
 
-import { createServerClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@/lib/supabase-server";
 
 interface RouteParams {
   params: {

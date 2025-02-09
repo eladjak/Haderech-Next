@@ -3,9 +3,10 @@
  * @description Auth sign-out handler for processing user logout
  */
 
-import { createServerClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@/lib/supabase-server";
 
 /**
  * POST /auth/sign-out

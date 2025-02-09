@@ -1,29 +1,8 @@
-import type { Database } from "./supabase";
-
-export type Tables<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"];
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar_url: string | null;
-  bio: string | null;
-  created_at: string;
-  updated_at: string;
-  role: "admin" | "user";
-  settings: {
-    notifications: boolean;
-    language: string;
-    theme: "light" | "dark" | "system";
-  };
-  points?: number;
-  level?: string;
-  badges?: string[];
-  completed_courses?: string[];
-  forum_posts?: number;
-  login_streak?: number;
-}
+/**
+ * API Types
+ *
+ * טיפוסים עבור ה-API של המערכת
+ */
 
 export interface Course {
   id: string;
@@ -36,145 +15,145 @@ export interface Course {
   updated_at: string;
   level: "beginner" | "intermediate" | "advanced";
   duration: number;
-  price?: number;
+  price: number;
   tags: string[];
-  author?: User;
-  lessons?: Lesson[];
-  ratings?: CourseRating[];
-  average_rating?: number;
-  total_students?: number;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url: string | null;
+    bio: string | null;
+    created_at: string;
+    updated_at: string;
+  };
+  rating: number;
+  ratings: CourseRating[];
+  ratings_count: number;
+  students_count: number;
+  lessons_count: number;
+  thumbnail_url: string;
+  sections: Section[];
+  comments?: Comment[];
+  instructor: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url: string | null;
+    bio: string | null;
+  };
+  lessons: Lesson[];
 }
 
-export interface Question {
+export interface Section {
   id: string;
-  type: "multiple_choice" | "true_false" | "open_ended";
-  text: string;
-  options?: string[];
-  correctAnswer?: string | boolean;
-  explanation?: string;
+  title: string;
+  description: string;
+  lessons: Lesson[];
 }
 
 export interface Lesson {
   id: string;
-  course_id: string;
   title: string;
   description: string;
+  duration: number;
+  videoUrl: string;
+  isCompleted: boolean;
+  content?: string;
+  progress?: Array<{
+    user_id: string;
+    completed: boolean;
+    progress: number;
+  }>;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  bio: string | null;
+  created_at: string;
+  updated_at: string;
+  role: "user" | "admin";
+  settings: {
+    notifications: boolean;
+    language: string;
+    theme: "light" | "dark" | "system";
+  };
+}
+
+export interface Comment {
+  id: string;
   content: string;
-  order: number;
-  duration?: number;
-  type?: "video" | "text" | "quiz";
-  status: "draft" | "published";
-  questions?: Question[];
-  resources?: Resource[];
-  progress?: LessonProgress[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Resource {
-  id: string;
-  title: string;
-  type: "pdf" | "video" | "link";
-  url: string;
-}
-
-export interface LessonProgress {
-  id: string;
-  user_id: string;
-  lesson_id: string;
-  completed: boolean;
-  last_accessed: string;
-  last_position?: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CourseRating {
-  id: string;
-  course_id: string;
-  user_id: string;
-  rating: number;
-  review: string | null;
-  created_at: string;
-  updated_at: string;
-  user?: User;
-}
-
-export interface CourseEnrollment {
-  id: string;
-  course_id: string;
-  user_id: string;
-  enrolled_at: string;
-  status: "active" | "completed" | "dropped";
-  progress: number;
-  last_accessed: string | null;
-  course?: Course;
-  user?: User;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  user: User;
 }
 
 export interface ForumPost {
   id: string;
   title: string;
   content: string;
-  author_id: string;
-  created_at: string;
-  updated_at: string;
-  tags: string[];
-  status: "draft" | "published" | "archived";
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  user: User;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url: string | null;
+    bio: string | null;
+  };
   likes: number;
-  views: number;
-  category?: string;
-  author?: User;
-  comments?: ForumComment[];
+  likes_count: number;
+  comments_count: number;
+  comments: ForumComment[];
+  tags: string[];
+  is_liked: boolean;
 }
 
 export interface ForumComment {
   id: string;
-  post_id: string;
-  author_id: string;
-  parent_id: string | null;
   content: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  user: User;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url: string | null;
+    bio: string | null;
+  };
   likes: number;
-  author?: User;
-  replies?: ForumComment[];
 }
 
 export interface Notification {
   id: string;
-  user_id: string;
-  title: string;
+  type: "like" | "comment" | "follow" | "mention";
   content: string;
-  type:
-    | "info"
-    | "success"
-    | "warning"
-    | "error"
-    | "achievement"
-    | "course"
-    | "forum"
-    | "system";
-  read_at: string | null;
+  user?: {
+    name?: string;
+    avatar_url?: string | null;
+  };
+  is_read: boolean;
   created_at: string;
   updated_at: string;
-  data?: Record<string, string | number | boolean | null>;
-  user?: User;
 }
 
 export interface Achievement {
   id: string;
-  user_id: string;
   title: string;
   description: string;
-  type: string;
-  earned_at: string;
-  icon_url: string | null;
-  points?: number;
-  condition?: string;
+  icon: string;
+  progress: number;
+  completed: boolean;
+  earned_at?: string;
   created_at: string;
   updated_at: string;
-  user?: User;
 }
 
 export interface ApiResponse<T> {
@@ -263,5 +242,13 @@ export interface SimulationResult {
     timestamp: string;
   }>;
   feedback: string[];
+  created_at: string;
+}
+
+export interface CourseRating {
+  id: string;
+  rating: number;
+  comment: string;
+  user: User;
   created_at: string;
 }

@@ -5,10 +5,13 @@
  */
 
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { createServerClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import React from "react";
+
 import { UserProfile } from "@/components/user-profile";
+import { createServerClient } from "@/lib/supabase-server";
+
 import type { User } from "@/types/api";
 
 export const metadata: Metadata = {
@@ -16,7 +19,7 @@ export const metadata: Metadata = {
   description: "צפה בהתקדמות שלך, העדפות והמלצות אישיות",
 };
 
-export default async function ProfilePage() {
+export default async function ProfilePage(): Promise<React.ReactElement> {
   const cookieStore = cookies();
   const supabase = createServerClient(cookieStore);
 

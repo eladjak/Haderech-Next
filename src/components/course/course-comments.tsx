@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,11 +38,14 @@ export function CourseComments({ comments }: CourseCommentsProps) {
         </div>
         <div className="mt-6 space-y-6">
           {displayComments.map((comment) => (
-            <div key={comment.id} className="space-y-4">
+            <div
+              key={comment.id}
+              className="space-y-4"
+            >
               <div className="flex items-start space-x-4 rtl:space-x-reverse">
                 <Avatar>
                   <AvatarImage
-                    src={comment.user.avatar_url}
+                    src={comment.user.avatar_url || undefined}
                     alt={comment.user.name}
                   />
                   <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
@@ -57,7 +61,7 @@ export function CourseComments({ comments }: CourseCommentsProps) {
                     {comment.content}
                   </p>
                   {comment.replies && comment.replies.length > 0 && (
-                    <div className="mt-4 space-y-4 border-l-2 pl-4 rtl:border-r-2 rtl:pr-4 rtl:pl-0">
+                    <div className="mt-4 space-y-4 border-l-2 pl-4 rtl:border-r-2 rtl:pl-0 rtl:pr-4">
                       {comment.replies.map((reply) => (
                         <div
                           key={reply.id}
@@ -65,7 +69,7 @@ export function CourseComments({ comments }: CourseCommentsProps) {
                         >
                           <Avatar>
                             <AvatarImage
-                              src={reply.user.avatar_url}
+                              src={reply.user.avatar_url || undefined}
                               alt={reply.user.name}
                             />
                             <AvatarFallback>
@@ -98,7 +102,10 @@ export function CourseComments({ comments }: CourseCommentsProps) {
         </div>
         {!showAll && comments.length > 3 && (
           <div className="mt-6 text-center">
-            <Button variant="outline" onClick={() => setShowAll(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowAll(true)}
+            >
               הצג עוד תגובות
             </Button>
           </div>

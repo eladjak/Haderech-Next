@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import React from "react";
+
 import { Button } from "@/components/ui/button";
 
 export default function Error({
@@ -9,21 +10,15 @@ export default function Error({
 }: {
   error: Error & { digest?: string };
   reset: () => void;
-}) {
-  useEffect(() => {
-    // אופציונלי: שליחת השגיאה לשירות ניטור
-    console.error(error);
-  }, [error]);
-
+}): React.ReactElement {
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4">
-      <div className="space-y-4 text-center">
-        <h2 className="text-2xl font-bold">אופס! משהו השתבש</h2>
-        <p className="text-muted-foreground">
-          אנחנו מצטערים, אבל נראה שהתרחשה שגיאה. אנא נסו שוב.
-        </p>
-      </div>
-      <Button variant="outline" onClick={() => reset()}>
+    <div className="container flex h-screen flex-col items-center justify-center">
+      <h2 className="text-2xl font-bold">משהו השתבש</h2>
+      <p className="text-muted-foreground">אירעה שגיאה בטעינת העמוד</p>
+      <Button
+        className="mt-4"
+        onClick={() => reset()}
+      >
         נסו שוב
       </Button>
     </div>

@@ -5,8 +5,9 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import type { CookieOptions } from "@supabase/ssr";
+
 import type { Database } from "@/types/supabase";
+import type { CookieOptions } from "@supabase/ssr";
 
 /**
  * Array of public routes that don't require authentication
@@ -28,7 +29,7 @@ const publicRoutes = [
  */
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   // Create a response object that we can modify
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },

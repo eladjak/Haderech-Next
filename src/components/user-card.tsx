@@ -1,9 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { UserPlus } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
+
 import type { User } from "@/types/api";
 
 interface UserCardProps {
@@ -17,7 +20,7 @@ export function UserCard({ user, onFollow, className }: UserCardProps) {
     <Card className={className}>
       <CardHeader className="flex flex-row items-center gap-4">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={user.avatar_url} />
+          <AvatarImage src={user.avatar_url || undefined} />
           <AvatarFallback>{user.name[0]}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
@@ -27,7 +30,11 @@ export function UserCard({ user, onFollow, className }: UserCardProps) {
           </div>
         </div>
         {onFollow && (
-          <Button variant="ghost" size="icon" onClick={() => onFollow(user.id)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onFollow(user.id)}
+          >
             <UserPlus className="h-4 w-4" />
           </Button>
         )}

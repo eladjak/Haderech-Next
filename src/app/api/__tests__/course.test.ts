@@ -5,6 +5,7 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+
 import { GET, PATCH, DELETE } from "../courses/[id]/route";
 
 jest.mock("next/headers");

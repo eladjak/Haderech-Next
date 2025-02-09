@@ -1,7 +1,6 @@
-import Image from "next/image";
 import { Clock, Users } from "lucide-react";
+import Image from "next/image";
 
-import type { Course } from "@/types/courses";
 import {
   Card,
   CardContent,
@@ -9,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import type { Course } from "@/types/courses";
 
 interface CourseCardProps {
   course: Course;
@@ -18,7 +19,7 @@ export function CourseCard({ course }: CourseCardProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-0">
-        <div className="relative aspect-video">
+        <div className="aspect-video relative">
           <Image
             src={course.thumbnail || "/placeholder.jpg"}
             alt={course.title}
@@ -29,7 +30,7 @@ export function CourseCard({ course }: CourseCardProps) {
       </CardHeader>
       <CardContent className="p-4">
         <CardTitle className="mb-2 line-clamp-2">{course.title}</CardTitle>
-        <p className="text-sm text-muted-foreground line-clamp-2">
+        <p className="line-clamp-2 text-sm text-muted-foreground">
           {course.description}
         </p>
       </CardContent>

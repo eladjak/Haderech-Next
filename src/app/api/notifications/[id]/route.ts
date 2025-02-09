@@ -5,9 +5,11 @@
  * authorization checks.
  */
 
-import { createServerClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@/lib/supabase-server";
+
 import type { Database } from "@/types/supabase";
 
 type Tables = Database["public"]["Tables"];

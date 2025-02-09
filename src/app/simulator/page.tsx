@@ -1,26 +1,24 @@
-import { Metadata } from "next";
-import { SimulatorChat } from "@/components/simulator/chat";
+import type { Metadata } from "next";
+import React from "react";
+import SimulatorClient from "./simulator-client";
 
 export const metadata: Metadata = {
-  title: "סימולטור דייטינג",
-  description: "תרגל את כישורי הדייטינג שלך בסביבה בטוחה ומבוקרת",
+  title: "סימולטור שיחה",
+  description: "תרגול שיחות בסביבה בטוחה ומבוקרת",
 };
 
-export default function SimulatorPage() {
+export default function SimulatorPage(): React.ReactNode {
   return (
-    <div className="container relative min-h-screen">
-      <div className="mx-auto max-w-2xl py-4">
-        <div className="rounded-lg border bg-background p-8">
-          <div className="flex flex-col space-y-1.5 pb-6">
-            <h2 className="text-2xl font-semibold leading-none tracking-tight">
-              סימולטור דייטינג
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              תרגל את כישורי הדייטינג שלך בסביבה בטוחה ומבוקרת
-            </p>
-          </div>
-          <SimulatorChat />
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 text-center">
+        <h1 className="mb-4 text-4xl font-bold">סימולטור שיחה</h1>
+        <p className="text-xl text-muted-foreground">
+          תרגול שיחות בסביבה בטוחה ומבוקרת
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-4xl">
+        <SimulatorClient />
       </div>
     </div>
   );

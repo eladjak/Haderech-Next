@@ -3,8 +3,8 @@
  * @description Progress component for course pages showing completion status
  */
 
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 export interface CourseProgressProps {
   completedLessons: number;
@@ -25,7 +25,10 @@ export function CourseProgress({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-2">
-          <Progress value={progress} className="w-full" />
+          <Progress
+            value={progress}
+            className="w-full"
+          />
           <div className="text-sm text-muted-foreground">
             {completedLessons} מתוך {totalLessons} שיעורים הושלמו
           </div>

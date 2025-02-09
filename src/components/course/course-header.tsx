@@ -4,9 +4,9 @@
  */
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { CourseHeaderProps } from "@/types/props";
 
 export function CourseHeader({ course, isEnrolled }: CourseHeaderProps) {
@@ -32,7 +32,7 @@ export function CourseHeader({ course, isEnrolled }: CourseHeaderProps) {
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Avatar>
                 <AvatarImage
-                  src={course.instructor.avatar_url}
+                  src={course.instructor.avatar_url || undefined}
                   alt={course.instructor.name}
                 />
                 <AvatarFallback>{course.instructor.name[0]}</AvatarFallback>

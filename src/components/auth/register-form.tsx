@@ -1,84 +1,176 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { useAuth } from "@/contexts/auth-context";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/components/ui/use-toast";
 
-export default function RegisterForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const { signUp } = useAuth();
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(2, "שם חייב להכיל לפחות 2 תווים")
+    .max(50, "שם יכול להכיל עד 50 תווים"),
+  email: z.string().email("כתובת אימייל לא תקינה"),
+  password: z
+    .string()
+    .min(8, "סיסמה חייבת להכיל לפחות 8 תווים")
+    .max(50, "סיסמה יכולה להכיל עד 50 תווים"),
+  confirmPassword: z.string(),
+});
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      await signUp(email, password, username, fullName);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בהרשמה");
+type FormValues = z.infer<typeof formSchema>;
+
+export default function RegisterForm(): React.ReactElement {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  async function onSubmit(values: FormValues) {
+    if (values.password !== values.confirmPassword) {
+      form.setError("confirmPassword", {
+        message: "הסיסמאות אינן תואמות",
+      });
+      return;
     }
-  };
 
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
+    setIsLoading(true);
 
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  };
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
-  const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
-  };
+      if (!response.ok) {
+        throw new Error("Failed to register");
+      }
 
-  const handleFullNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFullName(e.target.value);
-  };
+      toast({
+        title: "ההרשמה הושלמה בהצלחה",
+        description: "אנא התחבר למערכת",
+      });
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Error registering:", error);
+      toast({
+        title: "שגיאה",
+        description: "לא הצלחנו להשלים את ההרשמה. אנא נסה שוב מאוחר יותר.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <div className="space-y-2">
-        <Input
-          type="email"
-          placeholder="אימייל"
-          value={email}
-          onChange={handleEmailChange}
-          required
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  placeholder="שם מלא"
+                  {...field}
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Input
-          type="password"
-          placeholder="סיסמה"
-          value={password}
-          onChange={handlePasswordChange}
-          required
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="אימייל"
+                  {...field}
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Input
-          type="text"
-          placeholder="שם משתמש"
-          value={username}
-          onChange={handleUsernameChange}
-          required
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="סיסמה"
+                  {...field}
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Input
-          type="text"
-          placeholder="שם מלא"
-          value={fullName}
-          onChange={handleFullNameChange}
-          required
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="אימות סיסמה"
+                  {...field}
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <Button type="submit" className="w-full">
-        הרשמה
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full"
+        >
+          {isLoading ? "נרשם..." : "הרשמה"}
+        </Button>
+      </form>
+    </Form>
   );
 }

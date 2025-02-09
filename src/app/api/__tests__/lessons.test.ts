@@ -3,9 +3,10 @@
  * @description Tests for course lessons API endpoints
  */
 
-import { createMocks } from "node-mocks-http";
-import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { createMocks } from "node-mocks-http";
+
 import { GET, POST, PATCH } from "../courses/[id]/lessons/route";
 
 jest.mock("next/headers");

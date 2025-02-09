@@ -1,56 +1,49 @@
 "use client";
 
+import { ArrowUp } from "lucide-react";
 import * as React from "react";
-import { ChevronUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-interface ScrollToTopProps extends React.HTMLAttributes<HTMLButtonElement> {
-  showAfter?: number;
-}
+function ScrollToTop(): React.ReactElement {
+  const [isVisible, setIsVisible] = React.useState(false);
 
-const ScrollToTop = React.forwardRef<HTMLButtonElement, ScrollToTopProps>(
-  ({ className, showAfter = 100, ...props }, ref) => {
-    const [show, setShow] = React.useState(false);
+  const toggleVisibility = (): void => {
+    if (window.scrollY > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  };
 
-    React.useEffect(() => {
-      const handleScroll = () => {
-        if (window.scrollY > showAfter) {
-          setShow(true);
-        } else {
-          setShow(false);
-        }
-      };
+  const scrollToTop = (): void => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
-      window.addEventListener("scroll", handleScroll);
-      return () => window.removeEventListener("scroll", handleScroll);
-    }, [showAfter]);
-
-    const handleClick = () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  React.useEffect(() => {
+    window.addEventListener("scroll", toggleVisibility);
+    return () => {
+      window.removeEventListener("scroll", toggleVisibility);
     };
+  }, []);
 
-    if (!show) return null;
-
-    return (
-      <Button
-        ref={ref}
-        variant="outline"
-        size="icon"
-        className={cn(
-          "fixed bottom-4 left-4 z-50 rounded-full shadow-md transition-opacity duration-300",
-          className,
-        )}
-        onClick={handleClick}
-        {...props}
-      >
-        <ChevronUp className="h-4 w-4" />
-        <span className="sr-only">גלול למעלה</span>
-      </Button>
-    );
-  },
-);
-ScrollToTop.displayName = "ScrollToTop";
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      className={cn(
+        "fixed bottom-4 right-4 z-50 rounded-full transition-opacity duration-200",
+        isVisible ? "opacity-100" : "opacity-0",
+      )}
+      onClick={scrollToTop}
+    >
+      <ArrowUp className="h-4 w-4" />
+    </Button>
+  );
+}
 
 export { ScrollToTop };

@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ContentItem {
   id: string;
@@ -96,7 +97,7 @@ export function RecommendedContent() {
   return (
     <section className="py-12">
       <div className="container">
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <h2 className="text-3xl font-bold">תוכן מומלץ</h2>
           <Link href="/content">
             <Button variant="outline">לכל התכנים</Button>
@@ -104,7 +105,10 @@ export function RecommendedContent() {
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {EXAMPLE_CONTENT.map((item) => (
-            <Card key={item.id} className="overflow-hidden">
+            <Card
+              key={item.id}
+              className="overflow-hidden"
+            >
               <div
                 className="h-48 bg-cover bg-center"
                 style={{ backgroundImage: `url(${item.thumbnail})` }}
@@ -116,7 +120,7 @@ export function RecommendedContent() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">{item.description}</p>
+                <p className="mb-4 text-muted-foreground">{item.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     {item.duration}

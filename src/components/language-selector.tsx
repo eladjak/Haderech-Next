@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+
 import {
   Select,
   SelectContent,
@@ -25,7 +26,10 @@ export function LanguageSelector() {
       </SelectTrigger>
       <SelectContent>
         {languages.map((lang) => (
-          <SelectItem key={lang.code} value={lang.code}>
+          <SelectItem
+            key={lang.code}
+            value={lang.code}
+          >
             {lang.name}
           </SelectItem>
         ))}

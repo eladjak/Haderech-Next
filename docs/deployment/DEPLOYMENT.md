@@ -1,221 +1,403 @@
-# תהליך הפריסה
+# תהליך הפצה - פרויקט "הדרך" 🚀
 
-## 🌐 סקירה כללית
+## 📋 סקירה כללית
 
-תהליך הפריסה של הדרך מבוסס על Vercel ו-GitHub Actions. התהליך מאפשר פריסה אוטומטית, בדיקות מקיפות, וגיבוי מלא.
+מסמך זה מפרט את תהליך ההפצה המלא של הפרויקט, כולל סביבות, תהליכי CI/CD, ניטור ותחזוקה.
+
+## 🌐 סביבות
+
+### פיתוח (Development)
+
+```mermaid
+graph LR
+    A[מפתח] -->|git push| B[GitHub]
+    B -->|auto deploy| C[Vercel Dev]
+    B -->|tests| D[GitHub Actions]
+```
+
+- **URL**: dev.haderech.com
+- **מטרה**: פיתוח ובדיקות מקומיות
+- **מאפיינים**:
+  - Hot Reload
+  - דאטה מדומה
+  - כלי פיתוח
+  - לוגים מפורטים
+
+### בדיקות (Staging)
+
+```mermaid
+graph LR
+    A[PR מאושר] -->|merge| B[main branch]
+    B -->|auto deploy| C[Vercel Staging]
+    C -->|tests| D[E2E Tests]
+```
+
+- **URL**: staging.haderech.com
+- **מטרה**: בדיקות QA ואינטגרציה
+- **מאפיינים**:
+  - זהה לייצור
+  - דאטה אנונימית
+  - ניטור מלא
+  - בדיקות אוטומטיות
+
+### ייצור (Production)
+
+```mermaid
+graph LR
+    A[Staging מאושר] -->|promote| B[prod branch]
+    B -->|deploy| C[Vercel Prod]
+    C -->|monitor| D[ניטור]
+```
+
+- **URL**: haderech.com
+- **מטרה**: סביבת משתמשי קצה
+- **מאפיינים**:
+  - ביצועים מקסימליים
+  - אבטחה מלאה
+  - גיבוי אוטומטי
+  - ניטור 24/7
 
 ## 🔄 תהליך CI/CD
 
-### 1. בדיקות מקדימות
+### אינטגרציה רציפה (CI)
 
-```bash
-# התקנת תלויות
-pnpm install
+```yaml
+# .github/workflows/ci.yml
+name: CI Pipeline
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
 
-# בדיקת טיפוסים
-pnpm type-check
-
-# בדיקת לינטינג
-pnpm lint
-
-# הרצת טסטים
-pnpm test
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Tests
+        run: npm test
+      - name: Run Linting
+        run: npm run lint
+      - name: Build
+        run: npm run build
 ```
 
-### 2. בניית הפרויקט
+### הפצה רציפה (CD)
 
-```bash
-# בניית הפרויקט
-pnpm build
-
-# בדיקת בנייה
-pnpm build:check
+```yaml
+# vercel.json
+{
+  "version": 2,
+  "builds": [{ "src": "package.json", "use": "@vercel/next" }],
+  "routes": [{ "src": "/(.*)", "dest": "/$1" }],
+  "env":
+    {
+      "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_key",
+    },
+}
 ```
-
-### 3. פריסה
-
-```bash
-# פריסה לסביבת פיתוח
-pnpm deploy:dev
-
-# פריסה לסביבת ייצור
-pnpm deploy:prod
-```
-
-## 🌍 סביבות
-
-### 1. פיתוח
-
-- URL: https://dev.haderech.co.il
-- Branch: develop
-- Auto Deploy: ✅
-- Preview: ✅
-
-### 2. בדיקות
-
-- URL: https://staging.haderech.co.il
-- Branch: staging
-- Auto Deploy: ✅
-- Preview: ✅
-
-### 3. ייצור
-
-- URL: https://haderech.co.il
-- Branch: main
-- Auto Deploy: ❌
-- Preview: ❌
-
-## 🔑 משתני סביבה
-
-### 1. כללי
-
-```env
-NODE_ENV=production
-APP_URL=https://haderech.co.il
-API_URL=https://api.haderech.co.il
-```
-
-### 2. אימות
-
-```env
-NEXTAUTH_URL=https://haderech.co.il
-NEXTAUTH_SECRET=your-secret-here
-```
-
-### 3. בסיס נתונים
-
-```env
-DATABASE_URL=postgresql://user:pass@host:5432/db
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-key-here
-```
-
-### 4. שירותים חיצוניים
-
-```env
-SENTRY_DSN=your-dsn-here
-POSTHOG_KEY=your-key-here
-```
-
-## 📋 בדיקות לפני פריסה
-
-### 1. בדיקות אוטומטיות
-
-- [x] Unit Tests
-- [x] Integration Tests
-- [x] E2E Tests
-- [x] Type Checking
-- [x] Linting
-
-### 2. בדיקות ידניות
-
-- [ ] בדיקת ביצועים
-- [ ] בדיקת נגישות
-- [ ] בדיקת תאימות
-- [ ] בדיקת אבטחה
-
-### 3. בדיקות תשתית
-
-- [ ] בדיקת משתני סביבה
-- [ ] בדיקת חיבור לדאטהבייס
-- [ ] בדיקת שירותים חיצוניים
-- [ ] בדיקת SSL
-
-## 🔄 גיבוי ושחזור
-
-### 1. גיבוי דאטהבייס
-
-```bash
-# גיבוי ידני
-pg_dump -Fc > backup.dump
-
-# שחזור מגיבוי
-pg_restore -d database_name backup.dump
-```
-
-### 2. גיבוי קבצים
-
-```bash
-# גיבוי לאחסון
-aws s3 sync ./public s3://bucket-name
-
-# שחזור מאחסון
-aws s3 sync s3://bucket-name ./public
-```
-
-## 🚨 תהליך Rollback
-
-### 1. גרסת קוד
-
-```bash
-# חזרה לגרסה קודמת
-git revert HEAD
-
-# פריסה מחדש
-pnpm deploy:prod
-```
-
-### 2. בסיס נתונים
-
-```bash
-# שחזור גיבוי
-psql -d database_name -f backup.sql
-
-# בדיקת שלמות
-pnpm db:check
-```
-
-## 📊 ניטור
-
-### 1. לוגים
-
-- Vercel Logs
-- Supabase Logs
-- Application Logs
-
-### 2. מטריקות
-
-- Server Load
-- Response Times
-- Error Rates
-- User Sessions
-
-### 3. התראות
-
-- Server Down
-- High Error Rate
-- Slow Response
-- Low Storage
 
 ## 🔒 אבטחה
 
-### 1. SSL
+### SSL/TLS
 
-- Let's Encrypt
-- Auto Renewal
-- HSTS Enabled
+- Let's Encrypt אוטומטי
+- חידוש אוטומטי
+- דירוג A+ ב-SSL Labs
 
-### 2. Headers
+### הגנת תשתית
 
-```nginx
-add_header X-Frame-Options "SAMEORIGIN";
-add_header X-XSS-Protection "1; mode=block";
-add_header X-Content-Type-Options "nosniff";
+- WAF (Cloudflare)
+- DDoS Protection
+- Rate Limiting
+- IP Filtering
+
+### אבטחת מידע
+
+- הצפנת נתונים
+- גיבוי אוטומטי
+- ניטור אבטחה
+- GDPR Compliance
+
+## 📊 ניטור וביצועים
+
+### ניטור אפליקציה
+
+```javascript
+// monitoring.ts
+import * as Sentry from "@sentry/nextjs";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  tracesSampleRate: 1.0,
+  environment: process.env.VERCEL_ENV,
+});
 ```
 
-### 3. Rate Limiting
+### מדדי ביצועים
 
-```nginx
-limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-limit_req zone=api burst=20 nodelay;
+- Core Web Vitals
+- זמני תגובה
+- שימוש במשאבים
+- זמינות מערכת
+
+### התראות
+
+- Slack
+- Email
+- SMS (קריטי)
+- PagerDuty
+
+## 🔄 גיבוי ושחזור
+
+### גיבוי אוטומטי
+
+```sql
+-- supabase backup policy
+CREATE POLICY "backup_daily" ON storage.objects
+  FOR ALL USING (
+    scheduled_backup() = true
+  );
 ```
 
-## 📝 סיכום
+### תדירות
 
-תהליך הפריסה מבטיח:
+- יומי: גיבוי מלא
+- שעתי: גיבוי תוספתי
+- מיידי: לפני שינויים קריטיים
 
-- אמינות גבוהה
-- אבטחה מקסימלית
-- ביצועים מעולים
-- יכולת שחזור מהירה
-- ניטור מתמיד
+### שחזור
+
+- נקודות שחזור
+- שחזור סלקטיבי
+- בדיקות שחזור תקופתיות
+
+## 🚀 תהליך שחרור
+
+### לפני השחרור
+
+1. בדיקות רגרסיה
+2. אישור QA
+3. בדיקת ביצועים
+4. סקירת אבטחה
+
+### במהלך השחרור
+
+1. גיבוי מלא
+2. הפצה הדרגתית
+3. ניטור מוגבר
+4. צוות כוננות
+
+### אחרי השחרור
+
+1. אימות תקינות
+2. בדיקות קצה
+3. ניטור משתמשים
+4. איסוף משוב
+
+## 🛠️ כלים ושירותים
+
+### תשתית
+
+- Vercel: הפצה ואירוח
+- Supabase: בסיס נתונים
+- Cloudflare: CDN ואבטחה
+- GitHub: קוד ו-CI/CD
+
+### ניטור
+
+- Sentry: ניטור שגיאות
+- LogRocket: ניטור משתמשים
+- Google Analytics: אנליטיקס
+- Uptime Robot: זמינות
+
+### תקשורת
+
+- Slack: תקשורת צוות
+- Email: התראות
+- Status Page: סטטוס מערכת
+
+## 📝 הערות
+
+- יש לעדכן את תהליך ההפצה בהתאם לשינויים בארכיטקטורה
+- חשוב לשמור על תיעוד מעודכן של כל שינוי בתצורה
+- נדרש לבצע תרגולי שחזור תקופתיים
+- יש לשמור על מדיניות גרסאות ברורה
+
+# תהליך פריסה והעלאה לאוויר
+
+## בדיקות מקדימות
+
+### 1. בדיקות מקומיות
+
+לפני דחיפת שינויים לגיטהאב, יש לבצע את הבדיקות הבאות:
+
+```bash
+# בדיקת שגיאות טייפסקריפט
+npx tsc --noEmit
+
+# בדיקת לינטר
+npm run lint
+
+# בדיקות יחידה
+npm run test
+
+# בדיקת טיפוסים
+# חיפוש שימוש ב-any ו-unknown
+grep -r "any\|unknown" src/
+
+# בנייה מקומית
+npm run build
+```
+
+### 2. בדיקת תיעוד
+
+- וידוא שכל השינויים מתועדים
+- עדכון מסמכי API
+- עדכון CHANGELOG
+- בדיקת README
+
+### 3. בדיקת תצורה
+
+- בדיקת משתני סביבה
+- בדיקת הגדרות Vercel
+- בדיקת הגדרות Supabase
+
+## תהליך העלאה
+
+### 1. הכנה
+
+- מיזוג שינויים ל-main
+- עדכון מספר גרסה
+- תיוג בגיט
+
+### 2. בנייה
+
+- בנייה אוטומטית ב-Vercel
+- בדיקת לוגים
+- וידוא הצלחת הבנייה
+
+### 3. פריסה
+
+- פריסה אוטומטית לסביבת בדיקות
+- בדיקות קבלה
+- פריסה לייצור
+
+## בדיקות לאחר פריסה
+
+### 1. בדיקות פונקציונליות
+
+- בדיקת נתיבי ניווט
+- בדיקת טפסים
+- בדיקת אימות
+
+### 2. בדיקות ביצועים
+
+- בדיקת זמני טעינה
+- בדיקת עומסים
+- בדיקת זיכרון
+
+### 3. בדיקות אבטחה
+
+- בדיקת HTTPS
+- בדיקת הרשאות
+- בדיקת אימות
+
+## ניטור
+
+### 1. לוגים
+
+- בדיקת לוגי שרת
+- בדיקת לוגי לקוח
+- ניתוח שגיאות
+
+### 2. מדדים
+
+- ניטור זמני תגובה
+- ניטור שימוש במשאבים
+- ניטור שגיאות
+
+### 3. התראות
+
+- הגדרת התראות
+- ניטור זמינות
+- טיפול בתקלות
+
+## גיבוי ושחזור
+
+### 1. גיבויים
+
+- גיבוי בסיס נתונים
+- גיבוי קבצים
+- גיבוי הגדרות
+
+### 2. שחזור
+
+- נוהל שחזור
+- בדיקות שחזור
+- תיעוד תהליכים
+
+## תחזוקה
+
+### 1. עדכונים
+
+- עדכוני אבטחה
+- עדכון תלויות
+- עדכוני תשתית
+
+### 2. אופטימיזציה
+
+- ניקוי מטמונים
+- אופטימיזציה של בסיס נתונים
+- אופטימיזציה של קבצים
+
+### 3. תיעוד
+
+- עדכון תיעוד
+- תיעוד תקלות
+- תיעוד פתרונות
+
+## רשימת תיוג לפני פריסה
+
+### 1. קוד
+
+- [ ] כל הבדיקות המקומיות עברו
+- [ ] אין שגיאות טייפסקריפט
+- [ ] אין שימוש ב-any/unknown לא מתועד
+- [ ] כל הטיפוסים מוגדרים ב-api.ts
+- [ ] הבנייה המקומית הצליחה
+
+### 2. תיעוד
+
+- [ ] CHANGELOG מעודכן
+- [ ] תיעוד API מעודכן
+- [ ] README מעודכן
+- [ ] מסמכי פרויקט מעודכנים
+
+### 3. תצורה
+
+- [ ] משתני סביבה מוגדרים
+- [ ] הגדרות Vercel נכונות
+- [ ] הגדרות Supabase נכונות
+
+### 4. בדיקות
+
+- [ ] בדיקות יחידה עוברות
+- [ ] בדיקות אינטגרציה עוברות
+- [ ] בדיקות קבלה עוברות
+
+### 5. אבטחה
+
+- [ ] אין חשיפת מידע רגיש
+- [ ] הרשאות מוגדרות נכון
+- [ ] HTTPS מופעל
+
+### 6. ביצועים
+
+- [ ] זמני טעינה סבירים
+- [ ] אופטימיזציה של תמונות
+- [ ] מטמונים מוגדרים נכון

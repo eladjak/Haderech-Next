@@ -1,7 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ import { updateProfile } from "@/lib/api";
 const profileFormSchema = z.object({
   username: z.string().min(2).max(30),
   full_name: z.string().min(2).max(50),
-  bio: z.string().max(500).optional(),
+  bio: z.string().max(500).nullable(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -42,7 +42,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     defaultValues: {
       username: profile.username,
       full_name: profile.full_name,
-      bio: profile.bio || "",
+      bio: profile.bio,
     },
   });
 
@@ -64,7 +64,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+      >
         <FormField
           control={form.control}
           name="username"
@@ -99,7 +102,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             <FormItem>
               <FormLabel>ביוגרפיה</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea
+                  {...field}
+                  value={field.value || ""}
+                />
               </FormControl>
               <FormDescription>ספר לנו קצת על עצמך</FormDescription>
               <FormMessage />

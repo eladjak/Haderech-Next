@@ -3,10 +3,13 @@
  * @description Content component for course pages showing lessons list and content
  */
 
-import type { CourseWithRelations } from "@/types/courses";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Lock, Play, CheckCircle } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import type { CourseWithRelations } from "@/types/courses";
+
 
 interface CourseContentProps {
   course: CourseWithRelations;
@@ -50,7 +53,10 @@ export function CourseContent({
           const isLocked = !isEnrolled && !lesson.is_free && !isInstructor;
 
           return (
-            <Card key={lesson.id} className={isLocked ? "opacity-75" : ""}>
+            <Card
+              key={lesson.id}
+              className={isLocked ? "opacity-75" : ""}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-sm">

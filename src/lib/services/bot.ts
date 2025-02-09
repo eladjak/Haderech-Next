@@ -1,5 +1,6 @@
-import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
+
 import { env } from "@/env.mjs";
 
 /**

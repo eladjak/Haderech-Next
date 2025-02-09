@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
 import type { Database } from "@/types/supabase";
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -72,3 +73,68 @@ export type ForumComment = Tables<"forum_comments">;
 export type Notification = Tables<"notifications">;
 export type Achievement = Tables<"achievements">;
 export type Upload = Tables<"uploads">;
+
+// Create a single supabase client for interacting with your database
+export const createSupabaseClient = (): SupabaseClient<Database> => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Missing Supabase environment variables");
+    throw new Error("Missing Supabase environment variables");
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseKey);
+};
+
+export const signInWithEmail = async (
+  email: string,
+  password: string,
+): Promise<{
+  error: Error | null;
+  data: any | null;
+}> => {
+  try {
+    const supabase = createSupabaseClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("Error signing in:", error.message);
+      return { error, data: null };
+    }
+
+    return { error: null, data };
+  } catch (error) {
+    console.error("Unexpected error during sign in:", error);
+    return { error: error as Error, data: null };
+  }
+};
+
+export const signUpWithEmail = async (
+  email: string,
+  password: string,
+): Promise<{
+  error: Error | null;
+  data: any | null;
+}> => {
+  try {
+    const supabase = createSupabaseClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("Error signing up:", error.message);
+      return { error, data: null };
+    }
+
+    return { error: null, data };
+  } catch (error) {
+    console.error("Unexpected error during sign up:", error);
+    return { error: error as Error, data: null };
+  }
+};

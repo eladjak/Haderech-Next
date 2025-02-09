@@ -1,5 +1,7 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+
 import type { Achievement as AchievementType } from "@/types/api";
 
 interface AchievementProps {
@@ -19,9 +21,12 @@ export function Achievement({ achievement, className }: AchievementProps) {
           <div className="mt-1 text-sm text-muted-foreground">
             {achievement.description}
           </div>
-          <div className="mt-1 text-sm text-muted-foreground">
-            הושג ב-{new Date(achievement.earned_at).toLocaleDateString("he-IL")}
-          </div>
+          {achievement.earned_at && (
+            <div className="mt-1 text-sm text-muted-foreground">
+              הושג ב-
+              {new Date(achievement.earned_at).toLocaleDateString("he-IL")}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

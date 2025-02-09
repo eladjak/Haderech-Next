@@ -1,104 +1,189 @@
-# HaDerech Next 🚀
+# HaDerech - Interactive Learning Platform
 
-פלטפורמת למידה מתקדמת לשיפור מערכות יחסים, המשלבת AI לחוויית למידה מותאמת אישית.
+![HaDerech Logo](public/logo.png)
 
-## תיעוד 📚
+## Our Mission
 
-### מסמכי פרויקט
+HaDerech is more than just a platform - it's a journey towards better relationships and personal growth. We combine cutting-edge technology with proven educational methods to create an engaging, effective learning experience.
 
-- [דרישות מערכת](docs/project/REQUIREMENTS.md)
-- [מפרט משתמש](docs/project/USER_SPEC.md)
-- [סטטוס הפרויקט](docs/project/STATUS.md)
-- [מבנה הפרויקט](docs/project/STRUCTURE.md)
-- [מפת הפרויקט](docs/project/PROJECT_MAP.md)
-- [הנחיות AI](docs/project/PROMPT.md)
+### Educational Philosophy
 
-### מסמכים טכניים
+- **Personalized Learning**: Every person learns differently, and our AI adapts to your unique style
+- **Practical Application**: Theory meets practice through real-world simulations
+- **Community Support**: Learn together, grow together through our interactive forum
+- **Continuous Growth**: Track your progress and celebrate achievements
 
-- [מפרט טכני](docs/technical/TECHNICAL_SPEC.md)
-- [הגדרות Supabase](docs/technical/SUPABASE_CONFIG.md)
-- [דוח ביצועים](docs/technical/PERFORMANCE.md)
+## Features
 
-### הנחיות פיתוח
+### 🎯 Learning Experience
 
-- [הנחיות כלליות](docs/development/GUIDELINES.md)
-- [סקירת קוד](docs/development/CODE_REVIEW.md)
-- [תכנית בדיקות](docs/development/TEST_PLAN.md)
+- **Adaptive Learning Paths**
 
-### תחזוקה
+  - Personalized curriculum
+  - Progress tracking
+  - Achievement system
+  - Skill assessments
 
-- [תכנית תיקונים](docs/maintenance/FIX_PLAN.md)
-- [מדריך העברה](docs/maintenance/MIGRATION.md)
+- **Interactive Simulations**
 
-### תרומה לפרויקט
+  - Real-life scenarios
+  - AI-powered responses
+  - Immediate feedback
+  - Emotional intelligence training
 
-- [קוד התנהגות](docs/contributing/CODE_OF_CONDUCT.md)
-- [רישיון](docs/contributing/LICENSE.md)
+- **Community Learning**
 
-## התקנה 🛠️
+  - Moderated discussions
+  - Peer support
+  - Expert guidance
+  - Knowledge sharing
+
+- **AI Assistant**
+  - 24/7 learning support
+  - Contextual help
+  - Resource recommendations
+  - Progress monitoring
+
+### 💫 Technical Excellence
+
+- Next.js 14 with App Router
+- TypeScript for type safety
+- Tailwind CSS + shadcn/ui for styling
+- Supabase for backend services
+- OpenAI for AI features
+- Real-time capabilities
+- Responsive design
+- RTL support
+- Accessibility focused
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm
+- Git
+- Desire to learn and grow
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-username/haderech.git
+   cd haderech
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   pnpm install
+   ```
+
+3. Set up environment variables:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Fill in the required values in `.env.local`
+
+4. Start the development server:
+   ```bash
+   pnpm dev
+   ```
+
+Visit `http://localhost:3000` to begin your learning journey.
+
+## Learning Path
+
+1. **Assessment**
+
+   - Initial skill evaluation
+   - Learning style identification
+   - Goal setting
+   - Path customization
+
+2. **Core Learning**
+
+   - Interactive lessons
+   - Practical exercises
+   - Real-world simulations
+   - Progress tracking
+
+3. **Practice**
+
+   - Scenario simulations
+   - Peer interactions
+   - Feedback sessions
+   - Skill application
+
+4. **Community**
+   - Discussion participation
+   - Knowledge sharing
+   - Peer support
+   - Expert guidance
+
+## Documentation
+
+- [Architecture Overview](ARCHITECTURE.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Learning Guide](docs/learning.md)
+- [API Documentation](docs/api.md)
+- [Component Library](docs/components.md)
+
+## Testing
+
+We maintain high quality through comprehensive testing:
 
 ```bash
-# התקנת תלויות
-pnpm install
-
-# הגדרת משתני סביבה
-cp .env.example .env.local
-
-# הרצת הפרויקט
-pnpm dev
-```
-
-## טכנולוגיות 💻
-
-- Next.js 14
-- TypeScript
-- Supabase
-- Tailwind CSS
-- OpenAI
-
-## תכונות עיקריות ⭐
-
-- מערכת קורסים אינטראקטיבית
-- AI מותאם אישית
-- קהילה תומכת
-- מעקב התקדמות
-- תמיכה בעברית ואנגלית
-
-## פיתוח 🔧
-
-```bash
-# התקנת תלויות
-pnpm install
-
-# פיתוח
-pnpm dev
-
-# בדיקות
+# Unit tests
 pnpm test
 
-# בדיקת טיפוסים
-pnpm type-check
+# E2E tests
+pnpm test:e2e
 
-# בדיקת לינטינג
-pnpm lint
+# AI response testing
+pnpm test:ai
 
-# בנייה לייצור
-pnpm build
+# Test coverage
+pnpm test:coverage
 ```
 
-### הערות חשובות לבנייה 🏗️
+## Contributing
 
-- הפרויקט משתמש ב-Next.js 14.1.0
-- הקונפיגורציה מותאמת לעבודה בסביבת Windows
-- אופטימיזציה של תמונות מבוטלת (`unoptimized: true`)
-- SWC Minifier מבוטל לטובת יציבות (`swcMinify: false`)
-- בדיקות טיפוסים ולינטינג מבוטלות בזמן בנייה
-- נדרש Node.js 20.x ו-pnpm 9.x
+We welcome contributions to improve education! See our [Contributing Guide](CONTRIBUTING.md) for details.
 
-## תרומה 🤝
+### Development Process
 
-אנחנו מזמינים אתכם לתרום לפרויקט! אנא קראו את [הנחיות התרומה](docs/contributing/CONTRIBUTING.md) לפני שאתם מתחילים.
+1. Fork the repository
+2. Create your feature branch
+3. Add educational value
+4. Test thoroughly
+5. Create a Pull Request
 
-## רישיון 📄
+## Support
 
-פרויקט זה מופץ תחת רישיון MIT. ראו [LICENSE.md](docs/contributing/LICENSE.md) למידע נוסף.
+- [Learning Resources](docs/resources.md)
+- [Community Forum](https://community.haderech.com)
+- [Discord Community](https://discord.gg/haderech)
+- [Help Center](https://help.haderech.com)
+
+## Success Stories
+
+Read about how HaDerech has helped people improve their relationships and communication skills in our [Success Stories](docs/success-stories.md).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Our dedicated learners
+- The amazing teaching community
+- Our technology partners
+- Open source contributors
+
+---
+
+Begin your journey to better relationships today! 🌟

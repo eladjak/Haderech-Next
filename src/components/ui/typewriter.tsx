@@ -1,90 +1,41 @@
 "use client";
 
-import * as React from "react";
 import { motion, useAnimation } from "framer-motion";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface TypewriterProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TypewriterProps {
   text: string;
-  speed?: number;
   delay?: number;
-  cursor?: boolean;
+  className?: string;
   onComplete?: () => void;
 }
 
-const Typewriter = React.forwardRef<HTMLDivElement, TypewriterProps>(
-  (
-    {
-      className,
-      text,
-      speed = 50,
-      delay = 0,
-      cursor = true,
-      onComplete,
-      ...props
-    },
-    ref,
-  ) => {
-    const [displayText, setDisplayText] = React.useState("");
-    const controls = useAnimation();
+function Typewriter({
+  text,
+  delay = 50,
+  className,
+  onComplete,
+}: TypewriterProps): React.ReactElement {
+  const [displayText, setDisplayText] = React.useState("");
+  const [currentIndex, setCurrentIndex] = React.useState(0);
 
-    React.useEffect(() => {
-      let currentIndex = 0;
-      let timer: NodeJS.Timeout;
+  React.useEffect(() => {
+    if (currentIndex >= text.length) {
+      onComplete?.();
+      return;
+    }
 
-      const startTyping = () => {
-        timer = setInterval(() => {
-          if (currentIndex < text.length) {
-            setDisplayText(text.slice(0, currentIndex + 1));
-            currentIndex++;
-          } else {
-            clearInterval(timer);
-            onComplete?.();
-          }
-        }, speed);
-      };
+    const timeout = setTimeout(() => {
+      setDisplayText((prev) => prev + text[currentIndex]);
+      setCurrentIndex((prev) => prev + 1);
+    }, delay);
 
-      const delayTimer = setTimeout(() => {
-        startTyping();
-      }, delay);
+    return () => clearTimeout(timeout);
+  }, [currentIndex, delay, onComplete, text]);
 
-      return () => {
-        clearTimeout(delayTimer);
-        clearInterval(timer);
-      };
-    }, [text, speed, delay, onComplete]);
-
-    React.useEffect(() => {
-      if (cursor) {
-        controls.start({
-          opacity: [1, 0],
-          transition: {
-            duration: 0.8,
-            repeat: Infinity,
-            repeatType: "reverse",
-          },
-        });
-      }
-    }, [cursor, controls]);
-
-    return (
-      <div
-        ref={ref}
-        className={cn("relative inline-flex items-center", className)}
-        {...props}
-      >
-        <span>{displayText}</span>
-        {cursor && (
-          <motion.span
-            animate={controls}
-            className="ml-0.5 inline-block h-full w-0.5 bg-current"
-          />
-        )}
-      </div>
-    );
-  },
-);
-Typewriter.displayName = "Typewriter";
+  return <span className={className}>{displayText}</span>;
+}
 
 export { Typewriter };

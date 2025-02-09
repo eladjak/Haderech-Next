@@ -27,7 +27,10 @@ export function ProfileHeader({ profile, isCurrentUser }: ProfileHeaderProps) {
               <p className="text-sm text-muted-foreground">{profile.bio}</p>
             )}
             {isCurrentUser && (
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+              >
                 ערוך פרופיל
               </Button>
             )}

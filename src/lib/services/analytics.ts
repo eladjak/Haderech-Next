@@ -1,5 +1,6 @@
-import { createServerClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
+
+import { createServerClient } from "@/lib/supabase-server";
 
 interface AnalyticsEvent {
   id: string;

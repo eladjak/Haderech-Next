@@ -1,27 +1,26 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo '🏗️ בודק טיפוסים, לינטינג ובדיקות...'
+echo "🏗️ Running pre-commit checks..."
 
-# בדיקת טיפוסים
-pnpm type-check ||
-(
-    echo '❌ בדיקת טיפוסים נכשלה. אנא תקן את השגיאות ונסה שוב.'
-    false;
-)
+# Run type checking
+echo "📝 Type checking..."
+pnpm type-check || exit 1
 
-# בדיקת לינטינג
-pnpm lint ||
-(
-    echo '❌ בדיקת לינטינג נכשלה. אנא תקן את השגיאות ונסה שוב.'
-    false;
-)
+# Run strict linting
+echo "🔍 Running strict linting..."
+pnpm lint:strict || exit 1
 
-# הרצת בדיקות
-pnpm test ||
-(
-    echo '❌ הבדיקות נכשלו. אנא תקן את השגיאות ונסה שוב.'
-    false;
-)
+# Run format check
+echo "💅 Checking formatting..."
+pnpm format:check || exit 1
 
-echo '✅ כל הבדיקות עברו בהצלחה!' 
+# Run tests
+echo "🧪 Running tests..."
+pnpm test || exit 1
+
+# Run staged files checks
+echo "📋 Running staged files checks..."
+pnpm lint-staged || exit 1
+
+echo "✅ All checks passed!" 

@@ -1,23 +1,13 @@
 import { Metadata } from "next";
+import React from "react";
+
 import { RegisterContent } from "@/components/auth/register-content";
-import { AuthProvider } from "@/providers/auth-provider";
 
 export const metadata: Metadata = {
-  title: "הרשמה",
-  description: "צור חשבון חדש בהדרך",
+  title: "הרשמה - הדרך",
+  description: "צרו חשבון חדש בהדרך",
 };
 
-export const dynamic = "force-dynamic";
-
-function RegisterClientPage() {
-  "use client";
-  return (
-    <AuthProvider>
-      <RegisterContent />
-    </AuthProvider>
-  );
-}
-
-export default function RegisterPage() {
-  return <RegisterClientPage />;
+export default function RegisterPage(): React.ReactElement {
+  return <RegisterContent />;
 }

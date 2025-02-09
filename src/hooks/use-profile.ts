@@ -4,8 +4,10 @@
  */
 
 import { useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+
 import type { Database } from "@/types/supabase";
 
 type BaseProfile = Database["public"]["Tables"]["profiles"]["Row"];

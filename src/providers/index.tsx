@@ -1,8 +1,9 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
-import { AuthProvider } from "@/providers/auth-provider";
+
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/providers/auth-provider";
 
 interface ProvidersProps {
   children: React.ReactNode;

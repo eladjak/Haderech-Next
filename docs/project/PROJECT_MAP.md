@@ -1,227 +1,220 @@
-# מפת הפרויקט - HaDerech Next 🗺️
+# מפת הפרויקט 🗺️
 
-## סקירה כללית 📋
+## מבנה הקבצים והתיקיות 📁
 
-מסמך זה מספק מבט-על על פרויקט הדרך, כולל מבנה, קשרים, ותלויות בין רכיבי המערכת השונים.
-
-## מבנה הפרויקט 🏗️
-
-```mermaid
-graph TD
-    A[Frontend] --> B[Next.js App]
-    B --> C[Pages]
-    B --> D[Components]
-    B --> E[API Routes]
-
-    F[Backend] --> G[tRPC Server]
-    G --> H[Services]
-    G --> I[Models]
-
-    J[Database] --> K[Supabase]
-    K --> L[Tables]
-    K --> M[Functions]
-    K --> N[Policies]
+```
+haderech-next/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/
+│   │   │   ├── login/
+│   │   │   └── register/
+│   │   ├── (course)/
+│   │   │   ├── courses/
+│   │   │   │   └── [id]/
+│   │   │   │       ├── components/
+│   │   │   │       │   ├── course-content.tsx
+│   │   │   │       │   ├── course-comments.tsx
+│   │   │   │       │   └── course-ratings.tsx
+│   │   │   └── lessons/
+│   │   │       └── [id]/
+│   │   ├── (dashboard)/
+│   │   │   ├── components/
+│   │   │   │   ├── latest-forum-posts.tsx
+│   │   │   │   ├── recommended-courses-preview.tsx
+│   │   │   │   ├── referral-management.tsx
+│   │   │   │   └── social-recommendations.tsx
+│   │   │   └── dashboard/
+│   │   ├── (forum)/
+│   │   │   └── forum/
+│   │   ├── (marketing)/
+│   │   │   └── landing/
+│   │   ├── (profile)/
+│   │   │   └── profile/
+│   │   └── api/
+│   │       ├── auth/
+│   │       ├── bot/
+│   │       ├── courses/
+│   │       └── users/
+│   ├── components/
+│   │   ├── ui/
+│   │   ├── forms/
+│   │   └── shared/
+│   ├── lib/
+│   │   ├── supabase/
+│   │   └── utils/
+│   ├── types/
+│   └── styles/
+├── public/
+│   ├── images/
+│   └── fonts/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── API.md
+│   ├── DATABASE_SCHEMA.md
+│   └── ...
+└── ...
 ```
 
-## רכיבי המערכת 🔧
+## תיאור התיקיות העיקריות 📝
 
-### 1. Frontend
+### `src/app/`
 
-- **Pages**: דפי האפליקציה
+- מכיל את כל הדפים והרכיבים של האפליקציה
+- מאורגן לפי קבוצות פונקציונליות (auth, course, dashboard וכו')
+- כל קבוצה מכילה את הדפים והקומפוננטות הרלוונטיות
 
-  - `/`: דף הבית
-  - `/courses`: קטלוג קורסים
-  - `/course/[id]`: דף קורס
-  - `/profile`: פרופיל משתמש
-  - `/admin`: ממשק ניהול
+### `src/components/`
 
-- **Components**: רכיבים משותפים
-  - `Layout`: תבנית בסיסית
-  - `Navigation`: ניווט
-  - `CourseCard`: כרטיס קורס
-  - `UserProfile`: פרופיל משתמש
-  - `AdminPanel`: פאנל ניהול
+- מכיל קומפוננטות משותפות
+- מחולק לקטגוריות: ui, forms, shared
 
-### 2. Backend
+### `src/lib/`
 
-- **Services**: שירותי המערכת
+- מכיל פונקציות עזר וספריות
+- כולל הגדרות Supabase ופונקציות שימושיות
 
-  - `AuthService`: אימות משתמשים
-  - `CourseService`: ניהול קורסים
-  - `UserService`: ניהול משתמשים
-  - `PaymentService`: תשלומים
-  - `AnalyticsService`: אנליטיקס
+### `src/types/`
 
-- **Models**: מודלים
-  - `User`: משתמש
-  - `Course`: קורס
-  - `Lesson`: שיעור
-  - `Progress`: התקדמות
-  - `Payment`: תשלום
+- מכיל את כל הגדרות הטיפוסים של TypeScript
 
-### 3. Database
+### `tests/`
 
-- **Tables**: טבלאות
-  - `users`: משתמשים
-  - `courses`: קורסים
-  - `lessons`: שיעורים
-  - `progress`: התקדמות
-  - `payments`: תשלומים
+- מכיל את כל הטסטים מחולקים לפי סוגים
 
-## תלויות ותקשורת 🔄
+### `docs/`
 
-### 1. Frontend-Backend
+- מכיל את כל המסמכים הטכניים והתיעוד של הפרויקט
 
-```typescript
-// API Call Example
-const getCourse = async (id: string) => {
-  const course = await trpc.course.get.query({ id });
-  return course;
-};
-```
+## קבצים חשובים 📄
 
-### 2. Backend-Database
+- `package.json` - הגדרות הפרויקט ותלויות
+- `next.config.js` - הגדרות Next.js
+- `tailwind.config.ts` - הגדרות Tailwind CSS
+- `.env.local` - משתני סביבה מקומיים
+- `tsconfig.json` - הגדרות TypeScript
 
-```typescript
-// Database Query Example
-const getUserCourses = async (userId: string) => {
-  const { data, error } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("user_id", userId);
-  return data;
-};
-```
+## 📋 מסמכי ליבה
 
-## תהליכים עיקריים 🔄
+- [x] `TECHNICAL_SPEC.md` - מפרט טכני מקיף הכולל:
+  - מפרט API
+  - ביצועים ואופטימיזציה
+  - תכונות AI ומערכות מתקדמות
+  - פקודות קוליות ונגישות
+  - למידה חברתית וקהילתית
+- [x] `ARCHITECTURE.md` - ארכיטקטורה
+- [x] `DATABASE_SCHEMA.md` - סכמת בסיס נתונים
 
-### 1. הרשמה לקורס
+## 👤 מסמכי משתמש ופיתוח
 
-```mermaid
-sequenceDiagram
-    User->>Frontend: בחירת קורס
-    Frontend->>Backend: בקשת הרשמה
-    Backend->>Payment: עיבוד תשלום
-    Backend->>Database: שמירת הרשמה
-    Backend->>Frontend: אישור הרשמה
-    Frontend->>User: הצגת אישור
-```
+- [x] `user_specification.md` - מפרט משתמש (כולל רשימת תכונות)
+- [x] `PROJECT_MAP.md` - מפת פרויקט ומפת דרכים
 
-### 2. צפייה בשיעור
+## 🏗️ מסמכי תשתית
 
-```mermaid
-sequenceDiagram
-    User->>Frontend: בחירת שיעור
-    Frontend->>Backend: בקשת תוכן
-    Backend->>Database: בדיקת הרשאות
-    Database->>Backend: אישור
-    Backend->>Frontend: תוכן השיעור
-    Frontend->>User: הצגת השיעור
-```
+- [x] `test_plan.md` - תוכנית בדיקות
+- [x] `DEPLOYMENT.md` - תהליך הפצה
 
-## אינטגרציות 🔌
+## 🚀 מסמכים ייחודיים
 
-### 1. שירותים חיצוניים
+- [x] `AI_FEATURES.md` - תכונות AI
+- [x] `VOICE_COMMANDS.md` - פקודות קוליות
+- [x] `SOCIAL_LEARNING.md` - למידה חברתית
 
-- Stripe: תשלומים
-- OpenAI: AI Assistant
-- SendGrid: אימיילים
-- Cloudinary: מדיה
-- Sentry: ניטור
+## 🎯 צ'קליסט משימות
 
-### 2. כלי פיתוח
+### 1️⃣ תשתית ותיעוד
 
-- GitHub: קוד
-- Vercel: אירוח
-- Jest: בדיקות
-- ESLint: לינטינג
-- Prettier: פורמטינג
+- [x] ארגון מחדש של מסמכי התיעוד
+  - [x] מיזוג מסמכים כפולים
+  - [x] עדכון כל המסמכים לפורמט אחיד
+  - [x] הוספת קישורים פנימיים בין המסמכים
+- [x] הגדרת סטנדרטים
+  - [x] סטנדרט כתיבת קוד
+  - [x] סטנדרט תיעוד
+  - [x] סטנדרט בדיקות
+- [x] תשתיות פיתוח
+  - [x] הגדרת Supabase
+  - [x] הגדרת Vercel
+  - [x] הגדרת CI/CD
 
-## ניטור וביצועים 📊
+### 2️⃣ ניקוי וארגון קוד
 
-### 1. מדדי ביצוע
+- [x] ארגון מחדש של תיקיות
+  - [x] בדיקת כל התיקיות הקיימות
+  - [x] מחיקת קבצים כפולים/מיותרים
+  - [x] ארגון לפי מבנה סטנדרטי
+- [ ] שדרוג קומפוננטות
+  - [ ] המרה ל-shadcn/ui
+  - [ ] הוספת TypeScript types
+  - [ ] הוספת JSDoc
+- [ ] ניקוי קוד
+  - [ ] טיפול ב-linting issues
+  - [ ] שיפור קוד קיים
+  - [ ] הוספת error handling
 
-```typescript
-// Performance Monitoring
-const trackPerformance = () => {
-  const metrics = {
-    pageLoad: performance.now(),
-    memory: performance.memory,
-    resources: performance.getEntriesByType("resource"),
-  };
-  sendToAnalytics(metrics);
-};
-```
+### 3️⃣ פיתוח ושדרוג
 
-### 2. לוגים ושגיאות
+- [ ] תשתיות פיתוח
+  - [ ] הוספת Storybook
+  - [ ] הוספת בדיקות E2E
+  - [ ] הוספת בדיקות יחידה
+- [ ] שדרוג UI/UX
+  - [ ] עיצוב מודרני
+  - [ ] תמיכה ב-RTL
+  - [ ] נגישות
+- [ ] אבטחה
+  - [ ] הגדרת RLS
+  - [ ] אימות והרשאות
+  - [ ] אבטחת API
 
-```typescript
-// Error Tracking
-const errorHandler = (error: Error) => {
-  logger.error({
-    message: error.message,
-    stack: error.stack,
-    timestamp: new Date(),
-  });
-};
-```
+### 4️⃣ בדיקות ו-QA
 
-## אבטחה 🔒
+- [ ] בדיקות אוטומטיות
+  - [ ] Unit Tests
+  - [ ] Integration Tests
+  - [ ] E2E Tests
+- [ ] בדיקות ביצועים
+  - [ ] מדדי ביצועים
+  - [ ] אופטימיזציה
+  - [ ] ניטור
 
-### 1. הרשאות
+## 📅 לוח זמנים
 
-```typescript
-// Permission Check
-const checkAccess = async (userId: string, courseId: string) => {
-  const hasAccess = await supabase
-    .from("enrollments")
-    .select("*")
-    .match({ user_id: userId, course_id: courseId });
-  return hasAccess.data?.length > 0;
-};
-```
+- שלב 1: תשתית ותיעוד - הושלם ✅
+- שלב 2: ניקוי וארגון - שבוע
+- שלב 3: פיתוח ושדרוג - שבועיים
+- שלב 4: בדיקות ו-QA - שבוע
 
-### 2. אימות
+## 🔄 סטטוס נוכחי
 
-```typescript
-// Authentication
-const requireAuth = async (req: NextApiRequest) => {
-  const session = await getSession({ req });
-  if (!session) throw new Error("Unauthorized");
-  return session;
-};
-```
+1. הושלם ✅:
 
-## תחזוקה ועדכונים 🔧
+   - ארגון וניקוי מסמכי ליבה
+   - מיזוג מסמכים כפולים
+   - מפרט טכני מקיף ומאוחד
+   - מפרט משתמש מעודכן
+   - מפת דרכים מפורטת
+   - הגדרת סטנדרטים מלאה
+   - הגדרת תשתיות פיתוח מלאה
+   - ארגון מחדש של תיקיות
 
-### 1. גיבויים
+2. בתהליך 🔄:
 
-```bash
-# Database Backup
-pg_dump -U postgres -d haderech > backup.sql
-```
+   - שדרוג קומפוננטות
+   - ניקוי קוד
 
-### 2. עדכוני תשתית
+3. הבא בתור ⏭️:
+   - ניקוי וארגון קוד
+   - שדרוג קומפוננטות
+   - הוספת בדיקות
 
-```bash
-# Dependencies Update
-npm update --save
-```
+## 📝 הערות
 
-## סיכום 📝
-
-### מטרות
-
-1. ארכיטקטורה מודולרית
-2. תקשורת יעילה
-3. אבטחה גבוהה
-4. ביצועים מעולים
-5. תחזוקה פשוטה
-
-### המלצות
-
-1. שיפור תיעוד
-2. הרחבת בדיקות
-3. אופטימיזציה
-4. שדרוג אבטחה
-5. הוספת ניטור
+- יש לעדכן את המסמכים באופן שוטף
+- לשמור על תיאום בין המסמכים השונים
+- להוסיף דוגמאות ותרשימים במקומות הרלוונטיים

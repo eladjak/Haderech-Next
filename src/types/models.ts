@@ -1,5 +1,5 @@
-import { Tables } from "./supabase";
 import { CourseWithRelations } from "./courses";
+import { Tables } from "./supabase";
 
 // טיפוסים בסיסיים למודלים
 export interface User {

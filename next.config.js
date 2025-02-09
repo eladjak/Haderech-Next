@@ -2,24 +2,24 @@
 
 const nextConfig = {
   experimental: {
-    typedRoutes: true
+    typedRoutes: true,
   },
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: true,
   },
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
   },
   images: {
     domains: [
-      'lh3.googleusercontent.com',
-      'avatars.githubusercontent.com',
-      'res.cloudinary.com',
-      'images.unsplash.com'
+      "lh3.googleusercontent.com",
+      "avatars.githubusercontent.com",
+      "res.cloudinary.com",
+      "images.unsplash.com",
     ],
-    unoptimized: true
+    unoptimized: true,
   },
-  swcMinify: false
-}
+  swcMinify: false,
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

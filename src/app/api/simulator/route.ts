@@ -1,32 +1,92 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+
 import {
   startSimulation,
   processUserMessage,
   saveSimulationResults,
 } from "@/lib/services/simulator";
+import type { SimulationState } from "@/types/simulator";
 
 // Validation schemas
 const startSchema = z.object({
-  context: z.string().min(1).max(1000),
+  scenarioId: z.string().min(1),
 });
 
 const messageSchema = z.object({
   state: z.object({
-    context: z.string(),
+    id: z.string(),
+    scenario: z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string(),
+      difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+      category: z.string(),
+      initialMessage: z.string(),
+      suggestedResponses: z.array(z.string()),
+      learningObjectives: z.array(z.string()),
+      successCriteria: z.object({
+        minScore: z.number(),
+        requiredSkills: z.array(z.string()),
+        minDuration: z.number(),
+        maxDuration: z.number(),
+      }),
+    }),
     messages: z.array(
       z.object({
-        speaker: z.enum(["user", "partner"]),
+        id: z.string(),
         content: z.string(),
+        role: z.enum(["user", "assistant", "system"]),
         timestamp: z.string(),
+        sender: z.object({
+          id: z.string(),
+          name: z.string(),
+          avatar: z.string().optional(),
+        }),
+        feedback: z
+          .object({
+            score: z.number(),
+            message: z.string(),
+            details: z
+              .object({
+                empathy: z.number(),
+                clarity: z.number(),
+                effectiveness: z.number(),
+                appropriateness: z.number(),
+                strengths: z.array(z.string()),
+                improvements: z.array(z.string()),
+                tips: z.array(z.string()),
+              })
+              .optional(),
+          })
+          .optional(),
       }),
     ),
-    currentSpeaker: z.enum(["user", "partner"]),
-    emotionalState: z.object({
-      mood: z.enum(["positive", "neutral", "negative"]),
-      interest: z.number().min(0).max(100),
-      comfort: z.number().min(0).max(100),
-    }),
+    status: z.enum(["active", "completed", "failed"]),
+    feedback: z
+      .object({
+        score: z.number(),
+        comments: z.array(z.string()),
+        suggestions: z.array(z.string()),
+        details: z.object({
+          empathy: z.number(),
+          clarity: z.number(),
+          effectiveness: z.number(),
+          appropriateness: z.number(),
+          strengths: z.array(z.string()),
+          improvements: z.array(z.string()),
+          tips: z.array(z.string()),
+        }),
+        overallProgress: z.object({
+          empathy: z.number(),
+          clarity: z.number(),
+          effectiveness: z.number(),
+          appropriateness: z.number(),
+        }),
+      })
+      .optional(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
   }),
   message: z.string().min(1).max(1000),
 });
@@ -39,9 +99,9 @@ const messageSchema = z.object({
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { context } = startSchema.parse(body);
+    const { scenarioId } = startSchema.parse(body);
 
-    const state = await startSimulation(context);
+    const state = await startSimulation(scenarioId);
     return NextResponse.json(state);
   } catch (error) {
     console.error("Error starting simulation:", error);
@@ -62,7 +122,10 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { state, message } = messageSchema.parse(body);
 
-    const newState = await processUserMessage(state, message);
+    const newState = await processUserMessage(
+      state as SimulationState,
+      message,
+    );
     return NextResponse.json(newState);
   } catch (error) {
     console.error("Error processing message:", error);
@@ -83,7 +146,7 @@ export async function PATCH(req: Request) {
     const body = await req.json();
     const { state } = messageSchema.parse(body);
 
-    await saveSimulationResults(state);
+    await saveSimulationResults(state as SimulationState);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error saving simulation:", error);

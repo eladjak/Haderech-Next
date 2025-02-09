@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -212,7 +213,11 @@ export function SimulatorChat() {
         >
           סימולציה חדשה
         </Button>
-        <Button variant="secondary" onClick={saveResults} disabled={isLoading}>
+        <Button
+          variant="secondary"
+          onClick={saveResults}
+          disabled={isLoading}
+        >
           שמור תוצאות
         </Button>
       </div>

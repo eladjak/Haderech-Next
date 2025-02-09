@@ -1,15 +1,17 @@
 "use client";
 
+import { MessageSquare, ThumbsUp, User } from "lucide-react";
 import Link from "next/link";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { MessageSquare, ThumbsUp, User } from "lucide-react";
+
 import type { ForumPost } from "@/types/api";
 
 interface ForumPostProps {
@@ -24,7 +26,7 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
       <CardHeader>
         <div className="flex items-center gap-4">
           <Avatar>
-            <AvatarImage src={post.author?.avatar_url} />
+            <AvatarImage src={post.author?.avatar_url || undefined} />
             <AvatarFallback>
               {post.author?.name?.[0] ?? <User className="h-4 w-4" />}
             </AvatarFallback>
@@ -68,7 +70,12 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
               <span>{post.likes}</span>
             </Button>
           )}
-          <Button variant="ghost" size="sm" className="gap-2" asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2"
+            asChild
+          >
             <Link href={`/community/${post.id}`}>
               <MessageSquare className="h-4 w-4" />
               <span>{post.comments?.length || 0}</span>

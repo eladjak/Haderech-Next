@@ -1,8 +1,10 @@
 import { Server as HTTPServer } from "http";
-import { Server as SocketServer } from "socket.io";
+
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/supabase";
+import { Server as SocketServer } from "socket.io";
+
 import type { ChatMessage } from "@/types/models";
+import type { Database } from "@/types/supabase";
 
 // Initialize Supabase client
 const supabase = createClient<Database>(

@@ -1,4 +1,6 @@
+import React from "react";
 import { Metadata } from "next";
+
 import { CourseCard } from "@/components/course-card";
 import { courses } from "@/constants/courses";
 
@@ -7,7 +9,7 @@ export const metadata: Metadata = {
   description: "גלה את הקורסים שלנו",
 };
 
-export default function CoursesPage() {
+export default function CoursesPage(): React.ReactElement {
   return (
     <div className="container py-8">
       <div className="mb-8">
@@ -18,7 +20,10 @@ export default function CoursesPage() {
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {courses.map((course) => (
-          <CourseCard key={course.id} course={course} />
+          <CourseCard
+            key={course.id}
+            course={course}
+          />
         ))}
       </div>
     </div>

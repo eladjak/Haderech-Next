@@ -3,11 +3,12 @@
  * @description Auth callback handler for processing OAuth redirects
  */
 
-import { createServerClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export const dynamic = 'force-dynamic';
+import { createServerClient } from "@/lib/supabase-server";
+
+export const dynamic = "force-dynamic";
 
 /**
  * GET /auth/callback

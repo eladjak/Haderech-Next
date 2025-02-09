@@ -31,9 +31,10 @@
 
 "use client";
 
-import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+
+import { cn } from "@/lib/utils";
 
 /**
  * Props for the Glow component
@@ -133,7 +134,7 @@ export function Glow({
       exit={{ opacity: 0 }}
     >
       <div
-        className="absolute pointer-events-none"
+        className="pointer-events-none absolute"
         style={{
           left: "var(--glow-x)",
           top: "var(--glow-y)",

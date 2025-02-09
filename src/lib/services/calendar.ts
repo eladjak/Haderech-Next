@@ -1,5 +1,5 @@
-import { google } from "googleapis";
 import { OAuth2Client } from "google-auth-library";
+import { google } from "googleapis";
 
 interface CalendarEvent {
   summary: string;

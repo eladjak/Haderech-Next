@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import confetti from "canvas-confetti";
+import * as React from "react";
 
 interface ConfettiProps {
   onComplete?: () => void;

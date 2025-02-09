@@ -1,13 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+
 import { authReducer } from "./slices/auth";
-import { uiReducer } from "./slices/ui";
 import courseReducer from "./slices/courseSlice";
-import userReducer from "./slices/userSlice";
 import forumReducer from "./slices/forumSlice";
 import notificationReducer from "./slices/notificationSlice";
 import simulatorReducer from "./slices/simulatorSlice";
 import { socialReducer } from "./slices/social";
+import { uiReducer } from "./slices/ui";
+import userReducer from "./slices/userSlice";
 
 export const store = configureStore({
   reducer: {

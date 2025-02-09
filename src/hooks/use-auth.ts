@@ -4,92 +4,133 @@
  */
 
 import { useRouter } from "next/navigation";
-import { useEffect, useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "@/store/store";
-import { setUser, setLoading, setError } from "@/store/slices/userSlice";
-import { supabase } from "@/lib/api";
+import { useEffect, useCallback, useState } from "react";
+import { User } from "@supabase/supabase-js";
+import { createSupabaseClient } from "@/lib/supabase";
+
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/api";
+import { setUser, setLoading, setError } from "@/store/slices/userSlice";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+interface UseAuth {
+  user: User | null;
+  loading: boolean;
+  error: Error | null;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+}
 
 /**
  * Custom hook that provides authentication state and user session management
  *
  * @returns Object containing user state and auth methods
  */
-export function useAuth() {
+export const useAuth = (): UseAuth => {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    loading: true,
+    error: null,
+  });
+
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { user, loading, error } = useAppSelector((state) => ({
-    user: state.user.user,
-    loading: state.user.loading,
-    error: state.user.error,
-  }));
   const { toast } = useToast();
+  const supabase = createSupabaseClient();
 
   useEffect(() => {
-    // Listen for auth state changes
+    const getUser = async (): Promise<void> => {
+      try {
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
+
+        if (error) {
+          console.error("Error fetching user:", error.message);
+          setState((prev) => ({ ...prev, error, loading: false }));
+          return;
+        }
+
+        setState((prev) => ({ ...prev, user, loading: false }));
+      } catch (error) {
+        console.error("Unexpected error fetching user:", error);
+        setState((prev) => ({
+          ...prev,
+          error:
+            error instanceof Error
+              ? error
+              : new Error("An unexpected error occurred"),
+          loading: false,
+        }));
+      }
+    };
+
+    void getUser();
+
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN") {
-        dispatch(setLoading(true));
-        try {
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session!.user.id)
-            .single();
-
-          if (profileError) throw profileError;
-
-          if (profile) {
-            dispatch(setUser(profile));
-          } else {
-            router.push("/onboarding");
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-          dispatch(setError("שגיאה בטעינת הפרופיל"));
-        } finally {
-          dispatch(setLoading(false));
-        }
-      } else if (event === "SIGNED_OUT") {
-        dispatch(setUser(null));
-        router.push("/login");
-      }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setState((prev) => ({ ...prev, user: session?.user ?? null }));
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [dispatch, router]);
+  }, [supabase.auth]);
 
   const signIn = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string): Promise<void> => {
       try {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error signing in:", error.message);
+          setState((prev) => ({ ...prev, error }));
+          toast({
+            title: "שגיאה בהתחברות",
+            description: error.message,
+          });
+          return;
+        }
 
         toast({
           title: "התחברת בהצלחה",
           description: "ברוך הבא חזרה!",
         });
+        router.push("/dashboard");
       } catch (error) {
-        console.error("Error signing in:", error);
+        console.error("Unexpected error during sign in:", error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred";
+        setState((prev) => ({
+          ...prev,
+          error: error instanceof Error ? error : new Error(errorMessage),
+        }));
         toast({
           title: "שגיאה בהתחברות",
-          description: "אנא נסה שוב מאוחר יותר",
+          description: errorMessage,
         });
       }
     },
-    [toast],
+    [supabase.auth, router, toast],
   );
 
   const signUp = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string): Promise<void> => {
       try {
         const { error } = await supabase.auth.signUp({
           email,
@@ -99,47 +140,120 @@ export function useAuth() {
           },
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error signing up:", error.message);
+          setState((prev) => ({ ...prev, error }));
+          toast({
+            title: "שגיאה בהרשמה",
+            description: error.message,
+          });
+          return;
+        }
 
         toast({
           title: "נרשמת בהצלחה",
           description: "נשלח אליך מייל אימות",
         });
+        router.push("/verify-email");
       } catch (error) {
-        console.error("Error signing up:", error);
+        console.error("Unexpected error during sign up:", error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred";
+        setState((prev) => ({
+          ...prev,
+          error: error instanceof Error ? error : new Error(errorMessage),
+        }));
         toast({
           title: "שגיאה בהרשמה",
-          description: "אנא נסה שוב מאוחר יותר",
+          description: errorMessage,
         });
       }
     },
-    [toast],
+    [supabase.auth, router, toast],
   );
 
-  const signOut = useCallback(async () => {
+  const signOut = useCallback(async (): Promise<void> => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+
+      if (error) {
+        console.error("Error signing out:", error.message);
+        setState((prev) => ({ ...prev, error }));
+        toast({
+          title: "שגיאה בהתנתקות",
+          description: error.message,
+        });
+        return;
+      }
 
       toast({
         title: "התנתקת בהצלחה",
         description: "להתראות!",
       });
+      router.push("/");
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("Unexpected error during sign out:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error(errorMessage),
+      }));
       toast({
         title: "שגיאה בהתנתקות",
-        description: "אנא נסה שוב מאוחר יותר",
+        description: errorMessage,
       });
     }
-  }, [toast]);
+  }, [supabase.auth, router, toast]);
+
+  const resetPassword = useCallback(
+    async (email: string): Promise<void> => {
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+        if (error) {
+          console.error("Error resetting password:", error.message);
+          setState((prev) => ({ ...prev, error }));
+          toast({
+            title: "שגיאה באיפוס סיסמה",
+            description: error.message,
+          });
+          return;
+        }
+
+        toast({
+          title: "נשלח מייל איפוס סיסמה",
+          description: "בדוק את תיבת הדואר שלך",
+        });
+        router.push("/check-email");
+      } catch (error) {
+        console.error("Unexpected error during password reset:", error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred";
+        setState((prev) => ({
+          ...prev,
+          error: error instanceof Error ? error : new Error(errorMessage),
+        }));
+        toast({
+          title: "שגיאה באיפוס סיסמה",
+          description: errorMessage,
+        });
+      }
+    },
+    [supabase.auth, router, toast],
+  );
 
   return {
-    user,
-    loading,
-    error,
+    user: state.user,
+    loading: state.loading,
+    error: state.error,
     signIn,
     signUp,
     signOut,
+    resetPassword,
   };
-}
+};

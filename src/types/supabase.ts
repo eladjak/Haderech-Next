@@ -9,250 +9,192 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      users: {
-        Row: {
-          id: string;
-          name: string;
-          email: string;
-          avatar_url: string | null;
-          bio: string | null;
-          created_at: string;
-          updated_at: string;
-          role: "admin" | "user";
-          settings: {
-            notifications: boolean;
-            language: string;
-            theme: "light" | "dark" | "system";
-          };
-        };
-        Insert: Omit<
-          Database["public"]["Tables"]["users"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["users"]["Row"]>;
-      };
-      profiles: {
-        Row: {
-          id: string;
-          user_id: string;
-          username: string;
-          full_name: string;
-          avatar_url: string | null;
-          bio: string | null;
-          created_at: string;
-          updated_at: string;
-          settings: {
-            notifications: boolean;
-            language: string;
-            theme: "light" | "dark" | "system";
-          };
-        };
-        Insert: Omit<
-          Database["public"]["Tables"]["profiles"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
-      };
-      courses: {
+      simulator_scenarios: {
         Row: {
           id: string;
           title: string;
           description: string;
-          thumbnail: string | null;
-          instructor_id: string;
-          price: number | null;
-          duration: number | null;
-          level: "beginner" | "intermediate" | "advanced";
-          tags: string[];
-          requirements: string[] | null;
-          what_youll_learn: string[] | null;
-          average_rating: number | null;
-          total_students: number | null;
-          created_at: string;
-          updated_at: string | null;
-          published: boolean;
-          featured: boolean | null;
+          difficulty: "beginner" | "intermediate" | "advanced";
           category: string;
-          subcategory: string | null;
-          language: string;
-          certificate: boolean | null;
-          status: "draft" | "published" | "archived";
+          initial_message: string;
+          suggested_responses: string[];
+          learning_objectives: string[];
+          success_criteria: Json;
+          created_at: string;
+          updated_at: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["courses"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["courses"]["Row"]>;
-      };
-      lessons: {
-        Row: {
+        Insert: {
           id: string;
-          course_id: string;
           title: string;
           description: string;
-          content: string;
-          order: number;
+          difficulty: "beginner" | "intermediate" | "advanced";
+          category: string;
+          initial_message: string;
+          suggested_responses?: string[];
+          learning_objectives?: string[];
+          success_criteria?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          difficulty?: "beginner" | "intermediate" | "advanced";
+          category?: string;
+          initial_message?: string;
+          suggested_responses?: string[];
+          learning_objectives?: string[];
+          success_criteria?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      simulator_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          scenario_id: string;
+          status: "active" | "completed" | "failed";
+          messages: Json[];
+          feedback: Json;
+          created_at: string;
+          updated_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          scenario_id: string;
+          status?: "active" | "completed" | "failed";
+          messages?: Json[];
+          feedback?: Json;
+          created_at?: string;
+          updated_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          scenario_id?: string;
+          status?: "active" | "completed" | "failed";
+          messages?: Json[];
+          feedback?: Json;
+          created_at?: string;
+          updated_at?: string;
+          completed_at?: string | null;
+        };
+      };
+      simulator_results: {
+        Row: {
+          id: string;
+          session_id: string;
+          user_id: string;
+          scenario_id: string;
+          score: number;
+          feedback: Json;
           duration: number;
-          video_url: string | null;
-          attachments: string[] | null;
-          is_free: boolean | null;
+          details: Json;
           created_at: string;
-          updated_at: string | null;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["lessons"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["lessons"]["Row"]>;
-      };
-      lesson_progress: {
-        Row: {
+        Insert: {
           id: string;
+          session_id: string;
           user_id: string;
-          lesson_id: string;
-          completed: boolean;
-          created_at: string;
-          updated_at: string | null;
+          scenario_id: string;
+          score: number;
+          feedback?: Json;
+          duration: number;
+          details?: Json;
+          created_at?: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["lesson_progress"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["lesson_progress"]["Row"]>;
+        Update: {
+          id?: string;
+          session_id?: string;
+          user_id?: string;
+          scenario_id?: string;
+          score?: number;
+          feedback?: Json;
+          duration?: number;
+          details?: Json;
+          created_at?: string;
+        };
       };
-      course_enrollments: {
+      simulator_user_stats: {
         Row: {
-          id: string;
           user_id: string;
-          course_id: string;
-          progress: number;
-          last_accessed: string;
-          created_at: string;
-          updated_at: string | null;
+          total_sessions: number;
+          average_score: number;
+          completed_scenarios: string[];
+          time_spent: number;
+          strongest_category: string;
+          weakest_category: string;
+          skills_progress: Json;
+          learning_path: Json;
+          updated_at: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["course_enrollments"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<
-          Database["public"]["Tables"]["course_enrollments"]["Row"]
-        >;
-      };
-      course_ratings: {
-        Row: {
-          id: string;
+        Insert: {
           user_id: string;
-          course_id: string;
-          rating: number;
-          review: string | null;
-          created_at: string;
-          updated_at: string | null;
+          total_sessions?: number;
+          average_score?: number;
+          completed_scenarios?: string[];
+          time_spent?: number;
+          strongest_category?: string;
+          weakest_category?: string;
+          skills_progress?: Json;
+          learning_path?: Json;
+          updated_at?: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["course_ratings"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["course_ratings"]["Row"]>;
-      };
-      forum_posts: {
-        Row: {
-          id: string;
-          title: string;
-          content: string;
-          author_id: string;
-          created_at: string;
-          updated_at: string | null;
-          likes: number;
-          comments_count: number;
-          tags: string[];
+        Update: {
+          user_id?: string;
+          total_sessions?: number;
+          average_score?: number;
+          completed_scenarios?: string[];
+          time_spent?: number;
+          strongest_category?: string;
+          weakest_category?: string;
+          skills_progress?: Json;
+          learning_path?: Json;
+          updated_at?: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["forum_posts"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["forum_posts"]["Row"]>;
       };
-      forum_comments: {
+      simulator_user_settings: {
         Row: {
-          id: string;
-          post_id: string;
-          content: string;
-          author_id: string;
-          parent_id: string | null;
-          created_at: string;
-          updated_at: string | null;
-          likes: number;
-        };
-        Insert: Omit<
-          Database["public"]["Tables"]["forum_comments"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["forum_comments"]["Row"]>;
-      };
-      notifications: {
-        Row: {
-          id: string;
           user_id: string;
-          type: "course" | "forum" | "system";
-          title: string;
-          message: string;
-          link_url: string | null;
-          read: boolean;
-          created_at: string;
+          difficulty: "beginner" | "intermediate" | "advanced";
+          language: string;
+          feedback_frequency: "always" | "end" | "never";
+          auto_suggestions: boolean;
+          timer: boolean;
+          feedback_detail: "basic" | "detailed";
+          emotional_tracking: boolean;
+          learning_goals: string[];
+          updated_at: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["notifications"]["Row"],
-          "id" | "created_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["notifications"]["Row"]>;
-      };
-      achievements: {
-        Row: {
-          id: string;
+        Insert: {
           user_id: string;
-          type: string;
-          title: string;
-          description: string;
-          icon: string;
-          created_at: string;
+          difficulty?: "beginner" | "intermediate" | "advanced";
+          language?: string;
+          feedback_frequency?: "always" | "end" | "never";
+          auto_suggestions?: boolean;
+          timer?: boolean;
+          feedback_detail?: "basic" | "detailed";
+          emotional_tracking?: boolean;
+          learning_goals?: string[];
+          updated_at?: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["achievements"]["Row"],
-          "id" | "created_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["achievements"]["Row"]>;
-      };
-      lesson_content: {
-        Row: {
-          id: string;
-          lesson_id: string;
-          content: string;
-          type: "text" | "video" | "quiz";
-          order: number;
-          created_at: string;
-          updated_at: string | null;
+        Update: {
+          user_id?: string;
+          difficulty?: "beginner" | "intermediate" | "advanced";
+          language?: string;
+          feedback_frequency?: "always" | "end" | "never";
+          auto_suggestions?: boolean;
+          timer?: boolean;
+          feedback_detail?: "basic" | "detailed";
+          emotional_tracking?: boolean;
+          learning_goals?: string[];
+          updated_at?: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["lesson_content"]["Row"],
-          "id" | "created_at" | "updated_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["lesson_content"]["Row"]>;
-      };
-      uploads: {
-        Row: {
-          id: string;
-          user_id: string;
-          url: string;
-          filename: string;
-          size: number;
-          type: string;
-          created_at: string;
-        };
-        Insert: Omit<
-          Database["public"]["Tables"]["uploads"]["Row"],
-          "id" | "created_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["uploads"]["Row"]>;
       };
     };
     Views: {
@@ -262,6 +204,9 @@ export interface Database {
       [_ in never]: never;
     };
     Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
       [_ in never]: never;
     };
   };

@@ -3,9 +3,10 @@
  * @description Tests for course enrollment API endpoints
  */
 
-import { createMocks } from "node-mocks-http";
-import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { createMocks } from "node-mocks-http";
+
 import { POST, DELETE } from "../courses/[id]/enroll/route";
 
 jest.mock("next/headers");

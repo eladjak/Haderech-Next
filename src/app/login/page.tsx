@@ -1,91 +1,77 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Icons } from "@/components/icons";
+import React from "react";
+
+import { LoginForm } from "@/components/auth/login-form";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login - HaDerech",
-  description: "Login to your HaDerech account",
+  title: "התחברות - הדרך",
+  description: "התחברו לחשבון שלכם",
 };
 
-export default function LoginPage() {
+export default function LoginPage(): React.ReactElement {
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>
-            Enter your email and password to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid grid-cols-2 gap-6">
-            <Button variant="outline">
-              <Icons.google className="mr-2 h-4 w-4" />
-              Google
-            </Button>
-            <Button variant="outline">
-              <Icons.github className="mr-2 h-4 w-4" />
-              GitHub
-            </Button>
+    <div className="container relative grid h-screen flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0">
+      <Link
+        href="/register"
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          "absolute right-4 top-4 md:right-8 md:top-8",
+        )}
+      >
+        הרשמה
+      </Link>
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
+        <div className="absolute inset-0 bg-zinc-900" />
+        <div className="relative z-20 flex items-center text-lg font-medium">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2 h-6 w-6"
+          >
+            <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+          </svg>
+          הדרך
+        </div>
+        <div className="relative z-20 mt-auto">
+          <blockquote className="space-y-2">
+            <p className="text-lg">
+              &ldquo;הדרך היא הפלטפורמה המובילה ללימוד והתפתחות בתחום הזוגיות
+              ומערכות היחסים.&rdquo;
+            </p>
+            <footer className="text-sm">צוות הדרך</footer>
+          </blockquote>
+        </div>
+      </div>
+      <div className="lg:p-8">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+          <div className="flex flex-col space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              ברוכים השבים
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              הזינו את הפרטים שלכם להתחברות
+            </p>
           </div>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              autoComplete="email"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button className="w-full">Login</Button>
-          <div className="text-sm text-center text-muted-foreground">
-            Don't have an account?{" "}
+          <LoginForm />
+          <p className="px-8 text-center text-sm text-muted-foreground">
             <Link
               href="/register"
-              className="underline underline-offset-4 hover:text-primary"
+              className="hover:text-brand underline underline-offset-4"
             >
-              Sign up
+              אין לכם חשבון? הירשמו כאן
             </Link>
-          </div>
-          <Link
-            href="/forgot-password"
-            className="text-sm text-center text-muted-foreground underline underline-offset-4 hover:text-primary"
-          >
-            Forgot your password?
-          </Link>
-        </CardFooter>
-      </Card>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
