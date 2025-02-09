@@ -2,6 +2,14 @@
  * טיפוסים עבור מערכת הסימולציה
  */
 
+import type { Tables } from "@/types/database";
+
+export type SimulatorScenario = Tables<"simulator_scenarios">;
+export type SimulatorSession = Tables<"simulator_sessions">;
+export type SimulatorResult = Tables<"simulator_results">;
+export type SimulatorUserStats = Tables<"simulator_user_stats">;
+export type SimulatorUserSettings = Tables<"simulator_user_settings">;
+
 export interface Message {
   id: string;
   content: string;
@@ -39,7 +47,7 @@ export interface EmotionalState {
 
 export interface SimulationState {
   id: string;
-  scenario: SimulationScenario;
+  scenario: SimulatorScenario;
   messages: Message[];
   status: "active" | "completed" | "failed";
   feedback?: {
@@ -115,7 +123,7 @@ export interface SimulationStats {
   timeSpent: number;
   strongestCategory: string;
   weakestCategory: string;
-  recentResults: SimulationResult[];
+  recentResults: SimulatorResult[];
   skillsProgress: {
     [key: string]: number; // שם המיומנות -> ציון (0-100)
   };

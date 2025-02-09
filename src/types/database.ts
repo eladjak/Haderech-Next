@@ -65,6 +65,218 @@ export interface Database {
           updated_at?: string;
         };
       };
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          full_name: string;
+          avatar_url?: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          full_name: string;
+          avatar_url?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          full_name?: string;
+          avatar_url?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      profiles: {
+        Row: {
+          id: string;
+          user_id: string;
+          username: string;
+          full_name: string;
+          avatar_url?: string;
+          bio?: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          username: string;
+          full_name: string;
+          avatar_url?: string;
+          bio?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          username?: string;
+          full_name?: string;
+          avatar_url?: string;
+          bio?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      courses: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          level: string;
+          price: number;
+          duration: number;
+          total_students: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description: string;
+          level: string;
+          price: number;
+          duration: number;
+          total_students?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          level?: string;
+          price?: number;
+          duration?: number;
+          total_students?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      lessons: {
+        Row: {
+          id: string;
+          course_id: string;
+          title: string;
+          description: string;
+          content: string;
+          duration: number;
+          order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_id: string;
+          title: string;
+          description: string;
+          content: string;
+          duration: number;
+          order: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_id?: string;
+          title?: string;
+          description?: string;
+          content?: string;
+          duration?: number;
+          order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      forum_posts: {
+        Row: {
+          id: string;
+          title: string;
+          content: string;
+          author_id: string;
+          created_at: string;
+          updated_at: string;
+          replies_count: number;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          content: string;
+          author_id: string;
+          created_at?: string;
+          updated_at?: string;
+          replies_count?: number;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          content?: string;
+          author_id?: string;
+          created_at?: string;
+          updated_at?: string;
+          replies_count?: number;
+        };
+      };
+      forum_comments: {
+        Row: {
+          id: string;
+          post_id: string;
+          content: string;
+          author_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          content: string;
+          author_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          content?: string;
+          author_id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: string;
+          title: string;
+          content: string;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: string;
+          title: string;
+          content: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          type?: string;
+          title?: string;
+          content?: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+      };
       simulator_sessions: {
         Row: {
           id: string;
@@ -234,5 +446,30 @@ export interface Database {
         };
       };
     };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 }
+
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Insert"];
+export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Update"];
+export type Enums<T extends keyof Database["public"]["Enums"]> =
+  Database["public"]["Enums"][T];
+export type Functions<T extends keyof Database["public"]["Functions"]> =
+  Database["public"]["Functions"][T];
+export type Views<T extends keyof Database["public"]["Views"]> =
+  Database["public"]["Views"][T];

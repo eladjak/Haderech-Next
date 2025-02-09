@@ -1,3 +1,5 @@
+import type { Database as DatabaseTypes } from "./database";
+
 export type Json =
   | string
   | number
@@ -212,15 +214,29 @@ export interface Database {
   };
 }
 
-export type Tables<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"];
-export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Insert"];
-export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Update"];
-export type Enums<T extends keyof Database["public"]["Enums"]> =
-  Database["public"]["Enums"][T];
-export type Functions<T extends keyof Database["public"]["Functions"]> =
-  Database["public"]["Functions"][T];
-export type Views<T extends keyof Database["public"]["Views"]> =
-  Database["public"]["Views"][T];
+export type Tables<T extends keyof DatabaseTypes["public"]["Tables"]> =
+  DatabaseTypes["public"]["Tables"][T]["Row"];
+
+export type TablesInsert<T extends keyof DatabaseTypes["public"]["Tables"]> =
+  DatabaseTypes["public"]["Tables"][T]["Insert"];
+
+export type TablesUpdate<T extends keyof DatabaseTypes["public"]["Tables"]> =
+  DatabaseTypes["public"]["Tables"][T]["Update"];
+
+export type Enums<T extends keyof DatabaseTypes["public"]["Enums"]> =
+  DatabaseTypes["public"]["Enums"][T];
+
+export type Functions<T extends keyof DatabaseTypes["public"]["Functions"]> =
+  DatabaseTypes["public"]["Functions"][T];
+
+export type Views<T extends keyof DatabaseTypes["public"]["Views"]> =
+  DatabaseTypes["public"]["Views"][T];
+
+export type Profile = Tables<"profiles">;
+export type Course = Tables<"courses">;
+export type Lesson = Tables<"lessons">;
+export type ForumPost = Tables<"forum_posts">;
+export type ForumComment = Tables<"forum_comments">;
+export type Notification = Tables<"notifications">;
+
+export type Database = DatabaseTypes;

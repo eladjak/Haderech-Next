@@ -1,59 +1,73 @@
-export interface ForumAuthor {
-  id: string;
-  name: string;
-  avatar: string;
+import type { Tables } from "@/types/database";
+
+export type ForumPost = Tables<"forum_posts">;
+export type ForumComment = Tables<"forum_comments">;
+
+export interface ForumPostWithRelations extends ForumPost {
+  author: {
+    id: string;
+    name: string;
+    avatar_url?: string;
+  };
+  comments?: ForumCommentWithRelations[];
+  _count?: {
+    comments: number;
+    likes: number;
+  };
 }
 
-export interface ForumComment {
-  id: string;
-  post_id: string;
-  content: string;
-  created_at: string;
-  updated_at?: string;
+export interface ForumCommentWithRelations extends ForumComment {
   author: {
-    id?: string;
+    id: string;
     name: string;
-    avatar_url?: string | null;
+    avatar_url?: string;
   };
-  likes_count?: number;
-  is_solution?: boolean;
-  parent_id?: string;
-  replies?: ForumComment[];
-}
-
-export interface ForumPost {
-  id: string;
-  title: string;
-  content?: string;
-  created_at: string;
-  updated_at?: string;
-  author: {
-    id?: string;
-    name: string;
-    avatar_url?: string | null;
+  post?: ForumPost;
+  replies?: ForumCommentWithRelations[];
+  _count?: {
+    replies: number;
+    likes: number;
   };
-  category?: string;
-  tags?: string[];
-  replies_count: number;
-  likes_count?: number;
-  is_pinned?: boolean;
-  is_locked?: boolean;
-  last_reply_at?: string;
-  views_count?: number;
 }
 
 export interface ForumCategory {
   id: string;
   name: string;
-  description?: string;
+  description: string;
+  slug: string;
+  icon?: string;
   posts_count: number;
-  last_post?: {
+  last_activity?: string;
+}
+
+export interface ForumStats {
+  totalPosts: number;
+  totalComments: number;
+  totalUsers: number;
+  activeUsers: number;
+  postsToday: number;
+  popularCategories: {
     id: string;
-    title: string;
-    created_at: string;
-    author: {
-      name: string;
-      avatar_url?: string | null;
-    };
-  };
+    name: string;
+    posts_count: number;
+  }[];
+}
+
+export interface ForumFilters {
+  search?: string;
+  category?: string;
+  author?: string;
+  sortBy?: "newest" | "popular" | "unanswered";
+  timeframe?: "today" | "week" | "month" | "all";
+}
+
+export interface ForumNotification {
+  id: string;
+  userId: string;
+  type: "mention" | "reply" | "like";
+  postId?: string;
+  commentId?: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
 }
