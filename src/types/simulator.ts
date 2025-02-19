@@ -2,145 +2,277 @@
  * טיפוסים עבור מערכת הסימולציה
  */
 
-import type { Tables } from "@/types/database";
+import type { Database } from "./database";
 
-export type SimulatorScenario = Tables<"simulator_scenarios">;
-export type SimulatorSession = Tables<"simulator_sessions">;
-export type SimulatorResult = Tables<"simulator_results">;
-export type SimulatorUserStats = Tables<"simulator_user_stats">;
-export type SimulatorUserSettings = Tables<"simulator_user_settings">;
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
 
-export interface Message {
+export type Message = {
   id: string;
   content: string;
-  role: "user" | "assistant" | "system";
   timestamp: string;
+  role: "user" | "admin" | "instructor" | "assistant";
   sender: {
     id: string;
+    role: "user" | "admin" | "instructor" | "assistant";
     name: string;
     avatar?: string;
   };
-  feedback?: {
-    score: number;
-    message: string;
-    details?: FeedbackDetails;
-  };
+  feedback?: MessageFeedback;
+};
+
+export interface MessageFeedback {
+  score: number;
+  message: string;
+  details: FeedbackDetails;
+  comments: string[];
+  suggestions: string[];
 }
 
-export interface FeedbackDetails {
+export interface FeedbackMetrics {
   empathy: number;
   clarity: number;
   effectiveness: number;
   appropriateness: number;
+  professionalism: number;
+  problem_solving: number;
+}
+
+export interface FeedbackDetails {
+  metrics: FeedbackMetrics;
+  score: number;
+  empathy: number;
+  clarity: number;
+  effectiveness: number;
+  appropriateness: number;
+  professionalism: number;
+  problem_solving: number;
   strengths: string[];
   improvements: string[];
   tips: string[];
-}
-
-export interface EmotionalState {
-  mood: "positive" | "neutral" | "negative";
-  interest: number; // 0-100
-  comfort: number; // 0-100
-  engagement: number; // 0-100 - רמת המעורבות
-  confidence: number; // 0-100 - רמת הביטחון
-}
-
-export interface SimulationState {
-  id: string;
-  scenario: SimulatorScenario;
-  messages: Message[];
-  status: "active" | "completed" | "failed";
-  feedback?: {
+  comments: string[];
+  suggestions: string[];
+  overallProgress: {
     score: number;
-    comments: string[];
-    suggestions: string[];
-    details: FeedbackDetails;
-    overallProgress: {
-      empathy: number;
-      clarity: number;
-      effectiveness: number;
-      appropriateness: number;
-    };
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface SimulationResponse {
-  state: SimulationState;
-  message: string;
-  feedback?: {
-    score: number;
-    message: string;
-    details?: FeedbackDetails;
+    level: string;
+    nextLevel: string;
+    requiredScore: number;
+    progress: number;
   };
 }
 
-export interface SimulationResult {
-  id: string;
-  scenarioId: string;
-  userId: string;
-  score: number;
-  feedback: string[];
-  duration: number;
-  createdAt: string;
-  details: {
-    messagesCount: number;
-    averageResponseTime: number;
-    emotionalStates: EmotionalState[];
-    learningPoints: string[];
-    skillsImproved: string[];
-    overallProgress: {
-      empathy: number;
-      clarity: number;
-      effectiveness: number;
-      appropriateness: number;
-    };
-  };
-}
-
-export interface SimulationScenario {
+export type SimulatorScenario = {
   id: string;
   title: string;
   description: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   category: string;
-  initialMessage: string;
-  suggestedResponses: string[];
-  learningObjectives: string[];
-  successCriteria: {
+  initial_message: string;
+  learning_objectives: string[];
+  success_criteria: {
     minScore: number;
     requiredSkills: string[];
     minDuration: number;
     maxDuration: number;
   };
-}
+};
 
-export interface SimulationStats {
-  totalSessions: number;
-  averageScore: number;
-  completedScenarios: number;
-  timeSpent: number;
-  strongestCategory: string;
-  weakestCategory: string;
-  recentResults: SimulatorResult[];
-  skillsProgress: {
-    [key: string]: number; // שם המיומנות -> ציון (0-100)
+export type SimulatorState = {
+  scenario: SimulatorScenario;
+  messages: Message[];
+  status: "idle" | "active" | "completed" | "failed";
+  feedback?: {
+    score: number;
+    message: string;
+    details: {
+      metrics: {
+        empathy: number;
+        clarity: number;
+        effectiveness: number;
+        appropriateness: number;
+        professionalism: number;
+        problem_solving: number;
+      };
+      strengths: string[];
+      improvements: string[];
+      tips: string[];
+      comments: string;
+      suggestions: string[];
+      overallProgress: {
+        score: number;
+        level: string;
+        nextLevel: string;
+        requiredScore: number;
+      };
+    };
+    comments: string[];
+    suggestions: string[];
   };
-  learningPath: {
-    completedLevels: number;
-    nextScenarios: string[];
-    recommendedSkills: string[];
+  settings: {
+    difficulty: "beginner" | "intermediate" | "advanced";
+    language: string;
+    feedback_frequency: "always" | "end" | "never";
+    auto_suggestions: boolean;
   };
-}
+  stats: {
+    total_scenarios: number;
+    completed_scenarios: number;
+    average_score: number;
+    total_messages: number;
+    practice_time: number;
+    strengths: string[];
+    areas_for_improvement: string[];
+  };
+};
 
-export interface SimulationSettings {
+export type SimulatorUserStats = {
+  total_scenarios: number;
+  completed_scenarios: number;
+  average_score: number;
+  total_messages: number;
+  practice_time: number;
+  strengths: string[];
+  areas_for_improvement: string[];
+};
+
+export type SimulatorUserSettings = {
   difficulty: "beginner" | "intermediate" | "advanced";
-  language: string;
-  feedbackFrequency: "always" | "end" | "never";
-  autoSuggestions: boolean;
-  timer: boolean;
-  feedbackDetail: "basic" | "detailed" | "comprehensive";
-  emotionalTracking: boolean;
-  learningGoals: string[];
+  language: "he" | "en";
+  feedback_frequency: "always" | "end" | "never";
+  auto_suggestions: boolean;
+};
+
+export type SimulatorSession = {
+  id: string;
+  user_id: string;
+  scenario_id: string;
+  scenario: SimulatorScenario;
+  status: "active" | "completed" | "failed";
+  messages: Message[];
+  feedback?: {
+    score: number;
+    message: string;
+    details: {
+      metrics: {
+        empathy: number;
+        clarity: number;
+        effectiveness: number;
+        appropriateness: number;
+        professionalism: number;
+        problem_solving: number;
+      };
+      strengths: string[];
+      improvements: string[];
+      tips: string[];
+      comments: string;
+      suggestions: string[];
+      overallProgress: {
+        score: number;
+        level: string;
+        nextLevel: string;
+        requiredScore: number;
+      };
+    };
+    comments: string[];
+    suggestions: string[];
+  };
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  duration?: number;
+};
+
+export type SimulatorResult = {
+  id: string;
+  session_id: string;
+  scenario_id: string;
+  score: number;
+  feedback: {
+    score: number;
+    message: string;
+    details: {
+      metrics: {
+        empathy: number;
+        clarity: number;
+        effectiveness: number;
+        appropriateness: number;
+        professionalism: number;
+        problem_solving: number;
+      };
+      strengths: string[];
+      improvements: string[];
+      tips: string[];
+      comments: string;
+      suggestions: string[];
+      overallProgress: {
+        score: number;
+        level: string;
+        nextLevel: string;
+        requiredScore: number;
+      };
+    };
+    comments: string[];
+    suggestions: string[];
+  };
+  duration: number;
+  details: {
+    messages_count: number;
+    scenario_difficulty: string;
+    scenario_category: string;
+  };
+  created_at: string;
+  updated_at: string;
+};
+
+export type SimulatorResponse = {
+  success: boolean;
+  message: string;
+  state?: SimulatorState;
+  error?: string;
+};
+
+export interface APIResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
+
+export type SimulatorAction =
+  | { type: "START_SCENARIO"; scenario: SimulatorScenario }
+  | { type: "SEND_MESSAGE"; message: string }
+  | { type: "RECEIVE_MESSAGE"; message: string }
+  | { type: "SUBMIT_FEEDBACK"; rating: number; comment?: string }
+  | { type: "RESET" };
+
+export interface ChatCompletionMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+  name?: string;
+  function_call?: {
+    name: string;
+    arguments: string;
+  };
+}
+
+export interface FeedbackResponse {
+  metrics: FeedbackMetrics;
+  score: number;
+  strengths: string[];
+  improvements: string[];
+  tips: string[];
+  comments: string;
+  suggestions: string[];
+  overallProgress: {
+    level: string;
+    progress: number;
+    nextLevel: string;
+  };
+}
+
+export type SimulatorEvent = {
+  type: string;
+  data: {
+    [key: string]: any;
+  };
+  timestamp: string;
+};

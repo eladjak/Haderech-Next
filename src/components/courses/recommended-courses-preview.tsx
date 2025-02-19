@@ -1,6 +1,5 @@
 import { CourseCard } from "@/components/courses/course-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import type { Course } from "@/types/courses";
 
 interface RecommendedCoursesPreviewProps {
@@ -18,10 +17,7 @@ export function RecommendedCoursesPreview({
       <CardContent>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-            />
+            <CourseCard key={course.id} course={course} />
           ))}
         </div>
       </CardContent>

@@ -3,16 +3,28 @@
  * @description API routes for managing course lessons. Provides endpoints for retrieving and creating lessons.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
+
+import { Database, DatabaseCourse, DatabaseLesson } from "@/types/database";
+
+type Lesson = Database["public"]["Tables"]["lessons"]["Row"];
+type Course = Database["public"]["Tables"]["courses"]["Row"];
 
 interface CreateLessonBody {
   title: string;
   description: string;
   content: string;
   order: number;
-  status: "draft" | "published";
+  duration: number;
+  status?: "draft" | "published";
+}
+
+interface LessonOrderUpdate {
+  id: string;
+  order: number;
 }
 
 /**
@@ -22,7 +34,7 @@ interface CreateLessonBody {
  *
  * @requires Authentication
  *
- * @param {Request} _ - The request object (unused)
+ * @param {Request} request - The request object
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response containing the lessons or error message
  *
@@ -40,7 +52,10 @@ interface CreateLessonBody {
  * ]
  * ```
  */
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -52,36 +67,26 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const { data: lessons, error } = await supabase
       .from("lessons")
-      .select(
-        `
-        *,
-        content:lesson_content(*),
-        progress:lesson_progress(*)
-      `,
-      )
+      .select("*")
       .eq("course_id", params.id)
       .order("order", { ascending: true });
 
     if (error) {
-      console.error("Error fetching lessons:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch lessons" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
-    return NextResponse.json(lessons);
+    if (!lessons || lessons.length === 0) {
+      return NextResponse.json({ error: "לא נמצאו שיעורים" }, { status: 404 });
+    }
+
+    return NextResponse.json(lessons, { status: 200 });
   } catch (error) {
-    console.error("Error in GET /api/courses/[id]/lessons:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
   }
 }
 
@@ -108,8 +113,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
  * ```
  */
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -122,16 +127,33 @@ export async function POST(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
+    }
+
+    // בדיקה שהמשתמש הוא המדריך של הקורס
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("instructor_id")
+      .eq("id", params.id)
+      .single();
+
+    if (courseError || !course) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
+    }
+
+    if (course.instructor_id !== user.id) {
       return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
+        { error: "אין לך הרשאה ליצור שיעור בקורס זה" },
+        { status: 403 }
       );
     }
 
@@ -139,61 +161,44 @@ export async function POST(
 
     const { data: lesson, error: lessonError } = await supabase
       .from("lessons")
-      .insert({
-        course_id: params.id,
-        title: body.title,
-        description: body.description,
-        order: body.order,
-        status: body.status,
-      })
+      .insert([
+        {
+          ...body,
+          course_id: params.id,
+          created_by: user.id,
+        },
+      ])
       .select()
       .single();
 
     if (lessonError) {
-      console.error("Error creating lesson:", lessonError);
       return NextResponse.json(
-        { error: "Failed to create lesson" },
-        { status: 500 },
+        { error: "שגיאה ביצירת השיעור" },
+        { status: 500 }
       );
     }
 
-    const { error: contentError } = await supabase
-      .from("lesson_content")
-      .insert({
-        lesson_id: lesson.id,
-        content: body.content,
-        type: "text",
-        order: 1,
-      });
-
-    if (contentError) {
-      console.error("Error creating lesson content:", contentError);
-      // Cleanup lesson if content creation fails
-      await supabase.from("lessons").delete().eq("id", lesson.id);
-
-      return NextResponse.json(
-        { error: "Failed to create lesson content" },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json(lesson);
+    return NextResponse.json(lesson, { status: 201 });
   } catch (error) {
-    console.error("Error in POST /api/courses/[id]/lessons:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
   }
 }
 
 /**
- * PATCH handler for updating lesson order
+ * PATCH /api/courses/[id]/lessons
+ *
+ * Updates lesson order for a course.
+ *
+ * @requires Authentication & Authorization (Course Author)
+ *
+ * @param {Request} request - The request object containing the lesson order updates
+ * @param {RouteParams} params - Route parameters containing the course ID
+ * @returns {Promise<NextResponse>} JSON response containing success message or error
  */
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } },
-) {
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -205,42 +210,58 @@ export async function PATCH(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
     }
 
-    const updates = await request.json();
-
-    const { data: lesson, error } = await supabase
-      .from("lessons")
-      .update(updates)
-      .eq("course_id", params.id)
-      .select()
+    // בדיקה שהמשתמש הוא המדריך של הקורס
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("instructor_id")
+      .eq("id", params.id)
       .single();
 
-    if (error) {
-      console.error("Error updating lesson:", error);
+    if (courseError || !course) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
+    }
+
+    if (course.instructor_id !== user.id) {
       return NextResponse.json(
-        { error: "Failed to update lesson" },
-        { status: 500 },
+        { error: "אין לך הרשאה לעדכן שיעורים בקורס זה" },
+        { status: 403 }
       );
     }
 
-    return NextResponse.json(lesson);
-  } catch (error) {
-    console.error("Error in PATCH /api/courses/[id]/lessons:", error);
+    const updates: LessonOrderUpdate[] = await request.json();
+
+    for (const update of updates) {
+      const { error: updateError } = await supabase
+        .from("lessons")
+        .update({ order: update.order })
+        .eq("id", update.id)
+        .eq("course_id", params.id);
+
+      if (updateError) {
+        return NextResponse.json(
+          { error: "שגיאה בעדכון סדר השיעורים" },
+          { status: 500 }
+        );
+      }
+    }
+
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { message: "סדר השיעורים עודכן בהצלחה" },
+      { status: 200 }
     );
+  } catch (error) {
+    return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
   }
 }

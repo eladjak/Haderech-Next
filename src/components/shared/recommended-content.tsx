@@ -105,10 +105,7 @@ export function RecommendedContent() {
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {EXAMPLE_CONTENT.map((item) => (
-            <Card
-              key={item.id}
-              className="overflow-hidden"
-            >
+            <Card key={item.id} className="overflow-hidden">
               <div
                 className="h-48 bg-cover bg-center"
                 style={{ backgroundImage: `url(${item.thumbnail})` }}

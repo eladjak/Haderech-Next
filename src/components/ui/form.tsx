@@ -1,9 +1,10 @@
 "use client";
 
+import * as React from "react";
+
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import clsx from "clsx";
-import * as React from "react";
 import {
   Controller,
   ControllerProps,
@@ -17,7 +18,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-
 const Form = FormProvider;
 
 type FormFieldContextValue<
@@ -28,7 +28,7 @@ type FormFieldContextValue<
 };
 
 const FormFieldContext = React.createContext<FormFieldContextValue>(
-  {} as FormFieldContextValue,
+  {} as FormFieldContextValue
 );
 
 const FormField = <
@@ -72,7 +72,7 @@ type FormItemContextValue = {
 };
 
 const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue,
+  {} as FormItemContextValue
 );
 
 const FormItem = React.forwardRef<
@@ -83,11 +83,7 @@ const FormItem = React.forwardRef<
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div
-        ref={ref}
-        className={cn("space-y-2", className)}
-        {...props}
-      />
+      <div ref={ref} className={cn("space-y-2", className)} {...props} />
     </FormItemContext.Provider>
   );
 });
@@ -229,7 +225,7 @@ interface FormFieldGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 const FormFieldGroup = React.forwardRef<HTMLDivElement, FormFieldGroupProps>(
   (
     { name, label, required, description, children, className, ...props },
-    ref,
+    ref
   ) => {
     const {
       formState: { errors },
@@ -237,11 +233,7 @@ const FormFieldGroup = React.forwardRef<HTMLDivElement, FormFieldGroupProps>(
     const error = errors[name];
 
     return (
-      <div
-        ref={ref}
-        className={clsx("space-y-2", className)}
-        {...props}
-      >
+      <div ref={ref} className={clsx("space-y-2", className)} {...props}>
         {label && (
           <label
             htmlFor={name}
@@ -249,10 +241,7 @@ const FormFieldGroup = React.forwardRef<HTMLDivElement, FormFieldGroupProps>(
           >
             {label}
             {required && (
-              <span
-                className="text-action-error mr-1"
-                aria-hidden="true"
-              >
+              <span className="text-action-error mr-1" aria-hidden="true">
                 *
               </span>
             )}
@@ -267,7 +256,7 @@ const FormFieldGroup = React.forwardRef<HTMLDivElement, FormFieldGroupProps>(
         )}
       </div>
     );
-  },
+  }
 );
 
 FormFieldGroup.displayName = "FormFieldGroup";
@@ -299,7 +288,7 @@ const FormSubmitButton = React.forwardRef<
         "hover:bg-opacity-90 focus:outline-none focus:ring-2",
         "focus:ring-brand-primary focus:ring-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        className,
+        className
       )}
       disabled={disabled || isSubmitting || loading}
       {...props}

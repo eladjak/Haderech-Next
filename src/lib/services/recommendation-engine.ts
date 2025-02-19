@@ -1,27 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 
+import type {
+  DatabaseCourse,
+  DatabaseForumPost,
+  DatabaseUser,
+} from "@/types/database";
+
 interface UserPreferences {
   interests?: string[];
   difficulty?: string;
   recommendationFrequency?: "daily" | "weekly" | "custom";
 }
 
-interface Author {
-  id: string;
-  name: string;
-  avatar_url?: string;
-}
+interface Author extends Pick<DatabaseUser, "id" | "name" | "avatar_url"> {}
 
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  difficulty: string;
-  popularity: number;
-  price: number;
-  duration: number;
+interface CourseWithScore extends DatabaseCourse {
   author: Author;
+  score: number;
+  popularity?: number;
+  tags?: string[];
 }
 
 interface Book {
@@ -53,12 +50,8 @@ interface Article {
   readTime: number;
 }
 
-interface ForumPost {
-  id: string;
-  title: string;
-  content: string;
+interface ForumPostWithAuthor extends DatabaseForumPost {
   author: Author;
-  created_at: string;
   replies_count: number;
 }
 
@@ -79,24 +72,28 @@ interface UserHistory {
 }
 
 interface Recommendations {
-  courses: Course[];
+  courses: CourseWithScore[];
   books: Book[];
   podcasts: Podcast[];
   articles: Article[];
-  forumPosts: ForumPost[];
+  forumPosts: ForumPostWithAuthor[];
   simulationScenarios: SimulationScenario[];
 }
 
 const calculateRelevanceScore = (
-  item: Course | Book | Article | Podcast,
+  item: CourseWithScore | Book | Article | Podcast,
   userPreferences: UserPreferences,
-  userHistory: UserHistory,
+  userHistory: UserHistory
 ): number => {
-  let score = "popularity" in item ? item.popularity : 0;
+  let score = 0;
 
-  if (userPreferences.interests && "tags" in item) {
+  if ("popularity" in item && typeof item.popularity === "number") {
+    score = item.popularity;
+  }
+
+  if (userPreferences.interests && "tags" in item && Array.isArray(item.tags)) {
     const matchingTags = item.tags.filter((tag) =>
-      userPreferences.interests?.includes(tag),
+      userPreferences.interests?.includes(tag)
     );
     score += matchingTags.length * 10;
   }
@@ -105,7 +102,6 @@ const calculateRelevanceScore = (
     score += 20;
   }
 
-  // Check if user viewed similar items
   if ("tags" in item && "id" in item) {
     const hasViewedItem = userHistory.viewed_courses.includes(item.id);
     if (hasViewedItem) score += 15;
@@ -115,22 +111,22 @@ const calculateRelevanceScore = (
 };
 
 export const getRecommendations = async (
-  userId: string,
+  userId: string
 ): Promise<Recommendations> => {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   // Get user preferences and history
   const { data: user } = await supabase
-    .from("profiles")
+    .from("users")
     .select(
       `
       id,
       preferences,
       next_recommendation_time
-    `,
+    `
     )
     .eq("id", userId)
     .single();
@@ -156,7 +152,7 @@ export const getRecommendations = async (
       completed_courses,
       viewed_articles,
       forum_activity
-    `,
+    `
     )
     .eq("user_id", userId)
     .single();
@@ -173,18 +169,25 @@ export const getRecommendations = async (
       id,
       title,
       description,
+      image_url,
+      price,
+      level,
+      duration,
+      status,
+      author_id,
+      created_at,
+      updated_at,
       tags,
       difficulty,
       popularity,
-      price,
-      duration,
-      author:profiles!inner(id, name, avatar_url)
+      author:users!author_id(id, name, avatar_url)
     `);
 
   const courses = coursesData?.map((course) => ({
     ...course,
     author: course.author[0],
-  })) as Course[];
+    score: 0, // Will be calculated later
+  })) as CourseWithScore[];
 
   // Get books
   const { data: books } = await supabase.from("books").select("*");
@@ -197,16 +200,25 @@ export const getRecommendations = async (
 
   // Get forum posts
   const { data: forumPostsData } = await supabase
-    .from("posts")
+    .from("forum_posts")
     .select(
       `
-      id,
-      title,
-      content,
-      created_at,
-      author:profiles!inner(id, name, avatar_url),
-      replies_count
-    `,
+    id,
+    title,
+    content,
+    author_id,
+    category,
+    tags,
+    pinned,
+    solved,
+    likes,
+    views,
+    last_activity,
+    created_at,
+    updated_at,
+    author:users!author_id(id, name, avatar_url),
+    replies_count:forum_replies(count)
+  `
     )
     .order("created_at", { ascending: false })
     .limit(5);
@@ -214,7 +226,8 @@ export const getRecommendations = async (
   const forumPosts = forumPostsData?.map((post) => ({
     ...post,
     author: post.author[0],
-  })) as ForumPost[];
+    replies_count: post.replies_count[0]?.count || 0,
+  })) as ForumPostWithAuthor[];
 
   // Get simulation scenarios
   const { data: scenarios } = await supabase
@@ -246,7 +259,7 @@ export const getRecommendations = async (
   }
 
   await supabase
-    .from("profiles")
+    .from("users")
     .update({
       next_recommendation_time: nextRecommendationTime.toISOString(),
     })
@@ -268,10 +281,10 @@ export const getRecommendations = async (
 
   return {
     courses: recommendedCourses,
-    books: books?.slice(0, 3) || [],
-    podcasts: podcasts?.slice(0, 3) || [],
-    articles: articles?.slice(0, 3) || [],
+    books: (books || []) as Book[],
+    podcasts: (podcasts || []) as Podcast[],
+    articles: (articles || []) as Article[],
     forumPosts: forumPosts || [],
-    simulationScenarios: scenarios?.slice(0, 1) || [],
+    simulationScenarios: (scenarios || []) as SimulationScenario[],
   };
 };

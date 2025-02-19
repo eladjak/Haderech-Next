@@ -33,7 +33,7 @@ export const courseSlice = createSlice({
     },
     updateCourse: (state, action: PayloadAction<Course>) => {
       const index = state.courses.findIndex(
-        (course) => course.id === action.payload.id,
+        (course) => course.id === action.payload.id
       );
       if (index !== -1) {
         state.courses[index] = action.payload;
@@ -44,7 +44,7 @@ export const courseSlice = createSlice({
     },
     incrementStudents: (state, action: PayloadAction<string>) => {
       const course = state.courses.find(
-        (course) => course.id === action.payload,
+        (course) => course.id === action.payload
       );
       if (course) {
         course.total_students += 1;

@@ -5,7 +5,6 @@ import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
 import type { CourseRating } from "@/types/api";
 
 interface CourseRatingProps {
@@ -32,7 +31,7 @@ export function CourseRating({ rating, className }: CourseRatingProps) {
                     "h-4 w-4",
                     i < rating.rating
                       ? "fill-primary text-primary"
-                      : "text-muted",
+                      : "text-muted"
                   )}
                 />
               ))}

@@ -1,7 +1,8 @@
 "use client";
 
+import * as React from "react";
+
 import clsx from "clsx";
-import React from "react";
 
 /**
  * Checkbox Component
@@ -30,9 +31,14 @@ export interface CheckboxProps
 }
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ label, error, success, onChange, className, ...props }, ref) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange?.(e.target.checked);
+  (
+    { label, error, success, onChange, className, ...props },
+    ref
+  ): React.ReactElement => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+      if (onChange) {
+        onChange(e.target.checked);
+      }
     };
 
     return (
@@ -52,7 +58,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
                 "border-action-success focus:border-action-success focus:ring-action-success/20":
                   success,
               },
-              className,
+              className
             )}
             onChange={handleChange}
             {...props}
@@ -65,7 +71,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
                 "text-brand-primary": !error && !success,
                 "text-action-error": error,
                 "text-action-success": success,
-              },
+              }
             )}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -83,7 +89,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         )}
       </label>
     );
-  },
+  }
 );
 
 Checkbox.displayName = "Checkbox";

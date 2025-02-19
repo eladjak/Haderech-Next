@@ -64,10 +64,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="username"
@@ -102,10 +99,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             <FormItem>
               <FormLabel>ביוגרפיה</FormLabel>
               <FormControl>
-                <Textarea
-                  {...field}
-                  value={field.value || ""}
-                />
+                <Textarea {...field} value={field.value || ""} />
               </FormControl>
               <FormDescription>ספר לנו קצת על עצמך</FormDescription>
               <FormMessage />

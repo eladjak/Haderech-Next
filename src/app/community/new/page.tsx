@@ -1,9 +1,8 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useState } from "react";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -20,11 +19,13 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { createForumPost } from "@/lib/api";
 
 const formSchema = z.object({
   title: z
@@ -46,10 +47,8 @@ const formSchema = z.object({
 });
 
 export default function Page() {
-  const { data: session } = useSession();
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,50 +58,26 @@ export default function Page() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      setIsLoading(true);
-
-      if (!session?.user) {
-        router.push("/login");
-        return;
-      }
-
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response?.ok) {
+      const response = await createForumPost(data);
+      if (response && response.id) {
         toast({
-          title: "שגיאה",
-          description: "אירעה שגיאה בשליחת הפוסט",
-          variant: "destructive",
+          title: "פוסט נוצר בהצלחה",
+          description: "הפוסט שלך נוצר בהצלחה בפורום",
         });
-        return;
+        router.push(`/community/${response.id}`);
       }
-
-      const post = await response.json();
-
-      router.push(`/community/${post.id}`);
-
-      toast({
-        title: "הפוסט נשלח בהצלחה",
-        description: "הפוסט שלך נוסף לקהילה",
-      });
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "אירעה שגיאה ביצירת הפוסט";
       toast({
         title: "שגיאה",
-        description: "אירעה שגיאה בשליחת הפוסט",
+        description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container py-8">
@@ -120,20 +95,14 @@ export default function Page() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input
-                        placeholder="כותרת"
-                        {...field}
-                      />
+                      <Input placeholder="כותרת" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -156,12 +125,7 @@ export default function Page() {
                 )}
               />
               <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "שולח..." : "פרסם"}
-                </Button>
+                <Button type="submit">פרסם</Button>
               </div>
             </form>
           </Form>

@@ -3,9 +3,10 @@
  * @description API route handlers for file upload operations
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 import type { Database } from "@/types/supabase";
 
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     if (!bucket) {
       return NextResponse.json(
         { error: "No bucket specified" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
       console.error("Error uploading file:", uploadError);
       return NextResponse.json(
         { error: "Failed to upload file" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
     console.error("Upload error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

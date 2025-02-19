@@ -1,6 +1,5 @@
 import { Achievement } from "@/components/achievement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import type { Achievement as AchievementType } from "@/types/api";
 
 interface AchievementsProps {
@@ -20,10 +19,7 @@ export function Achievements({ achievements, className }: AchievementsProps) {
       </CardHeader>
       <CardContent className="grid gap-4">
         {achievements.map((achievement) => (
-          <Achievement
-            key={achievement.id}
-            achievement={achievement}
-          />
+          <Achievement key={achievement.id} achievement={achievement} />
         ))}
       </CardContent>
     </Card>

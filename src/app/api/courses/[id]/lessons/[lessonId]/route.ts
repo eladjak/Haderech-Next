@@ -4,44 +4,18 @@
  * updating, and deleting specific lessons.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-interface LessonUpdate {
-  title?: string;
-  description?: string;
-  content?: string;
-  order?: number;
-  status?: "draft" | "published";
-}
+import { createServerClient } from "@supabase/ssr";
 
-/**
- * GET /api/courses/[id]/lessons/[lessonId]
- *
- * Retrieves a specific lesson from a course.
- *
- * @requires Authentication
- *
- * @param {Request} _ - The request object (unused)
- * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
- * @returns {Promise<NextResponse>} JSON response containing the lesson details or error message
- *
- * @example Response
- * ```json
- * {
- *   "id": "lesson1",
- *   "title": "Introduction",
- *   "description": "Course overview",
- *   "content": "Lesson content...",
- *   "order": 1,
- *   "status": "published"
- * }
- * ```
- */
+import { Database, DatabaseLesson } from "@/types/database";
+
+type Lesson = Database["public"]["Tables"]["lessons"]["Row"];
+
 export async function GET(
-  _: Request,
-  { params }: { params: { id: string; lessonId: string } },
+  request: NextRequest,
+  { params }: { params: { id: string; lessonId: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -54,69 +28,36 @@ export async function GET(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const { data: lesson, error } = await supabase
       .from("lessons")
-      .select(
-        `
-        *,
-        content:lesson_content(*),
-        progress:lesson_progress(*)
-      `,
-      )
+      .select("*")
       .eq("id", params.lessonId)
       .eq("course_id", params.id)
       .single();
 
     if (error) {
-      console.error("Error fetching lesson:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch lesson" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     if (!lesson) {
       return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
 
-    return NextResponse.json(lesson);
+    return NextResponse.json({ lesson });
   } catch (error) {
-    console.error("Error in GET /api/courses/[id]/lessons/[lessonId]:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }
 
-/**
- * PATCH /api/courses/[id]/lessons/[lessonId]
- *
- * Updates a lesson's details.
- *
- * @requires Authentication & Authorization (Course Author)
- *
- * @param {Request} request - The request object containing the updated lesson data
- * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
- * @returns {Promise<NextResponse>} JSON response indicating success or error message
- *
- * @example Request
- * ```json
- * {
- *   "title": "Updated Title",
- *   "description": "Updated description",
- *   "content": "Updated content",
- *   "order": 2,
- *   "status": "published"
- * }
- * ```
- */
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string; lessonId: string } },
+  request: NextRequest,
+  { params }: { params: { id: string; lessonId: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -129,64 +70,66 @@ export async function PATCH(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const updates: LessonUpdate = await request.json();
+    // בדיקה שהמשתמש הוא המדריך של הקורס
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("instructor_id")
+      .eq("id", params.id)
+      .single();
+
+    if (courseError || !course) {
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
+
+    if (course.instructor_id !== user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const json = await request.json();
+    const { title, content, order, duration, status } = json;
 
     const { data: lesson, error } = await supabase
       .from("lessons")
-      .update(updates)
+      .update({
+        title,
+        content,
+        order,
+        duration,
+        status,
+      })
       .eq("id", params.lessonId)
       .eq("course_id", params.id)
       .select()
       .single();
 
     if (error) {
-      console.error("Error updating lesson:", error);
-      return NextResponse.json(
-        { error: "Failed to update lesson" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(lesson);
+    return NextResponse.json({ lesson });
   } catch (error) {
-    console.error(
-      "Error in PATCH /api/courses/[id]/lessons/[lessonId]:",
-      error,
-    );
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }
 
-/**
- * DELETE /api/courses/[id]/lessons/[lessonId]
- *
- * Deletes a lesson from a course.
- *
- * @requires Authentication & Authorization (Course Author)
- *
- * @param {Request} _ - The request object (unused)
- * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
- * @returns {Promise<NextResponse>} JSON response indicating success or error message
- */
 export async function DELETE(
-  _: Request,
-  { params }: { params: { id: string; lessonId: string } },
+  request: NextRequest,
+  { params }: { params: { id: string; lessonId: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -199,17 +142,31 @@ export async function DELETE(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // בדיקה שהמשתמש הוא המדריך של הקורס
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("instructor_id")
+      .eq("id", params.id)
+      .single();
+
+    if (courseError || !course) {
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
+
+    if (course.instructor_id !== user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { error } = await supabase
@@ -219,25 +176,14 @@ export async function DELETE(
       .eq("course_id", params.id);
 
     if (error) {
-      console.error("Error deleting lesson:", error);
-      return NextResponse.json(
-        { error: "Failed to delete lesson" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(
-      { message: "Lesson deleted successfully" },
-      { status: 200 },
-    );
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(
-      "Error in DELETE /api/courses/[id]/lessons/[lessonId]:",
-      error,
-    );
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }

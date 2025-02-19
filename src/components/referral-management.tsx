@@ -24,10 +24,7 @@ export function ReferralManagement({ referralCode }: ReferralManagementProps) {
           <div className="text-sm font-medium">קוד הזמנה</div>
           <div className="mt-1 text-2xl font-bold">{referralCode}</div>
         </div>
-        <Button
-          className="w-full"
-          onClick={handleShare}
-        >
+        <Button className="w-full" onClick={handleShare}>
           <Share className="mr-2 h-4 w-4" />
           שתף קוד הזמנה
         </Button>

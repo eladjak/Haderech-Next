@@ -1,29 +1,50 @@
-import type { Tables } from "@/types/database";
+import { Tables } from "@/types/supabase";
 
-export type Profile = Tables<"profiles">;
+export type User = Tables<"users">;
 
-export interface ProfileWithStats extends Profile {
+export interface UserSettings {
+  theme: "light" | "dark" | "system";
+  notifications: {
+    email: boolean;
+    push: boolean;
+  };
+  language: "he" | "en";
+  accessibility: {
+    fontSize: "small" | "medium" | "large";
+    contrast: "normal" | "high";
+  };
+}
+
+export interface UserStats {
+  points: number;
+  level: number;
+  badges: string[];
+  completedCourses: number;
+  forumPosts: number;
+  loginStreak: number;
+  lastLogin: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  earned_at: string;
+}
+
+export interface UserWithStats extends Omit<User, "achievements"> {
+  achievements: Achievement[];
   stats: {
     posts_count: number;
     comments_count: number;
     courses_completed: number;
     total_points: number;
-    achievements_count: number;
-    rank?: string;
+    current_streak: number;
+    longest_streak: number;
   };
-  achievements?: {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-    earned_at: string;
-  }[];
-  recent_activity?: {
-    type: "post" | "comment" | "course" | "achievement";
-    title: string;
-    link: string;
-    timestamp: string;
-  }[];
 }
 
 export interface ProfileSettings {

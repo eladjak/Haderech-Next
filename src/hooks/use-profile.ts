@@ -5,16 +5,21 @@
 
 import { useCallback } from "react";
 
+import { createClient } from "@supabase/supabase-js";
+
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import type { Tables } from "@/types/database";
 
-import type { Database } from "@/types/supabase";
+export type Profile = Tables<"users"> & {
+  avatar_url?: string | null;
+  bio?: string | null;
+};
 
-type BaseProfile = Database["public"]["Tables"]["profiles"]["Row"];
-
-interface Profile extends BaseProfile {
-  avatar_url: string | null;
-}
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 /**
  * Custom hook for managing user profile data and operations
@@ -32,7 +37,7 @@ export function useProfile() {
     async (userId: string) => {
       try {
         const { data, error } = await supabase
-          .from("profiles")
+          .from("users")
           .select("*")
           .eq("id", userId)
           .single();
@@ -49,14 +54,14 @@ export function useProfile() {
         return null;
       }
     },
-    [toast],
+    [toast]
   );
 
   const updateProfile = useCallback(
     async (userId: string, updates: Partial<Profile>) => {
       try {
         const { data, error } = await supabase
-          .from("profiles")
+          .from("users")
           .update(updates)
           .eq("id", userId)
           .select()
@@ -79,7 +84,7 @@ export function useProfile() {
         return null;
       }
     },
-    [toast],
+    [toast]
   );
 
   const uploadAvatar = useCallback(
@@ -113,7 +118,7 @@ export function useProfile() {
         return null;
       }
     },
-    [toast],
+    [toast]
   );
 
   const deleteAvatar = useCallback(
@@ -140,7 +145,7 @@ export function useProfile() {
         return false;
       }
     },
-    [toast],
+    [toast]
   );
 
   return {

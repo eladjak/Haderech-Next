@@ -1,78 +1,98 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { ForumComment } from "@/components/forum/ForumComment";
+import type { Author, ExtendedForumComment } from "@/types/forum";
 
-// Mock data
-const mockComment = {
+// מוסיף מוקים לפונקציות החסרות
+beforeAll(() => {
+  Element.prototype.hasPointerCapture = () => false;
+  Element.prototype.scrollIntoView = vi.fn();
+});
+
+const mockAuthor: Author = {
   id: "1",
-  content: "Test comment content",
-  createdAt: new Date("2024-01-01T00:00:00.000Z"),
-  updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-  userId: "user1",
-  user: {
-    id: "user1",
-    name: "Test User",
-    email: "test@example.com",
-    image: "/test-avatar.jpg",
-  },
+  name: "משתמש לדוגמה",
+  username: "example_user",
+  full_name: "משתמש לדוגמה",
+  email: "user@example.com",
+  avatar_url: "/images/avatar.jpg",
+  image: null,
+  bio: "מורה ותיק לפיזיקה",
+  role: "user",
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  last_seen: new Date().toISOString(),
+  points: 100,
+  level: 1,
+  badges: ["test"],
+  achievements: ["test"],
+};
+
+const mockComment: ExtendedForumComment = {
+  id: "1",
+  post_id: "post-1",
+  content: "תוכן התגובה לדוגמה",
+  author_id: mockAuthor.id,
+  author: mockAuthor,
+  parent_id: null,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  likes: 0,
+  isLiked: false,
+  replies_count: 0,
+  replies: [],
 };
 
 describe("ForumComment", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("renders comment content correctly", () => {
+  it("מציג תמונת פרופיל של המחבר", async () => {
     render(<ForumComment comment={mockComment} />);
 
-    // Check content
-    expect(screen.getByText(mockComment.content)).toBeInTheDocument();
-
-    // Check author
-    expect(screen.getByText(mockComment.user.name)).toBeInTheDocument();
-
-    // Check date
-    expect(screen.getByText(/1 בינואר 2024/)).toBeInTheDocument();
+    const avatar = await screen.findByRole("img", {
+      name: mockComment.author.name,
+    });
+    expect(avatar).toBeInTheDocument();
   });
 
-  it("applies custom className", () => {
-    const customClass = "test-class";
-    const { container } = render(
-      <ForumComment
-        comment={mockComment}
-        className={customClass}
-      />,
-    );
-
-    expect(container.firstChild).toHaveClass(customClass);
-  });
-
-  it("formats date correctly", () => {
-    const commentWithDifferentDate = {
+  it("מציג תמונת פרופיל כברירת מחדל כאשר אין תמונה", async () => {
+    const commentWithoutImage = {
       ...mockComment,
-      createdAt: new Date("2024-03-15T14:30:00.000Z"),
-    };
-
-    render(<ForumComment comment={commentWithDifferentDate} />);
-
-    // Should show formatted date (note: exact format depends on locale)
-    expect(screen.getByText(/15 במרץ 2024/)).toBeInTheDocument();
-  });
-
-  it("renders avatar with fallback", () => {
-    const commentWithoutAvatar = {
-      ...mockComment,
-      user: {
-        ...mockComment.user,
-        image: "",
+      author: {
+        ...mockComment.author,
+        avatar_url: null,
+        image: null,
+        name: "משתמש לדוגמה",
       },
     };
+    render(<ForumComment comment={commentWithoutImage} />);
 
-    render(<ForumComment comment={commentWithoutAvatar} />);
+    const fallback = await screen.findByRole("img", {
+      name: commentWithoutImage.author.name,
+    });
+    expect(fallback).toBeInTheDocument();
+    expect(fallback).toHaveTextContent("מ");
+  });
 
-    // Should show avatar with first letters of name
-    const avatar = screen.getByText("TU");
-    expect(avatar).toBeInTheDocument();
+  it("מקבל ומחיל className", () => {
+    const className = "test-class";
+    const { container } = render(
+      <ForumComment comment={mockComment} className={className} />
+    );
+    expect(container.firstChild).toHaveClass(className);
+  });
+
+  it("מציג את תוכן התגובה", () => {
+    render(<ForumComment comment={mockComment} />);
+    expect(screen.getByText(mockComment.content)).toBeInTheDocument();
+  });
+
+  it("מציג את שם המשתמש", () => {
+    render(<ForumComment comment={mockComment} />);
+    expect(screen.getByText(mockComment.author.name)).toBeInTheDocument();
+  });
+
+  it("מציג את מספר הלייקים", () => {
+    render(<ForumComment comment={mockComment} />);
+    expect(screen.getByText(mockComment.likes.toString())).toBeInTheDocument();
   });
 });

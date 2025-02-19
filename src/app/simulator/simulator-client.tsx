@@ -1,25 +1,32 @@
 "use client";
 
 import React, { useState } from "react";
+
+import { ChatSimulator } from "@/components/simulator/ChatSimulator";
+import { ScenarioSelector } from "@/components/simulator/ScenarioSelector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { ChatSimulator } from "@/components/simulator/ChatSimulator";
-import { ScenarioSelector } from "@/components/simulator/ScenarioSelector";
 import { EXAMPLE_SCENARIOS } from "@/constants/simulator";
-import type { SimulationScenario, SimulationState } from "@/types/simulator";
+import type { SimulationState, SimulatorScenario } from "@/types/simulator";
 
-export default function SimulatorClient(): React.ReactNode {
+interface SimulatorClientProps {
+  initialScenario?: SimulatorScenario;
+}
+
+export default function SimulatorClient({
+  initialScenario,
+}: SimulatorClientProps): React.ReactElement {
   const { toast } = useToast();
   const [selectedScenario, setSelectedScenario] = useState<
-    SimulationScenario | undefined
-  >();
+    SimulatorScenario | undefined
+  >(initialScenario);
   const [simulationState, setSimulationState] = useState<
     SimulationState | undefined
   >();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleScenarioSelect = (scenario: SimulationScenario): void => {
+  const handleScenarioSelect = (scenario: SimulatorScenario): void => {
     setSelectedScenario(scenario);
     setSimulationState(undefined);
   };

@@ -4,165 +4,106 @@
  * טיפוסים עבור ה-API של המערכת
  */
 
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  image_url: string | null;
-  status: "draft" | "published" | "archived";
-  author_id: string;
-  created_at: string;
-  updated_at: string;
-  level: "beginner" | "intermediate" | "advanced";
-  duration: number;
-  price: number;
-  tags: string[];
-  author: {
-    id: string;
-    name: string;
-    email: string;
-    avatar_url: string | null;
-    bio: string | null;
-    created_at: string;
-    updated_at: string;
+import type { Database } from "./database";
+
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+
+export type User = Tables<"users"> & {
+  points: number;
+  level: number;
+  badges: string[];
+  total_students?: number;
+  is_online?: boolean;
+  settings?: {
+    notifications: boolean;
+    theme: "light" | "dark" | "system";
+    language: string;
   };
-  rating: number;
-  ratings: CourseRating[];
-  ratings_count: number;
-  students_count: number;
-  lessons_count: number;
-  thumbnail_url: string;
-  sections: Section[];
-  comments?: Comment[];
+};
+
+export type Course = Tables<"courses"> & {
+  total_students?: number;
+  students_count?: number;
   instructor: {
     id: string;
     name: string;
-    email: string;
-    avatar_url: string | null;
-    bio: string | null;
+    avatar_url?: string;
   };
-  lessons: Lesson[];
+  ratings?: CourseRating[];
+  lessons?: CourseLesson[];
+  sections?: Section[];
+  progress?: {
+    completed: boolean;
+    score: number;
+    last_activity: string;
+  };
+};
+
+export type CourseRating = Tables<"course_ratings">;
+export type CourseLesson = Tables<"lessons">;
+export type Notification = Tables<"notifications">;
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  points: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExtendedProfile extends Omit<User, "achievements"> {
+  stats: {
+    total_courses: number;
+    completed_courses: number;
+    total_lessons: number;
+    completed_lessons: number;
+    total_points: number;
+    streak_days: number;
+    active_days: number;
+  };
+  achievements: Achievement[];
 }
 
 export interface Section {
   id: string;
+  course_id: string;
   title: string;
   description: string;
+  order: number;
   lessons: Lesson[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Lesson {
   id: string;
+  course_id: string;
   title: string;
   description: string;
+  content: string;
   duration: number;
-  videoUrl: string;
-  isCompleted: boolean;
-  content?: string;
-  progress?: Array<{
-    user_id: string;
-    completed: boolean;
-    progress: number;
-  }>;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar_url: string | null;
-  bio: string | null;
-  created_at: string;
-  updated_at: string;
-  role: "user" | "admin";
-  settings: {
-    notifications: boolean;
-    language: string;
-    theme: "light" | "dark" | "system";
-  };
-}
-
-export interface Comment {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  user: User;
-}
-
-export interface ForumPost {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  user: User;
-  author: {
-    id: string;
-    name: string;
-    email: string;
-    avatar_url: string | null;
-    bio: string | null;
-  };
-  likes: number;
-  likes_count: number;
-  comments_count: number;
-  comments: ForumComment[];
-  tags: string[];
-  is_liked: boolean;
-}
-
-export interface ForumComment {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  user: User;
-  author: {
-    id: string;
-    name: string;
-    email: string;
-    avatar_url: string | null;
-    bio: string | null;
-  };
-  likes: number;
-}
-
-export interface Notification {
-  id: string;
-  type: "like" | "comment" | "follow" | "mention";
-  content: string;
-  user?: {
-    name?: string;
-    avatar_url?: string | null;
-  };
-  is_read: boolean;
+  order: number;
+  is_free: boolean;
+  isCompleted?: boolean;
+  video_url: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  progress: number;
-  completed: boolean;
-  earned_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ApiResponse<T> {
+export type APIResponse<T> = {
+  success: boolean;
+  message: string;
   data?: T;
-  error?: {
-    message: string;
-    code: string;
-    details?: Record<string, string | number | boolean | null>;
-  };
+  error?: string;
+};
+
+export interface APIError {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
 }
 
 export interface SearchResults {
@@ -226,29 +167,4 @@ export interface SimulationState {
   }>;
   created_at: string;
   updated_at: string;
-}
-
-export interface SimulationResult {
-  id: string;
-  user_id: string;
-  scenario_id: string;
-  success: boolean;
-  duration: number;
-  messages_count: number;
-  emotional_changes: Array<{
-    type: "anger" | "happiness" | "sadness" | "fear" | "trust";
-    from: number;
-    to: number;
-    timestamp: string;
-  }>;
-  feedback: string[];
-  created_at: string;
-}
-
-export interface CourseRating {
-  id: string;
-  rating: number;
-  comment: string;
-  user: User;
-  created_at: string;
 }

@@ -2,80 +2,88 @@
  * Forum Comment Component
  *
  * A component for displaying individual forum comments with user information
- * and like functionality. Supports RTL and includes accessibility features.
+ * and interaction options.
  *
  * @example
  * ```tsx
  * <ForumComment
  *   comment={comment}
- *   isLiked={true}
- *   onLike={(id) => handleLike(id)}
+ *   onReply={(id) => handleReply(id)}
  * />
  * ```
  */
 
 "use client";
 
-import { format } from "date-fns";
+import React from "react";
+
+import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
+import { MessageSquare } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { ForumComment as ForumCommentType } from "@/types/forum";
 
-interface ForumCommentProps {
-  comment: {
-    id: string;
-    content: string;
-    createdAt: Date;
-    updatedAt: Date;
-    userId: string;
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      image: string;
-    };
-  };
+export interface ForumCommentProps {
+  comment: ForumCommentType;
   className?: string;
 }
 
-export function ForumComment({ comment, className }: ForumCommentProps) {
+export function ForumComment({
+  comment,
+  className,
+}: ForumCommentProps): React.ReactElement {
+  const { content, author, created_at, replies = [] } = comment;
+
+  const avatarUrl = author.avatar_url || undefined;
+
+  const timeAgo = formatDistanceToNow(new Date(created_at), {
+    addSuffix: true,
+    locale: he,
+  });
+
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="flex flex-row items-start gap-4 space-y-0">
+    <div className={cn("space-y-4", className)}>
+      <div className="flex items-start space-x-4">
         <Avatar>
           <AvatarImage
-            src={comment.user.image}
-            alt={comment.user.name}
+            src={avatarUrl}
+            alt={`תמונת הפרופיל של ${author.name}`}
           />
-          <AvatarFallback>
-            {comment.user.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
+          <AvatarFallback aria-label={`תמונת הפרופיל של ${author.name}`}>
+            {author.name[0]}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <CardTitle className="text-base">{comment.user.name}</CardTitle>
-          <CardDescription>
-            {format(new Date(comment.createdAt), "dd בMMMM yyyy", {
-              locale: he,
-            })}
-          </CardDescription>
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold">{author.name}</span>
+            <span className="text-sm text-muted-foreground">
+              לפני {timeAgo}
+            </span>
+          </div>
+          <p className="mt-1 text-sm">{content}</p>
+          <div className="mt-2 flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center space-x-2"
+              aria-label={`תגובות (${replies.length})`}
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span>{replies.length}</span>
+            </Button>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-          {comment.content}
-        </p>
-      </CardContent>
-    </Card>
+      </div>
+      {replies.length > 0 && (
+        <div className="mr-12 space-y-4">
+          {replies.map((reply) => (
+            <ForumComment key={reply.id} comment={reply} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

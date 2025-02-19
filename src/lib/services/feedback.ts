@@ -13,7 +13,7 @@ interface Feedback {
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 export const createFeedback = async (
@@ -21,7 +21,7 @@ export const createFeedback = async (
   courseId: string,
   lessonId: string,
   rating: number,
-  comment: string,
+  comment: string
 ): Promise<Feedback> => {
   try {
     // Validate rating is between 1-5
@@ -56,7 +56,7 @@ export const createFeedback = async (
 };
 
 export const getFeedbackForLesson = async (
-  lessonId: string,
+  lessonId: string
 ): Promise<Feedback[]> => {
   try {
     const { data: feedbacks, error } = await supabase
@@ -69,7 +69,7 @@ export const getFeedbackForLesson = async (
           name,
           avatar_url
         )
-      `,
+      `
       )
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: false });
@@ -83,7 +83,7 @@ export const getFeedbackForLesson = async (
 };
 
 export const getFeedbackForCourse = async (
-  courseId: string,
+  courseId: string
 ): Promise<Feedback[]> => {
   try {
     const { data: feedbacks, error } = await supabase
@@ -96,7 +96,7 @@ export const getFeedbackForCourse = async (
           name,
           avatar_url
         )
-      `,
+      `
       )
       .eq("course_id", courseId)
       .order("created_at", { ascending: false });

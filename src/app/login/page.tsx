@@ -1,5 +1,6 @@
-import Link from "next/link";
 import React from "react";
+
+import Link from "next/link";
 
 import { LoginForm } from "@/components/auth/login-form";
 import { buttonVariants } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export default function LoginPage(): React.ReactElement {
         href="/register"
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "absolute right-4 top-4 md:right-8 md:top-8",
+          "absolute right-4 top-4 md:right-8 md:top-8"
         )}
       >
         הרשמה

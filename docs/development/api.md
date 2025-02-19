@@ -452,7 +452,7 @@ const response = await fetch(
       completed: true,
       progress: 100,
     }),
-  },
+  }
 );
 ```
 

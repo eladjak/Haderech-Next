@@ -67,19 +67,19 @@ export const courseSlice = createSlice({
     },
     setCurrentCourse: (
       state: CourseState,
-      action: PayloadAction<Course | null>,
+      action: PayloadAction<Course | null>
     ) => {
       state.currentCourse = action.payload;
     },
     setCurrentLesson: (
       state: CourseState,
-      action: PayloadAction<Lesson | null>,
+      action: PayloadAction<Lesson | null>
     ) => {
       state.currentLesson = action.payload;
     },
     updateProgress: (
       state: CourseState,
-      action: PayloadAction<{ lessonId: string; progress: Progress }>,
+      action: PayloadAction<{ lessonId: string; progress: Progress }>
     ) => {
       state.progress[action.payload.lessonId] = action.payload.progress;
     },

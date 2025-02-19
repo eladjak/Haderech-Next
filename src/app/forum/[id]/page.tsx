@@ -1,9 +1,11 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,7 +28,6 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-
 import type { ForumPost as ForumPostType } from "@/types/api";
 
 const formSchema = z.object({
@@ -197,10 +198,7 @@ export default function Page({ params }: { params: { id: string } }) {
                   )}
                 />
                 <div className="flex justify-end">
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                  >
+                  <Button type="submit" disabled={isLoading}>
                     {isLoading ? "שולח..." : "הוסף תגובה"}
                   </Button>
                 </div>
@@ -209,10 +207,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
             <div className="mt-8 space-y-4">
               {post.comments.map((comment) => (
-                <ForumComment
-                  key={comment.id}
-                  comment={comment}
-                />
+                <ForumComment key={comment.id} comment={comment} />
               ))}
             </div>
           </CardContent>

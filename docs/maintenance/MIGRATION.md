@@ -144,7 +144,7 @@ class MigrationError extends Error {
     message: string,
     public entity: string,
     public oldId: string,
-    public details: any,
+    public details: any
   ) {
     super(message);
     this.name = "MigrationError";

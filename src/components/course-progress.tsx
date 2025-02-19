@@ -1,6 +1,5 @@
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/use-auth";
-
 import type { Course } from "@/types/api";
 
 interface CourseProgressProps {
@@ -23,10 +22,7 @@ export function CourseProgress({ course, className }: CourseProgressProps) {
 
   return (
     <div className={className}>
-      <Progress
-        value={progress}
-        className="h-2"
-      />
+      <Progress value={progress} className="h-2" />
       <div className="mt-2 text-sm text-muted-foreground">
         {completedLessons} מתוך {totalLessons} שיעורים הושלמו
       </div>

@@ -3,11 +3,12 @@
  * @description API routes for managing lesson comments. Provides endpoints for retrieving and creating comments.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import type { Database } from "@/types/supabase";
+import { createServerClient } from "@supabase/ssr";
+
+import { Database } from "@/types/supabase";
 
 interface RouteParams {
   params: {
@@ -21,9 +22,9 @@ interface RouteParams {
  *
  * Retrieves all comments for a specific lesson.
  *
- * @param {Request} _ - The request object (unused)
- * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
- * @returns {Promise<NextResponse>} JSON response containing the lesson comments or error message
+ * @param request - The request object
+ * @param params - URL parameters containing courseId and lessonId
+ * @returns Comments data or error response
  *
  * @example Response
  * ```json
@@ -50,7 +51,10 @@ interface RouteParams {
  * ]
  * ```
  */
-export async function GET(_: Request, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string; lessonId: string } }
+) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient<Database>(
@@ -62,20 +66,20 @@ export async function GET(_: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const { data: comments, error } = await supabase
       .from("lesson_comments")
-      .select("*, author:profiles(*)")
+      .select("*, author:users(*)")
       .eq("lesson_id", params.lessonId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: true });
 
     if (error) {
       console.error("Error fetching lesson comments:", error);
       return NextResponse.json(
-        { error: "Failed to fetch lesson comments" },
-        { status: 500 },
+        { error: "Failed to fetch comments" },
+        { status: 500 }
       );
     }
 
@@ -83,11 +87,11 @@ export async function GET(_: Request, { params }: RouteParams) {
   } catch (error) {
     console.error(
       "Error in GET /api/courses/[id]/lessons/[lessonId]/comments:",
-      error,
+      error
     );
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -99,9 +103,9 @@ export async function GET(_: Request, { params }: RouteParams) {
  *
  * @requires Authentication
  *
- * @param {Request} request - The incoming request object
- * @param {RouteParams} params - Route parameters containing the course ID and lesson ID
- * @returns {Promise<NextResponse>} JSON response containing the new comment or error message
+ * @param request - The request object containing the comment data
+ * @param params - URL parameters containing courseId and lessonId
+ * @returns Created comment data or error response
  *
  * @example Request Body
  * ```json
@@ -111,7 +115,10 @@ export async function GET(_: Request, { params }: RouteParams) {
  * }
  * ```
  */
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string; lessonId: string } }
+) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient<Database>(
@@ -123,91 +130,57 @@ export async function POST(request: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
-    // Verify authentication
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const { content, parent_id } = await request.json();
-
-    // Validate content
-    if (!content?.trim()) {
+    if (!user) {
       return NextResponse.json(
-        { error: "Comment content is required" },
-        { status: 400 },
+        { error: "User not authenticated" },
+        { status: 401 }
       );
     }
 
-    // Verify lesson exists
-    const { data: lesson } = await supabase
-      .from("lessons")
-      .select("id")
-      .eq("id", params.lessonId)
-      .eq("course_id", params.id)
-      .single();
+    const { content } = await request.json();
 
-    if (!lesson) {
-      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+    if (!content) {
+      return NextResponse.json(
+        { error: "Comment content is required" },
+        { status: 400 }
+      );
     }
 
-    // If this is a reply, verify parent comment exists
-    if (parent_id) {
-      const { data: parentComment } = await supabase
-        .from("lesson_comments")
-        .select("id")
-        .eq("id", parent_id)
-        .eq("lesson_id", params.lessonId)
-        .single();
-
-      if (!parentComment) {
-        return NextResponse.json(
-          { error: "Parent comment not found" },
-          { status: 404 },
-        );
-      }
-    }
-
-    // Create comment
     const { data: comment, error } = await supabase
       .from("lesson_comments")
       .insert({
-        lesson_id: params.lessonId,
-        user_id: session.user.id,
         content,
-        parent_id,
+        lesson_id: params.lessonId,
+        course_id: params.id,
+        author_id: user.id,
       })
-      .select(
-        `
-        *,
-        user:profiles!user_id (
-          id,
-          name,
-          avatar_url
-        )
-      `,
-      )
+      .select("*, author:users(*)")
       .single();
 
     if (error) {
-      console.error("Error creating comment:", error);
+      console.error("Error creating lesson comment:", error);
       return NextResponse.json(
         { error: "Failed to create comment" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
     return NextResponse.json(comment);
   } catch (error) {
-    console.error("Comments POST error:", error);
+    console.error(
+      "Error in POST /api/courses/[id]/lessons/[lessonId]/comments:",
+      error
+    );
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

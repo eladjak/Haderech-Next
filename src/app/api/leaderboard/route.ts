@@ -4,11 +4,24 @@
  * Provides a leaderboard of top users with their profiles and scores.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import type { Database } from "@/types/supabase";
+import { createServerClient } from "@supabase/ssr";
+
+import { supabase } from "@/lib/services/supabase";
+import { Database } from "@/types/supabase";
+
+// Constants for pagination and time periods
+const PAGE_SIZE = 10;
+const TIME_PERIODS = {
+  week: "7 days",
+  month: "30 days",
+  year: "365 days",
+  all: "all",
+} as const;
+
+type TimePeriod = keyof typeof TIME_PERIODS;
 
 /**
  * GET /api/leaderboard
@@ -34,56 +47,93 @@ import type { Database } from "@/types/supabase";
  * ]
  * ```
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      },
-    );
+    const searchParams = request.nextUrl.searchParams;
+    const period = (searchParams.get("period") as TimePeriod) || "all";
+    const page = parseInt(searchParams.get("page") || "1");
 
-    const { data: leaderboard, error } = await supabase
-      .from("profiles")
+    if (!TIME_PERIODS[period]) {
+      return NextResponse.json(
+        { error: "Invalid time period" },
+        { status: 400 }
+      );
+    }
+
+    if (isNaN(page) || page < 1) {
+      return NextResponse.json(
+        { error: "Invalid page number" },
+        { status: 400 }
+      );
+    }
+
+    // Calculate the date range for the query
+    const startDate =
+      period === "all"
+        ? null
+        : new Date(
+            Date.now() - parseInt(TIME_PERIODS[period]) * 24 * 60 * 60 * 1000
+          ).toISOString();
+
+    // Base query to get users with their points
+    let query = supabase
+      .from("users")
       .select(
         `
         id,
         name,
         avatar_url,
         points,
-        achievements:user_achievements(count),
-        courses:course_enrollments(count)
-      `,
+        level,
+        badges,
+        completed_courses,
+        forum_posts,
+        login_streak
+      `
       )
-      .order("points", { ascending: false })
-      .limit(100);
+      .order("points", { ascending: false });
+
+    // Apply time period filter if not 'all'
+    if (startDate) {
+      query = query.gte("updated_at", startDate);
+    }
+
+    // Apply pagination
+    const from = (page - 1) * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    query = query.range(from, to);
+
+    const { data: users, error, count } = await query;
 
     if (error) {
       console.error("Error fetching leaderboard:", error);
       return NextResponse.json(
-        { error: "שגיאה בטעינת טבלת המובילים" },
-        { status: 500 },
+        { error: "Failed to fetch leaderboard" },
+        { status: 500 }
       );
     }
 
-    // Add rank to each user
-    const rankedLeaderboard = leaderboard.map((user, index) => ({
-      rank: index + 1,
-      user,
-    }));
+    // Get total count for pagination
+    const totalQuery = supabase.from("users").select("id", { count: "exact" });
+    if (startDate) {
+      totalQuery.gte("updated_at", startDate);
+    }
+    const { count: total } = await totalQuery;
 
-    return NextResponse.json(rankedLeaderboard);
+    return NextResponse.json({
+      users,
+      pagination: {
+        page,
+        pageSize: PAGE_SIZE,
+        total: total || 0,
+        totalPages: Math.ceil((total || 0) / PAGE_SIZE),
+      },
+    });
   } catch (error) {
-    console.error("Error in GET /api/leaderboard:", error);
+    console.error("Error in leaderboard API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -100,7 +150,7 @@ export async function PATCH(req: Request) {
             return cookies().get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -110,7 +160,7 @@ export async function PATCH(req: Request) {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -119,7 +169,7 @@ export async function PATCH(req: Request) {
     if (typeof score !== "number") {
       return NextResponse.json(
         { error: "Score must be a number" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -149,7 +199,7 @@ export async function PATCH(req: Request) {
       console.error("Error updating score:", error);
       return NextResponse.json(
         { error: "שגיאה בעדכון הניקוד" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -161,7 +211,7 @@ export async function PATCH(req: Request) {
     console.error("Error in PATCH /api/leaderboard:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

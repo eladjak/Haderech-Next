@@ -4,7 +4,6 @@
  * @file course-comments.tsx
  * @description Comments component for course pages showing user discussions
  */
-
 import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,10 +37,7 @@ export function CourseComments({ comments }: CourseCommentsProps) {
         </div>
         <div className="mt-6 space-y-6">
           {displayComments.map((comment) => (
-            <div
-              key={comment.id}
-              className="space-y-4"
-            >
+            <div key={comment.id} className="space-y-4">
               <div className="flex items-start space-x-4 rtl:space-x-reverse">
                 <Avatar>
                   <AvatarImage
@@ -83,7 +79,7 @@ export function CourseComments({ comments }: CourseCommentsProps) {
                               </div>
                               <div className="text-sm text-muted-foreground">
                                 {new Date(reply.created_at).toLocaleDateString(
-                                  "he-IL",
+                                  "he-IL"
                                 )}
                               </div>
                             </div>
@@ -102,10 +98,7 @@ export function CourseComments({ comments }: CourseCommentsProps) {
         </div>
         {!showAll && comments.length > 3 && (
           <div className="mt-6 text-center">
-            <Button
-              variant="outline"
-              onClick={() => setShowAll(true)}
-            >
+            <Button variant="outline" onClick={() => setShowAll(true)}>
               הצג עוד תגובות
             </Button>
           </div>

@@ -1,8 +1,10 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Play } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { ChevronDown, ChevronUp, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +16,6 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-
 import type { Course } from "@/types/api";
 
 interface CourseTabsProps {
@@ -30,7 +31,7 @@ export function CourseTabs({ course, className }: CourseTabsProps) {
     setExpandedSections((prev) =>
       prev.includes(sectionId)
         ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId],
+        : [...prev, sectionId]
     );
   };
 
@@ -39,10 +40,7 @@ export function CourseTabs({ course, className }: CourseTabsProps) {
   };
 
   return (
-    <Tabs
-      defaultValue="content"
-      className={cn("space-y-4", className)}
-    >
+    <Tabs defaultValue="content" className={cn("space-y-4", className)}>
       <TabsList>
         <TabsTrigger value="content">תוכן הקורס</TabsTrigger>
         <TabsTrigger value="comments">תגובות</TabsTrigger>
@@ -60,10 +58,7 @@ export function CourseTabs({ course, className }: CourseTabsProps) {
                     <CardTitle>{section.title}</CardTitle>
                     <CardDescription>{section.description}</CardDescription>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                  >
+                  <Button variant="ghost" size="icon">
                     {expandedSections.includes(section.id) ? (
                       <ChevronUp className="h-4 w-4" />
                     ) : (
@@ -101,7 +96,7 @@ export function CourseTabs({ course, className }: CourseTabsProps) {
                             {String(lesson.duration % 60).padStart(2, "0")}
                           </span>
                           {lesson.isCompleted && (
-                            <span className="text-sm text-success">✓</span>
+                            <span className="text-success text-sm">✓</span>
                           )}
                         </div>
                       </div>

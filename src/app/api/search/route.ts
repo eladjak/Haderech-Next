@@ -3,9 +3,10 @@
  * @description API route handler for global search operations
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
     if (!query) {
       return NextResponse.json(
         { error: "Search query is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -93,7 +94,7 @@ export async function GET(request: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const results: SearchResults = {
@@ -115,7 +116,7 @@ export async function GET(request: Request) {
             name,
             avatar_url
           )
-        `,
+        `
         )
         .textSearch("title", query)
         .range(offset, offset + limit - 1);
@@ -124,7 +125,7 @@ export async function GET(request: Request) {
         console.error("Error searching courses:", coursesError);
         return NextResponse.json(
           { error: "Failed to search courses" },
-          { status: 500 },
+          { status: 500 }
         );
       }
 
@@ -153,7 +154,7 @@ export async function GET(request: Request) {
         console.error("Error searching instructors:", instructorsError);
         return NextResponse.json(
           { error: "Failed to search instructors" },
-          { status: 500 },
+          { status: 500 }
         );
       }
 
@@ -165,7 +166,7 @@ export async function GET(request: Request) {
     console.error("Error in GET /api/search:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

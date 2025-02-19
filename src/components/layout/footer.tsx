@@ -6,10 +6,7 @@ export function Footer() {
       <div className="container py-8">
         <div className="grid gap-8 lg:grid-cols-2">
           <div>
-            <Link
-              href="/"
-              className="flex items-center space-x-2"
-            >
+            <Link href="/" className="flex items-center space-x-2">
               <span className="inline-block font-bold">הדרך</span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">

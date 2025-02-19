@@ -39,6 +39,12 @@ interface SparkleStyle {
   zIndex: number;
 }
 
+interface SparkleProps {
+  color: string;
+  size: number;
+  style: SparkleStyle;
+}
+
 /**
  * Individual sparkle component that renders an animated SVG star
  *
@@ -46,15 +52,7 @@ interface SparkleStyle {
  * @param size - The size of the sparkle in pixels
  * @param style - Positioning and z-index styles
  */
-function Sparkle({
-  color,
-  size,
-  style,
-}: {
-  color: string;
-  size: number;
-  style: SparkleStyle;
-}) {
+function Sparkle({ color, size, style }: SparkleProps) {
   // SVG path for star shape
   const path = `M${size / 2} 0
                L${size / 2 + size / 4} ${size / 2}
@@ -67,10 +65,7 @@ function Sparkle({
                Z`;
 
   return (
-    <span
-      className="animate-sparkle-spin absolute block"
-      style={style}
-    >
+    <span className="animate-sparkle-spin absolute block" style={style}>
       <svg
         className="animate-sparkle-ping absolute inset-0"
         style={{
@@ -81,10 +76,7 @@ function Sparkle({
         viewBox="0 0 68 68"
         fill="none"
       >
-        <path
-          d={path}
-          fill={color}
-        />
+        <path d={path} fill={color} />
       </svg>
     </span>
   );
@@ -100,7 +92,7 @@ function random(min: number, max: number): number {
 function useRandomInterval(
   callback: () => void,
   minDelay: number | null,
-  maxDelay: number | null,
+  maxDelay: number | null
 ): () => void {
   const timeoutId = React.useRef<number | null>(null);
   const savedCallback = React.useRef(callback);
@@ -138,31 +130,33 @@ function useRandomInterval(
  * Generates a sparkle object with random position and size
  *
  * @param color - The color of the sparkle
+ * @param minSize - The minimum size of the sparkle in pixels
+ * @param maxSize - The maximum size of the sparkle in pixels
  * @returns A sparkle object with unique ID, creation timestamp, color, size, and positioning
  */
-function generateSparkle(color: string): {
+function generateSparkle(
+  color: string,
+  minSize = 10,
+  maxSize = 20
+): {
   id: string;
   createdAt: number;
   color: string;
   size: number;
-  style: {
-    top: string;
-    left: string;
-    zIndex: number;
-  };
+  style: SparkleStyle;
 } {
-  const sparkle = {
+  return {
     id: String(random(10000, 99999)),
     createdAt: Date.now(),
     color,
-    size: random(10, 20),
+    size: random(minSize, maxSize),
     style: {
-      top: random(0, 100) + "%",
-      left: random(0, 100) + "%",
+      position: "absolute",
+      top: `${random(0, 100)}%`,
+      left: `${random(0, 100)}%`,
       zIndex: 2,
     },
   };
-  return sparkle;
 }
 
 /**
@@ -210,7 +204,7 @@ export function Sparkles({
       setSparkles(generateSparkles());
     },
     sparkleInterval,
-    null,
+    null
   );
 
   return (

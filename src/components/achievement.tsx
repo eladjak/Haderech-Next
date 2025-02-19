@@ -1,7 +1,6 @@
 import { Trophy } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-
 import type { Achievement as AchievementType } from "@/types/api";
 
 interface AchievementProps {

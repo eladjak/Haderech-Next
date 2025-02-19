@@ -1,15 +1,16 @@
 "use client";
 
 import React from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { SimulationScenario } from "@/types/simulator";
+import type { SimulatorScenario } from "@/types/simulator";
 
 interface ScenarioSelectorProps {
-  scenarios: SimulationScenario[];
-  selectedScenario: SimulationScenario | undefined;
-  onSelect: (scenario: SimulationScenario) => void;
+  scenarios: SimulatorScenario[];
+  selectedScenario: SimulatorScenario | undefined;
+  onSelect: (scenario: SimulatorScenario) => void;
 }
 
 export function ScenarioSelector({
@@ -35,18 +36,21 @@ export function ScenarioSelector({
             }`}
             onClick={() => onSelect(scenario)}
           >
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="font-semibold">{scenario.title}</h3>
-              <Badge variant="outline">{scenario.difficulty}</Badge>
-            </div>
-            <p className="mb-2 text-sm text-muted-foreground">
-              {scenario.description}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">{scenario.category}</Badge>
-              <Badge variant="secondary">
-                {scenario.learningObjectives.length} מטרות למידה
-              </Badge>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">{scenario.title}</h3>
+              <p className="text-sm text-muted-foreground">
+                {scenario.description}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {scenario.learning_objectives.map((objective, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                  >
+                    {objective}
+                  </span>
+                ))}
+              </div>
             </div>
           </Card>
         ))}
@@ -54,10 +58,7 @@ export function ScenarioSelector({
 
       {selectedScenario && (
         <div className="flex justify-center">
-          <Button
-            size="lg"
-            onClick={() => onSelect(selectedScenario)}
-          >
+          <Button size="lg" onClick={() => onSelect(selectedScenario)}>
             התחל תרגול
           </Button>
         </div>

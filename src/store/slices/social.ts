@@ -62,19 +62,19 @@ export const socialSlice = createSlice({
     },
     setCurrentGroup: (
       state: SocialState,
-      action: PayloadAction<SocialGroup | null>,
+      action: PayloadAction<SocialGroup | null>
     ) => {
       state.currentGroup = action.payload;
     },
     setCurrentActivity: (
       state: SocialState,
-      action: PayloadAction<Activity | null>,
+      action: PayloadAction<Activity | null>
     ) => {
       state.currentActivity = action.payload;
     },
     addActivity: (
       state: SocialState,
-      action: PayloadAction<{ groupId: string; activity: Activity }>,
+      action: PayloadAction<{ groupId: string; activity: Activity }>
     ) => {
       const group = state.groups.find((g) => g.id === action.payload.groupId);
       if (group) {
@@ -93,12 +93,12 @@ export const socialSlice = createSlice({
         groupId: string;
         activityId: string;
         userId: string;
-      }>,
+      }>
     ) => {
       const group = state.groups.find((g) => g.id === action.payload.groupId);
       if (group) {
         const activity = group.activities.find(
-          (a) => a.id === action.payload.activityId,
+          (a) => a.id === action.payload.activityId
         );
         if (
           activity &&
@@ -112,7 +112,7 @@ export const socialSlice = createSlice({
         state.currentGroup.id === action.payload.groupId
       ) {
         const activity = state.currentGroup.activities.find(
-          (a) => a.id === action.payload.activityId,
+          (a) => a.id === action.payload.activityId
         );
         if (
           activity &&
@@ -124,7 +124,7 @@ export const socialSlice = createSlice({
     },
     updateFilters: (
       state: SocialState,
-      action: PayloadAction<Partial<SocialState["filters"]>>,
+      action: PayloadAction<Partial<SocialState["filters"]>>
     ) => {
       state.filters = { ...state.filters, ...action.payload };
     },

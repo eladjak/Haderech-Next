@@ -5,8 +5,6 @@ import { UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-
 import type { User } from "@/types/api";
 
 interface SocialRecommendationsProps {
@@ -25,10 +23,7 @@ export function SocialRecommendations({
       </CardHeader>
       <CardContent className="space-y-4">
         {users.map((user) => (
-          <div
-            key={user.id}
-            className="flex items-center justify-between"
-          >
+          <div key={user.id} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Avatar>
                 <AvatarImage src={user.avatar_url || undefined} />

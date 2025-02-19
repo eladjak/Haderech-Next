@@ -8,7 +8,7 @@ type LocaleObject = { [key: string]: string | LocaleObject };
 
 function getNestedValue(
   obj: Record<string, LocaleValue>,
-  path: string[],
+  path: string[]
 ): string | undefined {
   let current = obj as Record<string, LocaleValue>;
   for (const key of path) {
@@ -34,7 +34,7 @@ export function useLocalization() {
 
       return value;
     },
-    [],
+    []
   );
 
   const setLanguage = useCallback((lang: "he" | "en") => {

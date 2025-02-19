@@ -1,7 +1,8 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
 import React from "react";
+
+import { MessageCircle } from "lucide-react";
 
 import { ChatbotWindow, type ChatMessage } from "./ChatbotWindow";
 

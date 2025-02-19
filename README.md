@@ -1,189 +1,128 @@
-# HaDerech - Interactive Learning Platform
+# 🌟 HaDerech - פלטפורמת למידה מתקדמת
 
-![HaDerech Logo](public/logo.png)
+פלטפורמת למידה חדשנית המשלבת קורסים, פורום קהילתי, וסימולטור תרגול אינטראקטיבי.
 
-## Our Mission
+## 🚀 תכונות עיקריות
 
-HaDerech is more than just a platform - it's a journey towards better relationships and personal growth. We combine cutting-edge technology with proven educational methods to create an engaging, effective learning experience.
+- **מערכת קורסים** - קורסים אינטראקטיביים עם תמיכה בווידאו, טקסט ותרגילים
+- **פורום קהילתי** - פורום מתקדם עם תמיכה בקטגוריות, תגיות וחיפוש
+- **סימולטור תרגול** - סביבת תרגול אינטראקטיבית עם משוב בזמן אמת
+- **מערכת הישגים** - מערכת נקודות, תגים והישגים
+- **ממשק משתמש מודרני** - עיצוב נקי ומודרני עם תמיכה מלאה ב-RTL
 
-### Educational Philosophy
+## 🛠 טכנולוגיות
 
-- **Personalized Learning**: Every person learns differently, and our AI adapts to your unique style
-- **Practical Application**: Theory meets practice through real-world simulations
-- **Community Support**: Learn together, grow together through our interactive forum
-- **Continuous Growth**: Track your progress and celebrate achievements
+- [Next.js 14](https://nextjs.org/)
+- [React 18](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Supabase](https://supabase.com/)
+- [OpenAI API](https://openai.com/api/)
 
-## Features
+## 📋 דרישות מערכת
 
-### 🎯 Learning Experience
+- Node.js 18.0.0 ומעלה
+- npm או yarn
+- חשבון Supabase
+- חשבון OpenAI (לסימולטור)
 
-- **Adaptive Learning Paths**
+## ⚙️ התקנה
 
-  - Personalized curriculum
-  - Progress tracking
-  - Achievement system
-  - Skill assessments
-
-- **Interactive Simulations**
-
-  - Real-life scenarios
-  - AI-powered responses
-  - Immediate feedback
-  - Emotional intelligence training
-
-- **Community Learning**
-
-  - Moderated discussions
-  - Peer support
-  - Expert guidance
-  - Knowledge sharing
-
-- **AI Assistant**
-  - 24/7 learning support
-  - Contextual help
-  - Resource recommendations
-  - Progress monitoring
-
-### 💫 Technical Excellence
-
-- Next.js 14 with App Router
-- TypeScript for type safety
-- Tailwind CSS + shadcn/ui for styling
-- Supabase for backend services
-- OpenAI for AI features
-- Real-time capabilities
-- Responsive design
-- RTL support
-- Accessibility focused
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm
-- Git
-- Desire to learn and grow
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/your-username/haderech.git
-   cd haderech
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   pnpm install
-   ```
-
-3. Set up environment variables:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Fill in the required values in `.env.local`
-
-4. Start the development server:
-   ```bash
-   pnpm dev
-   ```
-
-Visit `http://localhost:3000` to begin your learning journey.
-
-## Learning Path
-
-1. **Assessment**
-
-   - Initial skill evaluation
-   - Learning style identification
-   - Goal setting
-   - Path customization
-
-2. **Core Learning**
-
-   - Interactive lessons
-   - Practical exercises
-   - Real-world simulations
-   - Progress tracking
-
-3. **Practice**
-
-   - Scenario simulations
-   - Peer interactions
-   - Feedback sessions
-   - Skill application
-
-4. **Community**
-   - Discussion participation
-   - Knowledge sharing
-   - Peer support
-   - Expert guidance
-
-## Documentation
-
-- [Architecture Overview](ARCHITECTURE.md)
-- [Contributing Guide](CONTRIBUTING.md)
-- [Learning Guide](docs/learning.md)
-- [API Documentation](docs/api.md)
-- [Component Library](docs/components.md)
-
-## Testing
-
-We maintain high quality through comprehensive testing:
+1. שכפל את הפרויקט:
 
 ```bash
-# Unit tests
-pnpm test
-
-# E2E tests
-pnpm test:e2e
-
-# AI response testing
-pnpm test:ai
-
-# Test coverage
-pnpm test:coverage
+git clone https://github.com/your-username/haderech-next.git
+cd haderech-next
 ```
 
-## Contributing
+2. התקן את החבילות הנדרשות:
 
-We welcome contributions to improve education! See our [Contributing Guide](CONTRIBUTING.md) for details.
+```bash
+npm install
+# או
+yarn install
+```
 
-### Development Process
+3. העתק את קובץ הגדרות הסביבה:
 
-1. Fork the repository
-2. Create your feature branch
-3. Add educational value
-4. Test thoroughly
-5. Create a Pull Request
+```bash
+cp .env.example .env.local
+```
 
-## Support
+4. עדכן את משתני הסביבה ב-.env.local עם הפרטים שלך
 
-- [Learning Resources](docs/resources.md)
-- [Community Forum](https://community.haderech.com)
-- [Discord Community](https://discord.gg/haderech)
-- [Help Center](https://help.haderech.com)
+5. הפעל את הפרויקט במצב פיתוח:
 
-## Success Stories
+```bash
+npm run dev
+# או
+yarn dev
+```
 
-Read about how HaDerech has helped people improve their relationships and communication skills in our [Success Stories](docs/success-stories.md).
+## 🔧 הגדרת מסד הנתונים
 
-## License
+1. צור פרויקט חדש ב-Supabase
+2. העתק את ה-SQL מתיקיית `/supabase/migrations` והרץ אותו במסד הנתונים
+3. הגדר את משתני הסביבה המתאימים ב-.env.local
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 🚀 פריסה
 
-## Acknowledgments
+הפרויקט מוכן לפריסה ב-Vercel. פשוט התחבר לחשבון ה-GitHub שלך והגדר את משתני הסביבה הנדרשים.
 
-- Our dedicated learners
-- The amazing teaching community
-- Our technology partners
-- Open source contributors
+## 🧪 בדיקות
 
----
+הפרויקט כולל מספר סוגי בדיקות:
 
-Begin your journey to better relationships today! 🌟
+```bash
+# בדיקות יחידה
+npm run test
+
+# בדיקות אינטגרציה
+npm run test:integration
+
+# בדיקות E2E
+npm run test:e2e
+```
+
+## 📝 רישיון
+
+פרויקט זה מופץ תחת רישיון MIT. ראה קובץ `LICENSE` לפרטים נוספים.
+
+## 👥 תרומה
+
+אנחנו מעודדים תרומות! אנא קרא את `CONTRIBUTING.md` למידע נוסף.
+
+## 📞 תמיכה
+
+- פתח issue ב-GitHub
+- שלח מייל ל-support@haderech.co.il
+- הצטרף לקהילת הדיסקורד שלנו
+
+## 📝 תיעוד
+
+- [תיעוד API](/docs/api.md)
+- [מדריך למפתח](/docs/developer.md)
+- [מדריך לתרומה](/docs/contributing.md)
+
+## 🤝 תרומה
+
+אנחנו מעודדים תרומות! אנא קרא את [מדריך התרומה](/docs/contributing.md) שלנו.
+
+## 📄 רישיון
+
+פרויקט זה מופץ תחת רישיון MIT. ראה את קובץ [LICENSE](LICENSE) למידע נוסף.
+
+## 👥 צוות
+
+- [שם המפתח](https://github.com/username) - מפתח ראשי
+- [שם המפתח](https://github.com/username) - מפתח
+
+## 📞 יצירת קשר
+
+- אתר: [haderech.co.il](https://haderech.co.il)
+- דוא"ל: info@haderech.co.il
+- טוויטר: [@haderech](https://twitter.com/haderech)
+
+## 🙏 תודות
+
+תודה מיוחדת לכל התורמים והשותפים שעזרו להפוך את הפרויקט הזה למציאות.

@@ -1,11 +1,12 @@
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 // Update achievement progress
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -18,7 +19,7 @@ export async function PATCH(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -28,7 +29,7 @@ export async function PATCH(
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -37,7 +38,7 @@ export async function PATCH(
     if (typeof progress !== "number" || progress < 0 || progress > 100) {
       return NextResponse.json(
         { error: "Progress must be a number between 0 and 100" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -58,7 +59,7 @@ export async function PATCH(
       console.error("Error updating achievement:", error);
       return NextResponse.json(
         { error: "שגיאה בעדכון התקדמות ההישג" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -71,7 +72,7 @@ export async function PATCH(
     console.error("Error in PATCH /api/achievements/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

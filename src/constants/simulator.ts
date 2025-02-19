@@ -1,77 +1,120 @@
-import type { SimulationScenario } from "@/types/simulator";
+import type { SimulatorScenario } from "@/types/simulator";
 
-export const EXAMPLE_SCENARIOS: SimulationScenario[] = [
+export const DEFAULT_STRENGTHS = ["אין חוזקות מיוחדות שזוהו"] as const;
+export const DEFAULT_IMPROVEMENTS = [
+  "אין נקודות לשיפור מיוחדות שזוהו",
+] as const;
+export const DEFAULT_TIPS = [
+  "המשך לתרגל ולשפר את המיומנויות הבסיסיות",
+] as const;
+export const DEFAULT_SUGGESTIONS = [
+  "המשך לתרגל ולשפר את המיומנויות הבסיסיות",
+] as const;
+
+export const MOCK_SCENARIOS: SimulatorScenario[] = [
   {
     id: "1",
-    title: "תקשורת זוגית",
-    description: "תרגול תקשורת זוגית אפקטיבית",
+    title: "התמודדות עם לקוח כועס",
+    description: "תרחיש שבו עליך להתמודד עם לקוח שאינו מרוצה מהשירות",
     difficulty: "beginner",
-    category: "communication",
-    initialMessage:
-      "שלום, אני כאן כדי לעזור לך לתרגל תקשורת זוגית. איך אוכל לעזור?",
-    suggestedResponses: [
-      "אני רוצה לתרגל הקשבה פעילה",
-      "איך להביע רגשות בצורה בריאה?",
-      "כיצד להתמודד עם קונפליקטים?",
-    ],
-    learningObjectives: [
-      "פיתוח מיומנויות הקשבה פעילה",
-      "שיפור היכולת להביע רגשות",
-      "למידת טכניקות לפתרון קונפליקטים",
-    ],
-    successCriteria: {
-      minScore: 70,
-      requiredSkills: ["הקשבה פעילה", "אמפתיה", "תקשורת ברורה"],
-      minDuration: 300, // 5 דקות
-      maxDuration: 1800, // 30 דקות
+    category: "שירות לקוחות",
+    initial_message: "אני מאוד מאוכזב מהשירות שקיבלתי!",
+    learning_objectives: ["הקשבה פעילה", "פתרון בעיות", "אמפתיה"],
+    success_criteria: {
+      minScore: 80,
+      requiredSkills: ["אמפתיה", "פתרון בעיות", "תקשורת"],
+      minDuration: 300,
+      maxDuration: 900,
     },
   },
   {
     id: "2",
-    title: "פתרון קונפליקטים",
-    description: "למידה כיצד לפתור מחלוקות בצורה בונה",
+    title: "ניהול משא ומתן על מחיר",
+    description: "תרחיש שבו עליך לנהל משא ומתן עם לקוח על מחיר המוצר",
     difficulty: "intermediate",
-    category: "conflict-resolution",
-    initialMessage: "בואו נתרגל פתרון קונפליקטים. איזה סוג של מצב תרצו לתרגל?",
-    suggestedResponses: [
-      "ויכוח על כספים",
-      "חילוקי דעות על חינוך ילדים",
-      "קונפליקט על זמן איכות",
-    ],
-    learningObjectives: [
-      "זיהוי מקורות הקונפליקט",
-      "פיתוח אסטרטגיות לפתרון בעיות",
-      "שיפור יכולת המשא ומתן",
-    ],
-    successCriteria: {
-      minScore: 75,
-      requiredSkills: ["פתרון בעיות", "משא ומתן", "ניהול כעסים"],
-      minDuration: 600, // 10 דקות
-      maxDuration: 2400, // 40 דקות
+    category: "מכירות",
+    initial_message: "המחיר שלכם גבוה מדי בהשוואה למתחרים",
+    learning_objectives: ["משא ומתן", "הצגת ערך", "שכנוע"],
+    success_criteria: {
+      minScore: 85,
+      requiredSkills: ["משא ומתן", "מכירות", "תקשורת"],
+      minDuration: 400,
+      maxDuration: 1200,
     },
   },
   {
     id: "3",
-    title: "הבעת אמפתיה",
-    description: "פיתוח יכולת אמפתית והבנה רגשית",
+    title: "טיפול בתלונה טכנית",
+    description: "תרחיש שבו עליך לסייע ללקוח עם בעיה טכנית במוצר",
     difficulty: "advanced",
-    category: "empathy",
-    initialMessage: "בואו נעבוד על פיתוח אמפתיה. איך תרצו להתחיל?",
-    suggestedResponses: [
-      "כיצד להבין את נקודת המבט של בן/בת הזוג?",
-      "איך להביע הבנה רגשית?",
-      "תרגול הקשבה אמפתית",
+    category: "תמיכה טכנית",
+    initial_message: "המוצר שלכם לא עובד כמו שצריך",
+    learning_objectives: ["פתרון בעיות טכניות", "הסברה", "סבלנות"],
+    success_criteria: {
+      minScore: 90,
+      requiredSkills: ["ידע טכני", "פתרון בעיות", "תקשורת"],
+      minDuration: 500,
+      maxDuration: 1500,
+    },
+  },
+];
+
+export const EXAMPLE_SCENARIOS: SimulatorScenario[] = [
+  {
+    id: "1",
+    title: "התמודדות עם תלמיד מתוסכל",
+    description: "תרחיש שבו תלמיד מביע תסכול מקושי בהבנת החומר",
+    difficulty: "beginner",
+    category: "classroom-management",
+    initial_message: "אני לא מבין כלום! זה קשה מדי בשבילי...",
+    learning_objectives: [
+      "פיתוח אמפתיה",
+      "זיהוי מקור התסכול",
+      "מתן כלים להתמודדות",
     ],
-    learningObjectives: [
-      "פיתוח יכולת הבנה רגשית",
-      "שיפור היכולת לזהות רגשות",
-      "למידת טכניקות להבעת אמפתיה",
+    success_criteria: {
+      minScore: 70,
+      requiredSkills: ["אמפתיה", "הקשבה פעילה", "פתרון בעיות"],
+      minDuration: 300,
+      maxDuration: 900,
+    },
+  },
+  {
+    id: "2",
+    title: "ניהול דיון כיתתי",
+    description: "תרחיש המדמה ניהול דיון בכיתה על נושא מורכב",
+    difficulty: "intermediate",
+    category: "discussion-facilitation",
+    initial_message: "איך נוכל לדון בנושא הזה בצורה מכבדת?",
+    learning_objectives: [
+      "ניהול זמן אפקטיבי",
+      "עידוד השתתפות",
+      "שמירה על פוקוס",
     ],
-    successCriteria: {
+    success_criteria: {
+      minScore: 75,
+      requiredSkills: ["ניהול דיון", "הנחיית קבוצות", "תקשורת ברורה"],
+      minDuration: 600,
+      maxDuration: 1200,
+    },
+  },
+  {
+    id: "3",
+    title: "התמודדות עם התנהגות מפריעה",
+    description: "תרחיש המדמה התמודדות עם התנהגות מפריעה בכיתה",
+    difficulty: "advanced",
+    category: "behavior-management",
+    initial_message: "התלמידים לא מקשיבים ומפריעים למהלך השיעור",
+    learning_objectives: [
+      "שמירה על סמכות",
+      "הצבת גבולות",
+      "יצירת אווירה חיובית",
+    ],
+    success_criteria: {
       minScore: 80,
-      requiredSkills: ["אמפתיה", "זיהוי רגשות", "תקשורת רגשית"],
-      minDuration: 900, // 15 דקות
-      maxDuration: 3600, // 60 דקות
+      requiredSkills: ["ניהול כיתה", "תקשורת אסרטיבית", "פתרון קונפליקטים"],
+      minDuration: 450,
+      maxDuration: 900,
     },
   },
 ];

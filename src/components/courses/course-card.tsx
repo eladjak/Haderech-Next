@@ -1,5 +1,6 @@
-import { Clock, Users } from "lucide-react";
 import Image from "next/image";
+
+import { Clock, Users } from "lucide-react";
 
 import {
   Card,
@@ -8,18 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import type { Course } from "@/types/courses";
+import type { CourseWithRelations } from "@/types/courses";
 
 interface CourseCardProps {
-  course: Course;
+  course: CourseWithRelations;
 }
 
 export function CourseCard({ course }: CourseCardProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-0">
-        <div className="aspect-video relative">
+        <div className="relative aspect-video">
           <Image
             src={course.thumbnail || "/placeholder.jpg"}
             alt={course.title}
@@ -42,7 +42,7 @@ export function CourseCard({ course }: CourseCardProps) {
           </div>
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>{course.studentsCount} תלמידים</span>
+            <span>{course._count?.students || 0} תלמידים</span>
           </div>
         </div>
       </CardFooter>

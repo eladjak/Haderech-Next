@@ -31,10 +31,7 @@ export function ProfileStats({ stats }: ProfileStatsProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Progress
-            value={completionRate}
-            className="mt-2"
-          />
+          <Progress value={completionRate} className="mt-2" />
         </CardContent>
       </Card>
       <Card>

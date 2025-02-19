@@ -69,7 +69,7 @@ export async function GET(_: Request, { params }: RouteParams) {
             author:users(*)
           )
         )
-      `,
+      `
       )
       .eq("id", params.id)
       .single();
@@ -78,7 +78,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       console.error("Error fetching post:", error);
       return NextResponse.json(
         { error: "Failed to fetch post" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -91,7 +91,7 @@ export async function GET(_: Request, { params }: RouteParams) {
     console.error("Error in GET /api/forum/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -143,7 +143,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (post.author_id !== session.user.id) {
       return NextResponse.json(
         { error: "Not authorized to update this post" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -170,7 +170,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             author:users(*)
           )
         )
-      `,
+      `
       )
       .single();
 
@@ -178,7 +178,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       console.error("Error updating post:", error);
       return NextResponse.json(
         { error: "Failed to update post" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -187,7 +187,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     console.error("Error in PATCH /api/forum/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -231,7 +231,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     if (post.author_id !== session.user.id) {
       return NextResponse.json(
         { error: "Not authorized to delete this post" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -245,7 +245,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       console.error("Error deleting post:", error);
       return NextResponse.json(
         { error: "Failed to delete post" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -254,7 +254,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     console.error("Error in DELETE /api/forum/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

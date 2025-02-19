@@ -276,12 +276,11 @@ const routes = {
 
 ```typescript
 // ייבוא ממוקד
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
+import * as Motion from "framer-motion";
+import { useEffect, useState } from "react";
 // במקום
 import * as React from "react";
-import * as Motion from "framer-motion";
 ```
 
 ## סיכום והמלצות 📝

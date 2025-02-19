@@ -14,8 +14,9 @@
  * ```
  */
 
-import clsx from "clsx";
 import React from "react";
+
+import clsx from "clsx";
 
 type CustomInputProps = {
   /** גודל הקלט */
@@ -54,9 +55,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       id,
       ...props
     },
-    ref,
+    ref
   ) => {
-    const inputId = id || React.useId();
+    const generatedId = React.useId();
+    const inputId = id || generatedId;
 
     const baseStyles =
       "w-full rounded-md border transition-colors focus:outline-none focus:ring-2";
@@ -102,7 +104,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             baseStyles,
             sizeStyles[size],
             stateStyles[state],
-            className,
+            className
           )}
           aria-invalid={state === "error"}
           aria-describedby={
@@ -129,7 +131,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  },
+  }
 );
 
 Input.displayName = "Input";

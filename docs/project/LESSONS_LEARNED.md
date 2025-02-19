@@ -57,15 +57,15 @@ const calculateTotal = (items: Item[]): number => {
 ### 1. מודולריות
 
 ```typescript
-// לפני: קוד מונוליתי
-const app = {
-  // כל הלוגיקה כאן
-};
-
 // אחרי: מודולים נפרדים
 import { auth } from "./auth";
 import { courses } from "./courses";
 import { users } from "./users";
+
+// לפני: קוד מונוליתי
+const app = {
+  // כל הלוגיקה כאן
+};
 ```
 
 ### 2. ניהול מצב
@@ -228,7 +228,7 @@ function calc() {
 function calculateFinalGrade(
   assignments: number[],
   exam: number,
-  weights: Weights,
+  weights: Weights
 ): number {
   // ...
 }

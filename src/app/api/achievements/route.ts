@@ -1,6 +1,7 @@
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 // Achievement definitions
 export const ACHIEVEMENTS = {
@@ -61,7 +62,7 @@ export async function GET() {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -71,7 +72,7 @@ export async function GET() {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -84,7 +85,7 @@ export async function GET() {
         progress,
         completed,
         completed_at
-      `,
+      `
       )
       .eq("user_id", session.user.id);
 
@@ -92,7 +93,7 @@ export async function GET() {
       console.error("Error fetching achievements:", error);
       return NextResponse.json(
         { error: "שגיאה בקבלת ההישגים" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -107,7 +108,7 @@ export async function GET() {
     console.error("Error in GET /api/achievements:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -125,7 +126,7 @@ export async function POST(req: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -135,7 +136,7 @@ export async function POST(req: Request) {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -229,21 +230,21 @@ export async function POST(req: Request) {
         console.error("Error adding achievements:", error);
         return NextResponse.json(
           { error: "שגיאה בהוספת הישגים" },
-          { status: 500 },
+          { status: 500 }
         );
       }
     }
 
     return NextResponse.json({
       newAchievements: newAchievements.map(
-        (id) => ACHIEVEMENTS[id as keyof typeof ACHIEVEMENTS],
+        (id) => ACHIEVEMENTS[id as keyof typeof ACHIEVEMENTS]
       ),
     });
   } catch (error) {
     console.error("Error in POST /api/achievements:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

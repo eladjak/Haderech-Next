@@ -1,4 +1,4 @@
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function useNavigation() {
   const router = useRouter();

@@ -32,7 +32,7 @@ export const SYSTEM_PROMPT_TEMPLATE = `אתה מנחה וירטואלי המתמ
 export function createSystemPrompt(
   scenario: string,
   difficulty: string,
-  goal: string,
+  goal: string
 ): string {
   return SYSTEM_PROMPT_TEMPLATE.replace("{scenario}", scenario)
     .replace("{difficulty}", difficulty)

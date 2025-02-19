@@ -1,20 +1,22 @@
-import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
-import type { Tables } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
+
+import type { Tables } from "@/types/database";
+
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
-  profile: Tables<"profiles"> | null;
+  profile: Tables<"users"> | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (
     email: string,
     password: string,
     username: string,
-    fullName: string,
+    fullName: string
   ) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -23,54 +25,65 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const [profile, setProfile] = useState<Tables<"users"> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for changes on auth state (logged in, signed out, etc.)
+    // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_, session) => {
+    } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", session.user.id)
+            .single();
+
+          setProfile(profile);
+        } else {
+          setProfile(null);
+        }
+
+        setLoading(false);
+      }
+    );
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+
+      if (session?.user) {
+        supabase
+          .from("users")
+          .select("*")
+          .eq("id", session.user.id)
+          .single()
+          .then(({ data }) => {
+            setProfile(data);
+          });
+      }
+
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
-
-  // Fetch user profile when user changes
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    } else {
-      setProfile(null);
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user?.id)
-        .single();
-
-      if (error) throw error;
-      setProfile(data);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -90,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     username: string,
-    fullName: string,
+    fullName: string
   ) => {
     try {
       setError(null);
@@ -111,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (user) {
         // Create profile
-        const { error: profileError } = await supabase.from("profiles").insert({
+        const { error: profileError } = await supabase.from("users").insert({
           id: user.id,
           username,
           full_name: fullName,

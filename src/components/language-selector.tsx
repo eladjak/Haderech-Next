@@ -26,10 +26,7 @@ export function LanguageSelector() {
       </SelectTrigger>
       <SelectContent>
         {languages.map((lang) => (
-          <SelectItem
-            key={lang.code}
-            value={lang.code}
-          >
+          <SelectItem key={lang.code} value={lang.code}>
             {lang.name}
           </SelectItem>
         ))}

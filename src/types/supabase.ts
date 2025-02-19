@@ -1,242 +1,89 @@
-import type { Database as DatabaseTypes } from "./database";
+/**
+ * Supabase Types
+ *
+ * This module provides type definitions for Supabase database tables and extended types.
+ */
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+import type { Course, CourseLesson, CourseRating, User } from "./api";
+import type { Database } from "./database";
+import type { Author, ForumComment, ForumPost } from "./forum";
 
-export interface Database {
-  public: {
-    Tables: {
-      simulator_scenarios: {
-        Row: {
-          id: string;
-          title: string;
-          description: string;
-          difficulty: "beginner" | "intermediate" | "advanced";
-          category: string;
-          initial_message: string;
-          suggested_responses: string[];
-          learning_objectives: string[];
-          success_criteria: Json;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id: string;
-          title: string;
-          description: string;
-          difficulty: "beginner" | "intermediate" | "advanced";
-          category: string;
-          initial_message: string;
-          suggested_responses?: string[];
-          learning_objectives?: string[];
-          success_criteria?: Json;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          description?: string;
-          difficulty?: "beginner" | "intermediate" | "advanced";
-          category?: string;
-          initial_message?: string;
-          suggested_responses?: string[];
-          learning_objectives?: string[];
-          success_criteria?: Json;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      simulator_sessions: {
-        Row: {
-          id: string;
-          user_id: string;
-          scenario_id: string;
-          status: "active" | "completed" | "failed";
-          messages: Json[];
-          feedback: Json;
-          created_at: string;
-          updated_at: string;
-          completed_at: string | null;
-        };
-        Insert: {
-          id: string;
-          user_id: string;
-          scenario_id: string;
-          status?: "active" | "completed" | "failed";
-          messages?: Json[];
-          feedback?: Json;
-          created_at?: string;
-          updated_at?: string;
-          completed_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          scenario_id?: string;
-          status?: "active" | "completed" | "failed";
-          messages?: Json[];
-          feedback?: Json;
-          created_at?: string;
-          updated_at?: string;
-          completed_at?: string | null;
-        };
-      };
-      simulator_results: {
-        Row: {
-          id: string;
-          session_id: string;
-          user_id: string;
-          scenario_id: string;
-          score: number;
-          feedback: Json;
-          duration: number;
-          details: Json;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          session_id: string;
-          user_id: string;
-          scenario_id: string;
-          score: number;
-          feedback?: Json;
-          duration: number;
-          details?: Json;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          session_id?: string;
-          user_id?: string;
-          scenario_id?: string;
-          score?: number;
-          feedback?: Json;
-          duration?: number;
-          details?: Json;
-          created_at?: string;
-        };
-      };
-      simulator_user_stats: {
-        Row: {
-          user_id: string;
-          total_sessions: number;
-          average_score: number;
-          completed_scenarios: string[];
-          time_spent: number;
-          strongest_category: string;
-          weakest_category: string;
-          skills_progress: Json;
-          learning_path: Json;
-          updated_at: string;
-        };
-        Insert: {
-          user_id: string;
-          total_sessions?: number;
-          average_score?: number;
-          completed_scenarios?: string[];
-          time_spent?: number;
-          strongest_category?: string;
-          weakest_category?: string;
-          skills_progress?: Json;
-          learning_path?: Json;
-          updated_at?: string;
-        };
-        Update: {
-          user_id?: string;
-          total_sessions?: number;
-          average_score?: number;
-          completed_scenarios?: string[];
-          time_spent?: number;
-          strongest_category?: string;
-          weakest_category?: string;
-          skills_progress?: Json;
-          learning_path?: Json;
-          updated_at?: string;
-        };
-      };
-      simulator_user_settings: {
-        Row: {
-          user_id: string;
-          difficulty: "beginner" | "intermediate" | "advanced";
-          language: string;
-          feedback_frequency: "always" | "end" | "never";
-          auto_suggestions: boolean;
-          timer: boolean;
-          feedback_detail: "basic" | "detailed";
-          emotional_tracking: boolean;
-          learning_goals: string[];
-          updated_at: string;
-        };
-        Insert: {
-          user_id: string;
-          difficulty?: "beginner" | "intermediate" | "advanced";
-          language?: string;
-          feedback_frequency?: "always" | "end" | "never";
-          auto_suggestions?: boolean;
-          timer?: boolean;
-          feedback_detail?: "basic" | "detailed";
-          emotional_tracking?: boolean;
-          learning_goals?: string[];
-          updated_at?: string;
-        };
-        Update: {
-          user_id?: string;
-          difficulty?: "beginner" | "intermediate" | "advanced";
-          language?: string;
-          feedback_frequency?: "always" | "end" | "never";
-          auto_suggestions?: boolean;
-          timer?: boolean;
-          feedback_detail?: "basic" | "detailed";
-          emotional_tracking?: boolean;
-          learning_goals?: string[];
-          updated_at?: string;
-        };
-      };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+// Base type helpers
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+
+export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Insert"];
+
+export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Update"];
+
+// Extended types
+export type ExtendedForumPost = {
+  id: string;
+  title: string;
+  content: string;
+  author: Author;
+  category: string;
+  tags: string[];
+  views: number;
+  likes: number;
+  comments: ExtendedForumComment[];
+  isLiked?: boolean;
+  isBookmarked?: boolean;
+  replies_count?: number;
+  created_at: string;
+  updated_at: string;
+  solved: boolean;
+  last_activity: string;
+};
+
+export type ExtendedForumComment = {
+  id: string;
+  post_id: string;
+  author: Author;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  replies?: ExtendedForumComment[];
+  isLiked?: boolean;
+};
+
+export type ExtendedCourse = Course & {
+  author: Author;
+  lessons_count: number;
+  students_count: number;
+  ratings?: {
+    average: number;
+    count: number;
   };
-}
+  progress?: {
+    completed: boolean;
+    percent: number;
+    last_viewed?: string;
+  };
+};
 
-export type Tables<T extends keyof DatabaseTypes["public"]["Tables"]> =
-  DatabaseTypes["public"]["Tables"][T]["Row"];
+export type ExtendedLesson = CourseLesson & {
+  course: {
+    id: string;
+    title: string;
+    author_id: string;
+  };
+  progress?: {
+    completed: boolean;
+    last_viewed: string;
+  };
+};
 
-export type TablesInsert<T extends keyof DatabaseTypes["public"]["Tables"]> =
-  DatabaseTypes["public"]["Tables"][T]["Insert"];
-
-export type TablesUpdate<T extends keyof DatabaseTypes["public"]["Tables"]> =
-  DatabaseTypes["public"]["Tables"][T]["Update"];
-
-export type Enums<T extends keyof DatabaseTypes["public"]["Enums"]> =
-  DatabaseTypes["public"]["Enums"][T];
-
-export type Functions<T extends keyof DatabaseTypes["public"]["Functions"]> =
-  DatabaseTypes["public"]["Functions"][T];
-
-export type Views<T extends keyof DatabaseTypes["public"]["Views"]> =
-  DatabaseTypes["public"]["Views"][T];
-
-export type Profile = Tables<"profiles">;
-export type Course = Tables<"courses">;
-export type Lesson = Tables<"lessons">;
-export type ForumPost = Tables<"forum_posts">;
-export type ForumComment = Tables<"forum_comments">;
-export type Notification = Tables<"notifications">;
-
-export type Database = DatabaseTypes;
+// Re-export types
+export type {
+  User,
+  Course,
+  CourseRating,
+  CourseLesson,
+  Author,
+  ForumComment,
+  ForumPost,
+};
+export type { Database };

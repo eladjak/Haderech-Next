@@ -1,26 +1,69 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🏗️ Running pre-commit checks..."
-
 # Run type checking
-echo "📝 Type checking..."
-pnpm type-check || exit 1
+pnpm type-check
 
-# Run strict linting
-echo "🔍 Running strict linting..."
-pnpm lint:strict || exit 1
-
-# Run format check
-echo "💅 Checking formatting..."
-pnpm format:check || exit 1
+# Run linting
+pnpm lint
 
 # Run tests
-echo "🧪 Running tests..."
-pnpm test || exit 1
+pnpm test
 
-# Run staged files checks
-echo "📋 Running staged files checks..."
-pnpm lint-staged || exit 1
+# Run formatting
+pnpm format
 
-echo "✅ All checks passed!" 
+# Run lint-staged
+pnpm lint-staged
+
+echo "🏗️ בודק את הקוד לפני commit..."
+
+# בדיקת טיפוסים
+echo "📝 בודק טיפוסים..."
+pnpm type-check || 
+(
+    echo "❌ בדיקת טיפוסים נכשלה. אנא תקן את השגיאות."
+    false;
+)
+
+# בדיקת לינטינג מחמירה
+echo "🔍 בודק לינטינג..."
+pnpm lint:strict || 
+(
+    echo "❌ בדיקת לינטינג נכשלה. אנא תקן את השגיאות."
+    false;
+)
+
+# בדיקת פורמט
+echo "💅 בודק פורמט..."
+pnpm format:check || 
+(
+    echo "❌ בדיקת פורמט נכשלה. אנא הרץ pnpm format לתיקון."
+    false;
+)
+
+# בדיקות יחידה וכיסוי קוד
+echo "🧪 מריץ בדיקות..."
+pnpm test:coverage || 
+(
+    echo "❌ הבדיקות נכשלו או שכיסוי הקוד נמוך מהמינימום הנדרש."
+    false;
+)
+
+# בדיקת קבצים בשלב
+echo "📋 בודק קבצים בשלב..."
+pnpm lint-staged || 
+(
+    echo "❌ בדיקת הקבצים בשלב נכשלה. אנא תקן את השגיאות."
+    false;
+)
+
+# וולידציה סופית
+echo "🔎 מבצע וולידציה סופית..."
+pnpm validate || 
+(
+    echo "❌ הוולידציה נכשלה. אנא תקן את כל השגיאות לפני הדחיפה."
+    false;
+)
+
+echo "✅ כל הבדיקות עברו בהצלחה! 🎉"

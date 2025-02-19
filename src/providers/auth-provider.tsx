@@ -1,8 +1,10 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
-import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { createBrowserClient } from "@supabase/ssr";
 
 import type { User } from "@supabase/supabase-js";
 
@@ -22,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   useEffect(() => {

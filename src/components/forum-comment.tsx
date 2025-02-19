@@ -10,8 +10,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
-
 import type { ForumComment } from "@/types/api";
 
 interface ForumCommentProps {

@@ -1,5 +1,6 @@
-import { Metadata } from "next";
 import React from "react";
+
+import { Metadata } from "next";
 
 import { LatestForumPosts } from "@/components/latest-forum-posts";
 import { RecommendedCoursesPreview } from "@/components/recommended-courses-preview";
@@ -22,10 +23,7 @@ function HomeActions(): React.ReactElement {
   return (
     <div className="flex justify-center gap-4">
       <Button size="lg">Start Learning</Button>
-      <Button
-        size="lg"
-        variant="outline"
-      >
+      <Button size="lg" variant="outline">
         Explore Courses
       </Button>
     </div>

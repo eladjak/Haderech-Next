@@ -1,8 +1,10 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Play } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { ChevronDown, ChevronUp, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-import type { Course, Section, Lesson } from "@/types/api";
+import type { Course, Lesson, Section } from "@/types/api";
 
 interface CourseContentProps {
   course: Course;
@@ -29,7 +30,7 @@ export function CourseContent({ course, className }: CourseContentProps) {
     setExpandedSections((prev) =>
       prev.includes(sectionId)
         ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId],
+        : [...prev, sectionId]
     );
   };
 
@@ -39,7 +40,7 @@ export function CourseContent({ course, className }: CourseContentProps) {
 
   return (
     <div className={cn("space-y-4", className)}>
-      {course.sections.map((section: Section) => (
+      {course.sections?.map((section: Section) => (
         <Card key={section.id}>
           <CardHeader
             className="cursor-pointer"
@@ -50,10 +51,7 @@ export function CourseContent({ course, className }: CourseContentProps) {
                 <CardTitle>{section.title}</CardTitle>
                 <CardDescription>{section.description}</CardDescription>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-              >
+              <Button variant="ghost" size="icon">
                 {expandedSections.includes(section.id) ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
@@ -91,7 +89,7 @@ export function CourseContent({ course, className }: CourseContentProps) {
                         {String(lesson.duration % 60).padStart(2, "0")}
                       </span>
                       {lesson.isCompleted && (
-                        <span className="text-sm text-success">✓</span>
+                        <span className="text-success text-sm">✓</span>
                       )}
                     </div>
                   </div>

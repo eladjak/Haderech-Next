@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
 import * as React from "react";
+
+import { motion, useScroll, useTransform } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -21,13 +22,13 @@ const Parallax = React.forwardRef<HTMLDivElement, ParallaxProps>(
     const transformY = useTransform(
       scrollYProgress,
       [0, 1],
-      direction === "down" ? [-offset, offset] : [offset, -offset],
+      direction === "down" ? [-offset, offset] : [offset, -offset]
     );
 
     const transformX = useTransform(
       scrollYProgress,
       [0, 1],
-      direction === "right" ? [-offset, offset] : [offset, -offset],
+      direction === "right" ? [-offset, offset] : [offset, -offset]
     );
 
     return (
@@ -51,7 +52,7 @@ const Parallax = React.forwardRef<HTMLDivElement, ParallaxProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 Parallax.displayName = "Parallax";
 

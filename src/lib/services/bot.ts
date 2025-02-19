@@ -1,14 +1,14 @@
-import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
 import { env } from "@/env.mjs";
+import type { Message } from "@/types/simulator";
 
 /**
  * מיפוי של כישורים שהבוט יכול ללמד
  */
 interface Skill {
   description: string;
-  exercises?: string[];
+  exercises: string[];
   challenges?: string[];
 }
 
@@ -40,30 +40,28 @@ class ChatBot implements Bot {
   }
 }
 
+const openai = new OpenAI({
+  apiKey: env.OPENAI_API_KEY,
+});
+
 /**
  * מוסיף יכולות מתקדמות לבוט
  */
 export const enhanceBotCapabilities = (bot: Bot) => {
-  // תקשורת בינאישית
-  bot.addSkill("communication", {
-    description: "שיפור מיומנויות תקשורת בינאישית",
-    exercises: ["תרגול שיחה פתוחה", "הקשבה אקטיבית", "שפת גוף חיובית"],
+  // הוספת כישורים בסיסיים
+  bot.addSkill("תקשורת", {
+    description: "יכולת לנהל שיחה ברורה ואמפתית",
+    exercises: ["תרגול שיחה", "משחקי תפקידים"],
   });
 
-  // ניהול קונפליקטים
-  bot.addSkill("conflict_resolution", {
-    description: "פתרון קונפליקטים בצורה בונה",
-    exercises: [
-      "זיהוי מקור הקונפליקט",
-      "מציאת פתרונות win-win",
-      "תקשורת לא אלימה",
-    ],
+  bot.addSkill("פתרון בעיות", {
+    description: "יכולת לזהות ולפתור בעיות",
+    exercises: ["תרגילי חשיבה", "פתרון תרחישים"],
   });
 
-  // אמפתיה
-  bot.addSkill("empathy", {
-    description: "פיתוח אמפתיה והבנה רגשית",
-    exercises: ["זיהוי רגשות", "הבנת נקודת מבט של האחר", "תגובה אמפתית"],
+  bot.addSkill("למידה", {
+    description: "יכולת ללמוד ולהתפתח",
+    exercises: ["תרגילי למידה", "משימות אתגר"],
   });
 
   return bot;
@@ -81,8 +79,7 @@ export const createBot = (): Bot => {
  * מייצר תגובה מותאמת אישית לקלט המשתמש
  */
 export const generateResponse = (input: string, bot: Bot): string => {
-  // זיהוי נושא השיחה
-  const topic = identifyTopic(input.toLowerCase());
+  const topic = identifyTopic(input);
   const skill = bot.getSkill(topic);
 
   if (skill) {
@@ -96,20 +93,16 @@ export const generateResponse = (input: string, bot: Bot): string => {
  * מייצר תגובת בוט באמצעות OpenAI
  */
 export async function generateBotResponse(
-  input: string,
+  input: string
 ): Promise<{ message: string }> {
   try {
-    const openai = new OpenAI({
-      apiKey: env.OPENAI_API_KEY,
-    });
-
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
           content:
-            "אתה מאמן יחסים אמפתי ותומך. תפקידך לעזור למשתמשים לשפר את מערכות היחסים שלהם באמצעות עצות מעשיות ותובנות.",
+            "אתה עוזר אישי אמפתי ומקצועי. תפקידך לסייע למשתמשים בצורה ברורה ומועילה.",
         },
         {
           role: "user",
@@ -117,30 +110,18 @@ export async function generateBotResponse(
         },
       ],
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 150,
     });
 
-    const message =
-      response.choices[0]?.message?.content || getFallbackResponse();
-
-    // שמירת האינטראקציה במסד הנתונים
-    const supabase = createClient(
-      env.NEXT_PUBLIC_SUPABASE_URL,
-      env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    );
-
-    await supabase.from("chat_history").insert([
-      {
-        user_message: input,
-        bot_response: message,
-        created_at: new Date().toISOString(),
-      },
-    ]);
+    const content = response.choices[0]?.message?.content;
+    const message = content
+      ? content
+      : "מצטער, לא הצלחתי לייצר תשובה. אנא נסה שוב.";
 
     return { message };
   } catch (error) {
     console.error("Error generating bot response:", error);
-    return { message: getFallbackResponse() };
+    throw new Error("שגיאה בייצור תשובת הבוט");
   }
 }
 
@@ -149,11 +130,11 @@ export async function generateBotResponse(
  */
 function getFallbackResponse(): string {
   const fallbackResponses = [
-    "אני מבין את הנקודה שלך. בוא נחשוב יחד על דרכים להתמודד עם זה.",
-    "זה נשמע מאתגר. אשמח לעזור לך למצוא פתרון.",
-    "תודה ששיתפת. בוא ננסה לחשוב על זה מזווית אחרת.",
-    "אני כאן כדי לעזור. בוא נפרק את זה לצעדים קטנים יותר.",
+    "אני לא בטוח שהבנתי. אפשר להסביר שוב?",
+    "סליחה, אני צריך עוד מידע כדי לעזור.",
+    "בוא ננסה לנסח את זה אחרת.",
   ];
+
   return fallbackResponses[
     Math.floor(Math.random() * fallbackResponses.length)
   ];
@@ -161,30 +142,39 @@ function getFallbackResponse(): string {
 
 // פונקציות עזר פנימיות
 function identifyTopic(input: string): string {
-  if (
-    input.includes("תקשורת") ||
-    input.includes("שיחה") ||
-    input.includes("דיבור")
-  ) {
-    return "communication";
+  const topics = {
+    תקשורת: ["לדבר", "להסביר", "לשוחח", "לתקשר", "להקשיב", "להבין", "לשתף"],
+    "פתרון בעיות": [
+      "בעיה",
+      "פתרון",
+      "לפתור",
+      "לתקן",
+      "לשפר",
+      "להתמודד",
+      "אתגר",
+    ],
+    למידה: ["ללמוד", "להבין", "לתרגל", "להתפתח", "להשתפר", "ידע", "מידע"],
+  };
+
+  for (const [topic, keywords] of Object.entries(topics)) {
+    if (keywords.some((keyword) => input.includes(keyword))) {
+      return topic;
+    }
   }
-  if (
-    input.includes("ריב") ||
-    input.includes("מריבה") ||
-    input.includes("קונפליקט")
-  ) {
-    return "conflict_resolution";
-  }
-  if (
-    input.includes("רגש") ||
-    input.includes("הבנה") ||
-    input.includes("אמפתיה")
-  ) {
-    return "empathy";
-  }
-  return "general";
+
+  return "תקשורת"; // ברירת מחדל
 }
 
 function generateSkillBasedResponse(skill: Skill): string {
-  return skill.description;
+  const responses = [
+    `אני יכול לעזור לך עם ${skill.description}.`,
+    `בוא נעבוד יחד על ${skill.description}.`,
+    `אני מומחה ב${skill.description}.`,
+  ];
+
+  const randomIndex = Math.floor(Math.random() * skill.exercises.length);
+  const exercise = skill.exercises[randomIndex];
+  responses.push(`אני ממליץ לנסות את התרגיל הבא: ${exercise}`);
+
+  return responses[Math.floor(Math.random() * responses.length)];
 }

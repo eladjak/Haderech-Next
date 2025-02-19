@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
 
+import Link from "next/link";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
+
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { loginSchema, type LoginSchema } from "@/lib/validations/auth";
-import { Icons } from "@/components/icons";
 
 export function LoginForm(): React.ReactElement {
   const [showPassword, setShowPassword] = useState(false);
@@ -46,10 +48,7 @@ export function LoginForm(): React.ReactElement {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -90,15 +89,9 @@ export function LoginForm(): React.ReactElement {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff
-                        className="h-4 w-4"
-                        aria-hidden="true"
-                      />
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
                     ) : (
-                      <Eye
-                        className="h-4 w-4"
-                        aria-hidden="true"
-                      />
+                      <Eye className="h-4 w-4" aria-hidden="true" />
                     )}
                     <span className="sr-only">
                       {showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
@@ -110,11 +103,7 @@ export function LoginForm(): React.ReactElement {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && (
             <Icons.spinner
               className="ml-2 h-4 w-4 animate-spin"
@@ -125,19 +114,13 @@ export function LoginForm(): React.ReactElement {
         </Button>
       </form>
       <div className="mt-4 text-center text-sm">
-        <Link
-          href="/forgot-password"
-          className="text-primary hover:underline"
-        >
+        <Link href="/forgot-password" className="text-primary hover:underline">
           שכחת סיסמה?
         </Link>
       </div>
       <div className="mt-2 text-center text-sm">
         אין לך חשבון?{" "}
-        <Link
-          href="/register"
-          className="text-primary hover:underline"
-        >
+        <Link href="/register" className="text-primary hover:underline">
           הירשם עכשיו
         </Link>
       </div>

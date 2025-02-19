@@ -3,14 +3,20 @@
  * @description API route handlers for user profile operations
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import type { Database } from "@/types/supabase";
+import { createServerClient } from "@supabase/ssr";
+
+import { Database } from "@/types/supabase";
 
 /**
- * GET handler for retrieving user profile
+ * GET /api/profile
+ *
+ * Fetches the current user's profile data.
+ * Requires authentication.
+ *
+ * @returns User profile data or error response
  */
 export async function GET() {
   try {
@@ -24,44 +30,54 @@ export async function GET() {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not authenticated" },
+        { status: 401 }
+      );
     }
 
     const { data: profile, error } = await supabase
-      .from("profiles")
+      .from("users")
       .select("*")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     if (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error fetching user profile:", error);
       return NextResponse.json(
-        { error: "Failed to fetch profile" },
-        { status: 500 },
+        { error: "Failed to fetch user profile" },
+        { status: 500 }
       );
     }
 
     return NextResponse.json(profile);
   } catch (error) {
-    console.error("Profile GET error:", error);
+    console.error("Error in GET /api/profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 /**
- * PUT handler for updating user profile
+ * PUT /api/profile
+ *
+ * Updates the current user's profile data.
+ * Requires authentication.
+ *
+ * @param request Request containing profile updates
+ * @returns Updated profile data or error response
  */
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient<Database>(
@@ -73,40 +89,43 @@ export async function PUT(request: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not authenticated" },
+        { status: 401 }
+      );
     }
 
     const updates = await request.json();
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", session.user.id);
+    const { data: profile, error } = await supabase
+      .from("users")
+      .update(updates)
+      .eq("id", user.id)
+      .select()
+      .single();
 
     if (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error updating user profile:", error);
       return NextResponse.json(
-        { error: "Failed to update profile" },
-        { status: 500 },
+        { error: "Failed to update user profile" },
+        { status: 500 }
       );
     }
 
-    return NextResponse.json({ message: "Profile updated successfully" });
+    return NextResponse.json(profile);
   } catch (error) {
-    console.error("Profile PUT error:", error);
+    console.error("Error in PUT /api/profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

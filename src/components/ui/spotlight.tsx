@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import * as React from "react";
+
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -50,7 +51,7 @@ const Spotlight = React.forwardRef<HTMLDivElement, SpotlightProps>(
         {children}
       </div>
     );
-  },
+  }
 );
 Spotlight.displayName = "Spotlight";
 

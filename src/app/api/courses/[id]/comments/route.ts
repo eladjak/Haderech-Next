@@ -4,9 +4,10 @@
  * creating, updating, and deleting comments on courses.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 import type { Database } from "@/types/supabase";
 
@@ -52,7 +53,7 @@ export async function GET(_: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const { data: comments, error } = await supabase
@@ -61,7 +62,7 @@ export async function GET(_: Request, { params }: RouteParams) {
         `
         *,
         author:users(id, name, avatar_url)
-      `,
+      `
       )
       .eq("course_id", params.id)
       .order("created_at", { ascending: false });
@@ -70,7 +71,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       console.error("Error fetching comments:", error);
       return NextResponse.json(
         { error: "Failed to fetch comments" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -79,7 +80,7 @@ export async function GET(_: Request, { params }: RouteParams) {
     console.error("Error in GET /api/courses/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -112,7 +113,7 @@ export async function POST(request: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -122,7 +123,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -131,7 +132,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (!content) {
       return NextResponse.json(
         { error: "Content is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -148,7 +149,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         `
         *,
         author:users(id, name, avatar_url)
-      `,
+      `
       )
       .single();
 
@@ -156,7 +157,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       console.error("Error creating comment:", error);
       return NextResponse.json(
         { error: "Failed to create comment" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -165,7 +166,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     console.error("Error in POST /api/courses/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

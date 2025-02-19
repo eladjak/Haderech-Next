@@ -1,101 +1,84 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import React from "react";
+import { describe, expect, it } from "vitest";
 
 import { Forum } from "@/components/forum/Forum";
-
-// Mock data
-const mockPosts = [
-  {
-    id: "1",
-    title: "Test Post Title",
-    content: "Test post content",
-    createdAt: new Date("2024-01-01T00:00:00.000Z"),
-    updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-    userId: "user1",
-    user: {
-      id: "user1",
-      name: "Test User",
-      email: "test@example.com",
-      image: "/test-avatar.jpg",
-    },
-    _count: {
-      comments: 5,
-    },
-  },
-  {
-    id: "2",
-    title: "Another Post",
-    content: "Another post content",
-    createdAt: new Date("2024-01-02T00:00:00.000Z"),
-    updatedAt: new Date("2024-01-02T00:00:00.000Z"),
-    userId: "user2",
-    user: {
-      id: "user2",
-      name: "Another User",
-      email: "another@example.com",
-      image: "/another-avatar.jpg",
-    },
-    _count: {
-      comments: 3,
-    },
-  },
-];
+import { Author, ExtendedForumPost } from "@/types/forum";
 
 describe("Forum", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  const mockAuthor: Author = {
+    id: "1",
+    name: "Test User",
+    username: "testuser",
+    full_name: "Test User",
+    email: "test@example.com",
+    avatar_url: "/images/avatar.jpg",
+    image: null,
+    bio: "Test bio",
+    role: "user",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    last_seen: new Date().toISOString(),
+    points: 100,
+    level: 1,
+    badges: ["test"],
+    achievements: ["test"],
+  };
+
+  const mockPosts: ExtendedForumPost[] = [
+    {
+      id: "1",
+      title: "Test Post",
+      content: "Test content",
+      author_id: mockAuthor.id,
+      author: mockAuthor,
+      category: "test",
+      tags: ["test"],
+      pinned: false,
+      solved: false,
+      likes: 0,
+      views: 0,
+      last_activity: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      isLiked: false,
+      isBookmarked: false,
+      replies_count: 0,
+      last_reply: null,
+      comments: [],
+    },
+  ];
+
+  it("מציג את הפוסטים כשיש פוסטים", () => {
+    render(<Forum posts={mockPosts} />);
+    expect(screen.getByText("Test Post")).toBeInTheDocument();
   });
 
-  it("renders posts correctly", () => {
-    render(<Forum posts={mockPosts} />);
-
-    // Check if posts are displayed
-    expect(screen.getByText("Test Post Title")).toBeInTheDocument();
-    expect(screen.getByText("Another Post")).toBeInTheDocument();
-  });
-
-  it("filters posts by search query", async () => {
-    render(<Forum posts={mockPosts} />);
-
-    // Type in search input
-    const searchInput = screen.getByPlaceholderText(/חיפוש בפורום/i);
-    await userEvent.type(searchInput, "Another");
-
-    // Check if only matching post is displayed
-    expect(screen.getByText("Another Post")).toBeInTheDocument();
-    expect(screen.queryByText("Test Post Title")).not.toBeInTheDocument();
-  });
-
-  it("shows empty state when no posts match search", async () => {
-    render(<Forum posts={mockPosts} />);
-
-    // Type in search input
-    const searchInput = screen.getByPlaceholderText(/חיפוש בפורום/i);
-    await userEvent.type(searchInput, "nonexistent");
-
-    // Check if empty state message is displayed
+  it("מציג הודעה כשאין פוסטים", () => {
+    render(<Forum posts={[]} />);
     expect(
-      screen.getByText(/לא נמצאו פוסטים התואמים את החיפוש/i),
+      screen.getByText("עדיין אין פוסטים בפורום. היה הראשון ליצור פוסט!")
     ).toBeInTheDocument();
   });
 
-  it("shows empty state when no posts exist", () => {
-    render(<Forum posts={[]} />);
-
-    // Check if empty state message is displayed
-    expect(screen.getByText(/אין פוסטים להצגה/i)).toBeInTheDocument();
+  it("מציג מצב טעינה", () => {
+    render(<Forum isLoading={true} />);
+    const loadingStatus = screen.getByTestId("loading-status");
+    expect(loadingStatus).toHaveTextContent("טוען פוסטים...");
   });
 
-  it("applies custom className", () => {
-    const customClass = "test-class";
-    const { container } = render(
-      <Forum
-        posts={mockPosts}
-        className={customClass}
-      />,
-    );
+  it("מציג הודעת שגיאה כאשר יש בעיה בטעינה", () => {
+    const errorMessage = "שגיאה בטעינת הפוסטים";
+    render(<Forum error={errorMessage} />);
+    const errorElement = screen.getByRole("alert");
+    expect(errorElement).toBeInTheDocument();
+    expect(errorElement).toHaveTextContent(errorMessage);
+  });
 
-    expect(container.firstChild).toHaveClass(customClass);
+  it("מספק תיאורים נגישים לכל הפוסטים", () => {
+    render(<Forum posts={mockPosts} />);
+    const articles = screen.getAllByRole("article");
+    articles.forEach((article) => {
+      expect(article).toHaveAttribute("aria-labelledby");
+    });
   });
 });

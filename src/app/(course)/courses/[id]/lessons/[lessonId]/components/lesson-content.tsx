@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
 import type { Lesson } from "@/types/api";
 
 interface LessonContentProps {

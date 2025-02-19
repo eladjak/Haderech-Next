@@ -4,38 +4,19 @@
  * and creating new posts. Includes authentication checks and post validation.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import type { Database } from "@/types/supabase";
+import { createServerClient } from "@supabase/ssr";
+
+import { Database } from "@/types/supabase";
 
 /**
  * GET /api/community
  *
- * Retrieves all community posts with their author information and comment counts.
- * Posts are ordered by creation date, with newest posts first.
+ * Fetches community data including forum posts and user information.
  *
- * @returns {Promise<NextResponse>} JSON response containing an array of posts or error message
- *
- * @example Response
- * ```json
- * [
- *   {
- *     "id": "post1",
- *     "title": "Learning Tips",
- *     "content": "Here are some effective learning strategies...",
- *     "created_at": "2024-01-20T12:00:00Z",
- *     "author": {
- *       "name": "John Doe",
- *       "avatar_url": "https://..."
- *     },
- *     "comments": {
- *       "count": 5
- *     }
- *   }
- * ]
- * ```
+ * @returns Community data or error response
  */
 export async function GET() {
   try {
@@ -49,34 +30,56 @@ export async function GET() {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
-    const { data: posts, error } = await supabase
-      .from("posts")
+    // Fetch forum posts with author information
+    const { data: posts, error: postsError } = await supabase
+      .from("forum_posts")
       .select(
         `
         *,
-        author:profiles(id, name, avatar_url),
-        comments:post_comments(count)
-      `,
+        author:users(id, name, avatar_url),
+        comments (
+          *,
+          author:users(id, name, avatar_url)
+        )
+      `
       )
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching posts:", error);
+    if (postsError) {
+      console.error("Error fetching forum posts:", postsError);
       return NextResponse.json(
-        { error: "שגיאה בקבלת הפוסטים" },
-        { status: 500 },
+        { error: "Failed to fetch forum posts" },
+        { status: 500 }
       );
     }
 
-    return NextResponse.json(posts);
+    // Fetch top contributors
+    const { data: topContributors, error: contributorsError } = await supabase
+      .from("users")
+      .select("id, name, avatar_url, forum_posts")
+      .order("forum_posts", { ascending: false })
+      .limit(5);
+
+    if (contributorsError) {
+      console.error("Error fetching top contributors:", contributorsError);
+      return NextResponse.json(
+        { error: "Failed to fetch top contributors" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      posts,
+      topContributors,
+    });
   } catch (error) {
     console.error("Error in GET /api/community:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -111,7 +114,7 @@ export async function POST(request: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Verify authentication
@@ -121,7 +124,7 @@ export async function POST(request: Request) {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -130,7 +133,7 @@ export async function POST(request: Request) {
     if (!title || !content) {
       return NextResponse.json(
         { error: "Title and content are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -156,7 +159,7 @@ export async function POST(request: Request) {
     console.error("Error in POST /api/community:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

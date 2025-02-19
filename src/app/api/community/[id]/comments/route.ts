@@ -1,6 +1,7 @@
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 // Get comments for a post
 export async function GET(_: Request, { params }: { params: { id: string } }) {
@@ -15,7 +16,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const { data: comments, error } = await supabase
@@ -28,7 +29,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       console.error("Error fetching comments:", error);
       return NextResponse.json(
         { error: "Failed to fetch comments" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -37,7 +38,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     console.error("Error in GET /api/community/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -45,7 +46,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 // Add a new comment
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -58,7 +59,7 @@ export async function POST(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -68,7 +69,7 @@ export async function POST(
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -76,7 +77,7 @@ export async function POST(
     if (!content) {
       return NextResponse.json(
         { error: "Content is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -95,7 +96,7 @@ export async function POST(
       console.error("Error adding comment:", error);
       return NextResponse.json(
         { error: "Failed to add comment" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -104,7 +105,7 @@ export async function POST(
     console.error("Error in POST /api/community/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

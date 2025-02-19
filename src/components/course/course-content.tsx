@@ -3,16 +3,22 @@
  * @description Content component for course pages showing lessons list and content
  */
 
-import { Lock, Play, CheckCircle } from "lucide-react";
+import { CheckCircle, Lock, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import type { CourseWithRelations } from "@/types/courses";
+import type { CourseLesson, CourseProgress } from "@/types/models";
 
+interface ExtendedCourseLesson extends CourseLesson {
+  progress?: CourseProgress[];
+  is_free: boolean;
+}
 
 interface CourseContentProps {
-  course: CourseWithRelations;
+  course: CourseWithRelations & {
+    lessons: ExtendedCourseLesson[];
+  };
   isEnrolled: boolean;
   isInstructor?: boolean;
 }
@@ -23,11 +29,11 @@ export function CourseContent({
   isInstructor,
 }: CourseContentProps) {
   const sortedLessons = (course.lessons || []).sort(
-    (a, b) => a.order - b.order,
+    (a, b) => a.order - b.order
   );
 
   const completedLessons = sortedLessons.filter((lesson) =>
-    lesson.progress?.some((p) => p.completed),
+    lesson.progress?.some((p) => p.completed)
   ).length;
 
   const freeLessons = sortedLessons.filter((lesson) => lesson.is_free).length;
@@ -40,7 +46,7 @@ export function CourseContent({
           {sortedLessons.length} שיעורים •{" "}
           {sortedLessons.reduce(
             (acc, lesson) => acc + (lesson.duration || 0),
-            0,
+            0
           )}{" "}
           דקות • הושלמו {completedLessons} שיעורים • {freeLessons} שיעורים
           חינמיים
@@ -53,10 +59,7 @@ export function CourseContent({
           const isLocked = !isEnrolled && !lesson.is_free && !isInstructor;
 
           return (
-            <Card
-              key={lesson.id}
-              className={isLocked ? "opacity-75" : ""}
-            >
+            <Card key={lesson.id} className={isLocked ? "opacity-75" : ""}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-sm">

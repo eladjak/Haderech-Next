@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useAnimation } from "framer-motion";
 import * as React from "react";
+
+import { motion, useAnimation } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -32,7 +33,7 @@ const Particles = React.forwardRef<HTMLDivElement, ParticlesProps>(
       interactiveForce = 0.5,
       ...props
     },
-    ref,
+    ref
   ) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const particlesRef = React.useRef<(HTMLDivElement | null)[]>([]);
@@ -145,7 +146,7 @@ const Particles = React.forwardRef<HTMLDivElement, ParticlesProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 Particles.displayName = "Particles";
 

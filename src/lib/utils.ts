@@ -5,7 +5,7 @@
  * Includes functions for class name merging, date formatting, text manipulation, etc.
  */
 
-import { type ClassValue, clsx } from "clsx";
+import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**

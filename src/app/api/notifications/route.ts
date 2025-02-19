@@ -3,19 +3,20 @@
  * @description API route handlers for user notifications
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import type { Database } from "@/types/supabase";
+import { createServerClient } from "@supabase/ssr";
+
+import { Database } from "@/types/database";
 
 /**
  * GET handler for retrieving user notifications
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -24,37 +25,33 @@ export async function GET() {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { data: notifications, error } = await supabase
       .from("notifications")
       .select("*")
-      .eq("user_id", session.user.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching notifications:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch notifications" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(notifications);
+    return NextResponse.json({ notifications });
   } catch (error) {
-    console.error("Notifications GET error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }
@@ -74,7 +71,7 @@ export async function POST(request: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
@@ -98,7 +95,7 @@ export async function POST(request: Request) {
       console.error("Error creating notification:", error);
       return NextResponse.json(
         { error: "Failed to create notification" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -107,7 +104,7 @@ export async function POST(request: Request) {
     console.error("Notifications POST error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -115,10 +112,10 @@ export async function POST(request: Request) {
 /**
  * PATCH handler for updating notification status (e.g., marking as read)
  */
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -127,38 +124,128 @@ export async function PATCH(request: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, ...updates } = await request.json();
+    const json = await request.json();
+    const { id } = json;
 
-    const { error } = await supabase
-      .from("notifications")
-      .update(updates)
-      .eq("id", id)
-      .eq("user_id", session.user.id);
-
-    if (error) {
-      console.error("Error updating notification:", error);
+    if (!id) {
       return NextResponse.json(
-        { error: "Failed to update notification" },
-        { status: 500 },
+        { error: "Notification ID is required" },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json({ message: "Notification updated successfully" });
+    // בדיקה שההתראה קיימת ושייכת למשתמש
+    const { data: notification, error: notificationError } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (notificationError || !notification) {
+      return NextResponse.json(
+        { error: "Notification not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    // סימון ההתראה כנקראה
+    const { data: updatedNotification, error: updateError } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ notification: updatedNotification });
   } catch (error) {
-    console.error("Notifications PATCH error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const json = await request.json();
+    const { id } = json;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Notification ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // בדיקה שההתראה קיימת ושייכת למשתמש
+    const { data: notification, error: notificationError } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (notificationError || !notification) {
+      return NextResponse.json(
+        { error: "Notification not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    // מחיקת ההתראה
+    const { error: deleteError } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }

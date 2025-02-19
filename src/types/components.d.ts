@@ -1,5 +1,4 @@
 import { HTMLAttributes } from "react";
-
 import type { Course, ForumPost, Lesson, User } from "./api";
 
 // Button component props

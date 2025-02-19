@@ -3,14 +3,16 @@
  * @description Custom hook for managing authentication state and user session
  */
 
+import { useCallback, useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
-import { useEffect, useCallback, useState } from "react";
+
 import { User } from "@supabase/supabase-js";
-import { createSupabaseClient } from "@/lib/supabase";
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/api";
-import { setUser, setLoading, setError } from "@/store/slices/userSlice";
+import { createSupabaseClient } from "@/lib/supabase";
+import { setError, setLoading, setUser } from "@/store/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 
 interface AuthState {
@@ -126,7 +128,7 @@ export const useAuth = (): UseAuth => {
         });
       }
     },
-    [supabase.auth, router, toast],
+    [supabase.auth, router, toast]
   );
 
   const signUp = useCallback(
@@ -171,7 +173,7 @@ export const useAuth = (): UseAuth => {
         });
       }
     },
-    [supabase.auth, router, toast],
+    [supabase.auth, router, toast]
   );
 
   const signOut = useCallback(async (): Promise<void> => {
@@ -244,7 +246,7 @@ export const useAuth = (): UseAuth => {
         });
       }
     },
-    [supabase.auth, router, toast],
+    [supabase.auth, router, toast]
   );
 
   return {

@@ -1,7 +1,8 @@
-import { createServerClient } from "@supabase/ssr";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/types/supabase";
 
@@ -49,7 +50,7 @@ async function logChatInteraction(
   supabase: SupabaseClient<Database>,
   userId: string,
   input: string,
-  response: string,
+  response: string
 ) {
   const { error } = await supabase.from("chat_interactions").insert({
     user_id: userId,
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -100,7 +101,7 @@ export async function POST(request: Request) {
     if (!message) {
       return NextResponse.json(
         { error: "Message is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -115,7 +116,7 @@ export async function POST(request: Request) {
     console.error("Error in bot API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

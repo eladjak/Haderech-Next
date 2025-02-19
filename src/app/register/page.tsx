@@ -1,5 +1,6 @@
-import { Metadata } from "next";
 import React from "react";
+
+import { Metadata } from "next";
 
 import { RegisterContent } from "@/components/auth/register-content";
 

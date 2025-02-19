@@ -13,14 +13,18 @@ interface UserState {
 const initialState: UserState = {
   user: null,
   preferences: {
-    theme: "light",
+    theme: "system",
     notifications: true,
     language: "he",
+    emailNotifications: true,
   },
   progress: {
     completedLessons: [],
+    completedCourses: [],
+    points: 0,
+    level: 1,
+    badges: [],
     courseProgress: {},
-    achievements: [],
   },
   loading: false,
   error: null,
@@ -35,7 +39,7 @@ export const userSlice = createSlice({
     },
     updatePreferences: (
       state,
-      action: PayloadAction<Partial<UserPreferences>>,
+      action: PayloadAction<Partial<UserPreferences>>
     ) => {
       state.preferences = { ...state.preferences, ...action.payload };
     },
@@ -49,15 +53,10 @@ export const userSlice = createSlice({
     },
     updateCourseProgress: (
       state,
-      action: PayloadAction<{ courseId: string; progress: number }>,
+      action: PayloadAction<{ courseId: string; progress: number }>
     ) => {
       const { courseId, progress } = action.payload;
       state.progress.courseProgress[courseId] = progress;
-    },
-    addAchievement: (state, action: PayloadAction<string>) => {
-      if (!state.progress.achievements.includes(action.payload)) {
-        state.progress.achievements.push(action.payload);
-      }
     },
     updatePoints: (state, action: PayloadAction<number>) => {
       if (state.user) {
@@ -72,24 +71,6 @@ export const userSlice = createSlice({
     addBadge: (state, action: PayloadAction<string>) => {
       if (state.user && !state.user.badges.includes(action.payload)) {
         state.user.badges.push(action.payload);
-      }
-    },
-    completeCourse: (state, action: PayloadAction<string>) => {
-      if (
-        state.user &&
-        !state.user.completed_courses.includes(action.payload)
-      ) {
-        state.user.completed_courses.push(action.payload);
-      }
-    },
-    incrementForumPosts: (state) => {
-      if (state.user) {
-        state.user.forum_posts += 1;
-      }
-    },
-    incrementLoginStreak: (state) => {
-      if (state.user) {
-        state.user.login_streak += 1;
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -107,13 +88,9 @@ export const {
   updateProgress,
   completeLesson,
   updateCourseProgress,
-  addAchievement,
   updatePoints,
   updateLevel,
   addBadge,
-  completeCourse,
-  incrementForumPosts,
-  incrementLoginStreak,
   setLoading,
   setError,
 } = userSlice.actions;

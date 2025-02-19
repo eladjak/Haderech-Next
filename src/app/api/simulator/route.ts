@@ -1,37 +1,44 @@
 import { NextResponse } from "next/server";
+
 import { z } from "zod";
 
+import { getScenarioById } from "@/lib/data/scenarios";
 import {
-  startSimulation,
-  processUserMessage,
+  completeSimulation,
   saveSimulationResults,
+  startSimulation,
 } from "@/lib/services/simulator";
-import type { SimulationState } from "@/types/simulator";
+import type { SimulationState, SimulatorScenario } from "@/types/simulator";
 
 // Validation schemas
 const startSchema = z.object({
   scenarioId: z.string().min(1),
+  userId: z.string().min(1),
+});
+
+const simulatorScenarioSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+  category: z.string(),
+  initial_message: z.string(),
+  suggested_responses: z.array(z.string()),
+  learning_objectives: z.array(z.string()),
+  success_criteria: z.object({
+    minScore: z.number(),
+    requiredSkills: z.array(z.string()),
+    minDuration: z.number(),
+    maxDuration: z.number(),
+  }),
+  created_at: z.string(),
+  updated_at: z.string(),
 });
 
 const messageSchema = z.object({
   state: z.object({
     id: z.string(),
-    scenario: z.object({
-      id: z.string(),
-      title: z.string(),
-      description: z.string(),
-      difficulty: z.enum(["beginner", "intermediate", "advanced"]),
-      category: z.string(),
-      initialMessage: z.string(),
-      suggestedResponses: z.array(z.string()),
-      learningObjectives: z.array(z.string()),
-      successCriteria: z.object({
-        minScore: z.number(),
-        requiredSkills: z.array(z.string()),
-        minDuration: z.number(),
-        maxDuration: z.number(),
-      }),
-    }),
+    scenario: simulatorScenarioSchema,
     messages: z.array(
       z.object({
         id: z.string(),
@@ -39,9 +46,9 @@ const messageSchema = z.object({
         role: z.enum(["user", "assistant", "system"]),
         timestamp: z.string(),
         sender: z.object({
-          id: z.string(),
-          name: z.string(),
-          avatar: z.string().optional(),
+          role: z.enum(["user", "assistant", "system"]),
+          name: z.string().optional(),
+          avatar_url: z.string().optional(),
         }),
         feedback: z
           .object({
@@ -56,27 +63,32 @@ const messageSchema = z.object({
                 strengths: z.array(z.string()),
                 improvements: z.array(z.string()),
                 tips: z.array(z.string()),
+                comments: z.string(),
+                suggestions: z.array(z.string()),
+                overallProgress: z.object({
+                  empathy: z.number(),
+                  clarity: z.number(),
+                  effectiveness: z.number(),
+                  appropriateness: z.number(),
+                }),
               })
               .optional(),
           })
           .optional(),
-      }),
+      })
     ),
     status: z.enum(["active", "completed", "failed"]),
     feedback: z
       .object({
-        score: z.number(),
-        comments: z.array(z.string()),
+        empathy: z.number(),
+        clarity: z.number(),
+        effectiveness: z.number(),
+        appropriateness: z.number(),
+        strengths: z.array(z.string()),
+        improvements: z.array(z.string()),
+        tips: z.array(z.string()),
+        comments: z.string(),
         suggestions: z.array(z.string()),
-        details: z.object({
-          empathy: z.number(),
-          clarity: z.number(),
-          effectiveness: z.number(),
-          appropriateness: z.number(),
-          strengths: z.array(z.string()),
-          improvements: z.array(z.string()),
-          tips: z.array(z.string()),
-        }),
         overallProgress: z.object({
           empathy: z.number(),
           clarity: z.number(),
@@ -85,8 +97,9 @@ const messageSchema = z.object({
         }),
       })
       .optional(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
+    created_at: z.string(),
+    updated_at: z.string(),
+    completed_at: z.string().optional(),
   }),
   message: z.string().min(1).max(1000),
 });
@@ -99,15 +112,23 @@ const messageSchema = z.object({
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { scenarioId } = startSchema.parse(body);
+    const { scenarioId, userId } = startSchema.parse(body);
 
-    const state = await startSimulation(scenarioId);
+    const scenario = await getScenarioById(scenarioId);
+    if (!scenario) {
+      return NextResponse.json(
+        { error: "Scenario not found" },
+        { status: 404 }
+      );
+    }
+
+    const state = await startSimulation(scenario, userId);
     return NextResponse.json(state);
   } catch (error) {
     console.error("Error starting simulation:", error);
     return NextResponse.json(
       { error: "Failed to start simulation" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -122,16 +143,13 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { state, message } = messageSchema.parse(body);
 
-    const newState = await processUserMessage(
-      state as SimulationState,
-      message,
-    );
+    const newState = await completeSimulation(state as SimulationState);
     return NextResponse.json(newState);
   } catch (error) {
     console.error("Error processing message:", error);
     return NextResponse.json(
       { error: "Failed to process message" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -152,7 +170,7 @@ export async function PATCH(req: Request) {
     console.error("Error saving simulation:", error);
     return NextResponse.json(
       { error: "Failed to save simulation" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

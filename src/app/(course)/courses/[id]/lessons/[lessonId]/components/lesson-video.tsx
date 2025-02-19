@@ -1,7 +1,8 @@
 "use client";
 
-import { Play } from "lucide-react";
 import { useState } from "react";
+
+import { Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +38,7 @@ export function LessonVideo({ lesson, className }: LessonVideoProps) {
         <CardDescription>{lesson.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="aspect-video relative">
+        <div className="relative aspect-video">
           {!isPlaying ? (
             <div className="absolute inset-0 flex items-center justify-center bg-black">
               <Button

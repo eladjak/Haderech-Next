@@ -4,11 +4,12 @@
  * and creating new posts. Includes authentication checks and post validation.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import type { Database } from "@/types/supabase";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+
+import type { Database } from "@/types/database";
 
 /**
  * GET /api/forum
@@ -38,45 +39,33 @@ import type { Database } from "@/types/supabase";
  * ```
  */
 export async function GET() {
-  try {
-    const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      },
-    );
+  const supabase = createRouteHandlerClient<Database>({ cookies });
 
+  try {
     const { data: posts, error } = await supabase
       .from("forum_posts")
       .select(
         `
         *,
-        author:profiles(id, name, avatar_url),
-        comments:forum_comments(count)
-      `,
+        author:users(*),
+        category:forum_categories(*),
+        tags:forum_tags(*)
+      `
       )
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching forum posts:", error);
       return NextResponse.json(
-        { error: "שגיאה בקבלת הפוסטים" },
-        { status: 500 },
+        { error: "שגיאה בטעינת הפוסטים" },
+        { status: 500 }
       );
     }
 
     return NextResponse.json(posts);
-  } catch (error) {
-    console.error("Error in GET /api/forum:", error);
+  } catch (_error) {
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "שגיאה בטעינת הפוסטים" },
+      { status: 500 }
     );
   }
 }
@@ -100,63 +89,33 @@ export async function GET() {
  * ```
  */
 export async function POST(request: Request) {
+  const supabase = createRouteHandlerClient<Database>({ cookies });
+
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      },
-    );
+    const json = await request.json();
 
-    // Verify authentication
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
-
-    // Get post data
-    const { title, content } = await request.json();
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: "Title and content are required" },
-        { status: 400 },
-      );
-    }
-
-    // Create post
     const { data: post, error } = await supabase
       .from("forum_posts")
-      .insert({
-        title,
-        content,
-        author_id: session.user.id,
-        created_at: new Date().toISOString(),
-      })
-      .select()
+      .insert(json)
+      .select(
+        `
+        *,
+        author:users(*),
+        category:forum_categories(*),
+        tags:forum_tags(*)
+      `
+      )
       .single();
 
     if (error) {
-      console.error("Error creating forum post:", error);
-      return NextResponse.json({ error: "שגיאה ביצירת פוסט" }, { status: 500 });
+      return NextResponse.json(
+        { error: "שגיאה ביצירת הפוסט" },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json(post, { status: 201 });
-  } catch (error) {
-    console.error("Error in POST /api/forum:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json(post);
+  } catch (_error) {
+    return NextResponse.json({ error: "שגיאה ביצירת הפוסט" }, { status: 500 });
   }
 }

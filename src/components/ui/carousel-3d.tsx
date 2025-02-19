@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
+
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -22,27 +23,21 @@ export function Carousel3D({
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
 
-  const nextSlide = () => {
+  const nextSlide = React.useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % items.length);
-  };
+  }, [items.length]);
 
   const prevSlide = () => {
     setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
   };
 
   React.useEffect(() => {
-    let timer: NodeJS.Timeout | undefined;
+    if (!autoPlay) return;
 
-    if (autoPlay && !isHovered) {
-      timer = setInterval(nextSlide, interval);
-    }
+    const timeoutId = window.setInterval(nextSlide, interval);
 
-    return () => {
-      if (timer) {
-        clearInterval(timer);
-      }
-    };
-  }, [autoPlay, interval, isHovered]);
+    return () => window.clearInterval(timeoutId);
+  }, [interval, nextSlide, autoPlay]);
 
   return (
     <div
@@ -63,7 +58,7 @@ export function Carousel3D({
               key={index}
               className={cn(
                 "absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transform-gpu transition-all duration-500",
-                isActive && "z-10",
+                isActive && "z-10"
               )}
               style={{
                 transform: `
@@ -110,7 +105,7 @@ export function Carousel3D({
               "h-2 w-2 rounded-full transition-all",
               index === activeIndex
                 ? "bg-primary"
-                : "bg-primary/20 hover:bg-primary/40",
+                : "bg-primary/20 hover:bg-primary/40"
             )}
             onClick={() => setActiveIndex(index)}
           >

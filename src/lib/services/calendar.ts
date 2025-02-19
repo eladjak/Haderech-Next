@@ -1,4 +1,3 @@
-import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
 
 interface CalendarEvent {
@@ -33,22 +32,21 @@ interface CalendarEvent {
   };
 }
 
-const calendar = google.calendar("v3");
-
-const oAuth2Client = new OAuth2Client(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI,
+const oAuth2Client = new google.auth.OAuth2(
+  process.env["GOOGLE_CLIENT_ID"],
+  process.env["GOOGLE_CLIENT_SECRET"],
+  process.env["GOOGLE_REDIRECT_URI"]
 );
 
 oAuth2Client.setCredentials({
-  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+  refresh_token: process.env["GOOGLE_REFRESH_TOKEN"] || null,
 });
+
+const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
 
 export const addEventToCalendar = async (event: CalendarEvent) => {
   try {
     const response = await calendar.events.insert({
-      auth: oAuth2Client,
       calendarId: "primary",
       requestBody: event,
       conferenceDataVersion: 1,
@@ -64,7 +62,6 @@ export const addEventToCalendar = async (event: CalendarEvent) => {
 export const getUpcomingEvents = async (maxResults = 10) => {
   try {
     const response = await calendar.events.list({
-      auth: oAuth2Client,
       calendarId: "primary",
       timeMin: new Date().toISOString(),
       maxResults,
@@ -81,11 +78,10 @@ export const getUpcomingEvents = async (maxResults = 10) => {
 
 export const updateEvent = async (
   eventId: string,
-  updates: Partial<CalendarEvent>,
+  updates: Partial<CalendarEvent>
 ) => {
   try {
     const response = await calendar.events.patch({
-      auth: oAuth2Client,
       calendarId: "primary",
       eventId,
       requestBody: updates,
@@ -101,7 +97,6 @@ export const updateEvent = async (
 export const deleteEvent = async (eventId: string) => {
   try {
     await calendar.events.delete({
-      auth: oAuth2Client,
       calendarId: "primary",
       eventId,
     });

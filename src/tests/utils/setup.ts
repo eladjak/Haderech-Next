@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { TextEncoder, TextDecoder } from "util";
+import { TextDecoder, TextEncoder } from "util";
 
 import { configure } from "@testing-library/react";
 
@@ -89,13 +89,13 @@ Object.defineProperty(window, "matchMedia", {
 expect.extend({
   toHaveBeenCalledWithMatch(received: jest.Mock, expected: any) {
     const pass = received.mock.calls.some((call) =>
-      JSON.stringify(call[0]).includes(JSON.stringify(expected)),
+      JSON.stringify(call[0]).includes(JSON.stringify(expected))
     );
     return {
       pass,
       message: () =>
         `expected ${received.getMockName()} to have been called with an object matching ${JSON.stringify(
-          expected,
+          expected
         )}`,
     };
   },

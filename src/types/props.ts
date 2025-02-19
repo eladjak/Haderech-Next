@@ -1,27 +1,98 @@
-import {
-  CourseWithRelations as Course,
+import { Tables } from "@/types/supabase";
+
+import { UserStats } from "./profile";
+
+import type { ForumComment } from "./forum";
+import type {
+  Course,
   CourseComment,
+  CourseProgress,
   CourseRating,
-} from "./courses";
-import { Profile } from "./models";
+  ForumPost,
+  Lesson,
+  Notification,
+  SimulatorResult,
+  SimulatorScenario,
+  SimulatorSession,
+  SimulatorUserSettings,
+  SimulatorUserStats,
+  User,
+} from "./models";
+
+export interface UserStatsProps {
+  stats: UserStats;
+  className?: string;
+}
 
 export interface CourseCardProps {
-  course: Course;
+  course: Tables<"courses"> & {
+    author: Tables<"users">;
+    lessons: { count: number }[];
+  };
+  className?: string;
+}
+
+export interface LessonCardProps {
+  lesson: Tables<"lessons">;
+  progress?: {
+    completed: boolean;
+    last_position?: number;
+    notes?: string;
+  };
+  className?: string;
+}
+
+export interface CommentProps {
+  comment: {
+    id: string;
+    content: string;
+    lesson_id: string;
+    course_id: string;
+    author_id: string;
+    created_at: string;
+    updated_at: string;
+    author: Tables<"users">;
+  };
+  className?: string;
+}
+
+export interface ForumPostProps {
+  post: Tables<"forum_posts"> & {
+    author: Tables<"users">;
+    comments: {
+      id: string;
+      content: string;
+      post_id: string;
+      author_id: string;
+      created_at: string;
+      updated_at: string;
+      author: Tables<"users">;
+    }[];
+  };
+  className?: string;
 }
 
 export interface CourseCommentsProps {
-  comments: CourseComment[] | null;
-  courseId: string;
+  comments: ForumComment[];
+  onAddComment?: (comment: string) => Promise<void>;
+  onAddReply?: (commentId: string, reply: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
 export interface CourseContentProps {
   course: Course;
+  lessons: Lesson[];
   isEnrolled?: boolean;
+  onLessonClick?: (lessonId: string) => void;
+  isLoading?: boolean;
 }
 
 export interface CourseHeaderProps {
   course: Course;
   isEnrolled?: boolean;
+  onEnroll?: () => Promise<void>;
+  onUnenroll?: () => Promise<void>;
+  isLoading?: boolean;
 }
 
 export interface CourseProgressProps {
@@ -30,20 +101,26 @@ export interface CourseProgressProps {
 }
 
 export interface CourseRatingsProps {
-  ratings: CourseRating[] | null;
+  ratings: CourseRating[];
+  onAddRating?: (rating: number, comment: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
 export interface CourseSidebarProps {
   course: Course;
-  isEnrolled: boolean;
+  lessons: Lesson[];
+  currentLessonId?: string;
+  onLessonClick?: (lessonId: string) => void;
+  isLoading?: boolean;
 }
 
-export interface ProfileFormProps {
-  profile: Profile;
+export interface ProfileProps {
+  user: User;
+  isCurrentUser: boolean;
 }
 
 export interface ProfileHeaderProps {
-  profile: Profile;
+  user: User;
   isCurrentUser?: boolean;
 }
 
@@ -59,7 +136,57 @@ export interface ProfileStatsProps {
 }
 
 export interface AvatarProps {
-  src: string | null;
+  src?: string | null;
   alt?: string;
   fallback: string;
+}
+
+export interface UserProfileProps {
+  user: User;
+  isCurrentUser?: boolean;
+  onFollow?: () => Promise<void>;
+  onUnfollow?: () => Promise<void>;
+  isLoading?: boolean;
+}
+
+export interface NotificationListProps {
+  notifications: Notification[];
+  onMarkAsRead?: (notificationId: string) => Promise<void>;
+  onMarkAllAsRead?: () => Promise<void>;
+  isLoading?: boolean;
+}
+
+export interface ForumCommentProps {
+  comment: ForumComment;
+  onLike?: () => Promise<void>;
+  onReply?: (reply: string) => Promise<void>;
+  isLoading?: boolean;
+}
+
+export interface NotificationProps {
+  notification: Notification;
+  onRead: () => Promise<void>;
+}
+
+export interface SimulatorScenarioProps {
+  scenario: SimulatorScenario;
+  onStart: () => Promise<void>;
+}
+
+export interface SimulatorSessionProps {
+  session: SimulatorSession;
+  onMessage: (content: string) => Promise<void>;
+}
+
+export interface SimulatorResultProps {
+  result: SimulatorResult;
+}
+
+export interface SimulatorStatsProps {
+  stats: SimulatorUserStats;
+}
+
+export interface SimulatorSettingsProps {
+  settings: SimulatorUserSettings;
+  onUpdate: (settings: Partial<SimulatorUserSettings>) => Promise<void>;
 }

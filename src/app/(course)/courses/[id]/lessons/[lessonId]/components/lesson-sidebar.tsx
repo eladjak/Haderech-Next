@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Play } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, ChevronUp, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
 import type { Course } from "@/types/api";
 
 interface LessonSidebarProps {
@@ -34,13 +33,17 @@ export function LessonSidebar({
     setExpandedSections((prev) =>
       prev.includes(sectionId)
         ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId],
+        : [...prev, sectionId]
     );
   };
 
   const handleLessonClick = (lessonId: string) => {
     router.push(`/courses/${course.id}/lessons/${lessonId}`);
   };
+
+  if (!course?.sections) {
+    return null;
+  }
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -55,10 +58,7 @@ export function LessonSidebar({
                 <CardTitle>{section.title}</CardTitle>
                 <CardDescription>{section.description}</CardDescription>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-              >
+              <Button variant="ghost" size="icon">
                 {expandedSections.includes(section.id) ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
@@ -75,7 +75,7 @@ export function LessonSidebar({
                     key={lesson.id}
                     className={cn(
                       "flex items-center justify-between rounded-lg border p-4 hover:bg-accent",
-                      lesson.id === currentLessonId && "bg-accent",
+                      lesson.id === currentLessonId && "bg-accent"
                     )}
                   >
                     <div className="flex items-center gap-4">

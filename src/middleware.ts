@@ -3,10 +3,12 @@
  * @description Middleware for handling authentication and protected routes
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { createServerClient } from "@supabase/ssr";
+
 import type { Database } from "@/types/supabase";
+
 import type { CookieOptions } from "@supabase/ssr";
 
 /**
@@ -58,7 +60,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
           });
         },
       },
-    },
+    }
   );
 
   // Refresh session if expired
@@ -68,7 +70,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const isPublicRoute = publicRoutes.some(
     (route) =>
       request.nextUrl.pathname === route ||
-      request.nextUrl.pathname.startsWith("/api/"),
+      request.nextUrl.pathname.startsWith("/api/")
   );
 
   // Get user session

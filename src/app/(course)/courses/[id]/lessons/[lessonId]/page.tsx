@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 
 import { useToast } from "@/components/ui/use-toast";
+import type { Course, Lesson } from "@/types/api";
 
 import { LessonContent } from "./components/lesson-content";
 import { LessonSidebar } from "./components/lesson-sidebar";
 
-import type { Course, Lesson } from "@/types/api";
-
-export default async function LessonPage({
+export default function LessonPage({
   params,
 }: {
   params: { id: string; lessonId: string };

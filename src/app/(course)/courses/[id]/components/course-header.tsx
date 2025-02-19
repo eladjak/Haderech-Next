@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { Clock, Users } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,7 +21,6 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-
 import type { Course } from "@/types/api";
 
 interface CourseHeaderProps {

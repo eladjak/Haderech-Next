@@ -3,98 +3,286 @@
  * @description Tests for specific course API endpoints
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
-import { GET, PATCH, DELETE } from "../courses/[id]/route";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-jest.mock("next/headers");
-jest.mock("@supabase/ssr");
+import { DELETE, GET, PATCH } from "../courses/[id]/route";
 
-describe("Course API", () => {
+vi.mock("next/headers");
+vi.mock("@supabase/auth-helpers-nextjs");
+
+describe("Course API Routes", () => {
+  const mockUser = {
+    id: "test-user-id",
+    email: "test@example.com",
+  };
+
   const mockCourse = {
-    id: "1",
+    id: "test-course-id",
     title: "Test Course",
     description: "Test Description",
-    instructor_id: "1",
-    price: 100,
-    duration: 120,
-    level: "beginner",
-    total_students: 0,
+    author_id: mockUser.id,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
 
   const mockSupabase = {
-    from: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    single: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockImplementation(async () => ({
+        data: mockCourse,
+        error: null,
+      })),
+    })),
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { user: mockUser } },
+        error: null,
+      }),
+    },
   };
 
+  vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
+
   beforeEach(() => {
-    jest.clearAllMocks();
-    (createServerClient as jest.Mock).mockReturnValue(mockSupabase);
-    (cookies as jest.Mock).mockReturnValue({
-      get: jest.fn().mockReturnValue({ value: "mock-cookie" }),
-      set: jest.fn(),
-      delete: jest.fn(),
-    });
+    vi.clearAllMocks();
+    vi.mocked(cookies).mockReturnValue({
+      get: vi.fn().mockReturnValue({ value: "test-token" }),
+    } as any);
   });
 
   describe("GET /api/courses/[id]", () => {
-    it("should return course if found", async () => {
-      mockSupabase.single.mockResolvedValue({ data: mockCourse, error: null });
+    it("מחזיר קורס כאשר הוא נמצא", async () => {
+      mockSupabase.from().select().single.mockResolvedValueOnce({
+        data: mockCourse,
+        error: null,
+      });
 
-      const response = await GET({} as Request, { params: { id: "1" } });
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id"
+      );
+      const response = await GET(request, {
+        params: { id: "test-course-id" },
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data).toEqual(mockCourse);
     });
 
-    it("should return 404 if course not found", async () => {
-      mockSupabase.single.mockResolvedValue({ data: null, error: null });
+    it("מחזיר 404 כאשר הקורס לא נמצא", async () => {
+      mockSupabase.from().select().single.mockResolvedValueOnce({
+        data: null,
+        error: null,
+      });
 
-      const response = await GET({} as Request, { params: { id: "1" } });
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/non-existent"
+      );
+      const response = await GET(request, {
+        params: { id: "non-existent" },
+      });
       const data = await response.json();
 
       expect(response.status).toBe(404);
-      expect(data).toEqual({ error: "Course not found" });
+      expect(data).toEqual({
+        error: "הקורס לא נמצא",
+      });
+    });
+
+    it("מחזיר שגיאת שרת כאשר יש בעיה במסד הנתונים", async () => {
+      mockSupabase
+        .from()
+        .select()
+        .single.mockResolvedValueOnce({
+          data: null,
+          error: { message: "שגיאת מסד נתונים" },
+        });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id"
+      );
+      const response = await GET(request, {
+        params: { id: "test-course-id" },
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data).toEqual({
+        error: "שגיאת מסד נתונים",
+      });
     });
   });
 
   describe("PATCH /api/courses/[id]", () => {
-    it("should update course if authorized", async () => {
-      const updates = { title: "Updated Title" };
-      mockSupabase.single.mockResolvedValue({
-        data: { ...mockCourse, ...updates },
-        error: null,
-      });
+    const updates = {
+      title: "Updated Title",
+      description: "Updated Description",
+    };
 
-      const response = await PATCH(
-        new Request("http://localhost", {
+    it("מעדכן קורס בהצלחה", async () => {
+      mockSupabase.from().update.mockReturnThis();
+      mockSupabase.from().update().select.mockReturnThis();
+      mockSupabase
+        .from()
+        .update()
+        .select()
+        .single.mockResolvedValueOnce({
+          data: { ...mockCourse, ...updates },
+          error: null,
+        });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id",
+        {
           method: "PATCH",
           body: JSON.stringify(updates),
-        }),
-        { params: { id: "1" } },
+        }
       );
+
+      const response = await PATCH(request, {
+        params: { id: "test-course-id" },
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual({ ...mockCourse, ...updates });
+      expect(data).toMatchObject(updates);
+    });
+
+    it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
+      mockSupabase.auth.getSession.mockResolvedValueOnce({
+        data: { session: null },
+        error: null,
+      });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id",
+        {
+          method: "PATCH",
+          body: JSON.stringify(updates),
+        }
+      );
+
+      const response = await PATCH(request, {
+        params: { id: "test-course-id" },
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data).toEqual({
+        error: "נדרשת הרשאת מנהל",
+      });
+    });
+
+    it("מחזיר שגיאה כאשר יש בעיה בעדכון הקורס", async () => {
+      mockSupabase.from().update.mockReturnThis();
+      mockSupabase.from().update().select.mockReturnThis();
+      mockSupabase
+        .from()
+        .update()
+        .select()
+        .single.mockResolvedValueOnce({
+          data: null,
+          error: { message: "שגיאת מסד נתונים" },
+        });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id",
+        {
+          method: "PATCH",
+          body: JSON.stringify(updates),
+        }
+      );
+
+      const response = await PATCH(request, {
+        params: { id: "test-course-id" },
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data).toEqual({
+        error: "שגיאת מסד נתונים",
+      });
     });
   });
 
   describe("DELETE /api/courses/[id]", () => {
-    it("should delete course if authorized", async () => {
-      mockSupabase.delete.mockResolvedValue({ error: null });
+    it("מוחק קורס בהצלחה", async () => {
+      mockSupabase.from().delete.mockResolvedValueOnce({
+        data: null,
+        error: null,
+      });
 
-      const response = await DELETE({} as Request, { params: { id: "1" } });
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id",
+        {
+          method: "DELETE",
+        }
+      );
+
+      const response = await DELETE(request, {
+        params: { id: "test-course-id" },
+      });
+      const data = await response.json();
 
       expect(response.status).toBe(200);
+      expect(data).toEqual({
+        message: "הקורס נמחק בהצלחה",
+      });
+    });
+
+    it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
+      mockSupabase.auth.getSession.mockResolvedValueOnce({
+        data: { session: null },
+        error: null,
+      });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id",
+        {
+          method: "DELETE",
+        }
+      );
+
+      const response = await DELETE(request, {
+        params: { id: "test-course-id" },
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data).toEqual({
+        error: "נדרשת הרשאת מנהל",
+      });
+    });
+
+    it("מחזיר שגיאה כאשר יש בעיה במחיקת הקורס", async () => {
+      mockSupabase.from().delete.mockResolvedValueOnce({
+        data: null,
+        error: { message: "שגיאת מסד נתונים" },
+      });
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/courses/test-course-id",
+        {
+          method: "DELETE",
+        }
+      );
+
+      const response = await DELETE(request, {
+        params: { id: "test-course-id" },
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data).toEqual({
+        error: "שגיאת מסד נתונים",
+      });
     });
   });
 });

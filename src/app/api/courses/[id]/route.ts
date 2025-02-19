@@ -4,9 +4,12 @@
  * updating, and deleting specific courses. Includes authentication and authorization checks.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
+
+import { Database } from "@/types/supabase";
 
 interface UpdateCourseBody {
   title?: string;
@@ -23,11 +26,14 @@ interface UpdateCourseBody {
  *
  * Retrieves a specific course by ID.
  *
- * @param {Request} _ - The request object (unused)
+ * @param {Request} request - The request object
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response with course data or error message
  */
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -39,46 +45,28 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const { data: course, error } = await supabase
       .from("courses")
-      .select(
-        `
-        *,
-        instructor:users!instructor_id(*),
-        lessons(
-          *,
-          progress:lesson_progress(*)
-        ),
-        ratings(
-          *,
-          user:users(*)
-        )
-      `,
-      )
+      .select("*")
       .eq("id", params.id)
       .single();
 
     if (error) {
-      console.error("Error fetching course:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch course" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     if (!course) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    return NextResponse.json(course);
+    return NextResponse.json({ course });
   } catch (error) {
-    console.error("Error in GET /api/courses/[id]:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }
@@ -104,8 +92,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
  * ```
  */
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -118,43 +106,56 @@ export async function PATCH(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const updates: UpdateCourseBody = await request.json();
 
+    // בדיקה אם הקורס קיים
+    const { data: existingCourse, error: fetchError } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("id", params.id)
+      .eq("instructor_id", user.id)
+      .single();
+
+    if (fetchError || !existingCourse) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
+    }
+
     const { data: course, error } = await supabase
       .from("courses")
-      .update(updates)
+      .update({
+        ...existingCourse,
+        ...updates,
+      })
       .eq("id", params.id)
+      .eq("instructor_id", user.id)
       .select()
       .single();
 
     if (error) {
-      console.error("Error updating course:", error);
-      return NextResponse.json(
-        { error: "Failed to update course" },
-        { status: 500 },
-      );
+      console.error("Error in PATCH /api/courses/[id]:", error);
+      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
-    return NextResponse.json(course);
+    if (!course) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
+    }
+
+    return NextResponse.json(course || {}, { status: 200 });
   } catch (error) {
     console.error("Error in PATCH /api/courses/[id]:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
   }
 }
 
@@ -165,13 +166,13 @@ export async function PATCH(
  *
  * @requires Authentication & Authorization (Course Author)
  *
- * @param {Request} _ - The request object (unused)
+ * @param {Request} request - The request object
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response indicating success or error message
  */
 export async function DELETE(
-  _: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const cookieStore = cookies();
@@ -184,41 +185,33 @@ export async function DELETE(
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { error } = await supabase
       .from("courses")
       .delete()
-      .eq("id", params.id);
+      .eq("id", params.id)
+      .eq("instructor_id", user.id);
 
     if (error) {
-      console.error("Error deleting course:", error);
-      return NextResponse.json(
-        { error: "Failed to delete course" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(
-      { message: "Course deleted successfully" },
-      { status: 200 },
-    );
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in DELETE /api/courses/[id]:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }

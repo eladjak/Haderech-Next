@@ -4,14 +4,15 @@
  * This is a server component that fetches the initial profile data server-side.
  */
 
-import { Metadata } from "next";
+import React from "react";
+
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import React from "react";
+
+import { Metadata } from "next";
 
 import { UserProfile } from "@/components/user-profile";
 import { createServerClient } from "@/lib/supabase-server";
-
 import type { User } from "@/types/api";
 
 export const metadata: Metadata = {
@@ -38,7 +39,7 @@ export default async function ProfilePage(): Promise<React.ReactElement> {
       courses:course_enrollments(
         course:courses(*)
       )
-    `,
+    `
     )
     .eq("id", session.user.id)
     .single();

@@ -1,12 +1,12 @@
 "use client";
 
-import { UserPlus, Mail } from "lucide-react";
 import Link from "next/link";
+
+import { Mail, UserPlus } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
 import type { User } from "@/types/api";
 
 interface UserProfileProps {
@@ -40,11 +40,7 @@ export function UserProfile({ user, onFollow, className }: UserProfileProps) {
               עקוב
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-          >
+          <Button variant="outline" size="sm" asChild>
             <Link href={`mailto:${user.email}`}>
               <Mail className="mr-2 h-4 w-4" />
               שלח מייל

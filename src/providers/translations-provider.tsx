@@ -8,6 +8,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { I18nextProvider } from "react-i18next";
 
 import { useTranslations } from "@/hooks/use-translations";

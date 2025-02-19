@@ -1,4 +1,4 @@
-import { formatDistanceToNow, format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
 
 export const formatDate = (date: string | Date) => {

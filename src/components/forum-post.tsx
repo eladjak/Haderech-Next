@@ -1,7 +1,8 @@
 "use client";
 
-import { MessageSquare, ThumbsUp, User } from "lucide-react";
 import Link from "next/link";
+
+import { MessageSquare, ThumbsUp, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
 import type { ForumPost } from "@/types/api";
 
 interface ForumPostProps {
@@ -43,7 +43,7 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
               <span>•</span>
               <span>
                 {new Date("2024-01-01T00:00:00.000Z").toLocaleDateString(
-                  "he-IL",
+                  "he-IL"
                 )}
               </span>
             </div>
@@ -70,12 +70,7 @@ export function ForumPost({ post, onLike, className }: ForumPostProps) {
               <span>{post.likes}</span>
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-            asChild
-          >
+          <Button variant="ghost" size="sm" className="gap-2" asChild>
             <Link href={`/community/${post.id}`}>
               <MessageSquare className="h-4 w-4" />
               <span>{post.comments?.length || 0}</span>

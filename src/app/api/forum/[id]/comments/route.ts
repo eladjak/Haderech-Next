@@ -8,7 +8,6 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { createServerClient } from "@/lib/supabase-server";
-
 import type { Database } from "@/types/supabase";
 
 type Tables = Database["public"]["Tables"];
@@ -77,7 +76,7 @@ export async function GET(_: Request, { params }: RouteParams) {
           *,
           author:users(*)
         )
-      `,
+      `
       )
       .eq("post_id", params.id)
       .is("parent_id", null)
@@ -87,7 +86,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       console.error("Error fetching comments:", error);
       return NextResponse.json(
         { error: "Failed to fetch comments" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -96,7 +95,7 @@ export async function GET(_: Request, { params }: RouteParams) {
     console.error("Error in GET /api/forum/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -145,7 +144,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (!content) {
       return NextResponse.json(
         { error: "Comment content is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -161,7 +160,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       if (!parentComment) {
         return NextResponse.json(
           { error: "Parent comment not found" },
-          { status: 404 },
+          { status: 404 }
         );
       }
     }
@@ -186,7 +185,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           *,
           author:users(*)
         )
-      `,
+      `
       )
       .single();
 
@@ -194,7 +193,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       console.error("Error creating comment:", error);
       return NextResponse.json(
         { error: "Failed to create comment" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -203,7 +202,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     console.error("Error in POST /api/forum/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

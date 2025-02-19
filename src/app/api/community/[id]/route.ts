@@ -4,9 +4,10 @@
  * updating, and deleting specific posts. Includes authentication and authorization checks.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 import type { Database } from "@/types/supabase";
 
@@ -52,7 +53,7 @@ export async function GET(_: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     const { data: post, error } = await supabase
@@ -72,7 +73,7 @@ export async function GET(_: Request, { params }: RouteParams) {
           type,
           user:users(id, name)
         )
-      `,
+      `
       )
       .eq("id", params.id)
       .single();
@@ -81,7 +82,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       console.error("Error fetching post:", error);
       return NextResponse.json(
         { error: "Failed to fetch post" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -94,7 +95,7 @@ export async function GET(_: Request, { params }: RouteParams) {
     console.error("Error in GET /api/community/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -128,7 +129,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -138,7 +139,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -147,7 +148,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (!title || !content) {
       return NextResponse.json(
         { error: "Title and content are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -165,7 +166,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (post.author_id !== session.user.id) {
       return NextResponse.json(
         { error: "Not authorized to update this post" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -181,7 +182,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       console.error("Error updating post:", error);
       return NextResponse.json(
         { error: "Failed to update post" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -190,7 +191,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     console.error("Error in PATCH /api/community/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -216,7 +217,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -226,7 +227,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     if (!session) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -251,7 +252,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       if (!user || user.role !== "admin") {
         return NextResponse.json(
           { error: "Not authorized to delete this post" },
-          { status: 403 },
+          { status: 403 }
         );
       }
     }
@@ -263,7 +264,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       console.error("Error deleting post:", error);
       return NextResponse.json(
         { error: "Failed to delete post" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -272,7 +273,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     console.error("Error in DELETE /api/community/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

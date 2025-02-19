@@ -51,7 +51,7 @@ export function Noise({
 }: NoiseProps): React.ReactElement {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [context, setContext] = React.useState<CanvasRenderingContext2D | null>(
-    null,
+    null
   );
 
   React.useEffect(() => {
@@ -111,10 +111,7 @@ export function Noise({
   }, [context, intensity, size, speed]);
 
   return (
-    <div
-      className={cn("relative overflow-hidden", className)}
-      {...props}
-    >
+    <div className={cn("relative overflow-hidden", className)} {...props}>
       <canvas
         ref={canvasRef}
         className="absolute inset-0 h-full w-full"

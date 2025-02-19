@@ -59,13 +59,13 @@ export const forumSlice = createSlice({
     },
     setCurrentPost: (
       state: ForumState,
-      action: PayloadAction<ForumPost | null>,
+      action: PayloadAction<ForumPost | null>
     ) => {
       state.currentPost = action.payload;
     },
     addComment: (
       state: ForumState,
-      action: PayloadAction<{ postId: string; comment: Comment }>,
+      action: PayloadAction<{ postId: string; comment: Comment }>
     ) => {
       const post = state.posts.find((p) => p.id === action.payload.postId);
       if (post) {
@@ -77,7 +77,7 @@ export const forumSlice = createSlice({
     },
     updateFilters: (
       state: ForumState,
-      action: PayloadAction<Partial<ForumState["filters"]>>,
+      action: PayloadAction<Partial<ForumState["filters"]>>
     ) => {
       state.filters = { ...state.filters, ...action.payload };
     },

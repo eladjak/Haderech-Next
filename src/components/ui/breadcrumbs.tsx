@@ -1,8 +1,10 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import * as React from "react";
+
+import Link from "next/link";
+
+import { ChevronLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -24,7 +26,7 @@ const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(
         aria-label="breadcrumbs"
         className={cn(
           "flex items-center text-sm text-muted-foreground",
-          className,
+          className
         )}
         {...props}
       >
@@ -37,7 +39,7 @@ const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(
                 href={segment.href}
                 className={cn(
                   "transition-colors hover:text-foreground",
-                  isLast && "pointer-events-none font-medium text-foreground",
+                  isLast && "pointer-events-none font-medium text-foreground"
                 )}
                 aria-current={isLast ? "page" : undefined}
               >
@@ -49,7 +51,7 @@ const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(
         })}
       </nav>
     );
-  },
+  }
 );
 Breadcrumbs.displayName = "Breadcrumbs";
 

@@ -15,8 +15,9 @@
 
 "use client";
 
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
+
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/lib/utils";
 
@@ -30,11 +31,11 @@ const Avatar = React.forwardRef<
       ref={ref}
       className={cn(
         "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
-        className,
+        className
       )}
       {...props}
     />
-  ),
+  )
 );
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
@@ -43,20 +44,27 @@ const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image> & {
     src?: string | null | undefined;
+    alt?: string;
+    "data-testid"?: string;
   }
->(({ className, src, ...props }, ref): React.ReactElement | null => {
-  // Only render the image if src is a non-null string
-  if (!src) return null;
-
-  return (
-    <AvatarPrimitive.Image
-      ref={ref}
-      className={cn("aspect-square h-full w-full", className)}
-      src={src}
-      {...props}
-    />
-  );
-});
+>(
+  (
+    { className, src, alt, "data-testid": dataTestId, ...props },
+    ref
+  ): React.ReactElement => {
+    return (
+      <AvatarPrimitive.Image
+        ref={ref}
+        className={cn("aspect-square h-full w-full", className)}
+        src={src || ""}
+        alt={alt}
+        role="img"
+        data-testid={dataTestId}
+        {...props}
+      />
+    );
+  }
+);
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 // Avatar fallback component (shown when image fails to load)
@@ -69,11 +77,12 @@ const AvatarFallback = React.forwardRef<
       ref={ref}
       className={cn(
         "flex h-full w-full items-center justify-center rounded-full bg-muted",
-        className,
+        className
       )}
+      role="img"
       {...props}
     />
-  ),
+  )
 );
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 

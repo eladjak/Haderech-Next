@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
 import React from "react";
 
 import { CreatePost } from "@/components/forum/CreatePost";
 import { Forum } from "@/components/forum/Forum";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "פורום - הדרך",

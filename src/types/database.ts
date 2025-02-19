@@ -9,6 +9,379 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          name: string;
+          full_name: string;
+          username: string;
+          avatar_url: string | null;
+          image: string | null;
+          bio: string | null;
+          role: "user" | "admin" | "instructor";
+          created_at: string;
+          updated_at: string;
+          last_seen: string | null;
+          points: number;
+          level: number;
+          badges: string[];
+          achievements: string[];
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          name?: string;
+          full_name?: string;
+          username: string;
+          avatar_url?: string | null;
+          image?: string | null;
+          bio?: string | null;
+          role?: "user" | "admin" | "instructor";
+          created_at?: string;
+          updated_at?: string;
+          last_seen?: string | null;
+          points?: number;
+          level?: number;
+          badges?: string[];
+          achievements?: string[];
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          name?: string;
+          full_name?: string;
+          username?: string;
+          avatar_url?: string | null;
+          image?: string | null;
+          bio?: string | null;
+          role?: "user" | "admin" | "instructor";
+          created_at?: string;
+          updated_at?: string;
+          last_seen?: string | null;
+          points?: number;
+          level?: number;
+          badges?: string[];
+          achievements?: string[];
+        };
+      };
+      courses: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          image_url: string | null;
+          price: number;
+          level: "beginner" | "intermediate" | "advanced";
+          duration: number;
+          status: "draft" | "published" | "archived";
+          author_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description: string;
+          image_url?: string | null;
+          price: number;
+          level: "beginner" | "intermediate" | "advanced";
+          duration: number;
+          status?: "draft" | "published" | "archived";
+          author_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          image_url?: string | null;
+          price?: number;
+          level?: "beginner" | "intermediate" | "advanced";
+          duration?: number;
+          status?: "draft" | "published" | "archived";
+          author_id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      course_progress: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          completed_lessons: string[];
+          progress: number;
+          last_accessed: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_id: string;
+          completed_lessons?: string[];
+          progress?: number;
+          last_accessed?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_id?: string;
+          completed_lessons?: string[];
+          progress?: number;
+          last_accessed?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      course_ratings: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          rating: number;
+          comment: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_id: string;
+          rating: number;
+          comment: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_id?: string;
+          rating?: number;
+          comment?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      course_comments: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          content: string;
+          parent_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_id: string;
+          content: string;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_id?: string;
+          content?: string;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      forum_posts: {
+        Row: {
+          id: string;
+          title: string;
+          content: string;
+          author_id: string;
+          category_id: string;
+          pinned: boolean;
+          solved: boolean;
+          likes: number;
+          views: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          content: string;
+          author_id: string;
+          category_id: string;
+          pinned?: boolean;
+          solved?: boolean;
+          likes?: number;
+          views?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          content?: string;
+          author_id?: string;
+          category_id?: string;
+          pinned?: boolean;
+          solved?: boolean;
+          likes?: number;
+          views?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      forum_categories: {
+        Row: {
+          id: string;
+          name: string;
+          description: string;
+          slug: string;
+          order: number;
+          icon: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description: string;
+          slug: string;
+          order?: number;
+          icon: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string;
+          slug?: string;
+          order?: number;
+          icon?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      forum_tags: {
+        Row: {
+          id: string;
+          name: string;
+          description: string;
+          slug: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description: string;
+          slug: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string;
+          slug?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      forum_comments: {
+        Row: {
+          id: string;
+          content: string;
+          author_id: string;
+          post_id: string;
+          parent_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          content: string;
+          author_id: string;
+          post_id: string;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          content?: string;
+          author_id?: string;
+          post_id?: string;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      forum_post_tags: {
+        Row: {
+          id: string;
+          post_id: string;
+          tag_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          tag_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          tag_id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          content: string;
+          type: "info" | "success" | "warning" | "error";
+          read: boolean;
+          link: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          content: string;
+          type?: "info" | "success" | "warning" | "error";
+          read?: boolean;
+          link?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          content?: string;
+          type?: "info" | "success" | "warning" | "error";
+          read?: boolean;
+          link?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       simulator_scenarios: {
         Row: {
           id: string;
@@ -20,11 +393,9 @@ export interface Database {
           suggested_responses: string[];
           learning_objectives: string[];
           success_criteria: {
-            minScore: number;
-            requiredSkills: string[];
-            minDuration: number;
-            maxDuration: number;
-          };
+            type: string;
+            value: any;
+          }[];
           created_at: string;
           updated_at: string;
         };
@@ -38,11 +409,9 @@ export interface Database {
           suggested_responses?: string[];
           learning_objectives?: string[];
           success_criteria?: {
-            minScore: number;
-            requiredSkills: string[];
-            minDuration: number;
-            maxDuration: number;
-          };
+            type: string;
+            value: any;
+          }[];
           created_at?: string;
           updated_at?: string;
         };
@@ -56,104 +425,9 @@ export interface Database {
           suggested_responses?: string[];
           learning_objectives?: string[];
           success_criteria?: {
-            minScore: number;
-            requiredSkills: string[];
-            minDuration: number;
-            maxDuration: number;
-          };
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      users: {
-        Row: {
-          id: string;
-          email: string;
-          full_name: string;
-          avatar_url?: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          email: string;
-          full_name: string;
-          avatar_url?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          email?: string;
-          full_name?: string;
-          avatar_url?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      profiles: {
-        Row: {
-          id: string;
-          user_id: string;
-          username: string;
-          full_name: string;
-          avatar_url?: string;
-          bio?: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          username: string;
-          full_name: string;
-          avatar_url?: string;
-          bio?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          username?: string;
-          full_name?: string;
-          avatar_url?: string;
-          bio?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      courses: {
-        Row: {
-          id: string;
-          title: string;
-          description: string;
-          level: string;
-          price: number;
-          duration: number;
-          total_students: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          description: string;
-          level: string;
-          price: number;
-          duration: number;
-          total_students?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          description?: string;
-          level?: string;
-          price?: number;
-          duration?: number;
-          total_students?: number;
+            type: string;
+            value: any;
+          }[];
           created_at?: string;
           updated_at?: string;
         };
@@ -161,287 +435,35 @@ export interface Database {
       lessons: {
         Row: {
           id: string;
-          course_id: string;
           title: string;
-          description: string;
           content: string;
-          duration: number;
+          course_id: string;
           order: number;
+          duration: number;
+          status: "draft" | "published";
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
-          course_id: string;
           title: string;
-          description: string;
           content: string;
-          duration: number;
+          course_id: string;
           order: number;
+          duration: number;
+          status?: "draft" | "published";
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
+          title?: string;
+          content?: string;
           course_id?: string;
-          title?: string;
-          description?: string;
-          content?: string;
-          duration?: number;
           order?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      forum_posts: {
-        Row: {
-          id: string;
-          title: string;
-          content: string;
-          author_id: string;
-          created_at: string;
-          updated_at: string;
-          replies_count: number;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          content: string;
-          author_id: string;
-          created_at?: string;
-          updated_at?: string;
-          replies_count?: number;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          content?: string;
-          author_id?: string;
-          created_at?: string;
-          updated_at?: string;
-          replies_count?: number;
-        };
-      };
-      forum_comments: {
-        Row: {
-          id: string;
-          post_id: string;
-          content: string;
-          author_id: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          post_id: string;
-          content: string;
-          author_id: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          post_id?: string;
-          content?: string;
-          author_id?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      notifications: {
-        Row: {
-          id: string;
-          user_id: string;
-          type: string;
-          title: string;
-          content: string;
-          is_read: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          type: string;
-          title: string;
-          content: string;
-          is_read?: boolean;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          type?: string;
-          title?: string;
-          content?: string;
-          is_read?: boolean;
-          created_at?: string;
-        };
-      };
-      simulator_sessions: {
-        Row: {
-          id: string;
-          user_id: string;
-          scenario_id: string;
-          status: "active" | "completed" | "failed";
-          messages: Json[];
-          feedback?: Json;
-          created_at: string;
-          updated_at: string;
-          completed_at?: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          scenario_id: string;
-          status: "active" | "completed" | "failed";
-          messages?: Json[];
-          feedback?: Json;
-          created_at?: string;
-          updated_at?: string;
-          completed_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          scenario_id?: string;
-          status?: "active" | "completed" | "failed";
-          messages?: Json[];
-          feedback?: Json;
-          created_at?: string;
-          updated_at?: string;
-          completed_at?: string;
-        };
-      };
-      simulator_results: {
-        Row: {
-          id: string;
-          session_id: string;
-          user_id: string;
-          scenario_id: string;
-          score: number;
-          feedback: string[];
-          duration: number;
-          details: {
-            messagesCount: number;
-            averageResponseTime: number;
-            emotionalStates: {
-              mood: "positive" | "neutral" | "negative";
-              interest: number;
-              comfort: number;
-              engagement: number;
-              confidence: number;
-            }[];
-            learningPoints: string[];
-            skillsImproved: string[];
-            overallProgress: {
-              empathy: number;
-              clarity: number;
-              effectiveness: number;
-              appropriateness: number;
-            };
-          };
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          session_id: string;
-          user_id: string;
-          scenario_id: string;
-          score: number;
-          feedback?: string[];
-          duration: number;
-          details?: Json;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          session_id?: string;
-          user_id?: string;
-          scenario_id?: string;
-          score?: number;
-          feedback?: string[];
           duration?: number;
-          details?: Json;
+          status?: "draft" | "published";
           created_at?: string;
-        };
-      };
-      simulator_user_stats: {
-        Row: {
-          user_id: string;
-          total_sessions: number;
-          average_score: number;
-          completed_scenarios: number;
-          time_spent: number;
-          strongest_category?: string;
-          weakest_category?: string;
-          skills_progress: Record<string, number>;
-          learning_path: {
-            completedLevels: number;
-            nextScenarios: string[];
-            recommendedSkills: string[];
-          };
-          updated_at: string;
-        };
-        Insert: {
-          user_id: string;
-          total_sessions?: number;
-          average_score?: number;
-          completed_scenarios?: number;
-          time_spent?: number;
-          strongest_category?: string;
-          weakest_category?: string;
-          skills_progress?: Record<string, number>;
-          learning_path?: Json;
-          updated_at?: string;
-        };
-        Update: {
-          user_id?: string;
-          total_sessions?: number;
-          average_score?: number;
-          completed_scenarios?: number;
-          time_spent?: number;
-          strongest_category?: string;
-          weakest_category?: string;
-          skills_progress?: Record<string, number>;
-          learning_path?: Json;
-          updated_at?: string;
-        };
-      };
-      simulator_user_settings: {
-        Row: {
-          user_id: string;
-          difficulty: "beginner" | "intermediate" | "advanced";
-          language: string;
-          feedback_frequency: "always" | "end" | "never";
-          auto_suggestions: boolean;
-          timer: boolean;
-          feedback_detail: "basic" | "detailed" | "comprehensive";
-          emotional_tracking: boolean;
-          learning_goals: string[];
-          updated_at: string;
-        };
-        Insert: {
-          user_id: string;
-          difficulty?: "beginner" | "intermediate" | "advanced";
-          language?: string;
-          feedback_frequency?: "always" | "end" | "never";
-          auto_suggestions?: boolean;
-          timer?: boolean;
-          feedback_detail?: "basic" | "detailed" | "comprehensive";
-          emotional_tracking?: boolean;
-          learning_goals?: string[];
-          updated_at?: string;
-        };
-        Update: {
-          user_id?: string;
-          difficulty?: "beginner" | "intermediate" | "advanced";
-          language?: string;
-          feedback_frequency?: "always" | "end" | "never";
-          auto_suggestions?: boolean;
-          timer?: boolean;
-          feedback_detail?: "basic" | "detailed" | "comprehensive";
-          emotional_tracking?: boolean;
-          learning_goals?: string[];
           updated_at?: string;
         };
       };
@@ -455,21 +477,22 @@ export interface Database {
     Enums: {
       [_ in never]: never;
     };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
   };
 }
 
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
-export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Insert"];
-export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Update"];
-export type Enums<T extends keyof Database["public"]["Enums"]> =
-  Database["public"]["Enums"][T];
-export type Functions<T extends keyof Database["public"]["Functions"]> =
-  Database["public"]["Functions"][T];
-export type Views<T extends keyof Database["public"]["Views"]> =
-  Database["public"]["Views"][T];
+
+export type DatabaseUser = Tables<"users">;
+export type DatabaseCourse = Tables<"courses">;
+export type DatabaseCourseProgress = Tables<"course_progress">;
+export type DatabaseCourseRating = Tables<"course_ratings">;
+export type DatabaseCourseComment = Tables<"course_comments">;
+export type DatabaseForumPost = Tables<"forum_posts">;
+export type DatabaseForumCategory = Tables<"forum_categories">;
+export type DatabaseForumTag = Tables<"forum_tags">;
+export type DatabaseForumComment = Tables<"forum_comments">;
+export type DatabasePostTag = Tables<"forum_post_tags">;
+export type DatabaseNotification = Tables<"notifications">;
+export type DatabaseSimulatorScenario = Tables<"simulator_scenarios">;
+export type DatabaseLesson = Tables<"lessons">;

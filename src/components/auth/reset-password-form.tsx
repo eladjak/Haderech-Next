@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import Link from "next/link";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,7 +23,6 @@ import {
   resetPasswordSchema,
   type ResetPasswordSchema,
 } from "@/lib/validations/auth";
-import { Icons } from "@/components/icons";
 
 export function ResetPasswordForm(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,10 +48,7 @@ export function ResetPasswordForm(): React.ReactElement {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -68,11 +67,7 @@ export function ResetPasswordForm(): React.ReactElement {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && (
             <Icons.spinner
               className="ml-2 h-4 w-4 animate-spin"
@@ -83,10 +78,7 @@ export function ResetPasswordForm(): React.ReactElement {
         </Button>
       </form>
       <div className="mt-4 text-center text-sm">
-        <Link
-          href="/login"
-          className="text-primary hover:underline"
-        >
+        <Link href="/login" className="text-primary hover:underline">
           חזרה להתחברות
         </Link>
       </div>

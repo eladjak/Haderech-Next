@@ -3,9 +3,10 @@
  * @description API routes for managing course enrollments. Provides endpoints for enrolling in and unenrolling from courses.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 import type { Database } from "@/types/supabase";
 
@@ -42,7 +43,7 @@ export async function POST(_: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Check authentication
@@ -50,10 +51,7 @@ export async function POST(_: Request, { params }: RouteParams) {
       data: { session },
     } = await supabase.auth.getSession();
     if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
     }
 
     // Check if course exists
@@ -64,7 +62,7 @@ export async function POST(_: Request, { params }: RouteParams) {
       .single();
 
     if (courseError || !course) {
-      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
     }
 
     // Check if already enrolled
@@ -77,8 +75,8 @@ export async function POST(_: Request, { params }: RouteParams) {
 
     if (enrollment) {
       return NextResponse.json(
-        { error: "Already enrolled in this course" },
-        { status: 400 },
+        { error: "אתה כבר רשום לקורס זה" },
+        { status: 400 }
       );
     }
 
@@ -94,21 +92,16 @@ export async function POST(_: Request, { params }: RouteParams) {
 
     if (createError) {
       console.error("Error creating enrollment:", createError);
-      return NextResponse.json(
-        { error: "Failed to enroll in course" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
-    return NextResponse.json({
-      message: `Successfully enrolled in ${course.title}`,
-    });
+    return NextResponse.json(
+      { message: "נרשמת לקורס בהצלחה" },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error in POST /api/courses/[id]/enroll:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }
 
@@ -135,7 +128,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Verify authentication
@@ -143,7 +136,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       data: { session },
     } = await supabase.auth.getSession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
     }
 
     // Delete enrollment
@@ -155,20 +148,15 @@ export async function DELETE(_: Request, { params }: RouteParams) {
 
     if (error) {
       console.error("Error deleting enrollment:", error);
-      return NextResponse.json(
-        { error: "Failed to delete enrollment" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
-    return NextResponse.json({
-      message: "Successfully unenrolled from course",
-    });
+    return NextResponse.json(
+      { message: "ההרשמה לקורס בוטלה בהצלחה" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Enrollment DELETE error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }

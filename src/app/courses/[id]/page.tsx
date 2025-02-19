@@ -3,10 +3,12 @@
  * @description Course details page component
  */
 
-import { Metadata } from "next";
+import React from "react";
+
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import React from "react";
+
+import { Metadata } from "next";
 
 import { CourseComments } from "@/components/course/course-comments";
 import { CourseContent } from "@/components/course/course-content";
@@ -15,7 +17,6 @@ import { CourseProgress } from "@/components/course/course-progress";
 import { CourseRatings } from "@/components/course/course-ratings";
 import { CourseSidebar } from "@/components/course/course-sidebar";
 import { createServerClient } from "@/lib/supabase-server";
-
 import type { CourseWithRelations } from "@/types/courses";
 
 interface RouteParams {
@@ -75,7 +76,7 @@ export default async function CoursePage({
         *,
         user:users(*)
       )
-    `,
+    `
     )
     .eq("id", params.id)
     .single();
@@ -105,8 +106,8 @@ export default async function CoursePage({
       completedLessons =
         typedCourse.lessons?.filter((lesson) =>
           lesson.progress?.some(
-            (p) => p.user_id === session.user.id && p.completed,
-          ),
+            (p) => p.user_id === session.user.id && p.completed
+          )
         ).length || 0;
 
       progress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
@@ -117,14 +118,8 @@ export default async function CoursePage({
     <div className="container py-8">
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
-          <CourseHeader
-            course={typedCourse}
-            isEnrolled={isEnrolled}
-          />
-          <CourseContent
-            course={typedCourse}
-            isEnrolled={isEnrolled}
-          />
+          <CourseHeader course={typedCourse} isEnrolled={isEnrolled} />
+          <CourseContent course={typedCourse} isEnrolled={isEnrolled} />
           <CourseRatings course={typedCourse} />
           <CourseComments
             comments={typedCourse.comments}

@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -143,10 +145,7 @@ export function CourseComments({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="content"
@@ -164,10 +163,7 @@ export function CourseComments({
                 )}
               />
               <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                >
+                <Button type="submit" disabled={isLoading}>
                   {isLoading ? "שולח..." : "שלח תגובה"}
                 </Button>
               </div>
@@ -180,10 +176,7 @@ export function CourseComments({
           <Card key={comment.id}>
             <CardHeader className="flex flex-row items-start gap-4 space-y-0">
               <Avatar>
-                <AvatarImage
-                  src={comment.user.image}
-                  alt={comment.user.name}
-                />
+                <AvatarImage src={comment.user.image} alt={comment.user.name} />
                 <AvatarFallback>
                   {comment.user.name
                     .split(" ")

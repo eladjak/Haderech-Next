@@ -1,7 +1,8 @@
 "use client";
 
-import { X, Minimize2, Maximize2, Send } from "lucide-react";
 import React from "react";
+
+import { Maximize2, Minimize2, Send, X } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -81,7 +82,7 @@ export function ChatbotWindow({
         "fixed bottom-4 left-4 w-[400px] transition-all duration-200",
         isMinimized && "h-[60px]",
         !isMinimized && "h-[600px]",
-        className,
+        className
       )}
     >
       {/* Header */}
@@ -99,11 +100,7 @@ export function ChatbotWindow({
               <Minimize2 className="h-4 w-4" />
             )}
           </Button>
-          <Button
-            variant="ghost"
-            className="h-8 w-8 p-0"
-            onClick={onClose}
-          >
+          <Button variant="ghost" className="h-8 w-8 p-0" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -119,7 +116,7 @@ export function ChatbotWindow({
                   key={message.id}
                   className={cn(
                     "flex gap-3",
-                    message.sender === "user" && "flex-row-reverse",
+                    message.sender === "user" && "flex-row-reverse"
                   )}
                 >
                   <Avatar>
@@ -137,7 +134,7 @@ export function ChatbotWindow({
                       "rounded-lg p-3",
                       message.sender === "user"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted",
+                        : "bg-muted"
                     )}
                   >
                     <p className="text-sm">{message.content}</p>

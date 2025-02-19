@@ -1,6 +1,7 @@
-import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
+import { Star } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +12,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
 import type { Course } from "@/types/api";
 
 interface CourseCardProps {
@@ -29,7 +29,7 @@ export function CourseCard({ course, className }: CourseCardProps) {
   return (
     <Card className={className}>
       <CardHeader className="p-0">
-        <div className="aspect-video relative w-full overflow-hidden rounded-t-lg">
+        <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
           <Image
             src={course.image_url || "/placeholder.png"}
             alt={course.title}
@@ -75,10 +75,7 @@ export function CourseCard({ course, className }: CourseCardProps) {
         )}
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button
-          className="w-full"
-          asChild
-        >
+        <Button className="w-full" asChild>
           <Link href={`/courses/${course.id}`}>
             {course.price === 0 ? "התחל ללמוד" : `הירשם ב-${course.price}₪`}
           </Link>

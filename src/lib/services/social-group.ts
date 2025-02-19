@@ -1,36 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 
-interface SocialGroup {
-  id: string;
-  name: string;
-  description: string;
-  members: string[];
-  activities: Activity[];
-  created_at: string;
-  updated_at: string;
+import type { Activity } from "@/types/social";
+import type { Database, SocialGroup } from "@/types/supabase";
+
+if (
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+) {
+  throw new Error("Missing Supabase environment variables");
 }
 
-interface Activity {
-  id: string;
-  title: string;
-  description: string;
-  type: "meeting" | "workshop" | "social" | "other";
-  date: string;
-  location?: string;
-  max_participants?: number;
-  participants: string[];
-  created_at: string;
-}
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+const supabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 export const createSocialGroup = async (
   name: string,
   description: string,
-  creatorId: string,
+  creatorId: string
 ): Promise<SocialGroup> => {
   try {
     const { data: group, error } = await supabase
@@ -47,6 +35,8 @@ export const createSocialGroup = async (
       .single();
 
     if (error) throw error;
+    if (!group) throw new Error("Failed to create social group");
+
     return group;
   } catch (error) {
     console.error("Error creating social group:", error);
@@ -56,31 +46,34 @@ export const createSocialGroup = async (
 
 export const addMemberToGroup = async (
   groupId: string,
-  userId: string,
+  userId: string
 ): Promise<SocialGroup> => {
   try {
-    // Get current group members
-    const { data: group } = await supabase
+    const { data: group, error: fetchError } = await supabase
       .from("social_groups")
-      .select("*")
+      .select()
       .eq("id", groupId)
       .single();
 
+    if (fetchError) throw fetchError;
     if (!group) throw new Error("קבוצה לא נמצאה");
 
+    const currentMembers = group.members ?? [];
     // Add member if not already in group
-    if (!group.members.includes(userId)) {
-      const { data: updatedGroup, error } = await supabase
+    if (!currentMembers.includes(userId)) {
+      const { data: updatedGroup, error: updateError } = await supabase
         .from("social_groups")
         .update({
-          members: [...group.members, userId],
+          members: [...currentMembers, userId],
           updated_at: new Date().toISOString(),
         })
         .eq("id", groupId)
         .select()
         .single();
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+      if (!updatedGroup) throw new Error("Failed to update group");
+
       return updatedGroup;
     }
 
@@ -93,35 +86,39 @@ export const addMemberToGroup = async (
 
 export const addActivityToGroup = async (
   groupId: string,
-  activity: Omit<Activity, "id" | "created_at">,
+  activity: Omit<Activity, "id" | "created_at">
 ): Promise<SocialGroup> => {
   try {
-    // Get current group activities
-    const { data: group } = await supabase
+    const { data: group, error: fetchError } = await supabase
       .from("social_groups")
-      .select("activities")
+      .select()
       .eq("id", groupId)
       .single();
 
+    if (fetchError) throw fetchError;
     if (!group) throw new Error("קבוצה לא נמצאה");
 
-    const newActivity = {
+    const newActivity: Activity = {
       ...activity,
       id: crypto.randomUUID(),
       created_at: new Date().toISOString(),
     };
 
-    const { data: updatedGroup, error } = await supabase
+    const currentActivities = group.activities ?? [];
+
+    const { data: updatedGroup, error: updateError } = await supabase
       .from("social_groups")
       .update({
-        activities: [...group.activities, newActivity],
+        activities: [...currentActivities, newActivity],
         updated_at: new Date().toISOString(),
       })
       .eq("id", groupId)
       .select()
       .single();
 
-    if (error) throw error;
+    if (updateError) throw updateError;
+    if (!updatedGroup) throw new Error("Failed to update group");
+
     return updatedGroup;
   } catch (error) {
     console.error("Error adding activity to group:", error);
@@ -130,17 +127,19 @@ export const addActivityToGroup = async (
 };
 
 export const getGroupActivities = async (
-  groupId: string,
+  groupId: string
 ): Promise<Activity[]> => {
   try {
-    const { data: group } = await supabase
+    const { data: group, error } = await supabase
       .from("social_groups")
-      .select("activities")
+      .select()
       .eq("id", groupId)
       .single();
 
+    if (error) throw error;
     if (!group) throw new Error("קבוצה לא נמצאה");
-    return group.activities;
+
+    return group.activities ?? [];
   } catch (error) {
     console.error("Error fetching group activities:", error);
     throw new Error("שגיאה בטעינת פעילויות הקבוצה");
@@ -150,51 +149,60 @@ export const getGroupActivities = async (
 export const joinActivity = async (
   groupId: string,
   activityId: string,
-  userId: string,
+  userId: string
 ): Promise<Activity> => {
   try {
-    const { data: group } = await supabase
+    const { data: group, error: fetchError } = await supabase
       .from("social_groups")
-      .select("activities")
+      .select()
       .eq("id", groupId)
       .single();
 
+    if (fetchError) throw fetchError;
     if (!group) throw new Error("קבוצה לא נמצאה");
 
-    const activityIndex = group.activities.findIndex(
-      (a: Activity) => a.id === activityId,
+    const activities = group.activities ?? [];
+    const activity = activities.find(
+      (act: Activity): act is Activity => act.id === activityId
     );
-    if (activityIndex === -1) throw new Error("פעילות לא נמצאה");
 
-    const activity = group.activities[activityIndex];
+    if (!activity) throw new Error("פעילות לא נמצאה");
+
+    const currentParticipants = activity.participants ?? [];
 
     // Check if user already joined
-    if (activity.participants.includes(userId)) {
+    if (currentParticipants.includes(userId)) {
       return activity;
     }
 
     // Check max participants
     if (
       activity.max_participants &&
-      activity.participants.length >= activity.max_participants
+      currentParticipants.length >= activity.max_participants
     ) {
       throw new Error("הפעילות מלאה");
     }
 
     // Add user to participants
-    activity.participants.push(userId);
-    group.activities[activityIndex] = activity;
+    const updatedActivity: Activity = {
+      ...activity,
+      participants: [...currentParticipants, userId],
+    };
 
-    const { error } = await supabase
+    const updatedActivities = activities.map((act: Activity) =>
+      act.id === activityId ? updatedActivity : act
+    );
+
+    const { error: updateError } = await supabase
       .from("social_groups")
       .update({
-        activities: group.activities,
+        activities: updatedActivities,
         updated_at: new Date().toISOString(),
       })
       .eq("id", groupId);
 
-    if (error) throw error;
-    return activity;
+    if (updateError) throw updateError;
+    return updatedActivity;
   } catch (error) {
     console.error("Error joining activity:", error);
     throw new Error("שגיאה בהצטרפות לפעילות");

@@ -29,16 +29,8 @@ export function ReferralManagement({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2">
-          <Input
-            value={referralCode}
-            readOnly
-            className="font-mono"
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onShare}
-          >
+          <Input value={referralCode} readOnly className="font-mono" />
+          <Button variant="outline" size="icon" onClick={onShare}>
             <Share className="h-4 w-4" />
             <span className="sr-only">שתף קוד הזמנה</span>
           </Button>

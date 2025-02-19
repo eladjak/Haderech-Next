@@ -8,21 +8,27 @@
 
 ```sql
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
   email TEXT UNIQUE NOT NULL,
-  full_name TEXT NOT NULL,
+  name TEXT,
+  full_name TEXT,
+  username TEXT UNIQUE,
   avatar_url TEXT,
+  image TEXT,
   bio TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  role TEXT DEFAULT 'user',
-  referral_code TEXT UNIQUE,
-  points INTEGER DEFAULT 0
+  role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'instructor')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  last_seen TIMESTAMP WITH TIME ZONE,
+  points INTEGER DEFAULT 0,
+  level INTEGER DEFAULT 1,
+  badges TEXT[] DEFAULT '{}',
+  achievements TEXT[] DEFAULT '{}'
 );
 
 -- אינדקסים
+CREATE INDEX users_username_idx ON users(username);
 CREATE INDEX users_email_idx ON users(email);
-CREATE INDEX users_role_idx ON users(role);
 ```
 
 ### profiles
@@ -53,20 +59,20 @@ CREATE INDEX profiles_user_id_idx ON profiles(user_id);
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
-  description TEXT,
+  description TEXT NOT NULL,
   image_url TEXT,
-  price DECIMAL(10,2),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  author_id UUID REFERENCES users(id),
-  published BOOLEAN DEFAULT false,
-  level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced'))
+  price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced')),
+  duration INTEGER NOT NULL,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
+  author_id UUID REFERENCES users(id) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 -- אינדקסים
 CREATE INDEX courses_author_id_idx ON courses(author_id);
-CREATE INDEX courses_level_idx ON courses(level);
-CREATE INDEX courses_published_idx ON courses(published);
+CREATE INDEX courses_status_idx ON courses(status);
 ```
 
 ### lessons
@@ -76,20 +82,74 @@ CREATE INDEX courses_published_idx ON courses(published);
 ```sql
 CREATE TABLE lessons (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  course_id UUID REFERENCES courses(id),
   title TEXT NOT NULL,
-  content TEXT,
-  video_url TEXT,
-  duration INTEGER,
-  order INTEGER NOT NULL,
-  is_free BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  content TEXT NOT NULL,
+  course_id UUID REFERENCES courses(id) NOT NULL,
+  order_number INTEGER NOT NULL,
+  duration INTEGER NOT NULL,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 -- אינדקסים
 CREATE INDEX lessons_course_id_idx ON lessons(course_id);
-CREATE INDEX lessons_order_idx ON lessons(course_id, order_index);
+CREATE INDEX lessons_status_idx ON lessons(status);
+```
+
+### course_progress
+
+```sql
+CREATE TABLE course_progress (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) NOT NULL,
+  course_id UUID REFERENCES courses(id) NOT NULL,
+  completed_lessons UUID[] DEFAULT '{}',
+  progress INTEGER DEFAULT 0,
+  last_accessed TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  UNIQUE(user_id, course_id)
+);
+
+CREATE INDEX course_progress_user_id_idx ON course_progress(user_id);
+CREATE INDEX course_progress_course_id_idx ON course_progress(course_id);
+```
+
+### course_ratings
+
+```sql
+CREATE TABLE course_ratings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) NOT NULL,
+  course_id UUID REFERENCES courses(id) NOT NULL,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5) NOT NULL,
+  comment TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  UNIQUE(user_id, course_id)
+);
+
+CREATE INDEX course_ratings_user_id_idx ON course_ratings(user_id);
+CREATE INDEX course_ratings_course_id_idx ON course_ratings(course_id);
+```
+
+### course_comments
+
+```sql
+CREATE TABLE course_comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) NOT NULL,
+  course_id UUID REFERENCES courses(id) NOT NULL,
+  content TEXT NOT NULL,
+  parent_id UUID REFERENCES course_comments(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+CREATE INDEX course_comments_user_id_idx ON course_comments(user_id);
+CREATE INDEX course_comments_course_id_idx ON course_comments(course_id);
+CREATE INDEX course_comments_parent_id_idx ON course_comments(parent_id);
 ```
 
 ### forum_posts
@@ -99,64 +159,94 @@ CREATE INDEX lessons_order_idx ON lessons(course_id, order_index);
 ```sql
 CREATE TABLE forum_posts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id),
   title TEXT NOT NULL,
   content TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  author_id UUID REFERENCES users(id) NOT NULL,
+  category TEXT NOT NULL,
+  tags TEXT[] DEFAULT '{}',
+  pinned BOOLEAN DEFAULT false,
+  solved BOOLEAN DEFAULT false,
+  likes INTEGER DEFAULT 0,
   views INTEGER DEFAULT 0,
-  likes INTEGER DEFAULT 0
+  last_activity TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 -- אינדקסים
 CREATE INDEX forum_posts_author_id_idx ON forum_posts(author_id);
+CREATE INDEX forum_posts_category_idx ON forum_posts(category);
 CREATE INDEX forum_posts_created_at_idx ON forum_posts(created_at DESC);
-CREATE INDEX forum_posts_tags_idx ON forum_posts USING GIN(tags);
 ```
 
-### comments
-
-טבלת תגובות
+### forum_categories
 
 ```sql
-CREATE TABLE comments (
+CREATE TABLE forum_categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  post_id UUID REFERENCES forum_posts(id) ON DELETE CASCADE,
-  author_id UUID REFERENCES users(id),
-  content TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  likes_count INTEGER DEFAULT 0,
-  parent_id UUID REFERENCES comments(id),
-  is_solution BOOLEAN DEFAULT false
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  icon TEXT,
+  color TEXT,
+  order_number INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- אינדקסים
-CREATE INDEX comments_post_id_idx ON comments(post_id);
-CREATE INDEX comments_author_id_idx ON comments(author_id);
-CREATE INDEX comments_parent_id_idx ON comments(parent_id);
+CREATE INDEX forum_categories_order_number_idx ON forum_categories(order_number);
 ```
 
-### progress
-
-טבלת התקדמות בקורסים
+### forum_tags
 
 ```sql
-CREATE TABLE progress (
+CREATE TABLE forum_tags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  lesson_id UUID REFERENCES lessons(id) ON DELETE CASCADE,
-  status TEXT CHECK (status IN ('not_started', 'in_progress', 'completed')),
-  progress_percent INTEGER DEFAULT 0,
-  last_position INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  name TEXT NOT NULL,
+  description TEXT,
+  color TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- אינדקסים
-CREATE INDEX progress_user_course_idx ON progress(user_id, course_id);
-CREATE INDEX progress_lesson_idx ON progress(lesson_id);
+CREATE INDEX forum_tags_name_idx ON forum_tags(name);
+```
+
+### notifications
+
+```sql
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) NOT NULL,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  link TEXT,
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+CREATE INDEX notifications_user_id_idx ON notifications(user_id);
+CREATE INDEX notifications_created_at_idx ON notifications(created_at DESC);
+```
+
+### simulator_scenarios
+
+```sql
+CREATE TABLE simulator_scenarios (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  difficulty TEXT CHECK (difficulty IN ('easy', 'medium', 'hard')) NOT NULL,
+  initial_code TEXT NOT NULL,
+  solution_code TEXT NOT NULL,
+  test_cases JSONB NOT NULL,
+  hints TEXT[] DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+CREATE INDEX simulator_scenarios_difficulty_idx ON simulator_scenarios(difficulty);
 ```
 
 ## 🔒 Row Level Security (RLS)
@@ -164,38 +254,173 @@ CREATE INDEX progress_lesson_idx ON progress(lesson_id);
 ### מדיניות הרשאות
 
 ```sql
--- courses
+-- Enable RLS on all tables
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Courses are viewable by everyone"
-  ON courses FOR SELECT
-  USING (published = true OR auth.uid() = author_id);
-
-CREATE POLICY "Courses are editable by author"
-  ON courses FOR ALL
-  USING (auth.uid() = author_id);
-
--- forum_posts
+ALTER TABLE lessons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE course_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE course_ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE course_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE forum_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE forum_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE forum_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE simulator_scenarios ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Posts are viewable by everyone"
-  ON forum_posts FOR SELECT
-  USING (true);
+-- Users are viewable by everyone
+CREATE POLICY "Users are viewable by everyone"
+ON users FOR SELECT
+USING (true);
 
-CREATE POLICY "Posts are editable by author"
-  ON forum_posts FOR UPDATE
-  USING (auth.uid() = author_id);
+-- Users are editable by owner
+CREATE POLICY "Users are editable by owner"
+ON users FOR ALL
+USING (auth.uid() = id);
 
--- profiles
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+-- Courses are viewable by everyone
+CREATE POLICY "Courses are viewable by everyone"
+ON courses FOR SELECT
+USING (true);
 
-CREATE POLICY "Profiles are viewable by everyone"
-  ON profiles FOR SELECT
-  USING (true);
+-- Courses are editable by author or admin
+CREATE POLICY "Courses are editable by author or admin"
+ON courses FOR ALL
+USING (
+  auth.uid() = author_id OR
+  EXISTS (
+    SELECT 1 FROM users
+    WHERE id = auth.uid()
+    AND role = 'admin'
+  )
+);
 
-CREATE POLICY "Profiles are editable by owner"
-  ON profiles FOR ALL
-  USING (auth.uid() = user_id);
+-- Lessons are viewable by everyone
+CREATE POLICY "Lessons are viewable by everyone"
+ON lessons FOR SELECT
+USING (true);
+
+-- Lessons are editable by course author or admin
+CREATE POLICY "Lessons are editable by course author or admin"
+ON lessons FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM courses
+    WHERE id = course_id
+    AND (
+      author_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users
+        WHERE id = auth.uid()
+        AND role = 'admin'
+      )
+    )
+  )
+);
+
+-- Course progress is viewable by owner
+CREATE POLICY "Course progress is viewable by owner"
+ON course_progress FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Course progress is editable by owner
+CREATE POLICY "Course progress is editable by owner"
+ON course_progress FOR ALL
+USING (auth.uid() = user_id);
+
+-- Course ratings are viewable by everyone
+CREATE POLICY "Course ratings are viewable by everyone"
+ON course_ratings FOR SELECT
+USING (true);
+
+-- Course ratings are editable by owner
+CREATE POLICY "Course ratings are editable by owner"
+ON course_ratings FOR ALL
+USING (auth.uid() = user_id);
+
+-- Course comments are viewable by everyone
+CREATE POLICY "Course comments are viewable by everyone"
+ON course_comments FOR SELECT
+USING (true);
+
+-- Course comments are editable by owner
+CREATE POLICY "Course comments are editable by owner"
+ON course_comments FOR ALL
+USING (auth.uid() = user_id);
+
+-- Forum posts are viewable by everyone
+CREATE POLICY "Forum posts are viewable by everyone"
+ON forum_posts FOR SELECT
+USING (true);
+
+-- Forum posts are editable by author or admin
+CREATE POLICY "Forum posts are editable by author or admin"
+ON forum_posts FOR ALL
+USING (
+  auth.uid() = author_id OR
+  EXISTS (
+    SELECT 1 FROM users
+    WHERE id = auth.uid()
+    AND role = 'admin'
+  )
+);
+
+-- Forum categories are viewable by everyone
+CREATE POLICY "Forum categories are viewable by everyone"
+ON forum_categories FOR SELECT
+USING (true);
+
+-- Forum categories are editable by admin only
+CREATE POLICY "Forum categories are editable by admin only"
+ON forum_categories FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM users
+    WHERE id = auth.uid()
+    AND role = 'admin'
+  )
+);
+
+-- Forum tags are viewable by everyone
+CREATE POLICY "Forum tags are viewable by everyone"
+ON forum_tags FOR SELECT
+USING (true);
+
+-- Forum tags are editable by admin only
+CREATE POLICY "Forum tags are editable by admin only"
+ON forum_tags FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM users
+    WHERE id = auth.uid()
+    AND role = 'admin'
+  )
+);
+
+-- Notifications are viewable by owner
+CREATE POLICY "Notifications are viewable by owner"
+ON notifications FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Notifications are editable by owner
+CREATE POLICY "Notifications are editable by owner"
+ON notifications FOR ALL
+USING (auth.uid() = user_id);
+
+-- Simulator scenarios are viewable by everyone
+CREATE POLICY "Simulator scenarios are viewable by everyone"
+ON simulator_scenarios FOR SELECT
+USING (true);
+
+-- Simulator scenarios are editable by admin only
+CREATE POLICY "Simulator scenarios are editable by admin only"
+ON simulator_scenarios FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM users
+    WHERE id = auth.uid()
+    AND role = 'admin'
+  )
+);
 ```
 
 ## 📈 Materialized Views
@@ -275,16 +500,22 @@ EXECUTE FUNCTION update_post_comments_count();
 
 ```sql
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
   email TEXT UNIQUE NOT NULL,
-  full_name TEXT NOT NULL,
+  name TEXT,
+  full_name TEXT,
+  username TEXT UNIQUE,
   avatar_url TEXT,
+  image TEXT,
   bio TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  role TEXT DEFAULT 'user',
-  referral_code TEXT UNIQUE,
-  points INTEGER DEFAULT 0
+  role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'instructor')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  last_seen TIMESTAMP WITH TIME ZONE,
+  points INTEGER DEFAULT 0,
+  level INTEGER DEFAULT 1,
+  badges TEXT[] DEFAULT '{}',
+  achievements TEXT[] DEFAULT '{}'
 );
 ```
 
@@ -294,14 +525,15 @@ CREATE TABLE users (
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
-  description TEXT,
+  description TEXT NOT NULL,
   image_url TEXT,
-  price DECIMAL(10,2),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  author_id UUID REFERENCES users(id),
-  published BOOLEAN DEFAULT false,
-  level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced'))
+  price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced')),
+  duration INTEGER NOT NULL,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
+  author_id UUID REFERENCES users(id) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 ```
 
@@ -310,15 +542,14 @@ CREATE TABLE courses (
 ```sql
 CREATE TABLE lessons (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  course_id UUID REFERENCES courses(id),
   title TEXT NOT NULL,
-  content TEXT,
-  video_url TEXT,
-  duration INTEGER,
-  order INTEGER NOT NULL,
-  is_free BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  content TEXT NOT NULL,
+  course_id UUID REFERENCES courses(id) NOT NULL,
+  order_number INTEGER NOT NULL,
+  duration INTEGER NOT NULL,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 ```
 

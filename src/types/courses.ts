@@ -1,75 +1,116 @@
-import type { Tables } from "@/types/database";
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  level: string;
+  price: number;
+  duration: number;
+  total_students: number;
+  created_at: string;
+  updated_at: string;
+}
 
-export type Course = Tables<"courses">;
-export type Lesson = Tables<"lessons">;
+export interface CourseLesson {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string;
+  content: string;
+  duration: number;
+  order: number;
+  created_at: string;
+  updated_at: string;
+  is_free: boolean;
+}
+
+export interface CourseProgress {
+  id: string;
+  course_id: string;
+  lesson_id: string;
+  user_id: string;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CourseRating {
+  id: string;
+  course_id: string;
+  user_id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+  user: {
+    name: string;
+    avatar_url?: string;
+  };
+  review?: string;
+}
+
+export interface CourseComment {
+  id: string;
+  course_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  user: {
+    name: string;
+    avatar_url?: string;
+  };
+}
 
 export interface CourseWithRelations extends Course {
-  lessons?: Lesson[];
-  author?: {
-    id: string;
+  thumbnail?: string;
+  lessons: (CourseLesson & {
+    progress?: CourseProgress[];
+  })[];
+  ratings: CourseRating[];
+  comments: CourseComment[];
+  instructor: {
     name: string;
     avatar_url?: string;
   };
   _count?: {
-    lessons: number;
     students: number;
   };
 }
 
-export interface LessonWithRelations extends Lesson {
-  course?: Course;
-  _count?: {
-    completions: number;
-  };
-}
-
-export interface CourseFilters {
-  search?: string;
-  level?: Course["level"];
-  minPrice?: number;
-  maxPrice?: number;
-  sortBy?: "title" | "price" | "level" | "duration";
-  sortOrder?: "asc" | "desc";
-}
-
-export interface CourseStats {
-  totalLessons: number;
-  totalDuration: number;
-  averageRating: number;
-  totalStudents: number;
+export interface LessonWithProgress extends CourseLesson {
+  progress?: CourseProgress[];
   completionRate: number;
-}
-
-export interface CourseProgress {
-  courseId: string;
-  userId: string;
-  completedLessons: number;
-  totalLessons: number;
-  lastAccessedAt: string;
-  isCompleted: boolean;
 }
 
 export interface LessonProgress {
   lessonId: string;
   userId: string;
-  courseId: string;
   isCompleted: boolean;
-  completedAt?: string;
-  progress: number;
+  lastAccessedAt: string;
   timeSpent: number;
 }
 
-export interface CourseRating {
-  id: string;
-  courseId: string;
-  userId: string;
-  rating: number;
-  comment?: string;
-  createdAt: string;
-  updatedAt: string;
-  user?: {
-    id: string;
-    name: string;
-    avatar_url?: string;
+export interface CourseFilters {
+  search?: string;
+  level?: string;
+  category?: string;
+  price?: {
+    min?: number;
+    max?: number;
   };
+  duration?: {
+    min?: number;
+    max?: number;
+  };
+  rating?: number;
+  sortBy?: "price" | "rating" | "students" | "date";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface CourseStats {
+  totalStudents: number;
+  averageRating: number;
+  totalLessons: number;
+  totalDuration: number;
+  completionRate: number;
 }

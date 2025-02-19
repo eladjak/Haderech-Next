@@ -3,290 +3,192 @@
  * @description Tests for courses API endpoints
  */
 
+import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
+
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { GET, POST } from "../courses/route";
 
-// Mock Supabase client
-const mockSupabase = {
-  from: jest.fn(() => ({
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    neq: jest.fn().mockReturnThis(),
-    gt: jest.fn().mockReturnThis(),
-    gte: jest.fn().mockReturnThis(),
-    lt: jest.fn().mockReturnThis(),
-    lte: jest.fn().mockReturnThis(),
-    like: jest.fn().mockReturnThis(),
-    ilike: jest.fn().mockReturnThis(),
-    is: jest.fn().mockReturnThis(),
-    in: jest.fn().mockReturnThis(),
-    contains: jest.fn().mockReturnThis(),
-    containedBy: jest.fn().mockReturnThis(),
-    range: jest.fn().mockReturnThis(),
-    textSearch: jest.fn().mockReturnThis(),
-    filter: jest.fn().mockReturnThis(),
-    or: jest.fn().mockReturnThis(),
-    and: jest.fn().mockReturnThis(),
-    not: jest.fn().mockReturnThis(),
-    match: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    offset: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    maybeSingle: jest.fn().mockReturnThis(),
-    csv: jest.fn().mockReturnThis(),
-  })),
-  auth: {
-    getSession: jest.fn(),
-  },
-  storage: {
-    from: jest.fn(() => ({
-      upload: jest.fn(),
-      download: jest.fn(),
-      remove: jest.fn(),
-      createSignedUrl: jest.fn(),
-      getPublicUrl: jest.fn(),
-    })),
-  },
-  rpc: jest.fn(),
-};
-
-// Mock createServerClient
-jest.mock("@supabase/ssr", () => ({
-  createServerClient: jest.fn(() => mockSupabase),
-}));
-
-// Mock cookies
-jest.mock("next/headers", () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn(() => ({ value: "mock-cookie" })),
-    getAll: jest.fn(() => []),
-    set: jest.fn(),
-    delete: jest.fn(),
-  })),
-}));
+vi.mock("next/headers");
+vi.mock("@supabase/auth-helpers-nextjs");
 
 describe("Courses API", () => {
+  const mockUser = {
+    id: "test-user-id",
+    email: "test@example.com",
+  };
+
+  const mockCourse = {
+    id: "test-course-id",
+    title: "Test Course",
+    description: "Test Description",
+    author_id: mockUser.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  const mockSupabase = {
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      single: vi.fn().mockImplementation(async () => ({
+        data: mockCourse,
+        error: null,
+      })),
+    })),
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { user: mockUser } },
+        error: null,
+      }),
+    },
+  };
+
+  vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    vi.mocked(cookies).mockReturnValue({
+      get: vi.fn().mockReturnValue({ value: "test-token" }),
+    } as any);
   });
 
   describe("GET /api/courses", () => {
-    it("should return courses list", async () => {
-      const mockCourses = [
-        {
-          id: "1",
-          title: "Test Course",
-          description: "Test Description",
-        },
-      ];
-
+    it("מחזיר את כל הקורסים", async () => {
       mockSupabase
         .from()
-        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
+        .select()
+        .order.mockResolvedValueOnce({
+          data: [mockCourse],
+          error: null,
+        });
 
-      const request = new Request("http://localhost:3000/api/courses");
+      const request = new NextRequest("http://localhost:3000/api/courses");
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual(mockCourses);
+      expect(data).toEqual([mockCourse]);
     });
 
-    it("should handle search query", async () => {
-      const mockCourses = [
-        {
-          id: "1",
-          title: "Test Course",
-          description: "Test Description",
-        },
-      ];
-
+    it("מחזיר שגיאה כאשר יש בעיה בשליפת הקורסים", async () => {
       mockSupabase
         .from()
-        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
+        .select()
+        .order.mockResolvedValueOnce({
+          data: null,
+          error: { message: "שגיאת מסד נתונים" },
+        });
 
-      const request = new Request(
-        "http://localhost:3000/api/courses?search=test",
-      );
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data).toEqual(mockCourses);
-    });
-
-    it("should handle category filter", async () => {
-      const mockCourses = [
-        {
-          id: "1",
-          title: "Test Course",
-          description: "Test Description",
-          category: "test",
-        },
-      ];
-
-      mockSupabase
-        .from()
-        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
-
-      const request = new Request(
-        "http://localhost:3000/api/courses?category=test",
-      );
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data).toEqual(mockCourses);
-    });
-
-    it("should handle level filter", async () => {
-      const mockCourses = [
-        {
-          id: "1",
-          title: "Test Course",
-          description: "Test Description",
-          level: "beginner",
-        },
-      ];
-
-      mockSupabase
-        .from()
-        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
-
-      const request = new Request(
-        "http://localhost:3000/api/courses?level=beginner",
-      );
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data).toEqual(mockCourses);
-    });
-
-    it("should handle instructor filter", async () => {
-      const mockCourses = [
-        {
-          id: "1",
-          title: "Test Course",
-          description: "Test Description",
-          instructor_id: "test-instructor",
-        },
-      ];
-
-      mockSupabase
-        .from()
-        .select.mockResolvedValueOnce({ data: mockCourses, error: null });
-
-      const request = new Request(
-        "http://localhost:3000/api/courses?instructor=test-instructor",
-      );
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data).toEqual(mockCourses);
-    });
-
-    it("should handle database error", async () => {
-      mockSupabase.from().select.mockResolvedValueOnce({
-        data: null,
-        error: new Error("Database error"),
-      });
-
-      const request = new Request("http://localhost:3000/api/courses");
+      const request = new NextRequest("http://localhost:3000/api/courses");
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data).toEqual({ error: "Failed to fetch courses" });
+      expect(data).toEqual({
+        error: "שגיאת מסד נתונים",
+      });
     });
   });
 
   describe("POST /api/courses", () => {
-    it("should create a new course for authenticated instructor", async () => {
-      const mockSession = {
-        user: { id: "test-user" },
-      };
+    const newCourse = {
+      title: "קורס חדש",
+      description: "תיאור הקורס",
+      image_url: "https://example.com/image.jpg",
+      status: "draft" as const,
+      level: "beginner" as const,
+      duration: 60,
+      tags: ["javascript", "react"],
+    };
 
-      mockSupabase.auth.getSession.mockResolvedValueOnce({
-        data: { session: mockSession },
-      });
+    it("יוצר קורס חדש בהצלחה", async () => {
+      mockSupabase.from().insert.mockReturnThis();
+      mockSupabase.from().insert().select.mockReturnThis();
+      mockSupabase
+        .from()
+        .insert()
+        .select()
+        .single.mockResolvedValueOnce({
+          data: { id: "new-course-1", ...newCourse },
+          error: null,
+        });
 
-      const mockCourse = {
-        id: "1",
-        title: "New Course",
-        description: "Course Description",
-      };
-
-      mockSupabase.from().insert.mockResolvedValueOnce({
-        data: mockCourse,
-        error: null,
-      });
-
-      const request = new Request("http://localhost:3000/api/courses", {
+      const request = new NextRequest("http://localhost:3000/api/courses", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(mockCourse),
+        body: JSON.stringify(newCourse),
       });
 
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data).toEqual(mockCourse);
+      expect(response.status).toBe(201);
+      expect(data).toHaveProperty("id", "new-course-1");
+      expect(data).toMatchObject(newCourse);
     });
 
-    it("should reject unauthenticated requests", async () => {
+    it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
+        error: null,
       });
 
-      const request = new Request("http://localhost:3000/api/courses", {
+      const request = new NextRequest("http://localhost:3000/api/courses", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
+        body: JSON.stringify(newCourse),
       });
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data).toEqual({ error: "Unauthorized" });
+      expect(data).toEqual({
+        error: "נדרשת הזדהות",
+      });
     });
 
-    it("should handle database error", async () => {
-      const mockSession = {
-        user: { id: "test-user" },
-      };
-
-      mockSupabase.auth.getSession.mockResolvedValueOnce({
-        data: { session: mockSession },
-      });
-      mockSupabase.from().insert.mockResolvedValueOnce({
-        data: null,
-        error: new Error("Database error"),
-      });
-
-      const request = new Request("http://localhost:3000/api/courses", {
+    it("מחזיר שגיאה כאשר חסרים שדות חובה", async () => {
+      const request = new NextRequest("http://localhost:3000/api/courses", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({}),
       });
 
       const response = await POST(request);
       const data = await response.json();
 
+      expect(response.status).toBe(400);
+      expect(data).toEqual({
+        error: "חסרים שדות חובה",
+      });
+    });
+
+    it("מחזיר שגיאה כאשר יש בעיה ביצירת הקורס", async () => {
+      mockSupabase.from().insert.mockReturnThis();
+      mockSupabase.from().insert().select.mockReturnThis();
+      mockSupabase
+        .from()
+        .insert()
+        .select()
+        .single.mockResolvedValueOnce({
+          data: null,
+          error: { message: "שגיאת מסד נתונים" },
+        });
+
+      const request = new NextRequest("http://localhost:3000/api/courses", {
+        method: "POST",
+        body: JSON.stringify(newCourse),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
       expect(response.status).toBe(500);
-      expect(data).toEqual({ error: "Failed to create course" });
+      expect(data).toEqual({
+        error: "שגיאת מסד נתונים",
+      });
     });
   });
 });

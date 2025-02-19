@@ -1,7 +1,9 @@
-import { createServerClient as createClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+import { createServerClient as createClient } from "@supabase/ssr";
+
 import type { Database } from "@/types/supabase";
+
 import type { CookieOptions } from "@supabase/ssr";
 
 export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
@@ -35,6 +37,6 @@ export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
         detectSessionInUrl: true,
         persistSession: true,
       },
-    },
+    }
   );
 }

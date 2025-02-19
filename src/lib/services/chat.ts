@@ -1,57 +1,78 @@
-import { Server as HTTPServer } from "http";
+import { Server } from "socket.io";
 
-import { createClient } from "@supabase/supabase-js";
-import { Server as SocketServer } from "socket.io";
+import type { Server as HTTPServer } from "http";
+import type { Socket as NetSocket } from "net";
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { Server as IOServer } from "socket.io";
 
-import type { ChatMessage } from "@/types/models";
-import type { Database } from "@/types/supabase";
+interface Message {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp: string;
+  sender: {
+    id: string;
+    name: string;
+    role: string;
+  };
+  room_id?: string;
+  feedback?: {
+    rating: number;
+    comment?: string;
+  };
+}
 
-// Initialize Supabase client
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+interface SocketServer extends HTTPServer {
+  io?: IOServer | undefined;
+}
 
-export const initializeSocket = (server: HTTPServer) => {
-  const io = new SocketServer(server, {
+interface SocketWithIO extends NetSocket {
+  server: SocketServer;
+}
+
+interface NextApiResponseWithSocket extends NextApiResponse {
+  socket: SocketWithIO;
+}
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default function SocketHandler(
+  req: NextApiRequest,
+  res: NextApiResponseWithSocket
+) {
+  if (res.socket.server.io) {
+    res.end();
+    return;
+  }
+
+  const io = new Server(res.socket.server, {
+    path: "/api/socket",
+    addTrailingSlash: false,
     cors: {
-      origin: process.env.NEXT_PUBLIC_APP_URL,
+      origin: process.env["NEXT_PUBLIC_APP_URL"],
       methods: ["GET", "POST"],
     },
   });
 
+  res.socket.server.io = io;
+
   io.on("connection", (socket) => {
-    console.log("Client connected:", socket.id);
-
-    socket.on("join_room", (roomId: string) => {
-      socket.join(roomId);
-      console.log(`Client ${socket.id} joined room ${roomId}`);
-    });
-
-    socket.on("leave_room", (roomId: string) => {
-      socket.leave(roomId);
-      console.log(`Client ${socket.id} left room ${roomId}`);
-    });
-
-    socket.on("send_message", async (message: ChatMessage) => {
-      try {
-        // Save message to database
-        const { error } = await supabase.from("chat_messages").insert(message);
-
-        if (error) throw error;
-
-        // Broadcast message to room
-        io.to(message.room_id).emit("receive_message", message);
-      } catch (error) {
-        console.error("Error sending message:", error);
-        socket.emit("error", { message: "Failed to send message" });
+    socket.on("join_room", (room_id: string) => {
+      if (room_id) {
+        socket.join(room_id);
       }
     });
 
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
+    socket.on("send_message", (message: Message) => {
+      if (message.room_id) {
+        io.to(message.room_id).emit("receive_message", message);
+      }
     });
   });
 
-  return io;
-};
+  res.end();
+}

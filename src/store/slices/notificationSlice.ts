@@ -5,26 +5,24 @@ import type { Notification } from "@/types/models";
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
 }
 
 const initialState: NotificationState = {
   notifications: [],
   unreadCount: 0,
-  loading: false,
+  isLoading: false,
   error: null,
 };
 
 export const notificationSlice = createSlice({
-  name: "notifications",
+  name: "notification",
   initialState,
   reducers: {
     setNotifications: (state, action: PayloadAction<Notification[]>) => {
       state.notifications = action.payload;
-      state.unreadCount = action.payload.filter(
-        (notification) => !notification.read,
-      ).length;
+      state.unreadCount = action.payload.filter((n) => !n.read).length;
     },
     addNotification: (state, action: PayloadAction<Notification>) => {
       state.notifications.unshift(action.payload);
@@ -34,7 +32,7 @@ export const notificationSlice = createSlice({
     },
     markAsRead: (state, action: PayloadAction<string>) => {
       const notification = state.notifications.find(
-        (n) => n.id === action.payload,
+        (n) => n.id === action.payload
       );
       if (notification && !notification.read) {
         notification.read = true;
@@ -42,24 +40,24 @@ export const notificationSlice = createSlice({
       }
     },
     markAllAsRead: (state) => {
-      state.notifications.forEach((notification) => {
-        notification.read = true;
+      state.notifications.forEach((n) => {
+        n.read = true;
       });
       state.unreadCount = 0;
     },
     deleteNotification: (state, action: PayloadAction<string>) => {
       const notification = state.notifications.find(
-        (n) => n.id === action.payload,
-      );
-      state.notifications = state.notifications.filter(
-        (n) => n.id !== action.payload,
+        (n) => n.id === action.payload
       );
       if (notification && !notification.read) {
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
+      state.notifications = state.notifications.filter(
+        (n) => n.id !== action.payload
+      );
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
+      state.isLoading = action.payload;
     },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;

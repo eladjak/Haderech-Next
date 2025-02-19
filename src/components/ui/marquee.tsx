@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
 import * as React from "react";
+
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -59,10 +60,7 @@ export function Marquee({
   };
 
   return (
-    <div
-      className={cn("relative overflow-hidden", className)}
-      {...props}
-    >
+    <div className={cn("relative overflow-hidden", className)} {...props}>
       <motion.div
         ref={contentRef}
         className="flex min-w-full"

@@ -5,8 +5,6 @@ import { UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-
 import type { User } from "@/types/api";
 
 interface UserCardProps {
@@ -30,11 +28,7 @@ export function UserCard({ user, onFollow, className }: UserCardProps) {
           </div>
         </div>
         {onFollow && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onFollow(user.id)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => onFollow(user.id)}>
             <UserPlus className="h-4 w-4" />
           </Button>
         )}

@@ -25,10 +25,7 @@ export function CourseProgress({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-2">
-          <Progress
-            value={progress}
-            className="w-full"
-          />
+          <Progress value={progress} className="w-full" />
           <div className="text-sm text-muted-foreground">
             {completedLessons} מתוך {totalLessons} שיעורים הושלמו
           </div>

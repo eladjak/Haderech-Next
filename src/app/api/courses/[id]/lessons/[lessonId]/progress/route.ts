@@ -3,9 +3,10 @@
  * @description API routes for managing lesson progress. Provides endpoints for retrieving and updating progress.
  */
 
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+import { createServerClient } from "@supabase/ssr";
 
 import type { Database } from "@/types/supabase";
 
@@ -49,7 +50,7 @@ export async function GET(_: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Verify authentication
@@ -72,18 +73,18 @@ export async function GET(_: Request, { params }: RouteParams) {
       console.error("Error fetching progress:", error);
       return NextResponse.json(
         { error: "Failed to fetch progress" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
     return NextResponse.json(
-      progress || { completed: false, last_position: 0 },
+      progress || { completed: false, last_position: 0 }
     );
   } catch (error) {
     console.error("Progress GET error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -120,7 +121,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
             return cookieStore.get(name)?.value;
           },
         },
-      },
+      }
     );
 
     // Verify authentication
@@ -142,7 +143,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     if (!enrollment) {
       return NextResponse.json(
         { error: "Must be enrolled to track progress" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -177,7 +178,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       console.error("Error updating progress:", error);
       return NextResponse.json(
         { error: "Failed to update progress" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -186,7 +187,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     console.error("Progress PUT error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -9,7 +9,6 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { createServerClient } from "@/lib/supabase-server";
-
 import type { Database } from "@/types/supabase";
 
 type Tables = Database["public"]["Tables"];
@@ -60,7 +59,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
     if (!notification) {
       return NextResponse.json(
         { error: "Notification not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -68,7 +67,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
     if (notification.user_id !== session.user.id) {
       return NextResponse.json(
         { error: "Not authorized to update this notification" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -83,7 +82,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
         `
         *,
         user:users(*)
-      `,
+      `
       )
       .single();
 
@@ -91,7 +90,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
       console.error("Error updating notification:", error);
       return NextResponse.json(
         { error: "Failed to update notification" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -100,7 +99,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
     console.error("Error in PATCH /api/notifications/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -139,7 +138,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     if (!notification) {
       return NextResponse.json(
         { error: "Notification not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -147,7 +146,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     if (notification.user_id !== session.user.id) {
       return NextResponse.json(
         { error: "Not authorized to delete this notification" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -161,7 +160,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       console.error("Error deleting notification:", error);
       return NextResponse.json(
         { error: "Failed to delete notification" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -170,7 +169,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     console.error("Error in DELETE /api/notifications/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

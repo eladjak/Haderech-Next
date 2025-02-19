@@ -2,42 +2,34 @@
  * Forum Post Component
  *
  * A comprehensive component for displaying forum posts with rich interactions.
- * Supports likes, comments, saves, and sharing functionality.
+ * Supports comments and sharing functionality.
  *
  * @example
  * ```tsx
  * <ForumPost
  *   post={post}
  *   showFullContent
- *   onLike={(id) => handleLike(id)}
- *   onSave={(id) => handleSave(id)}
  *   onShare={(id) => handleShare(id)}
- *   isLiked={true}
- *   isSaved={false}
  * />
  * ```
  */
 
 "use client";
 
+import React from "react";
+
+import Link from "next/link";
+
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
-import { MessageCircle, ThumbsUp } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import { MessageSquare, ThumbsUp } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { ForumPost as ForumPostType } from "@/types/forum";
 
-interface ForumPostProps {
+export interface ForumPostProps {
   post: ForumPostType;
   className?: string;
 }
@@ -46,53 +38,75 @@ export function ForumPost({
   post,
   className,
 }: ForumPostProps): React.ReactElement {
+  const {
+    id,
+    title,
+    content,
+    author,
+    created_at,
+    likes = 0,
+    comments = [],
+  } = post;
+
+  const avatarUrl = author.avatar_url || undefined;
+
+  const timeAgo = formatDistanceToNow(new Date(created_at), {
+    addSuffix: true,
+    locale: he,
+  });
+
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="flex flex-row items-center gap-4">
-        <Avatar>
-          <AvatarImage
-            src={post.author.avatar_url || ""}
-            alt={post.author.name}
-          />
-          <AvatarFallback>{post.author.name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <Link
-            href={`/forum/${post.id}`}
-            className="text-lg font-semibold hover:underline"
-          >
-            {post.title}
-          </Link>
-          <p className="text-sm text-muted-foreground">
-            {post.author.name} •{" "}
-            {formatDistanceToNow(new Date(post.created_at), {
-              addSuffix: true,
-              locale: he,
-            })}
-          </p>
+    <div className={cn("space-y-4", className)}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start space-x-4">
+          <Avatar>
+            <AvatarImage
+              src={avatarUrl}
+              alt={`תמונת הפרופיל של ${author.name}`}
+            />
+            <AvatarFallback aria-label={`תמונת הפרופיל של ${author.name}`}>
+              {author.name[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <Link
+              href={`/community/${id}`}
+              className="font-semibold hover:underline"
+              id={`post-title-${id}`}
+              data-testid={`post-link-${id}`}
+            >
+              {title}
+            </Link>
+            <div className="text-sm text-muted-foreground">
+              נכתב על ידי {author.name} לפני {timeAgo}
+            </div>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm">{post.content}</p>
-      </CardContent>
-      <CardFooter className="flex items-center gap-4">
+      </div>
+
+      <div className="text-sm">{content}</div>
+
+      <div className="flex items-center space-x-4">
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="flex items-center space-x-2"
+          aria-label={`לייקים (${likes})`}
         >
           <ThumbsUp className="h-4 w-4" />
-          {post.likes_count || 0}
+          <span>{likes}</span>
         </Button>
+
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="flex items-center space-x-2"
+          aria-label={`תגובות (${comments.length})`}
         >
-          <MessageCircle className="h-4 w-4" />
-          {post.replies_count}
+          <MessageSquare className="h-4 w-4" />
+          <span>{comments.length}</span>
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

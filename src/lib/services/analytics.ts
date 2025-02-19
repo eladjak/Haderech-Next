@@ -41,7 +41,7 @@ export async function trackEvent(
   user_id: string,
   data: Record<string, string | number | boolean | null>,
   course_id?: string,
-  lesson_id?: string,
+  lesson_id?: string
 ) {
   try {
     const cookieStore = cookies();
@@ -67,7 +67,7 @@ export async function trackEvent(
 }
 
 export async function getUserEngagement(
-  user_id: string,
+  user_id: string
 ): Promise<UserEngagement | null> {
   try {
     const cookieStore = cookies();
@@ -124,7 +124,7 @@ export async function getUserEngagement(
 }
 
 export async function getCourseMetrics(
-  course_id: string,
+  course_id: string
 ): Promise<CourseMetrics | null> {
   try {
     const cookieStore = cookies();

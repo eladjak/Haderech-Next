@@ -5,16 +5,31 @@
  */
 
 import { createBrowserClient } from "@supabase/ssr";
-import { createSupabaseClient } from "./supabase";
+import { createClient } from "@supabase/supabase-js";
 
-import type { Database } from "@/types/supabase";
+import { APIResponse } from "@/types/api";
+import type { Database } from "@/types/database";
+import type {
+  Course,
+  ExtendedForumComment,
+  ExtendedForumPost,
+  ForumPost,
+} from "@/types/supabase";
+
+type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+
+type DatabaseCourse = Tables<"courses">;
+type DatabaseLesson = Tables<"lessons">;
+type DatabaseUser = Tables<"users">;
+type DatabaseForumPost = Tables<"forum_posts">;
 
 /**
  * Creates a singleton instance of the Supabase client for browser use
  */
 export const supabase = createBrowserClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 /**
@@ -58,7 +73,7 @@ export async function getProfile() {
   }
 
   const { data: profile, error } = await supabase
-    .from("profiles")
+    .from("users")
     .select("*")
     .eq("id", session.user.id)
     .single();
@@ -78,7 +93,7 @@ export async function getProfile() {
  * @throws Error if update fails or user is not authenticated
  */
 export async function updateProfile(
-  updates: Partial<Database["public"]["Tables"]["profiles"]["Update"]>,
+  updates: Partial<Database["public"]["Tables"]["users"]["Update"]>
 ) {
   const {
     data: { session },
@@ -88,7 +103,7 @@ export async function updateProfile(
   }
 
   const { data: profile, error } = await supabase
-    .from("profiles")
+    .from("users")
     .update(updates)
     .eq("id", session.user.id)
     .select()
@@ -131,39 +146,6 @@ export async function signInWithGithub() {
   }
 }
 
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  duration: number;
-  level: "beginner" | "intermediate" | "advanced";
-  price: number;
-  averageRating: number;
-  thumbnail?: string;
-}
-
-export interface ForumPost {
-  id: string;
-  title: string;
-  author: {
-    name: string;
-    avatar_url?: string;
-  };
-  created_at: string;
-  replies_count: number;
-}
-
-interface RawForumPost {
-  id: string;
-  title: string;
-  created_at: string;
-  author: {
-    name: string;
-    avatar_url: string | null;
-  }[];
-  replies_count: { count: number }[];
-}
-
 export async function getRecommendedCourses(): Promise<Course[]> {
   const { data, error } = await supabase
     .from("courses")
@@ -178,17 +160,18 @@ export async function getRecommendedCourses(): Promise<Course[]> {
   return data || [];
 }
 
-export async function getLatestForumPosts(): Promise<ForumPost[]> {
+export async function getLatestForumPosts(): Promise<ExtendedForumPost[]> {
   const { data: posts, error } = await supabase
     .from("forum_posts")
     .select(
       `
       id,
       title,
+      content,
       created_at,
-      author:profiles(name, avatar_url),
+      author:users(id, name, avatar_url, image),
       replies_count:forum_replies(count)
-    `,
+    `
     )
     .order("created_at", { ascending: false })
     .limit(5);
@@ -198,105 +181,127 @@ export async function getLatestForumPosts(): Promise<ForumPost[]> {
     return [];
   }
 
-  return (posts as RawForumPost[]).map((post) => ({
-    id: post.id,
-    title: post.title,
-    created_at: post.created_at,
-    author: {
-      name: post.author[0]?.name || "משתמש לא ידוע",
-      avatar_url: post.author[0]?.avatar_url || undefined,
+  return (posts as any[]).map((post) => ({
+    ...post,
+    author: post.author[0] || {
+      name: "משתמש לא ידוע",
+      avatar_url: null,
+      image: null,
     },
     replies_count: post.replies_count[0]?.count || 0,
   }));
 }
 
-type ApiResponse<T> = {
-  data: T | null;
-  error: Error | null;
+// Create a single supabase client for interacting with your database
+export const createSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Missing Supabase environment variables");
+    throw new Error("Missing Supabase environment variables");
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseKey);
 };
 
-const supabaseClient = createSupabaseClient();
-
 export const fetchCourses = async (): Promise<
-  ApiResponse<Database["public"]["Tables"]["courses"]["Row"][]>
+  APIResponse<DatabaseCourse[]>
 > => {
   try {
+    const supabaseClient = createSupabaseClient();
     const { data, error } = await supabaseClient.from("courses").select("*");
 
-    if (error) {
-      console.error("Error fetching courses:", error.message);
-      return { data: null, error };
-    }
-
-    return { data, error: null };
+    return {
+      success: !error,
+      message: error ? error.message : "Courses fetched successfully",
+      data: data || [],
+      error: error?.message,
+    };
   } catch (error) {
-    console.error("Unexpected error fetching courses:", error);
-    return { data: null, error: error as Error };
+    return {
+      success: false,
+      message: "Failed to fetch courses",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 };
 
 export const fetchCourse = async (
-  id: string,
-): Promise<ApiResponse<Database["public"]["Tables"]["courses"]["Row"]>> => {
+  id: string
+): Promise<APIResponse<DatabaseCourse>> => {
   try {
+    const supabaseClient = createSupabaseClient();
     const { data, error } = await supabaseClient
       .from("courses")
       .select("*")
       .eq("id", id)
       .single();
 
-    if (error) {
-      console.error("Error fetching course:", error.message);
-      return { data: null, error };
-    }
-
-    return { data, error: null };
+    return {
+      success: !error,
+      message: error ? error.message : "Course fetched successfully",
+      data: data || undefined,
+      error: error?.message,
+    };
   } catch (error) {
-    console.error("Unexpected error fetching course:", error);
-    return { data: null, error: error as Error };
+    return {
+      success: false,
+      message: "Failed to fetch course",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 };
 
 export const fetchLessons = async (
-  courseId: string,
-): Promise<ApiResponse<Database["public"]["Tables"]["lessons"]["Row"][]>> => {
+  courseId: string
+): Promise<APIResponse<DatabaseLesson[]>> => {
   try {
+    const supabaseClient = createSupabaseClient();
     const { data, error } = await supabaseClient
       .from("lessons")
       .select("*")
-      .eq("course_id", courseId);
+      .eq("course_id", courseId)
+      .order("order", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching lessons:", error.message);
-      return { data: null, error };
-    }
-
-    return { data, error: null };
+    return {
+      success: !error,
+      message: error ? error.message : "Lessons fetched successfully",
+      data: data || [],
+      error: error?.message,
+    };
   } catch (error) {
-    console.error("Unexpected error fetching lessons:", error);
-    return { data: null, error: error as Error };
+    return {
+      success: false,
+      message: "Failed to fetch lessons",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 };
 
 export const fetchLesson = async (
-  id: string,
-): Promise<ApiResponse<Database["public"]["Tables"]["lessons"]["Row"]>> => {
+  id: string
+): Promise<APIResponse<DatabaseLesson>> => {
   try {
+    const supabaseClient = createSupabaseClient();
     const { data, error } = await supabaseClient
       .from("lessons")
       .select("*")
       .eq("id", id)
       .single();
 
-    if (error) {
-      console.error("Error fetching lesson:", error.message);
-      return { data: null, error };
-    }
-
-    return { data, error: null };
+    return {
+      success: !error,
+      message: error ? error.message : "Lesson fetched successfully",
+      data: data || undefined,
+      error: error?.message,
+    };
   } catch (error) {
-    console.error("Unexpected error fetching lesson:", error);
-    return { data: null, error: error as Error };
+    return {
+      success: false,
+      message: "Failed to fetch lesson",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 };
 
@@ -307,14 +312,11 @@ export const searchContent = async (
     category?: string;
     level?: string;
     limit?: number;
-  },
-): Promise<ApiResponse<Database["public"]["Tables"]["courses"]["Row"][]>> => {
+  }
+): Promise<APIResponse<DatabaseCourse[]>> => {
   try {
+    const supabaseClient = createSupabaseClient();
     let queryBuilder = supabaseClient.from("courses").select("*");
-
-    if (query) {
-      queryBuilder = queryBuilder.ilike("title", `%${query}%`);
-    }
 
     if (filters?.type) {
       queryBuilder = queryBuilder.eq("type", filters.type);
@@ -332,16 +334,231 @@ export const searchContent = async (
       queryBuilder = queryBuilder.limit(filters.limit);
     }
 
-    const { data, error } = await queryBuilder;
+    const { data, error } = await queryBuilder.or(
+      `title.ilike.%${query}%,description.ilike.%${query}%`
+    );
 
-    if (error) {
-      console.error("Error searching content:", error.message);
-      return { data: null, error };
+    return {
+      success: !error,
+      message: error ? error.message : "Search completed successfully",
+      data: data || [],
+      error: error?.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to search content",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+};
+
+export interface CreateForumPostData {
+  title: string;
+  content: string;
+  category?: string;
+}
+
+export async function createForumPost(data: CreateForumPostData) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error("Not authenticated");
+  }
+
+  const { data: post, error } = await supabase
+    .from("forum_posts")
+    .insert({
+      title: data.title,
+      content: data.content,
+      category: data.category,
+      author_id: session.user.id,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return post;
+}
+
+export async function getForumPost(postId: string): Promise<ExtendedForumPost> {
+  const { data: post, error } = await supabase
+    .from("forum_posts")
+    .select(
+      `
+      *,
+      author:author_id (
+        id,
+        name:full_name,
+        role,
+        avatar_url
+      ),
+      comments:forum_comments (
+        *,
+        author:author_id (
+          id,
+          name:full_name,
+          role,
+          avatar_url
+        )
+      )
+    `
+    )
+    .eq("id", postId)
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!post) {
+    throw new Error("הפוסט לא נמצא");
+  }
+
+  return {
+    ...post,
+    category: "general",
+    isLiked: false,
+    isBookmarked: false,
+    likes: 0,
+    views: 0,
+    tags: [],
+  } as ExtendedForumPost;
+}
+
+interface CreateForumCommentParams {
+  postId: string;
+  content: string;
+}
+
+export async function createForumComment({
+  postId,
+  content,
+}: CreateForumCommentParams) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("יש להתחבר כדי להוסיף תגובה");
+  }
+
+  const { error } = await supabase.from("forum_comments").insert({
+    post_id: postId,
+    content,
+    author_id: user.id,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export const fetchUserProfile = async (
+  userId: string
+): Promise<APIResponse<DatabaseUser>> => {
+  try {
+    const supabaseClient = createSupabaseClient();
+    const { data, error } = await supabaseClient
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    return {
+      success: !error,
+      message: error ? error.message : "Profile fetched successfully",
+      data: data || undefined,
+      error: error?.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to fetch user profile",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+};
+
+export const updateUserProfile = async (
+  userId: string,
+  updates: Partial<Database["public"]["Tables"]["users"]["Update"]>
+): Promise<APIResponse<DatabaseUser>> => {
+  try {
+    const supabaseClient = createSupabaseClient();
+    const { data, error } = await supabaseClient
+      .from("users")
+      .update(updates)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    return {
+      success: !error,
+      message: error ? error.message : "Profile updated successfully",
+      data: data || undefined,
+      error: error?.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to update user profile",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+};
+
+export const fetchForumPosts = async (options?: {
+  category?: string;
+  tag?: string;
+  search?: string;
+  limit?: number;
+}): Promise<APIResponse<(DatabaseForumPost & { author: DatabaseUser })[]>> => {
+  try {
+    const supabaseClient = createSupabaseClient();
+    let query = supabaseClient
+      .from("forum_posts")
+      .select("*, author:users!author_id(*)");
+
+    if (options?.category) {
+      query = query.eq("category", options.category);
     }
 
-    return { data, error: null };
+    if (options?.tag) {
+      query = query.contains("tags", [options.tag]);
+    }
+
+    if (options?.search) {
+      query = query.or(
+        `title.ilike.%${options.search}%,content.ilike.%${options.search}%`
+      );
+    }
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
+
+    return {
+      success: !error,
+      message: error ? error.message : "Forum posts fetched successfully",
+      data: data || [],
+      error: error?.message,
+    };
   } catch (error) {
-    console.error("Unexpected error during search:", error);
-    return { data: null, error: error as Error };
+    return {
+      success: false,
+      message: "Failed to fetch forum posts",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 };

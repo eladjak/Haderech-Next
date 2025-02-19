@@ -52,7 +52,7 @@ export async function GET(_: Request, { params }: RouteParams) {
         `
         *,
         user:users(*)
-      `,
+      `
       )
       .eq("course_id", params.id)
       .order("created_at", { ascending: false });
@@ -61,7 +61,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       console.error("Error fetching ratings:", error);
       return NextResponse.json(
         { error: "Failed to fetch ratings" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -70,7 +70,7 @@ export async function GET(_: Request, { params }: RouteParams) {
     console.error("Error in GET /api/courses/[id]/ratings:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -118,7 +118,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (!enrollment) {
       return NextResponse.json(
         { error: "Must be enrolled in the course to rate it" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -133,7 +133,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (existingRating) {
       return NextResponse.json(
         { error: "You have already rated this course" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -144,7 +144,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (typeof rating !== "number" || rating < 1 || rating > 5) {
       return NextResponse.json(
         { error: "Rating must be a number between 1 and 5" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -163,7 +163,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         `
         *,
         user:users(*)
-      `,
+      `
       )
       .single();
 
@@ -171,7 +171,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       console.error("Error creating rating:", error);
       return NextResponse.json(
         { error: "Failed to create rating" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -180,7 +180,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     console.error("Error in POST /api/courses/[id]/ratings:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -220,7 +220,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       console.error("Error deleting rating:", error);
       return NextResponse.json(
         { error: "Failed to delete rating" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -229,7 +229,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     console.error("Error in DELETE /api/courses/[id]/ratings:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

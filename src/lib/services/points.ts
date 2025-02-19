@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
+import type { Database, DatabaseUser } from "@/types/database";
+
 interface Level {
   name: string;
   minPoints: number;
@@ -15,11 +17,8 @@ interface Badge {
   condition: (user: UserProfile) => boolean;
 }
 
-interface UserProfile {
-  id: string;
-  points: number;
-  level: string;
-  badges: string[];
+interface UserProfile
+  extends Pick<DatabaseUser, "id" | "points" | "level" | "badges"> {
   completed_courses: string[];
   forum_posts: number;
   login_streak: number;
@@ -109,7 +108,7 @@ export const calculatePoints = (
     difficulty?: keyof typeof MULTIPLIERS.difficulty;
     quality?: keyof typeof MULTIPLIERS.quality;
     streak?: number;
-  },
+  }
 ): number => {
   let points = POINTS_CONFIG[action];
 
@@ -127,7 +126,7 @@ export const calculatePoints = (
       (acc, [days, multiplier]) => {
         return streak >= Number(days) ? multiplier : acc;
       },
-      1,
+      1
     );
     points *= streakMultiplier;
   }
@@ -159,9 +158,9 @@ export const getCurrentLevel = (points: number): Level => {
   return LEVELS.findLast((level) => points >= level.minPoints) ?? DEFAULT_LEVEL;
 };
 
-export const getLevelProgress = async (
-  points: number,
-): Promise<{ level: Level; progress: number }> => {
+export const getLevelProgress = (
+  points: number
+): { level: Level; progress: number } => {
   const level = getCurrentLevel(points);
   const nextLevel = getNextLevel(points);
 
@@ -217,45 +216,70 @@ export const BADGES: Badge[] = [
   },
 ];
 
-const supabase = createClient(
+const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 export const awardPoints = async (
   userId: string,
-  action: ActionType,
+  action: ActionType
 ): Promise<UserProfile> => {
   try {
-    // Get current user profile
-    const { data: user } = await supabase
-      .from("profiles")
-      .select("*")
+    // Get current user profile with all required fields
+    const { data: user, error: fetchError } = await supabase
+      .from("users")
+      .select(
+        `
+        id,
+        points,
+        level,
+        badges,
+        completed_courses,
+        forum_posts,
+        login_streak,
+        created_at,
+        updated_at
+      `
+      )
       .eq("id", userId)
       .single();
 
-    if (!user) throw new Error("משתמש לא נמצא");
+    if (fetchError || !user) throw new Error("משתמש לא נמצא");
+
+    // Create UserProfile object
+    const userProfile: UserProfile = {
+      id: user.id,
+      points: user.points ?? 0,
+      level: user.level ?? DEFAULT_LEVEL.name,
+      badges: user.badges ?? [],
+      completed_courses: user.completed_courses ?? [],
+      forum_posts: user.forum_posts ?? 0,
+      login_streak: user.login_streak ?? 0,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
 
     // Calculate new points
-    const newPoints = (user.points || 0) + ACTIONS[action];
+    const newPoints = userProfile.points + ACTIONS[action];
 
     // Calculate new level
-    const newLevel = LEVELS.reduce((acc, level) => {
+    const newLevel = LEVELS.reduce<string>((acc, level) => {
       if (newPoints >= level.minPoints) return level.name;
       return acc;
-    }, LEVELS[0].name);
+    }, DEFAULT_LEVEL.name);
 
     // Check for new badges
-    const currentBadges = new Set(user.badges || []);
+    const currentBadges = new Set(userProfile.badges);
     BADGES.forEach((badge) => {
-      if (!currentBadges.has(badge.id) && badge.condition(user)) {
+      if (!currentBadges.has(badge.id) && badge.condition(userProfile)) {
         currentBadges.add(badge.id);
       }
     });
 
     // Update user profile
-    const { data: updatedUser, error } = await supabase
-      .from("profiles")
+    const { data: updatedUser, error: updateError } = await supabase
+      .from("users")
       .update({
         points: newPoints,
         level: newLevel,
@@ -263,56 +287,63 @@ export const awardPoints = async (
         updated_at: new Date().toISOString(),
       })
       .eq("id", userId)
-      .select()
+      .select(
+        `
+        id,
+        points,
+        level,
+        badges,
+        completed_courses,
+        forum_posts,
+        login_streak,
+        created_at,
+        updated_at
+      `
+      )
       .single();
 
-    if (error) throw error;
-    return updatedUser;
+    if (updateError || !updatedUser) throw new Error("שגיאה בעדכון המשתמש");
+
+    // Convert to UserProfile
+    return {
+      id: updatedUser.id,
+      points: updatedUser.points ?? 0,
+      level: updatedUser.level ?? DEFAULT_LEVEL.name,
+      badges: updatedUser.badges ?? [],
+      completed_courses: updatedUser.completed_courses ?? [],
+      forum_posts: updatedUser.forum_posts ?? 0,
+      login_streak: updatedUser.login_streak ?? 0,
+      created_at: updatedUser.created_at,
+      updated_at: updatedUser.updated_at,
+    };
   } catch (error) {
     console.error("Error awarding points:", error);
-    throw new Error("שגיאה בהענקת נקודות");
+    throw error;
   }
 };
 
 export const getUserLevel = async (
-  userId: string,
+  userId: string
 ): Promise<{ level: Level; progress: number }> => {
-  try {
-    // Get user points
-    const { data: user } = await supabase
-      .from("profiles")
-      .select("points")
-      .eq("id", userId)
-      .single();
+  const { data, error } = await supabase
+    .from("users")
+    .select("points")
+    .eq("id", userId)
+    .single();
 
-    if (!user) throw new Error("משתמש לא נמצא");
+  if (error) throw new Error("משתמש לא נמצא");
+  if (!data) throw new Error("משתמש לא נמצא");
 
-    const points = user.points || 0;
+  const userPoints = data as { points: number | null };
+  const points = userPoints.points ?? 0;
+  const level = getCurrentLevel(points);
+  const nextLevel = getNextLevel(points);
 
-    // Find current level and next level
-    let currentLevel = LEVELS[0];
-    let nextLevel = LEVELS[1];
-
-    for (let i = 0; i < LEVELS.length; i++) {
-      if (points >= LEVELS[i].minPoints) {
-        currentLevel = LEVELS[i];
-        nextLevel = LEVELS[i + 1];
-      }
-    }
-
-    // Calculate progress to next level
-    const progress = nextLevel
-      ? ((points - currentLevel.minPoints) /
-          (nextLevel.minPoints - currentLevel.minPoints)) *
+  return {
+    level,
+    progress: nextLevel
+      ? ((points - level.minPoints) / (nextLevel.minPoints - level.minPoints)) *
         100
-      : 100;
-
-    return {
-      level: currentLevel,
-      progress: Math.min(Math.max(progress, 0), 100),
-    };
-  } catch (error) {
-    console.error("Error getting user level:", error);
-    throw new Error("שגיאה בטעינת רמת המשתמש");
-  }
+      : 100,
+  };
 };

@@ -1,12 +1,13 @@
 "use client";
 
+import * as React from "react";
+
 import {
   motion,
   useMotionValue,
   useSpring,
   type HTMLMotionProps,
 } from "framer-motion";
-import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -66,7 +67,7 @@ function Tilt({
         transition: `${speed}ms ${easing}`,
       });
     },
-    [max, perspective, scale, speed, easing],
+    [max, perspective, scale, speed, easing]
   );
 
   const handleMouseLeave = React.useCallback(() => {
@@ -107,7 +108,7 @@ function Tilt({
         <div
           className={cn(
             "pointer-events-none absolute bg-gradient-to-r from-transparent to-white opacity-0 transition-opacity group-hover:opacity-20",
-            getGlarePosition(),
+            getGlarePosition()
           )}
           style={{
             opacity: glareOpacity,
