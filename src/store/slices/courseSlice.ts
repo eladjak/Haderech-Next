@@ -42,15 +42,22 @@ export const courseSlice = createSlice({
         state.currentCourse = action.payload;
       }
     },
-    incrementStudents: (state, action: PayloadAction<string>) => {
-      const course = state.courses.find(
-        (course) => course.id === action.payload
-      );
-      if (course) {
-        course.total_students += 1;
+    incrementStudents: (state) => {
+      if (state.currentCourse) {
+        state.currentCourse.students_count += 1;
       }
-      if (state.currentCourse?.id === action.payload) {
-        state.currentCourse.total_students += 1;
+    },
+    updateProgress: (
+      state,
+      action: PayloadAction<{ lessonId: string; progress: number }>
+    ) => {
+      if (state.currentCourse && state.currentCourse.lessons) {
+        const lesson = state.currentCourse.lessons.find(
+          (l) => l.id === action.payload.lessonId
+        );
+        if (lesson) {
+          lesson.progress = action.payload.progress;
+        }
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -68,6 +75,7 @@ export const {
   setCurrentLesson,
   updateCourse,
   incrementStudents,
+  updateProgress,
   setLoading,
   setError,
 } = courseSlice.actions;

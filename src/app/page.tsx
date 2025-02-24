@@ -1,5 +1,14 @@
 import React from "react";
 
+import Link from "next/link";
+
+import {
+  ArrowRight,
+  BookOpen,
+  ChevronRight,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Metadata } from "next";
 
 import { LatestForumPosts } from "@/components/latest-forum-posts";
@@ -11,6 +20,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,61 +29,104 @@ import { posts } from "@/constants/posts";
 import { users } from "@/constants/users";
 
 function HomeActions(): React.ReactElement {
-  "use client";
   return (
-    <div className="flex justify-center gap-4">
-      <Button size="lg">Start Learning</Button>
-      <Button size="lg" variant="outline">
-        Explore Courses
+    <div className="flex flex-col justify-center gap-4 sm:flex-row">
+      <Button
+        size="lg"
+        className="bg-gradient-to-r from-primary to-blue-600 transition-all duration-300 hover:from-primary/90 hover:to-blue-500"
+      >
+        <Link href="/courses">
+          <span className="flex items-center">
+            התחל ללמוד
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </span>
+        </Link>
+      </Button>
+      <Button
+        size="lg"
+        variant="outline"
+        className="border-primary text-primary transition-all duration-300 hover:bg-primary/10"
+      >
+        <Link href="/courses">
+          <span className="flex items-center">
+            גלה קורסים
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </span>
+        </Link>
       </Button>
     </div>
   );
 }
 
 function SocialSection(): React.ReactElement {
-  "use client";
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Community Support</CardTitle>
-        <CardDescription>
-          Connect with others on similar journeys
-        </CardDescription>
+    <Card className="overflow-hidden border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-50"></div>
+      <CardHeader className="relative">
+        <div className="absolute right-4 top-4 rounded-full bg-blue-100 p-2">
+          <Users className="h-5 w-5 text-blue-600" />
+        </div>
+        <CardTitle className="text-xl font-bold">קהילה תומכת</CardTitle>
+        <CardDescription>התחבר עם אחרים במסעות דומים</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <SocialRecommendations users={users} />
       </CardContent>
+      <CardFooter className="relative">
+        <Button variant="ghost" size="sm" className="ml-auto text-blue-600">
+          <span className="flex items-center">
+            להצטרף לקהילה
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </span>
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
 
 function ReferralSection(): React.ReactElement {
-  "use client";
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Practice & Growth</CardTitle>
+    <Card className="overflow-hidden border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 opacity-50"></div>
+      <CardHeader className="relative">
+        <div className="absolute right-4 top-4 rounded-full bg-purple-100 p-2">
+          <Sparkles className="h-5 w-5 text-purple-600" />
+        </div>
+        <CardTitle className="text-xl font-bold">תרגול וצמיחה</CardTitle>
         <CardDescription>
-          Interactive scenarios and real-world applications
+          תרחישים אינטראקטיביים ויישומים מהעולם האמיתי
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <ReferralManagement referralCode="ABC123" />
       </CardContent>
+      <CardFooter className="relative">
+        <Button variant="ghost" size="sm" className="ml-auto text-purple-600">
+          <span className="flex items-center">
+            לסימולטור התרגול
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </span>
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
 
 const HeroSection = (): React.ReactElement => {
   return (
-    <section className="mb-12 text-center">
-      <h1 className="mb-4 text-4xl font-bold tracking-tight">
-        Welcome to HaDerech
-      </h1>
-      <p className="mb-8 text-xl text-muted-foreground">
-        Your journey to better relationships starts here
-      </p>
-      <HomeActions />
+    <section className="relative mb-12 overflow-hidden py-20 text-center">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 opacity-70"></div>
+      <div className="absolute inset-0 bg-[url(/grid.svg)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+
+      <div className="relative">
+        <h1 className="mb-4 bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-5xl font-bold tracking-tight text-transparent">
+          ברוכים הבאים להדרך
+        </h1>
+        <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
+          המסע שלך ליצירת מערכות יחסים טובות יותר מתחיל כאן
+        </p>
+        <HomeActions />
+      </div>
     </section>
   );
 };
@@ -81,16 +134,30 @@ const HeroSection = (): React.ReactElement => {
 const FeaturesSection = (): React.ReactElement => {
   return (
     <section className="mb-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <Card>
-        <CardHeader>
-          <CardTitle>AI-Powered Learning</CardTitle>
+      <Card className="overflow-hidden border-0 shadow-lg transition-all duration-300 hover:shadow-xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50 opacity-50"></div>
+        <CardHeader className="relative">
+          <div className="absolute right-4 top-4 rounded-full bg-green-100 p-2">
+            <BookOpen className="h-5 w-5 text-green-600" />
+          </div>
+          <CardTitle className="text-xl font-bold">
+            למידה מונעת בינה מלאכותית
+          </CardTitle>
           <CardDescription>
-            Personalized course recommendations and adaptive learning paths
+            המלצות קורסים מותאמות אישית ומסלולי למידה אדפטיביים
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <RecommendedCoursesPreview courses={courses} />
         </CardContent>
+        <CardFooter className="relative">
+          <Button variant="ghost" size="sm" className="ml-auto text-green-600">
+            <span className="flex items-center">
+              למסלולי למידה מותאמים
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </span>
+          </Button>
+        </CardFooter>
       </Card>
 
       <SocialSection />
@@ -102,16 +169,23 @@ const FeaturesSection = (): React.ReactElement => {
 const TestimonialsSection = (): React.ReactElement => {
   return (
     <section className="mb-12">
-      <Card>
-        <CardHeader>
-          <CardTitle>Latest Community Discussions</CardTitle>
-          <CardDescription>
-            Join the conversation and share your experiences
-          </CardDescription>
+      <Card className="overflow-hidden border-0 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-amber-50 opacity-40"></div>
+        <CardHeader className="relative">
+          <CardTitle>דיונים אחרונים בקהילה</CardTitle>
+          <CardDescription>הצטרף לשיחה ושתף את החוויות שלך</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <LatestForumPosts posts={posts} />
         </CardContent>
+        <CardFooter className="relative">
+          <Button variant="ghost" size="sm" className="ml-auto text-orange-600">
+            <span className="flex items-center">
+              לפורום הקהילה
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </span>
+          </Button>
+        </CardFooter>
       </Card>
     </section>
   );

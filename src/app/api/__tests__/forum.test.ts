@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, POST } from "../forum/route";
@@ -13,6 +14,8 @@ describe("Forum API", () => {
   const mockUser = {
     id: "test-user-id",
     email: "test@example.com",
+    name: "משתמש לדוגמה",
+    avatar_url: "https://example.com/avatar.jpg",
   };
 
   const mockPost = {
@@ -20,27 +23,39 @@ describe("Forum API", () => {
     title: "פוסט לדוגמה",
     content: "תוכן הפוסט",
     author_id: mockUser.id,
+    author: mockUser,
+    category: "general",
+    category_details: {
+      id: "general",
+      name: "כללי",
+    },
+    tags: ["test"],
+    tags_details: [
+      {
+        id: "test",
+        name: "טסט",
+      },
+    ],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    category: "general",
-    tags: ["test"],
   };
 
   const mockSupabase = {
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      contains: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(async () => ({
         data: mockPost,
         error: null,
       })),
     })),
     auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: { user: mockUser } },
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: mockUser },
         error: null,
       }),
     },
@@ -48,21 +63,53 @@ describe("Forum API", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(cookies).mockReturnValue({
-      get: vi.fn().mockReturnValue({ value: "test-token" }),
-    } as any);
-    vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
+
+    // מוק לשליפת פוסטים
+    mockSupabase.from().select.mockResolvedValueOnce({
+      data: [mockPost],
+      error: null,
+    });
+
+    // מוק לשגיאה בשליפת פוסטים
+    mockSupabase.from().select.mockResolvedValueOnce({
+      data: null,
+      error: { message: "שגיאת מסד נתונים" },
+    });
+
+    // מוק ליצירת פוסט
+    mockSupabase.from().insert.mockReturnThis();
+    mockSupabase.from().insert().select.mockReturnThis();
+    mockSupabase
+      .from()
+      .insert()
+      .select()
+      .single.mockResolvedValueOnce({
+        data: { ...mockPost, id: "new-post-1" },
+        error: null,
+      });
+
+    // מוק לשגיאה ביצירת פוסט
+    mockSupabase.from().insert.mockReturnThis();
+    mockSupabase.from().insert().select.mockReturnThis();
+    mockSupabase
+      .from()
+      .insert()
+      .select()
+      .single.mockResolvedValueOnce({
+        data: null,
+        error: { message: "שגיאת מסד נתונים" },
+      });
   });
+
+  vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
+  vi.mocked(createServerClient).mockReturnValue(mockSupabase as any);
 
   describe("GET /api/forum", () => {
     it("מחזיר את כל הפוסטים", async () => {
-      mockSupabase
-        .from()
-        .select()
-        .order.mockResolvedValueOnce({
-          data: [mockPost],
-          error: null,
-        });
+      mockSupabase.from().select.mockResolvedValueOnce({
+        data: [mockPost],
+        error: null,
+      });
 
       const request = new NextRequest("http://localhost:3000/api/forum");
       const response = await GET(request);
@@ -73,13 +120,11 @@ describe("Forum API", () => {
     });
 
     it("מחזיר שגיאה כאשר יש בעיה בשליפת הפוסטים", async () => {
-      mockSupabase
-        .from()
-        .select()
-        .order.mockResolvedValueOnce({
-          data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        });
+      const errorMessage = "שגיאת מסד נתונים";
+      mockSupabase.from().select.mockResolvedValueOnce({
+        data: null,
+        error: { message: errorMessage },
+      });
 
       const request = new NextRequest("http://localhost:3000/api/forum");
       const response = await GET(request);
@@ -88,19 +133,16 @@ describe("Forum API", () => {
       expect(response.status).toBe(500);
       expect(data).toEqual({
         error: "שגיאת מסד נתונים",
+        details: errorMessage,
       });
     });
 
     it("מסנן פוסטים לפי קטגוריה", async () => {
       const category = "javascript";
-      mockSupabase
-        .from()
-        .select()
-        .order()
-        .eq.mockResolvedValueOnce({
-          data: [mockPost],
-          error: null,
-        });
+      mockSupabase.from().select.mockResolvedValueOnce({
+        data: [mockPost],
+        error: null,
+      });
 
       const request = new NextRequest(
         `http://localhost:3000/api/forum?category=${category}`
@@ -108,9 +150,13 @@ describe("Forum API", () => {
       const response = await GET(request);
       const data = await response.json();
 
-      expect(mockSupabase.from().select().order().eq).toHaveBeenCalledWith(
-        "category",
-        category
+      expect(mockSupabase.from().select).toHaveBeenCalledWith(
+        `
+        *,
+        author:users(id, name, avatar_url),
+        category:forum_categories(id, name),
+        tags:forum_tags(id, name)
+      `
       );
       expect(response.status).toBe(200);
       expect(data).toEqual([mockPost]);
@@ -118,14 +164,10 @@ describe("Forum API", () => {
 
     it("מסנן פוסטים לפי תגית", async () => {
       const tag = "react";
-      mockSupabase
-        .from()
-        .select()
-        .order()
-        .contains.mockResolvedValueOnce({
-          data: [mockPost],
-          error: null,
-        });
+      mockSupabase.from().select.mockResolvedValueOnce({
+        data: [mockPost],
+        error: null,
+      });
 
       const request = new NextRequest(
         `http://localhost:3000/api/forum?tag=${tag}`
@@ -133,9 +175,14 @@ describe("Forum API", () => {
       const response = await GET(request);
       const data = await response.json();
 
-      expect(
-        mockSupabase.from().select().order().contains
-      ).toHaveBeenCalledWith("tags", [tag]);
+      expect(mockSupabase.from().select).toHaveBeenCalledWith(
+        `
+        *,
+        author:users(id, name, avatar_url),
+        category:forum_categories(id, name),
+        tags:forum_tags(id, name)
+      `
+      );
       expect(response.status).toBe(200);
       expect(data).toEqual([mockPost]);
     });
@@ -150,33 +197,24 @@ describe("Forum API", () => {
     };
 
     it("יוצר פוסט חדש בהצלחה", async () => {
+      const createdPost = {
+        ...newPost,
+        id: "new-post-1",
+        author_id: mockUser.id,
+        created_at: expect.any(String),
+        updated_at: expect.any(String),
+        author: mockUser,
+        category_details: { id: "general", name: "כללי" },
+        tags_details: [
+          { id: "javascript", name: "JavaScript" },
+          { id: "react", name: "React" },
+        ],
+      };
+
       mockSupabase.from().insert.mockReturnThis();
       mockSupabase.from().insert().select.mockReturnThis();
-      mockSupabase
-        .from()
-        .insert()
-        .select()
-        .single.mockResolvedValueOnce({
-          data: { id: "new-post-1", ...newPost },
-          error: null,
-        });
-
-      const request = new NextRequest("http://localhost:3000/api/forum", {
-        method: "POST",
-        body: JSON.stringify(newPost),
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(201);
-      expect(data).toHaveProperty("id", "new-post-1");
-      expect(data).toMatchObject(newPost);
-    });
-
-    it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
-      mockSupabase.auth.getSession.mockResolvedValueOnce({
-        data: { session: null },
+      mockSupabase.from().insert().select().single.mockResolvedValueOnce({
+        data: createdPost,
         error: null,
       });
 
@@ -188,13 +226,16 @@ describe("Forum API", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(401);
-      expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+      expect(response.status).toBe(201);
+      expect(data).toMatchObject(createdPost);
     });
 
-    it("מחזיר שגיאה כאשר חסרים שדות חובה", async () => {
+    it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
+      mockSupabase.auth.getUser.mockResolvedValueOnce({
+        data: { user: null },
+        error: null,
+      });
+
       const request = new NextRequest("http://localhost:3000/api/forum", {
         method: "POST",
         body: JSON.stringify({}),
@@ -203,13 +244,44 @@ describe("Forum API", () => {
       const response = await POST(request);
       const data = await response.json();
 
+      expect(response.status).toBe(401);
+      expect(data).toEqual({
+        error: "נדרשת הזדהות",
+      });
+    });
+
+    it("מחזיר שגיאה כאשר חסרה כותרת", async () => {
+      const request = new NextRequest("http://localhost:3000/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ content: "תוכן" }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "חסרים שדות חובה",
+        error: "חסרה כותרת",
+      });
+    });
+
+    it("מחזיר שגיאה כאשר חסר תוכן", async () => {
+      const request = new NextRequest("http://localhost:3000/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ title: "כותרת" }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data).toEqual({
+        error: "חסר תוכן",
       });
     });
 
     it("מחזיר שגיאה כאשר יש בעיה ביצירת הפוסט", async () => {
+      const errorMessage = "שגיאת מסד נתונים";
       mockSupabase.from().insert.mockReturnThis();
       mockSupabase.from().insert().select.mockReturnThis();
       mockSupabase
@@ -218,7 +290,7 @@ describe("Forum API", () => {
         .select()
         .single.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
+          error: { message: errorMessage },
         });
 
       const request = new NextRequest("http://localhost:3000/api/forum", {
@@ -232,6 +304,7 @@ describe("Forum API", () => {
       expect(response.status).toBe(500);
       expect(data).toEqual({
         error: "שגיאת מסד נתונים",
+        details: errorMessage,
       });
     });
   });

@@ -1,18 +1,64 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
 
+// קריאת משתני סביבה
+dotenv.config({ path: ".env.test" });
+
+// הגדרת הקונפיגורציה
 export default defineConfig({
-  testDir: "./e2e-tests",
-  fullyParallel: true,
-  forbidOnly: process.env["CI"] ? true : false,
-  retries: process.env["CI"] ? 2 : 0,
-  workers: process.env["CI"] ? 1 : 2,
-  reporter: process.env["CI"] ? "github" : "html",
+  // תיקיית הטסטים
+  testDir: "./src/tests/e2e",
+
+  // מספר הניסיונות המקסימלי לכל טסט
+  retries: process.env.CI ? 2 : 0,
+
+  // מספר העובדים המקסימלי
+  workers: process.env.CI ? 1 : undefined,
+
+  // זמן מקסימלי לכל טסט
+  timeout: 30000,
+
+  // הגדרות דיווח
+  reporter: [
+    ["html"],
+    ["list"],
+    ["junit", { outputFile: "test-results/junit.xml" }],
+  ],
+
+  // הגדרות שימוש
   use: {
-    baseURL: process.env["NEXT_PUBLIC_APP_URL"] || "http://localhost:3000",
-    trace: "on-first-retry",
-    video: "retain-on-failure",
+    // בסיס URL לכל הבקשות
+    baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+
+    // צילום מסך בכישלון
     screenshot: "only-on-failure",
+
+    // הקלטת וידאו בכישלון
+    video: "retain-on-failure",
+
+    // איסוף עקבות בכישלון
+    trace: "retain-on-failure",
+
+    // הגדרות נוספות
+    actionTimeout: 10000,
+    navigationTimeout: 15000,
+
+    // הגדרות דפדפן
+    viewport: { width: 1280, height: 720 },
+    ignoreHTTPSErrors: true,
+
+    // הגדרות נגישות
+    bypassCSP: true,
+    hasTouch: true,
+    isMobile: false,
+
+    // הגדרות לוקליזציה
+    locale: "he-IL",
+    timezoneId: "Asia/Jerusalem",
   },
+
+  // פרויקטים
   projects: [
     {
       name: "chromium",
@@ -27,22 +73,34 @@ export default defineConfig({
       use: { ...devices["Desktop Safari"] },
     },
     {
-      name: "Mobile Chrome",
+      name: "mobile-chrome",
       use: { ...devices["Pixel 5"] },
     },
     {
-      name: "Mobile Safari",
+      name: "mobile-safari",
       use: { ...devices["iPhone 12"] },
     },
   ],
+
+  // הגדרות בנייה
   webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env["CI"],
-    timeout: 120 * 1000,
+    command: "pnpm run dev",
+    port: 3000,
+    timeout: 120000,
+    reuseExistingServer: !process.env.CI,
   },
-  expect: {
-    timeout: 10000,
-  },
-  testMatch: ["**/*.spec.ts"],
+
+  // הגדרות תיקיות
+  outputDir: "test-results/",
+  snapshotDir: "test-snapshots/",
+
+  // הגדרות גלובליות
+  globalSetup: require.resolve("./src/tests/e2e/global-setup"),
+  globalTeardown: require.resolve("./src/tests/e2e/global-teardown"),
+
+  // התעלמות מקבצים
+  testIgnore: ["**/node_modules/**", "**/.next/**"],
+
+  // תבניות שם לצילומי מסך
+  snapshotPathTemplate: "{testDir}/{testFilePath}/{arg}-{projectName}{ext}",
 });

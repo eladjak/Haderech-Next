@@ -1,9 +1,9 @@
 "use client";
 
 // React and external dependencies
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
-import { Search } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,30 +23,49 @@ import type { ForumFilters as ForumFiltersType } from "@/types/forum";
 export interface ForumFiltersProps {
   onFilter?: (filters: ForumFiltersType) => void;
   className?: string;
+  filters?: ForumFiltersType;
 }
 
 export function ForumFilters({
   onFilter,
   className,
+  filters = {
+    search: "",
+    sort: "latest",
+    category: undefined,
+    status: "all",
+    timeframe: "all",
+  },
 }: ForumFiltersProps): React.ReactElement {
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<ForumFiltersType["sort"]>("latest");
-  const [category, setCategory] = useState("");
-  const [status, setStatus] = useState<ForumFiltersType["status"]>("all");
-  const [timeframe, setTimeframe] =
-    useState<ForumFiltersType["timeframe"]>("all");
+  const [search, setSearch] = useState(filters.search);
+  const [sort, setSort] = useState<ForumFiltersType["sort"]>(filters.sort);
+  const [category, setCategory] = useState(filters.category || "");
+  const [status, setStatus] = useState<ForumFiltersType["status"]>(
+    filters.status
+  );
+  const [timeframe, setTimeframe] = useState<ForumFiltersType["timeframe"]>(
+    filters.timeframe
+  );
 
-  const handleFilterChange = () => {
-    if (onFilter) {
-      onFilter({
-        search,
-        sort,
-        category,
-        status,
-        timeframe,
-      });
-    }
-  };
+  const handleFilterChange = useCallback(
+    (key: keyof ForumFiltersType, value: string) => {
+      if (onFilter) {
+        onFilter({
+          ...filters,
+          [key]: value,
+        });
+      }
+    },
+    [onFilter, filters]
+  );
+
+  useEffect(() => {
+    handleFilterChange("search", search);
+    handleFilterChange("sort", sort);
+    handleFilterChange("category", category);
+    handleFilterChange("status", status);
+    handleFilterChange("timeframe", timeframe);
+  }, [search, sort, category, status, timeframe, handleFilterChange]);
 
   const handleReset = () => {
     setSearch("");
@@ -54,7 +73,6 @@ export function ForumFilters({
     setCategory("");
     setStatus("all");
     setTimeframe("all");
-    handleFilterChange();
   };
 
   return (
@@ -75,6 +93,7 @@ export function ForumFilters({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label="חיפוש בפורום"
+            data-testid="search-input"
           />
         </div>
       </div>
@@ -82,12 +101,14 @@ export function ForumFilters({
         value={sort}
         onValueChange={(value) => {
           setSort(value as ForumFiltersType["sort"]);
-          handleFilterChange();
         }}
         data-testid="sort-select"
-        aria-label="מיין תוצאות"
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger
+          className="w-[180px]"
+          data-testid="sort-trigger"
+          aria-label="מיין תוצאות"
+        >
           <SelectValue>
             {sort === "latest"
               ? "הכי חדשים"
@@ -112,12 +133,14 @@ export function ForumFilters({
         value={status}
         onValueChange={(value) => {
           setStatus(value as ForumFiltersType["status"]);
-          handleFilterChange();
         }}
         data-testid="status-select"
-        aria-label="סנן לפי סטטוס"
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger
+          className="w-[180px]"
+          data-testid="status-trigger"
+          aria-label="סנן לפי סטטוס"
+        >
           <SelectValue>
             {status === "all"
               ? "כל הסטטוסים"
@@ -142,12 +165,14 @@ export function ForumFilters({
         value={timeframe}
         onValueChange={(value) => {
           setTimeframe(value as ForumFiltersType["timeframe"]);
-          handleFilterChange();
         }}
         data-testid="timeframe-select"
-        aria-label="סנן לפי זמן"
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger
+          className="w-[180px]"
+          data-testid="timeframe-trigger"
+          aria-label="סנן לפי טווח זמן"
+        >
           <SelectValue>
             {timeframe === "all"
               ? "כל הזמנים"

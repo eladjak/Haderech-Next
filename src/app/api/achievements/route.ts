@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 // Achievement definitions
-export const ACHIEVEMENTS = {
+const ACHIEVEMENTS_DATA = {
   FIRST_LOGIN: {
     id: "first_login",
     title: "התחברות ראשונה",
@@ -100,7 +100,9 @@ export async function GET() {
     // Map achievements with their definitions
     const achievementsWithDetails = achievements.map((achievement) => ({
       ...achievement,
-      ...ACHIEVEMENTS[achievement.achievement_id as keyof typeof ACHIEVEMENTS],
+      ...ACHIEVEMENTS_DATA[
+        achievement.achievement_id as keyof typeof ACHIEVEMENTS_DATA
+      ],
     }));
 
     return NextResponse.json(achievementsWithDetails);
@@ -165,52 +167,52 @@ export async function POST(req: Request) {
     // Check each achievement condition
     if (
       isFirstLogin &&
-      !existingAchievements.includes(ACHIEVEMENTS.FIRST_LOGIN.id)
+      !existingAchievements.includes(ACHIEVEMENTS_DATA.FIRST_LOGIN.id)
     ) {
-      newAchievements.push(ACHIEVEMENTS.FIRST_LOGIN.id);
+      newAchievements.push(ACHIEVEMENTS_DATA.FIRST_LOGIN.id);
     }
 
     if (
       profileCompletion === 100 &&
-      !existingAchievements.includes(ACHIEVEMENTS.COMPLETE_PROFILE.id)
+      !existingAchievements.includes(ACHIEVEMENTS_DATA.COMPLETE_PROFILE.id)
     ) {
-      newAchievements.push(ACHIEVEMENTS.COMPLETE_PROFILE.id);
+      newAchievements.push(ACHIEVEMENTS_DATA.COMPLETE_PROFILE.id);
     }
 
     if (
       completedCourses > 0 &&
-      !existingAchievements.includes(ACHIEVEMENTS.FIRST_COURSE.id)
+      !existingAchievements.includes(ACHIEVEMENTS_DATA.FIRST_COURSE.id)
     ) {
-      newAchievements.push(ACHIEVEMENTS.FIRST_COURSE.id);
+      newAchievements.push(ACHIEVEMENTS_DATA.FIRST_COURSE.id);
     }
 
     if (
       joinedGroups >= 5 &&
-      !existingAchievements.includes(ACHIEVEMENTS.SOCIAL_BUTTERFLY.id)
+      !existingAchievements.includes(ACHIEVEMENTS_DATA.SOCIAL_BUTTERFLY.id)
     ) {
-      newAchievements.push(ACHIEVEMENTS.SOCIAL_BUTTERFLY.id);
+      newAchievements.push(ACHIEVEMENTS_DATA.SOCIAL_BUTTERFLY.id);
     }
 
     if (
       chatInteractions >= 50 &&
-      !existingAchievements.includes(ACHIEVEMENTS.CHAT_MASTER.id)
+      !existingAchievements.includes(ACHIEVEMENTS_DATA.CHAT_MASTER.id)
     ) {
-      newAchievements.push(ACHIEVEMENTS.CHAT_MASTER.id);
+      newAchievements.push(ACHIEVEMENTS_DATA.CHAT_MASTER.id);
     }
 
     if (
       simulatorInteractions >= 50 &&
-      !existingAchievements.includes(ACHIEVEMENTS.SIMULATOR_MASTER.id)
+      !existingAchievements.includes(ACHIEVEMENTS_DATA.SIMULATOR_MASTER.id)
     ) {
-      newAchievements.push(ACHIEVEMENTS.SIMULATOR_MASTER.id);
+      newAchievements.push(ACHIEVEMENTS_DATA.SIMULATOR_MASTER.id);
     }
 
     if (
       completedSimulations >= 10 &&
       averageFeedback >= 4.5 &&
-      !existingAchievements.includes(ACHIEVEMENTS.FEEDBACK_CHAMPION.id)
+      !existingAchievements.includes(ACHIEVEMENTS_DATA.FEEDBACK_CHAMPION.id)
     ) {
-      newAchievements.push(ACHIEVEMENTS.FEEDBACK_CHAMPION.id);
+      newAchievements.push(ACHIEVEMENTS_DATA.FEEDBACK_CHAMPION.id);
     }
 
     // Add new achievements
@@ -237,7 +239,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       newAchievements: newAchievements.map(
-        (id) => ACHIEVEMENTS[id as keyof typeof ACHIEVEMENTS]
+        (id) => ACHIEVEMENTS_DATA[id as keyof typeof ACHIEVEMENTS_DATA]
       ),
     });
   } catch (error) {

@@ -2,7 +2,8 @@ import { Tables } from "@/types/supabase";
 
 import { UserStats } from "./profile";
 
-import type { ForumComment } from "./forum";
+import type { CourseLesson } from "./api";
+import type { ForumComment, ForumStats } from "./forum";
 import type {
   Course,
   CourseComment,
@@ -18,6 +19,7 @@ import type {
   SimulatorUserStats,
   User,
 } from "./models";
+import type { SimulatorState } from "./simulator";
 
 export interface UserStatsProps {
   stats: UserStats;
@@ -25,11 +27,7 @@ export interface UserStatsProps {
 }
 
 export interface CourseCardProps {
-  course: Tables<"courses"> & {
-    author: Tables<"users">;
-    lessons: { count: number }[];
-  };
-  className?: string;
+  course: Course;
 }
 
 export interface LessonCardProps {
@@ -81,18 +79,13 @@ export interface CourseCommentsProps {
 
 export interface CourseContentProps {
   course: Course;
-  lessons: Lesson[];
-  isEnrolled?: boolean;
-  onLessonClick?: (lessonId: string) => void;
-  isLoading?: boolean;
+  currentLesson?: CourseLesson;
 }
 
 export interface CourseHeaderProps {
   course: Course;
   isEnrolled?: boolean;
-  onEnroll?: () => Promise<void>;
-  onUnenroll?: () => Promise<void>;
-  isLoading?: boolean;
+  onEnroll?: () => void;
 }
 
 export interface CourseProgressProps {
@@ -108,10 +101,7 @@ export interface CourseRatingsProps {
 
 export interface CourseSidebarProps {
   course: Course;
-  lessons: Lesson[];
-  currentLessonId?: string;
-  onLessonClick?: (lessonId: string) => void;
-  isLoading?: boolean;
+  currentLesson?: CourseLesson;
 }
 
 export interface ProfileProps {
@@ -189,4 +179,34 @@ export interface SimulatorStatsProps {
 export interface SimulatorSettingsProps {
   settings: SimulatorUserSettings;
   onUpdate: (settings: Partial<SimulatorUserSettings>) => Promise<void>;
+}
+
+export interface CourseTabsProps {
+  course: Course;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+export interface LessonContentProps {
+  lesson: CourseLesson;
+  onComplete?: () => void;
+}
+
+export interface LessonSidebarProps {
+  course: Course;
+  currentLesson: CourseLesson;
+  onLessonSelect: (lesson: CourseLesson) => void;
+}
+
+export interface ForumProps {
+  posts: ForumPost[];
+  stats: ForumStats;
+}
+
+export interface ChatSimulatorProps {
+  state: SimulatorState;
+  onSendMessage: (message: string) => void;
+  onReset: () => void;
+  isLoading?: boolean;
+  showFeedback?: boolean;
 }

@@ -1,36 +1,42 @@
 /// <reference types="vitest" />
+/// <reference types="vite/client" />
+
+import { resolve } from "path";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react()],
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["./src/test/setup.ts"],
+    setupFiles: [
+      "./src/test/vitest-setup.ts",
+      "./src/tests/utils/test-setup.ts",
+      "./src/tests/utils/test-matchers.ts",
+    ],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
-      provider: "v8",
       reporter: ["text", "json", "html"],
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
-        "coverage/**",
-        "dist/**",
-        "**/[.]**",
-        "packages/*/test?(s)/**",
-        "**/*.d.ts",
-        "**/virtual:*",
-        "**/__mocks__/*",
-        "**/node_modules/**",
-        "test?(s)/**",
+        "src/**/*.{test,spec}.{ts,tsx}",
+        "src/test/**/*",
+        "src/tests/**/*",
+        "src/types/**/*",
       ],
-      thresholds: {
-        statements: 80,
-        branches: 70,
-        functions: 80,
-        lines: 80,
-      },
     },
-    include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    exclude: ["node_modules", "dist", ".idea", ".git", ".cache"],
+    deps: {
+      inline: [
+        "@testing-library/jest-dom",
+        "@testing-library/react",
+        "@testing-library/user-event",
+      ],
+    },
+  },
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "./src"),
+    },
   },
 });

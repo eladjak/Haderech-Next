@@ -8,10 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createServerClient } from "@supabase/ssr";
 
-import { Database, DatabaseCourse, DatabaseLesson } from "@/types/database";
-
-type Lesson = Database["public"]["Tables"]["lessons"]["Row"];
-type Course = Database["public"]["Tables"]["courses"]["Row"];
+import { Database } from "@/types/database";
 
 interface CreateLessonBody {
   title: string;
@@ -37,20 +34,6 @@ interface LessonOrderUpdate {
  * @param {Request} request - The request object
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response containing the lessons or error message
- *
- * @example Response
- * ```json
- * [
- *   {
- *     "id": "lesson1",
- *     "title": "Introduction",
- *     "description": "Course overview",
- *     "content": "Lesson content...",
- *     "order": 1,
- *     "status": "published"
- *   }
- * ]
- * ```
  */
 export async function GET(
   request: NextRequest,
@@ -70,6 +53,25 @@ export async function GET(
       }
     );
 
+    // בדיקה שהקורס קיים
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("id", params.id)
+      .single();
+
+    if (courseError) {
+      console.error("Course error:", courseError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: courseError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!course) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
+    }
+
     const { data: lessons, error } = await supabase
       .from("lessons")
       .select("*")
@@ -77,16 +79,23 @@ export async function GET(
       .order("order", { ascending: true });
 
     if (error) {
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
+      console.error("Lessons error:", error);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: error.message },
+        { status: 500 }
+      );
     }
 
-    if (!lessons || lessons.length === 0) {
-      return NextResponse.json({ error: "לא נמצאו שיעורים" }, { status: 404 });
-    }
-
-    return NextResponse.json(lessons, { status: 200 });
+    return NextResponse.json(lessons || [], { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
+    console.error("Server error:", error);
+    return NextResponse.json(
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -100,17 +109,6 @@ export async function GET(
  * @param {Request} request - The request object containing the lesson data
  * @param {RouteParams} params - Route parameters containing the course ID
  * @returns {Promise<NextResponse>} JSON response containing the created lesson or error message
- *
- * @example Request
- * ```json
- * {
- *   "title": "New Lesson",
- *   "description": "Lesson description",
- *   "content": "Lesson content...",
- *   "order": 1,
- *   "status": "draft"
- * }
- * ```
  */
 export async function POST(
   request: NextRequest,
@@ -146,7 +144,15 @@ export async function POST(
       .eq("id", params.id)
       .single();
 
-    if (courseError || !course) {
+    if (courseError) {
+      console.error("Course error:", courseError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: courseError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!course) {
       return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
     }
 
@@ -159,11 +165,23 @@ export async function POST(
 
     const body: CreateLessonBody = await request.json();
 
+    // בדיקת שדות חובה
+    if (!body.title?.trim()) {
+      return NextResponse.json({ error: "חסרה כותרת" }, { status: 400 });
+    }
+
+    if (!body.content?.trim()) {
+      return NextResponse.json({ error: "חסר תוכן" }, { status: 400 });
+    }
+
     const { data: lesson, error: lessonError } = await supabase
       .from("lessons")
       .insert([
         {
           ...body,
+          title: body.title.trim(),
+          content: body.content.trim(),
+          description: body.description?.trim(),
           course_id: params.id,
           created_by: user.id,
         },
@@ -172,15 +190,23 @@ export async function POST(
       .single();
 
     if (lessonError) {
+      console.error("Lesson error:", lessonError);
       return NextResponse.json(
-        { error: "שגיאה ביצירת השיעור" },
+        { error: "שגיאת מסד נתונים", details: lessonError.message },
         { status: 500 }
       );
     }
 
     return NextResponse.json(lesson, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
+    console.error("Server error:", error);
+    return NextResponse.json(
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -229,7 +255,15 @@ export async function PATCH(
       .eq("id", params.id)
       .single();
 
-    if (courseError || !course) {
+    if (courseError) {
+      console.error("Course error:", courseError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: courseError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!course) {
       return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
     }
 
@@ -242,6 +276,24 @@ export async function PATCH(
 
     const updates: LessonOrderUpdate[] = await request.json();
 
+    // בדיקת תקינות הנתונים
+    if (!Array.isArray(updates) || updates.length === 0) {
+      return NextResponse.json(
+        { error: "נדרש מערך של עדכוני סדר שיעורים" },
+        { status: 400 }
+      );
+    }
+
+    for (const update of updates) {
+      if (!update.id || typeof update.order !== "number") {
+        return NextResponse.json(
+          { error: "כל עדכון חייב לכלול מזהה וסדר" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // עדכון סדר השיעורים
     for (const update of updates) {
       const { error: updateError } = await supabase
         .from("lessons")
@@ -250,8 +302,9 @@ export async function PATCH(
         .eq("course_id", params.id);
 
       if (updateError) {
+        console.error("Update error:", updateError);
         return NextResponse.json(
-          { error: "שגיאה בעדכון סדר השיעורים" },
+          { error: "שגיאת מסד נתונים", details: updateError.message },
           { status: 500 }
         );
       }
@@ -262,6 +315,13 @@ export async function PATCH(
       { status: 200 }
     );
   } catch (error) {
-    return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
+    console.error("Server error:", error);
+    return NextResponse.json(
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

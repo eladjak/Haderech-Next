@@ -1,128 +1,367 @@
-# 🌟 HaDerech - פלטפורמת למידה מתקדמת
+# 🛣️ HaDerech - Advanced Learning Platform
 
-פלטפורמת למידה חדשנית המשלבת קורסים, פורום קהילתי, וסימולטור תרגול אינטראקטיבי.
+## 📝 Description
 
-## 🚀 תכונות עיקריות
+HaDerech is an advanced learning platform combining an interactive simulator, community forum, and online courses. The platform is designed to help users develop professional and personal skills through experiential and interactive learning.
 
-- **מערכת קורסים** - קורסים אינטראקטיביים עם תמיכה בווידאו, טקסט ותרגילים
-- **פורום קהילתי** - פורום מתקדם עם תמיכה בקטגוריות, תגיות וחיפוש
-- **סימולטור תרגול** - סביבת תרגול אינטראקטיבית עם משוב בזמן אמת
-- **מערכת הישגים** - מערכת נקודות, תגים והישגים
-- **ממשק משתמש מודרני** - עיצוב נקי ומודרני עם תמיכה מלאה ב-RTL
+[Read documentation in English](docs/ARCHITECTURE.md)
 
-## 🛠 טכנולוגיות
+## 🚀 Key Features
 
-- [Next.js 14](https://nextjs.org/)
-- [React 18](https://reactjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Supabase](https://supabase.com/)
-- [OpenAI API](https://openai.com/api/)
+- **Course System** - Interactive courses with support for video, text, and exercises
+- **Community Forum** - Advanced forum with category, tag, and search support
+- **Practice Simulator** - Interactive training environment with real-time feedback
+- **Achievement System** - Points system, badges, and achievements
+- **Modern User Interface** - Clean, modern design with full RTL support
 
-## 📋 דרישות מערכת
+## 🛠 Technologies
 
-- Node.js 18.0.0 ומעלה
-- npm או yarn
-- חשבון Supabase
-- חשבון OpenAI (לסימולטור)
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **UI Components**: Shadcn UI, Radix UI
+- **Styling**: Tailwind CSS
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: NextAuth.js, Supabase Auth
+- **State Management**: React Context, TanStack Query
+- **Testing**: Vitest, Jest, Playwright
+- **Linting**: ESLint, Prettier
+- **CI/CD**: GitHub Actions, Vercel
 
-## ⚙️ התקנה
+## 📋 System Requirements
 
-1. שכפל את הפרויקט:
+- Node.js 18.0.0 or higher
+- pnpm 8.0.0 or higher
+- Supabase account or self-hosted instance
+
+## ⚙️ Installation
+
+1. Clone the project:
 
 ```bash
 git clone https://github.com/your-username/haderech-next.git
 cd haderech-next
 ```
 
-2. התקן את החבילות הנדרשות:
+2. Install dependencies:
 
 ```bash
-npm install
-# או
-yarn install
+pnpm install
 ```
 
-3. העתק את קובץ הגדרות הסביבה:
+3. Set up environment variables:
 
 ```bash
 cp .env.example .env.local
 ```
 
-4. עדכן את משתני הסביבה ב-.env.local עם הפרטים שלך
+Update `.env.local` with appropriate values, especially the Supabase configuration.
 
-5. הפעל את הפרויקט במצב פיתוח:
-
-```bash
-npm run dev
-# או
-yarn dev
-```
-
-## 🔧 הגדרת מסד הנתונים
-
-1. צור פרויקט חדש ב-Supabase
-2. העתק את ה-SQL מתיקיית `/supabase/migrations` והרץ אותו במסד הנתונים
-3. הגדר את משתני הסביבה המתאימים ב-.env.local
-
-## 🚀 פריסה
-
-הפרויקט מוכן לפריסה ב-Vercel. פשוט התחבר לחשבון ה-GitHub שלך והגדר את משתני הסביבה הנדרשים.
-
-## 🧪 בדיקות
-
-הפרויקט כולל מספר סוגי בדיקות:
+4. Run the development server:
 
 ```bash
-# בדיקות יחידה
-npm run test
-
-# בדיקות אינטגרציה
-npm run test:integration
-
-# בדיקות E2E
-npm run test:e2e
+pnpm dev
 ```
 
-## 📝 רישיון
+5. Build for production:
 
-פרויקט זה מופץ תחת רישיון MIT. ראה קובץ `LICENSE` לפרטים נוספים.
+```bash
+pnpm build
+```
 
-## 👥 תרומה
+## 🏗️ Project Structure
 
-אנחנו מעודדים תרומות! אנא קרא את `CONTRIBUTING.md` למידע נוסף.
+```
+haderech-next/
+├── src/                   # Source code
+│   ├── app/               # Next.js App Router pages and layouts
+│   ├── components/        # Reusable UI components
+│   ├── config/            # Configuration files
+│   ├── constants/         # Application constants
+│   ├── contexts/          # React Context providers
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Core libraries and utilities
+│   ├── locales/           # Internationalization files
+│   ├── models/            # Data models
+│   ├── providers/         # Service providers
+│   ├── services/          # Business logic services
+│   ├── store/             # State management
+│   ├── styles/            # Global styles
+│   ├── tests/             # Test files
+│   ├── types/             # TypeScript type definitions
+│   └── utils/             # Utility functions
+├── public/                # Static assets
+├── prisma/                # Database schema and migrations
+├── tests/                 # Additional tests
+├── docs/                  # Documentation
+└── supabase/              # Supabase configuration
+```
 
-## 📞 תמיכה
+## 📚 Documentation
 
-- פתח issue ב-GitHub
-- שלח מייל ל-support@haderech.co.il
-- הצטרף לקהילת הדיסקורד שלנו
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [API Documentation](docs/API.md)
+- [Component Library](docs/COMPONENTS.md)
+- [Testing Strategy](docs/TESTING.md)
 
-## 📝 תיעוד
+## 🔍 Development
 
-- [תיעוד API](/docs/api.md)
-- [מדריך למפתח](/docs/developer.md)
-- [מדריך לתרומה](/docs/contributing.md)
+### Type Checking
 
-## 🤝 תרומה
+```bash
+pnpm type-check
+```
 
-אנחנו מעודדים תרומות! אנא קרא את [מדריך התרומה](/docs/contributing.md) שלנו.
+### Unit Tests
 
-## 📄 רישיון
+```bash
+pnpm test
+```
 
-פרויקט זה מופץ תחת רישיון MIT. ראה את קובץ [LICENSE](LICENSE) למידע נוסף.
+### E2E Tests
 
-## 👥 צוות
+```bash
+pnpm test:e2e
+```
 
-- [שם המפתח](https://github.com/username) - מפתח ראשי
-- [שם המפתח](https://github.com/username) - מפתח
+### Linting
 
-## 📞 יצירת קשר
+```bash
+pnpm lint
+```
 
-- אתר: [haderech.co.il](https://haderech.co.il)
-- דוא"ל: info@haderech.co.il
-- טוויטר: [@haderech](https://twitter.com/haderech)
+### Development Server
 
-## 🙏 תודות
+```bash
+pnpm dev
+```
 
-תודה מיוחדת לכל התורמים והשותפים שעזרו להפוך את הפרויקט הזה למציאות.
+### Production Build
+
+```bash
+pnpm build
+```
+
+## 🗄️ Database
+
+This project uses Supabase for database, authentication, and storage. The database schema is defined in the Supabase dashboard or through migration files.
+
+### Supabase CLI Commands:
+
+```bash
+# Generate TypeScript types from Supabase
+pnpm supabase gen types typescript --project-id <your-project-id> --schema public > src/types/supabase.ts
+
+# Start local Supabase
+pnpm supabase start
+
+# Apply local migrations
+pnpm supabase db push
+```
+
+## 📈 Quality Metrics
+
+### Performance
+
+- Initial load time: < 2 seconds
+- First Contentful Paint: < 1 second
+- Time to Interactive: < 3 seconds
+- Lighthouse score: > 90
+
+### Accessibility
+
+- WCAG score: AA
+- Lighthouse accessibility score: > 90
+- ARIA coverage: 100%
+- Full keyboard support
+
+### Security
+
+- OWASP compliance
+- Zero critical vulnerabilities
+- Package freshness: 100%
+- Security coverage: > 95%
+
+## 🤝 Contributing
+
+1. Fork the project
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is distributed under the MIT License. See the `LICENSE` file for more information.
+
+## 👥 Team
+
+- Elad Jacobi - Founder and Lead Developer
+
+## 📞 Contact
+
+- **Website**: [haderech.co.il](https://haderech.co.il)
+- **Email**: [contact@haderech.co.il](mailto:contact@haderech.co.il)
+- **Telegram**: [@haderech](https://t.me/haderech)
+
+---
+
+<div dir="rtl">
+
+# הדרך - פלטפורמת למידה מתקדמת
+
+**הדרך** היא פלטפורמת למידה אינטראקטיבית המאפשרת לפתח כישורים מקצועיים דרך קורסים, פורומים קהילתיים, וסימולטורים.
+
+## תכונות מרכזיות
+
+- **מערכת קורסים**: קורסים מובנים עם וידאו, טקסט ותרגולים אינטראקטיביים
+- **פורום קהילתי**: לשאלות, דיונים ושיתוף ידע
+- **סימולטור תרגול**: להתנסות בתרחישים מציאותיים
+- **מערכת הישגים**: מעקב אחר התקדמות ופרסים וירטואליים
+- **ממשק משתמש מודרני**: חוויית משתמש נוחה ונגישה
+
+## טכנולוגיות
+
+הפרויקט משתמש בטכנולוגיות המתקדמות ביותר:
+
+- **Next.js 14**: עם App Router לניהול דפים ונתיבים
+- **React 18**: לממשק משתמש תגובתי ומודרני
+- **TypeScript**: לכתיבת קוד יציב ומתוחזק
+- **Tailwind CSS**: לעיצוב מהיר ומותאם
+- **Supabase**: לניהול משתמשים, אימות, ובסיס נתונים
+- **Redux Toolkit**: לניהול מצב אפליקציה
+- **OpenAI API**: לאלמנטים מבוססי בינה מלאכותית
+- **ShadcnUI & Radix UI**: לקומפוננטות נגישות
+
+## דרישות מערכת
+
+- Node.js 18.0.0 ומעלה
+- pnpm 8.0.0 ומעלה
+- חשבון Supabase
+
+## התקנה
+
+1. שכפל את הפרויקט:
+
+```bash
+git clone https://github.com/yourusername/haderech-next.git
+cd haderech-next
+```
+
+2. התקן את התלויות:
+
+```bash
+pnpm install
+```
+
+3. הגדר משתני סביבה:
+
+   - צור קובץ `.env.local` בתיקית הפרויקט
+   - העתק את התוכן מ-`.env.example` והגדר את הערכים הנדרשים
+
+4. הפעל את שרת הפיתוח:
+
+```bash
+pnpm dev
+```
+
+5. בנה לסביבת ייצור:
+
+```bash
+pnpm build
+pnpm start
+```
+
+## מבנה הפרויקט
+
+```
+haderech-next/
+├── docs/               # תיעוד פרויקט
+├── lib/                # קוד משותף וספריות
+├── public/             # קבצים סטטיים
+├── src/
+│   ├── app/            # רכיבי דפים ונתיבי API
+│   ├── components/     # רכיבי React משותפים
+│   ├── constants/      # קבועים וערכים מוגדרים מראש
+│   ├── hooks/          # React hooks מותאמים
+│   ├── lib/            # פונקציות שירות וכלים
+│   ├── store/          # Redux store וslices
+│   ├── styles/         # קבצי CSS
+│   ├── tests/          # בדיקות אוטומטיות
+│   └── types/          # הגדרות TypeScript
+├── .env.example        # דוגמה למשתני סביבה
+├── .eslintrc.js        # תצורת ESLint
+├── next.config.js      # תצורת Next.js
+├── package.json        # תלויות פרויקט
+└── tsconfig.json       # תצורת TypeScript
+```
+
+## קישורי תיעוד
+
+- [סקירת ארכיטקטורה](./docs/ARCHITECTURE.md)
+- [תיעוד API](./docs/API.md)
+- [ספריית רכיבים](./docs/COMPONENTS.md)
+- [אסטרטגיית בדיקות](./docs/TESTING.md)
+
+## פיתוח
+
+```bash
+# בדיקת טיפוסים
+pnpm type-check
+
+# הרצת בדיקות יחידה
+pnpm test
+
+# הרצת בדיקות קצה-לקצה
+pnpm test:e2e
+
+# בדיקות לינט
+pnpm lint
+
+# שרת פיתוח
+pnpm dev
+```
+
+## בסיס נתונים
+
+הפרויקט משתמש ב-Supabase לניהול בסיס נתונים, אימות משתמשים ואחסון.
+
+```bash
+# התקנת CLI של Supabase
+npm install -g supabase
+
+# התחברות לפרויקט
+supabase login
+supabase link --project-ref <your-project-id>
+
+# דחיפת סכמה לבסיס הנתונים
+supabase db push
+```
+
+## מדדי איכות
+
+- **ביצועים**: עמידה בסטנדרטים של Web Vitals (LCP < 2.5s, FID < 100ms, CLS < 0.1)
+- **נגישות**: תאימות ל-WCAG 2.1 AA
+- **אבטחה**: בדיקות אבטחה סדירות וטיפול בסיכונים
+
+## תרומה לפרויקט
+
+1. צור Fork של הפרויקט
+2. צור ענף חדש (`git checkout -b feature/amazing-feature`)
+3. בצע את השינויים שלך
+4. דחוף לענף (`git push origin feature/amazing-feature`)
+5. פתח בקשת משיכה (Pull Request)
+
+## רישיון
+
+הפרויקט מופץ תחת רישיון MIT. ראה קובץ `LICENSE` לפרטים נוספים.
+
+## צוות
+
+- **אלעד יעקבי** - מייסד ומפתח ראשי - [GitHub](https://github.com/username)
+
+## יצירת קשר
+
+- דוא"ל: email@example.com
+- טוויטר: [@username](https://twitter.com/username)
+- פרויקט: [GitHub Issues](https://github.com/yourusername/haderech-next/issues)
+
+</div>

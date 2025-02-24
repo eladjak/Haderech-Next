@@ -6,12 +6,25 @@
  */
 import { useState } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CourseCommentsProps } from "@/types/props";
+import type { CourseComment } from "@/types/api";
 
-export function CourseComments({ comments }: CourseCommentsProps) {
+interface CourseCommentsProps {
+  comments: CourseComment[];
+  courseId: string;
+  onAddComment?: (content: string) => Promise<void>;
+  onAddReply?: (commentId: string, content: string) => Promise<void>;
+}
+
+export function CourseComments({
+  comments,
+  courseId,
+  onAddComment,
+  onAddReply,
+}: CourseCommentsProps) {
   const [showAll, setShowAll] = useState(false);
 
   if (!comments?.length) {
@@ -39,13 +52,14 @@ export function CourseComments({ comments }: CourseCommentsProps) {
           {displayComments.map((comment) => (
             <div key={comment.id} className="space-y-4">
               <div className="flex items-start space-x-4 rtl:space-x-reverse">
-                <Avatar>
-                  <AvatarImage
-                    src={comment.user.avatar_url || undefined}
+                <div className="relative h-10 w-10">
+                  <Image
+                    src={comment.user.avatar_url || "/placeholder.png"}
                     alt={comment.user.name}
+                    fill
+                    className="rounded-full object-cover"
                   />
-                  <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
-                </Avatar>
+                </div>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="font-medium">{comment.user.name}</div>
@@ -63,15 +77,14 @@ export function CourseComments({ comments }: CourseCommentsProps) {
                           key={reply.id}
                           className="flex items-start space-x-4 rtl:space-x-reverse"
                         >
-                          <Avatar>
-                            <AvatarImage
-                              src={reply.user.avatar_url || undefined}
+                          <div className="relative h-10 w-10">
+                            <Image
+                              src={reply.user.avatar_url || "/placeholder.png"}
                               alt={reply.user.name}
+                              fill
+                              className="rounded-full object-cover"
                             />
-                            <AvatarFallback>
-                              {reply.user.name[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          </div>
                           <div className="flex-1 space-y-1">
                             <div className="flex items-center justify-between">
                               <div className="text-sm font-medium">

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect } from "react";
 
 import confetti from "canvas-confetti";
 
@@ -18,8 +18,8 @@ const Confetti = ({
   particleCount = 100,
   spread = 70,
   origin = { x: 0.5, y: 0.5 },
-}: ConfettiProps) => {
-  React.useEffect(() => {
+}: ConfettiProps): React.ReactElement | null => {
+  useEffect(() => {
     const end = Date.now() + duration;
 
     const frame = () => {

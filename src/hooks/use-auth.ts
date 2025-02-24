@@ -7,22 +7,23 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { User } from "@supabase/supabase-js";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/api";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseClient } from "@/lib/services/supabase";
 import { setError, setLoading, setUser } from "@/store/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
+import { User } from "@/types/models";
 
 interface AuthState {
-  user: User | null;
+  user: SupabaseUser | null;
   loading: boolean;
   error: Error | null;
 }
 
 interface UseAuth {
-  user: User | null;
+  user: SupabaseUser | null;
   loading: boolean;
   error: Error | null;
   signIn: (email: string, password: string) => Promise<void>;
@@ -30,6 +31,93 @@ interface UseAuth {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
+
+// Helper function to safely use Redux
+const useReduxDispatch = () => {
+  try {
+    // This will throw during SSG if Redux is not available
+    return { dispatch: useAppDispatch(), isClient: true };
+  } catch (e) {
+    // Return a no-op dispatch function for SSG
+    return {
+      dispatch: () => ({}),
+      isClient: false,
+    };
+  }
+};
+
+// Helper to convert Supabase User to app User type expected by Redux
+const convertToAppUser = (user: SupabaseUser | null): User | null => {
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    name: user.user_metadata?.name || "",
+    email: user.email || "",
+    avatar_url: user.user_metadata?.avatar_url || null,
+    role: "user",
+    points: 0,
+    level: 1,
+    badges: [],
+    achievements: [],
+    preferences: {
+      theme: "system",
+      language: "he",
+      notifications: {
+        email: true,
+        push: true,
+        desktop: true,
+      },
+      simulator: {
+        difficulty: "beginner",
+        language: "he",
+        feedback_frequency: "high",
+        auto_suggestions: true,
+        theme: "system",
+      },
+    },
+    progress: {
+      id: user.id,
+      user_id: user.id,
+      points: 0,
+      level: 1,
+      xp: 0,
+      next_level_xp: 1000,
+      badges: [],
+      achievements: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      completedLessons: [],
+      courseProgress: {},
+      courses: {
+        completed: [],
+        in_progress: [],
+        bookmarked: [],
+      },
+      lessons: {
+        completed: [],
+        in_progress: [],
+      },
+      simulator: {
+        completed_scenarios: [],
+        results: [],
+        stats: {
+          total_sessions: 0,
+          average_score: 0,
+          time_spent: 0,
+        },
+      },
+      forum: {
+        posts: [],
+        comments: [],
+        likes: [],
+        bookmarks: [],
+      },
+    },
+    created_at: user.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+};
 
 /**
  * Custom hook that provides authentication state and user session management
@@ -44,7 +132,7 @@ export const useAuth = (): UseAuth => {
   });
 
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const { dispatch, isClient } = useReduxDispatch();
   const { toast } = useToast();
   const supabase = createSupabaseClient();
 
@@ -59,10 +147,20 @@ export const useAuth = (): UseAuth => {
         if (error) {
           console.error("Error fetching user:", error.message);
           setState((prev) => ({ ...prev, error, loading: false }));
+          // Update Redux state only in browser environment
+          if (isClient) {
+            dispatch(setError(error.message));
+            dispatch(setLoading(false));
+          }
           return;
         }
 
         setState((prev) => ({ ...prev, user, loading: false }));
+        // Update Redux state only in browser environment
+        if (isClient) {
+          dispatch(setUser(convertToAppUser(user)));
+          dispatch(setLoading(false));
+        }
       } catch (error) {
         console.error("Unexpected error fetching user:", error);
         setState((prev) => ({
@@ -73,6 +171,17 @@ export const useAuth = (): UseAuth => {
               : new Error("An unexpected error occurred"),
           loading: false,
         }));
+        // Update Redux state only in browser environment
+        if (isClient) {
+          dispatch(
+            setError(
+              error instanceof Error
+                ? error.message
+                : "An unexpected error occurred"
+            )
+          );
+          dispatch(setLoading(false));
+        }
       }
     };
 
@@ -81,13 +190,18 @@ export const useAuth = (): UseAuth => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setState((prev) => ({ ...prev, user: session?.user ?? null }));
+      const user = session?.user ?? null;
+      setState((prev) => ({ ...prev, user }));
+      // Update Redux state only in browser environment
+      if (isClient) {
+        dispatch(setUser(convertToAppUser(user)));
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabase.auth, dispatch, isClient]);
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<void> => {

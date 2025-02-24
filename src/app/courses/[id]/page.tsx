@@ -122,7 +122,24 @@ export default async function CoursePage({
           <CourseContent course={typedCourse} isEnrolled={isEnrolled} />
           <CourseRatings course={typedCourse} />
           <CourseComments
-            comments={typedCourse.comments}
+            comments={typedCourse.comments?.map((comment) => ({
+              ...comment,
+              likes: 0,
+              user: {
+                ...comment.user,
+                id: comment.user_id,
+                email: "",
+                username: comment.user.name,
+                role: "user",
+                points: 0,
+                level: 1,
+                badges: [],
+                achievements: [],
+                full_name: comment.user.name,
+                created_at: comment.created_at,
+                updated_at: comment.updated_at,
+              },
+            }))}
             courseId={typedCourse.id}
           />
         </div>

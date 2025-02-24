@@ -38,33 +38,51 @@ import type { Database } from "@/types/database";
  * ]
  * ```
  */
-export async function GET() {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
-
+export async function GET(request: Request) {
   try {
-    const { data: posts, error } = await supabase
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    const url = new URL(request.url);
+    const category = url.searchParams.get("category");
+    const tag = url.searchParams.get("tag");
+
+    let query = supabase
       .from("forum_posts")
       .select(
         `
         *,
-        author:users(*),
-        category:forum_categories(*),
-        tags:forum_tags(*)
+        author:users(id, name, avatar_url),
+        category:forum_categories(id, name),
+        tags:forum_tags(id, name)
       `
       )
       .order("created_at", { ascending: false });
 
+    if (category) {
+      query = query.eq("category", category);
+    }
+
+    if (tag) {
+      query = query.contains("tags", [tag]);
+    }
+
+    const { data: posts, error } = await query;
+
     if (error) {
+      console.error("Database error:", error);
       return NextResponse.json(
-        { error: "שגיאה בטעינת הפוסטים" },
+        { error: "שגיאת מסד נתונים", details: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(posts);
-  } catch (_error) {
+    return NextResponse.json(posts || [], { status: 200 });
+  } catch (error) {
+    console.error("Server error:", error);
     return NextResponse.json(
-      { error: "שגיאה בטעינת הפוסטים" },
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -89,33 +107,65 @@ export async function GET() {
  * ```
  */
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
-
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
+    }
+
     const json = await request.json();
+
+    if (!json.title?.trim()) {
+      return NextResponse.json({ error: "חסרה כותרת" }, { status: 400 });
+    }
+
+    if (!json.content?.trim()) {
+      return NextResponse.json({ error: "חסר תוכן" }, { status: 400 });
+    }
 
     const { data: post, error } = await supabase
       .from("forum_posts")
-      .insert(json)
+      .insert({
+        title: json.title.trim(),
+        content: json.content.trim(),
+        author_id: session.user.id,
+        category: json.category || "general",
+        tags: json.tags || [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
       .select(
         `
         *,
-        author:users(*),
-        category:forum_categories(*),
-        tags:forum_tags(*)
+        author:users(id, name, avatar_url),
+        category:forum_categories(id, name),
+        tags:forum_tags(id, name)
       `
       )
       .single();
 
     if (error) {
+      console.error("Database error:", error);
       return NextResponse.json(
-        { error: "שגיאה ביצירת הפוסט" },
+        { error: "שגיאת מסד נתונים", details: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(post);
-  } catch (_error) {
-    return NextResponse.json({ error: "שגיאה ביצירת הפוסט" }, { status: 500 });
+    return NextResponse.json(post, { status: 201 });
+  } catch (error) {
+    console.error("Server error:", error);
+    return NextResponse.json(
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

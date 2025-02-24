@@ -11,173 +11,141 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { ForumStats as ForumStatsType } from "@/types/forum";
 
-export interface ForumStatsProps {
+interface ForumStatsProps {
   stats: ForumStatsType;
   className?: string;
 }
 
+const defaultStats: ForumStatsType = {
+  active_users: 0,
+  posts_today: 0,
+  total_posts: 0,
+  total_comments: 0,
+  total_views: 0,
+  total_likes: 0,
+  total_users: 0,
+  total_solved: 0,
+  trending_tags: [],
+  popular_tags: [],
+  top_contributors: [],
+};
+
 export function ForumStats({
-  stats,
+  stats = defaultStats,
   className,
-}: ForumStatsProps): React.ReactElement {
+}: ForumStatsProps) {
   return (
-    <div className={`space-y-6 ${className}`}>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              משתמשים פעילים
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div
-              className="text-2xl font-bold"
-              data-testid="active-users"
-              aria-label={`${stats.active_users} משתמשים פעילים`}
-            >
-              {stats.active_users}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <span data-testid="posts-today">{stats.posts_today}</span> פוסטים
-              היום
-            </p>
-          </CardContent>
-        </Card>
+    <Card className={cn("w-full", className)}>
+      <CardHeader>
+        <CardTitle>סטטיסטיקות פורום</CardTitle>
+        <CardDescription>נתונים כלליים על הפעילות בפורום</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="space-y-1">
+            <p className="text-sm font-medium">סה&quot;כ פוסטים</p>
+            <p className="text-2xl font-bold">{stats.total_posts}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">סה&quot;כ תגובות</p>
+            <p className="text-2xl font-bold">{stats.total_comments}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">סה&quot;כ משתמשים</p>
+            <p className="text-2xl font-bold">{stats.total_users}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">פוסטים שנפתרו</p>
+            <p className="text-2xl font-bold">{stats.total_solved}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">סה&quot;כ צפיות</p>
+            <p className="text-2xl font-bold">{stats.total_views}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">סה&quot;כ לייקים</p>
+            <p className="text-2xl font-bold">{stats.total_likes}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">משתמשים פעילים</p>
+            <p className="text-2xl font-bold">{stats.active_users}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">פוסטים היום</p>
+            <p className="text-2xl font-bold">{stats.posts_today}</p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle
-              className="text-sm font-medium"
-              data-testid="total-posts-title"
-            >
-              סה״כ פוסטים
-            </CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div
-              className="text-2xl font-bold"
-              data-testid="total-posts"
-              aria-label={`סך הכל ${stats.total_posts} פוסטים`}
-            >
-              {stats.total_posts}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <span data-testid="total-comments">{stats.total_comments}</span>{" "}
-              תגובות
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">צפיות</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div
-              className="text-2xl font-bold"
-              data-testid="total-views"
-              aria-label={`סך הכל ${stats.total_views} צפיות`}
-            >
-              {stats.total_views}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {Math.round(stats.total_views / stats.total_posts)} צפיות לפוסט
-              בממוצע
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">לייקים</CardTitle>
-            <ThumbsUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div
-              className="text-2xl font-bold"
-              data-testid="total-likes"
-              aria-label={`סך הכל ${stats.total_likes} לייקים`}
-            >
-              {stats.total_likes}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {Math.round(stats.total_likes / stats.total_posts)} לייקים לפוסט
-              בממוצע
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle
-              className="text-sm font-medium"
-              data-testid="trending-tags-title"
-            >
-              תגיות פופולריות
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="flex flex-wrap gap-2" data-testid="trending-tags">
-              {stats.trending_tags.map(({ tag, count }) => (
-                <Badge
+        {/* Popular Tags */}
+        {stats.popular_tags && stats.popular_tags.length > 0 && (
+          <div className="mt-6">
+            <h3 className="mb-2 text-lg font-semibold">תגיות פופולריות</h3>
+            <div className="flex flex-wrap gap-2">
+              {stats.popular_tags.map(({ tag, count }) => (
+                <div
                   key={tag.id}
-                  variant="secondary"
-                  className="flex items-center gap-1"
+                  className="rounded-full bg-muted px-3 py-1 text-sm"
                 >
-                  {tag.name}
-                  <span className="text-xs text-muted-foreground">
-                    ({count})
-                  </span>
-                </Badge>
+                  {tag.name} ({count})
+                </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle
-              className="text-sm font-medium"
-              data-testid="top-contributors-title"
-            >
-              תורמים מובילים
-            </CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-6 pt-0">
-            <div className="space-y-4" data-testid="top-contributors">
-              {stats.top_contributors.map(
-                ({ author, posts_count, likes_received }) => (
-                  <div
-                    key={author.id}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{author.name}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{posts_count} פוסטים</span>
-                      <span>{likes_received} לייקים</span>
+        {/* Trending Tags */}
+        {stats.trending_tags && stats.trending_tags.length > 0 && (
+          <div className="mt-6">
+            <h3 className="mb-2 text-lg font-semibold">תגיות במגמת עלייה</h3>
+            <div className="flex flex-wrap gap-2">
+              {stats.trending_tags.map(({ tag, count }) => (
+                <div
+                  key={tag.id}
+                  className="rounded-full bg-muted px-3 py-1 text-sm"
+                >
+                  {tag.name} ({count})
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Top Contributors */}
+        {stats.top_contributors && stats.top_contributors.length > 0 && (
+          <div className="mt-6">
+            <h3 className="mb-2 text-lg font-semibold">תורמים מובילים</h3>
+            <div className="space-y-2">
+              {stats.top_contributors.map((contributor) => (
+                <div
+                  key={contributor.id}
+                  className="flex items-center justify-between rounded-lg bg-muted p-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-primary" />
+                    <div>
+                      <p className="font-medium">{contributor.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {contributor.posts_count} פוסטים,{" "}
+                        {contributor.likes_received} לייקים
+                      </p>
                     </div>
                   </div>
-                )
-              )}
+                </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

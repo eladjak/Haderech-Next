@@ -1,0 +1,13 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and api routes
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://haderech.co.il/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 10 

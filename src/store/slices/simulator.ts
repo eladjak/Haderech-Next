@@ -1,78 +1,90 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-import type {
-  SimulatorState as SimState,
-  SimulatorAction,
-} from "@/types/models";
+import type { Message, FeedbackDetails, SimulatorState, SimulatorScenario } from "@/types/simulator";
 
-interface SimulatorState {
-  state: SimState;
-  actions: SimulatorAction[];
-  currentStep: number;
-  isRunning: boolean;
-  speed: number;
+import type { PayloadAction } from "@reduxjs/toolkit";
+
+// State model interface
+interface SimulatorStateModel {
+  state: SimulatorState | null;
+  isLoading: boolean;
   error: string | null;
+  currentScenario: SimulatorScenario | null;
+  feedback: FeedbackDetails | null;
+  messages: Message[];
 }
 
-const initialState: SimulatorState = {
-  state: {
-    registers: {},
-    memory: {},
-    flags: {},
-    programCounter: 0,
-  },
-  actions: [],
-  currentStep: 0,
-  isRunning: false,
-  speed: 1,
+// Initial state
+const initialState: SimulatorStateModel = {
+  state: null,
+  isLoading: false,
   error: null,
+  currentScenario: null,
+  feedback: null,
+  messages: [],
 };
 
-export const simulatorSlice = createSlice({
+// Slice
+const simulatorSlice = createSlice({
   name: "simulator",
   initialState,
   reducers: {
-    setState: (state, action: PayloadAction<SimState>) => {
+    setState: (state: SimulatorStateModel, action: PayloadAction<SimulatorState>) => {
       state.state = action.payload;
+      state.messages = action.payload.messages;
+      state.currentScenario = action.payload.scenario;
+      state.feedback = action.payload.feedback || null;
     },
-    setActions: (state, action: PayloadAction<SimulatorAction[]>) => {
-      state.actions = action.payload;
-      state.currentStep = 0;
+    setLoading: (state: SimulatorStateModel, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
     },
-    step: (state) => {
-      if (state.currentStep < state.actions.length) {
-        state.currentStep += 1;
-      }
-    },
-    reset: (state) => {
-      state.currentStep = 0;
-      state.state = initialState.state;
-      state.isRunning = false;
-    },
-    setRunning: (state, action: PayloadAction<boolean>) => {
-      state.isRunning = action.payload;
-    },
-    setSpeed: (state, action: PayloadAction<number>) => {
-      state.speed = action.payload;
-    },
-    setError: (state, action: PayloadAction<string | null>) => {
+    setError: (state: SimulatorStateModel, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    resetSimulation: () => {
-      return initialState;
+    addMessage: (state: SimulatorStateModel, action: PayloadAction<Message>) => {
+      if (state.state) {
+        state.state.messages.push(action.payload);
+        state.messages.push(action.payload);
+      }
+    },
+    setFeedback: (state: SimulatorStateModel, action: PayloadAction<FeedbackDetails>) => {
+      if (state.state) {
+        state.state.feedback = action.payload;
+        state.feedback = action.payload;
+      }
+    },
+    setCurrentScenario: (state: SimulatorStateModel, action: PayloadAction<SimulatorScenario>) => {
+      state.currentScenario = action.payload;
+    },
+    reset: (state: SimulatorStateModel) => {
+      state.state = null;
+      state.isLoading = false;
+      state.error = null;
+      state.currentScenario = null;
+      state.feedback = null;
+      state.messages = [];
     },
   },
 });
 
+// Selectors
+export const selectSimulatorState = (state: { simulator: SimulatorStateModel }): SimulatorState | null => state.simulator.state;
+export const selectIsLoading = (state: { simulator: SimulatorStateModel }): boolean => state.simulator.isLoading;
+export const selectError = (state: { simulator: SimulatorStateModel }): string | null => state.simulator.error;
+export const selectCurrentScenario = (state: { simulator: SimulatorStateModel }): SimulatorScenario | null => state.simulator.currentScenario;
+export const selectFeedback = (state: { simulator: SimulatorStateModel }): FeedbackDetails | null => state.simulator.feedback;
+export const selectMessages = (state: { simulator: SimulatorStateModel }): Message[] => state.simulator.messages;
+
+// Actions
 export const {
   setState,
-  setActions,
-  step,
-  reset,
-  setRunning,
-  setSpeed,
+  setLoading,
   setError,
-  resetSimulation,
+  addMessage,
+  setFeedback,
+  setCurrentScenario,
+  reset,
 } = simulatorSlice.actions;
 
+// Reducer
 export default simulatorSlice.reducer;

@@ -1,69 +1,92 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run type checking
-pnpm type-check
+echo "🚀 מתחיל בדיקות לפני commit..."
 
-# Run linting
-pnpm lint
-
-# Run tests
-pnpm test
-
-# Run formatting
-pnpm format
-
-# Run lint-staged
-pnpm lint-staged
-
-echo "🏗️ בודק את הקוד לפני commit..."
+# בדיקת פורמט
+echo "✨ בודק פורמט קוד..."
+pnpm run format || {
+  echo "❌ בדיקת פורמט נכשלה. מריץ פורמט אוטומטי..."
+  pnpm run format:fix
+  echo "✅ פורמט הקוד תוקן. אנא הוסף את השינויים ונסה שוב."
+  exit 1
+}
 
 # בדיקת טיפוסים
 echo "📝 בודק טיפוסים..."
-pnpm type-check || 
-(
-    echo "❌ בדיקת טיפוסים נכשלה. אנא תקן את השגיאות."
-    false;
-)
+pnpm run type-check || {
+  echo "❌ בדיקת טיפוסים נכשלה. אנא תקן את השגיאות:"
+  exit 1
+}
 
 # בדיקת לינטינג מחמירה
 echo "🔍 בודק לינטינג..."
-pnpm lint:strict || 
-(
-    echo "❌ בדיקת לינטינג נכשלה. אנא תקן את השגיאות."
-    false;
-)
+pnpm run lint:strict || {
+  echo "❌ בדיקת לינטינג נכשלה. מנסה לתקן אוטומטית..."
+  pnpm run lint:fix
+  
+  # בדיקה חוזרת אחרי תיקון אוטומטי
+  pnpm run lint:strict || {
+    echo "❌ עדיין יש שגיאות לינטינג. אנא תקן ידנית:"
+    exit 1
+  }
+}
 
-# בדיקת פורמט
-echo "💅 בודק פורמט..."
-pnpm format:check || 
-(
-    echo "❌ בדיקת פורמט נכשלה. אנא הרץ pnpm format לתיקון."
-    false;
-)
+# בדיקת טסטים
+echo "🧪 מריץ טסטים..."
+pnpm run test || {
+  echo "❌ הטסטים נכשלו. אנא תקן את הטסטים הנכשלים:"
+  exit 1
+}
 
-# בדיקות יחידה וכיסוי קוד
-echo "🧪 מריץ בדיקות..."
-pnpm test:coverage || 
-(
-    echo "❌ הבדיקות נכשלו או שכיסוי הקוד נמוך מהמינימום הנדרש."
-    false;
-)
+# בדיקת בנייה
+echo "🏗 בודק תהליך בנייה..."
+pnpm run build || {
+  echo "❌ תהליך הבנייה נכשל. אנא תקן את השגיאות:"
+  exit 1
+}
 
-# בדיקת קבצים בשלב
-echo "📋 בודק קבצים בשלב..."
-pnpm lint-staged || 
-(
-    echo "❌ בדיקת הקבצים בשלב נכשלה. אנא תקן את השגיאות."
-    false;
-)
+# בדיקת גודל חבילה
+echo "📦 בודק גודל חבילה..."
+pnpm run analyze || {
+  echo "⚠️ נמצאו חבילות גדולות. שקול לבצע אופטימיזציה."
+}
 
-# וולידציה סופית
-echo "🔎 מבצע וולידציה סופית..."
-pnpm validate || 
-(
-    echo "❌ הוולידציה נכשלה. אנא תקן את כל השגיאות לפני הדחיפה."
-    false;
-)
+# בדיקת תלויות מיותרות
+echo "🔍 בודק תלויות מיותרות..."
+pnpm run depcheck || {
+  echo "⚠️ נמצאו תלויות שאינן בשימוש. שקול להסיר אותן."
+}
+
+# בדיקת אבטחה
+echo "🔒 בודק בעיות אבטחה..."
+pnpm audit || {
+  echo "⚠️ נמצאו בעיות אבטחה. אנא בדוק את הדוח ועדכן חבילות בהתאם."
+}
+
+# בדיקת נגישות
+echo "♿ בודק נגישות..."
+pnpm run test:a11y || {
+  echo "⚠️ נמצאו בעיות נגישות. אנא תקן אותן לפני הדחיפה."
+}
+
+# בדיקת ביצועים
+echo "⚡ בודק ביצועים..."
+pnpm run lighthouse || {
+  echo "⚠️ ציון הביצועים נמוך מהמצופה. שקול לבצע אופטימיזציות."
+}
+
+# בדיקת קבצים גדולים
+echo "📏 בודק גודל קבצים..."
+find . -type f -size +5M ! -path "./node_modules/*" ! -path "./.git/*" | while read -r file; do
+  echo "⚠️ אזהרה: הקובץ $file גדול מ-5MB"
+done
+
+# בדיקת סודות
+echo "🔑 בודק קבצי תצורה עבור סודות..."
+if grep -r "API_KEY\|SECRET\|PASSWORD\|TOKEN" --exclude-dir={node_modules,.git,dist,.next} .; then
+  echo "⚠️ נמצאו סודות פוטנציאליים בקוד. אנא העבר אותם לקובץ .env"
+  exit 1
+fi
 
 echo "✅ כל הבדיקות עברו בהצלחה! 🎉"

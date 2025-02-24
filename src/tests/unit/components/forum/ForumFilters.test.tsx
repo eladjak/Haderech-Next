@@ -1,133 +1,113 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { ForumFilters } from "@/components/forum/ForumFilters";
+import type { ForumFilters as ForumFiltersType } from "@/types/forum";
 
-// מוסיף מוקים לפונקציות החסרות
-beforeAll(() => {
-  Element.prototype.hasPointerCapture = () => false;
-  Element.prototype.scrollIntoView = vi.fn();
-});
+const mockOnFilter = vi.fn();
 
-describe("ForumFilters", () => {
-  it("מציג את כל אפשרויות הסינון", () => {
-    render(<ForumFilters />);
+const defaultFilters: ForumFiltersType = {
+  search: "",
+  sort: "latest",
+  category: undefined,
+  status: "all",
+  timeframe: "all",
+};
 
-    // בודק שדה חיפוש
-    expect(screen.getByPlaceholderText("חיפוש בפורום...")).toBeInTheDocument();
-
-    // בודק כפתורי סינון
-    expect(screen.getByTestId("sort-select")).toBeInTheDocument();
-    expect(screen.getByTestId("category-select")).toBeInTheDocument();
-    expect(screen.getByTestId("tag-select")).toBeInTheDocument();
-    expect(screen.getByTestId("status-select")).toBeInTheDocument();
+describe("ForumFilters Component", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it("מפעיל את onFilter כאשר משנים את החיפוש", async () => {
-    const onFilter = vi.fn();
-    render(<ForumFilters onFilter={onFilter} />);
+  it("renders all filter options", () => {
+    render(<ForumFilters filters={defaultFilters} onFilter={mockOnFilter} />);
 
-    const searchInput = screen.getByPlaceholderText("חיפוש בפורום...");
-    await userEvent.type(searchInput, "test");
-
-    expect(onFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        search: "test",
-      })
-    );
+    expect(screen.getByPlaceholderText(/חיפוש/i)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /מיון/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /קטגוריה/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /סטטוס/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /טווח זמן/i })
+    ).toBeInTheDocument();
   });
 
-  it("מפעיל את onFilter כאשר בוחרים קטגוריה", async () => {
-    const onFilter = vi.fn();
-    render(<ForumFilters onFilter={onFilter} />);
+  it("calls onFilter when search input changes", () => {
+    render(<ForumFilters filters={defaultFilters} onFilter={mockOnFilter} />);
 
-    const categoryButton = screen.getByTestId("category-select");
-    await userEvent.click(categoryButton);
-    await userEvent.click(screen.getByTestId("category-option-general"));
+    const searchInput = screen.getByPlaceholderText(/חיפוש/i);
+    fireEvent.change(searchInput, { target: { value: "test" } });
 
-    await waitFor(() => {
-      expect(onFilter).toHaveBeenCalledWith(
-        expect.objectContaining({ category: "general" })
-      );
+    expect(mockOnFilter).toHaveBeenCalledWith({
+      ...defaultFilters,
+      search: "test",
     });
   });
 
-  it("מפעיל את onFilter כאשר בוחרים תגית", async () => {
-    const onFilter = vi.fn();
-    render(<ForumFilters onFilter={onFilter} />);
+  it("calls onFilter when sort changes", () => {
+    render(<ForumFilters filters={defaultFilters} onFilter={mockOnFilter} />);
 
-    const tagButton = screen.getByTestId("tag-select");
-    await userEvent.click(tagButton);
-    await userEvent.click(screen.getByTestId("tag-option-javascript"));
+    const sortSelect = screen.getByRole("combobox", { name: /מיון/i });
+    fireEvent.change(sortSelect, { target: { value: "popular" } });
 
-    await waitFor(() => {
-      expect(onFilter).toHaveBeenCalledWith(
-        expect.objectContaining({ tag: "javascript" })
-      );
+    expect(mockOnFilter).toHaveBeenCalledWith({
+      ...defaultFilters,
+      sort: "popular",
     });
   });
 
-  it("מפעיל את onFilter כאשר משנים את המיון", async () => {
-    const onFilter = vi.fn();
-    render(<ForumFilters onFilter={onFilter} />);
+  it("calls onFilter when category changes", () => {
+    render(<ForumFilters filters={defaultFilters} onFilter={mockOnFilter} />);
 
-    const sortButton = screen.getByTestId("sort-select");
-    await userEvent.click(sortButton);
-    await userEvent.click(screen.getByTestId("sort-option-popular"));
+    const categorySelect = screen.getByRole("combobox", { name: /קטגוריה/i });
+    fireEvent.change(categorySelect, { target: { value: "general" } });
 
-    await waitFor(() => {
-      expect(onFilter).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: "popular" })
-      );
+    expect(mockOnFilter).toHaveBeenCalledWith({
+      ...defaultFilters,
+      category: "general",
     });
   });
 
-  it("מפעיל את onFilter כאשר משנים את הסטטוס", async () => {
-    const onFilter = vi.fn();
-    render(<ForumFilters onFilter={onFilter} />);
+  it("calls onFilter when status changes", () => {
+    render(<ForumFilters filters={defaultFilters} onFilter={mockOnFilter} />);
 
-    const statusButton = screen.getByTestId("status-select");
-    await userEvent.click(statusButton);
-    await userEvent.click(screen.getByTestId("status-option-solved"));
+    const statusSelect = screen.getByRole("combobox", { name: /סטטוס/i });
+    fireEvent.change(statusSelect, { target: { value: "solved" } });
 
-    await waitFor(() => {
-      expect(onFilter).toHaveBeenCalledWith(
-        expect.objectContaining({ status: "solved" })
-      );
+    expect(mockOnFilter).toHaveBeenCalledWith({
+      ...defaultFilters,
+      status: "solved",
     });
   });
 
-  it("מאפס את כל הפילטרים בלחיצה על כפתור האיפוס", async () => {
-    const onFilter = vi.fn();
-    render(<ForumFilters onFilter={onFilter} />);
+  it("calls onFilter when timeframe changes", () => {
+    render(<ForumFilters filters={defaultFilters} onFilter={mockOnFilter} />);
 
-    // מדמה בחירת פילטרים
-    const searchInput = screen.getByPlaceholderText("חיפוש בפורום...");
-    await userEvent.type(searchInput, "test");
+    const timeframeSelect = screen.getByRole("combobox", { name: /טווח זמן/i });
+    fireEvent.change(timeframeSelect, { target: { value: "week" } });
 
-    const resetButton = screen.getByTestId("reset-filters");
-    await userEvent.click(resetButton);
-
-    await waitFor(() => {
-      expect(onFilter).toHaveBeenLastCalledWith({
-        sort: "latest",
-        search: "",
-        category: undefined,
-        tag: undefined,
-        timeframe: "all",
-        status: "all",
-      });
+    expect(mockOnFilter).toHaveBeenCalledWith({
+      ...defaultFilters,
+      timeframe: "week",
     });
   });
 
-  it("מספק תיאורים נגישים", () => {
-    render(<ForumFilters />);
+  it("resets all filters when reset button is clicked", () => {
+    const currentFilters: ForumFiltersType = {
+      search: "test",
+      sort: "popular",
+      category: "general",
+      status: "solved",
+      timeframe: "week",
+    };
 
-    expect(screen.getByLabelText("חיפוש בפורום")).toBeInTheDocument();
-    expect(screen.getByLabelText("מיין תוצאות")).toBeInTheDocument();
-    expect(screen.getByLabelText("סנן לפי קטגוריה")).toBeInTheDocument();
-    expect(screen.getByLabelText("סנן לפי תגיות")).toBeInTheDocument();
-    expect(screen.getByLabelText("סנן לפי סטטוס")).toBeInTheDocument();
+    render(<ForumFilters filters={currentFilters} onFilter={mockOnFilter} />);
+
+    const resetButton = screen.getByRole("button", { name: /איפוס/i });
+    fireEvent.click(resetButton);
+
+    expect(mockOnFilter).toHaveBeenCalledWith(defaultFilters);
   });
 });

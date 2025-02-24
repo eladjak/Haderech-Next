@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }): React.ReactElement {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="he" dir="rtl" suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
@@ -37,6 +37,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Analytics />
+          <Toaster />
         </Providers>
       </body>
     </html>

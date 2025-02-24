@@ -1,65 +1,116 @@
 import { render, screen } from "@testing-library/react";
-import { vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Message } from "@/types/simulator";
 
 import { MessageList } from "../MessageList";
 
-describe("MessageList", () => {
-  const mockMessages: Message[] = [
-    {
+const mockMessages: Message[] = [
+  {
+    id: "1",
+    role: "user",
+    content: "שלום, אני צריך עזרה",
+    timestamp: new Date().toISOString(),
+    sender: {
       id: "1",
-      role: "user",
-      content: "שלום",
-      timestamp: new Date().toISOString(),
-      sender: {
-        role: "user",
-        name: "משתמש",
-      },
+      name: "משתמש",
+      role: "user" as const,
     },
-    {
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    role: "assistant",
+    content: "כיצד אוכל לעזור?",
+    timestamp: new Date().toISOString(),
+    sender: {
       id: "2",
-      role: "assistant",
-      content: "היי! איך אני יכול לעזור?",
-      timestamp: new Date().toISOString(),
-      sender: {
-        role: "assistant",
-        name: "עוזר",
-      },
+      name: "עוזר",
+      role: "assistant" as const,
     },
-  ];
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
 
+describe("MessageList", () => {
   beforeEach(() => {
-    // Mock scrollIntoView
     Element.prototype.scrollIntoView = vi.fn();
   });
 
-  it("מציג את כל ההודעות", () => {
+  it("renders all messages", () => {
     render(
       <MessageList
         messages={mockMessages}
         expandedFeedback={[]}
-        onToggleFeedback={() => {}}
+        onToggleFeedback={() => undefined}
       />
     );
 
-    expect(screen.getByText("שלום")).toBeInTheDocument();
-    expect(screen.getByText("היי! איך אני יכול לעזור?")).toBeInTheDocument();
+    expect(screen.getByText("שלום, אני צריך עזרה")).toBeInTheDocument();
+    expect(screen.getByText("כיצד אוכל לעזור?")).toBeInTheDocument();
   });
 
-  it("מוסיף class שהועבר כ-prop", () => {
-    const { container } = render(
+  it("renders sender names", () => {
+    render(
       <MessageList
         messages={mockMessages}
-        className="test-class"
         expandedFeedback={[]}
-        onToggleFeedback={() => {}}
+        onToggleFeedback={() => undefined}
       />
     );
-    expect(container.firstChild).toHaveClass("test-class");
+
+    expect(screen.getByText("משתמש")).toBeInTheDocument();
+    expect(screen.getByText("עוזר")).toBeInTheDocument();
   });
 
-  it("קורא ל-scrollIntoView כאשר מתווספת הודעה חדשה", () => {
+  it("handles empty messages array", () => {
+    render(
+      <MessageList
+        messages={[]}
+        expandedFeedback={[]}
+        onToggleFeedback={() => undefined}
+      />
+    );
+    expect(screen.getByText("אין הודעות עדיין")).toBeInTheDocument();
+  });
+
+  it("updates view when new messages arrive", () => {
+    const { rerender } = render(
+      <MessageList
+        messages={mockMessages}
+        expandedFeedback={[]}
+        onToggleFeedback={() => undefined}
+      />
+    );
+
+    const newMessage: Message = {
+      id: "3",
+      role: "user",
+      content: "הודעה חדשה",
+      timestamp: new Date().toISOString(),
+      sender: {
+        id: "1",
+        name: "משתמש",
+        role: "user" as const,
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    rerender(
+      <MessageList
+        messages={[...mockMessages, newMessage]}
+        expandedFeedback={[]}
+        onToggleFeedback={() => undefined}
+      />
+    );
+
+    expect(screen.getByText("הודעה חדשה")).toBeInTheDocument();
+  });
+
+  it("calls scrollIntoView when new message is added", () => {
     const scrollIntoViewMock = vi.fn();
     Element.prototype.scrollIntoView = scrollIntoViewMock;
 
@@ -67,64 +118,69 @@ describe("MessageList", () => {
       <MessageList
         messages={mockMessages}
         expandedFeedback={[]}
-        onToggleFeedback={() => {}}
+        onToggleFeedback={() => undefined}
       />
     );
 
-    const newMessages: Message[] = [
-      ...mockMessages,
-      {
-        id: "3",
-        role: "user",
-        content: "הודעה חדשה",
-        timestamp: new Date().toISOString(),
-        sender: {
-          role: "user",
-          name: "משתמש",
-        },
+    const newMessage: Message = {
+      id: "3",
+      role: "user",
+      content: "הודעה חדשה",
+      timestamp: new Date().toISOString(),
+      sender: {
+        id: "1",
+        name: "משתמש",
+        role: "user" as const,
       },
-    ];
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
     rerender(
       <MessageList
-        messages={newMessages}
+        messages={[...mockMessages, newMessage]}
         expandedFeedback={[]}
-        onToggleFeedback={() => {}}
+        onToggleFeedback={() => undefined}
       />
     );
 
     expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: "smooth" });
   });
 
-  it("מציג משוב כאשר קיים", () => {
+  it("displays feedback when available", () => {
     const messageWithFeedback: Message = {
       id: "1",
       role: "user",
       content: "שלום",
       timestamp: new Date().toISOString(),
       sender: {
-        role: "user",
+        id: "1",
         name: "משתמש",
+        role: "user" as const,
       },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       feedback: {
+        metrics: {
+          empathy: 4,
+          clarity: 4,
+          effectiveness: 4,
+          appropriateness: 4,
+          professionalism: 4,
+          problem_solving: 4,
+          overall: 4,
+        },
+        strengths: ["תקשורת טובה"],
+        improvements: ["יכול להיות יותר ממוקד"],
+        tips: ["נסה להיות יותר קצר"],
+        comments: "תגובה טובה באופן כללי",
+        suggestions: ["המשך לתרגל"],
         score: 85,
-        message: "תגובה טובה!",
-        details: {
-          empathy: 90,
-          clarity: 85,
-          effectiveness: 80,
-          appropriateness: 85,
-          strengths: ["חוזקה 1"],
-          improvements: ["שיפור 1"],
-          tips: ["טיפ 1"],
-          comments: "הערה כללית",
-          suggestions: ["הצעה 1"],
-          overallProgress: {
-            empathy: 90,
-            clarity: 85,
-            effectiveness: 80,
-            appropriateness: 85,
-          },
+        overallProgress: {
+          score: 85,
+          level: "מתקדם",
+          nextLevel: "מומחה",
+          requiredScore: 90,
         },
       },
     };
@@ -133,11 +189,10 @@ describe("MessageList", () => {
       <MessageList
         messages={[messageWithFeedback]}
         expandedFeedback={[messageWithFeedback.id]}
-        onToggleFeedback={() => {}}
+        onToggleFeedback={() => undefined}
       />
     );
 
-    expect(screen.getByText("תגובה טובה!")).toBeInTheDocument();
-    expect(screen.getByText("ציון: 85")).toBeInTheDocument();
+    expect(screen.getByText("תגובה טובה באופן כללי")).toBeInTheDocument();
   });
 });

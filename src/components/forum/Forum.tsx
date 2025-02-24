@@ -15,10 +15,13 @@
 // React and external dependencies
 import { useMemo } from "react";
 
+import { Loader2 } from "lucide-react";
+
 import { ForumFilters } from "@/components/forum/ForumFilters";
 // Components
 import { ForumPost } from "@/components/forum/ForumPost";
 import { ForumStats } from "@/components/forum/ForumStats";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 // Utils
 import { cn } from "@/lib/utils";
 // Types
@@ -33,17 +36,22 @@ import { CreatePost } from "./CreatePost";
 export interface ForumProps {
   posts: ForumPostType[];
   stats: ForumStatsType;
+  isLoading?: boolean;
+  error?: string;
   onFilter?: (filters: ForumFiltersType) => void;
   className?: string;
 }
 
 export function Forum({
-  posts,
+  posts = [],
   stats,
+  isLoading = false,
+  error,
   onFilter,
   className,
 }: ForumProps): React.ReactElement {
   const sortedPosts = useMemo(() => {
+    if (!Array.isArray(posts)) return [];
     return [...posts].sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -65,9 +73,33 @@ export function Forum({
           </div>
           <ForumFilters onFilter={handleFilter} />
           <div className="mt-8 space-y-4">
-            {sortedPosts.map((post: ForumPostType) => (
-              <ForumPost key={post.id} post={post} />
-            ))}
+            {isLoading ? (
+              <div
+                className="flex items-center justify-center p-8"
+                data-testid="loading-status"
+                role="status"
+                aria-label="טוען פוסטים..."
+              >
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="sr-only">טוען פוסטים...</span>
+              </div>
+            ) : error ? (
+              <Alert variant="destructive" role="alert">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : sortedPosts.length > 0 ? (
+              sortedPosts.map((post: ForumPostType) => (
+                <ForumPost key={post.id} post={post} />
+              ))
+            ) : (
+              <div
+                className="p-4 text-center text-muted-foreground"
+                role="status"
+                aria-label="אין פוסטים"
+              >
+                עדיין אין פוסטים בפורום. היה הראשון ליצור פוסט!
+              </div>
+            )}
           </div>
         </div>
         <div className="w-full md:w-1/4">

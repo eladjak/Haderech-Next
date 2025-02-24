@@ -1,224 +1,179 @@
+import type { Author } from "./api";
 import type { Database } from "./database";
 
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
 
-export interface SimulatorSession {
-  id: string;
-  user_id: string;
-  scenario_id: string;
-  status: "active" | "completed" | "failed";
-  messages: {
-    id: string;
-    role: "user" | "assistant" | "system";
-    content: string;
-    timestamp: string;
-    sender: {
-      role: "user" | "assistant" | "system";
-      name?: string;
-      avatar?: string;
-    };
-    feedback?: {
-      score: number;
-      message: string;
-      details?: {
-        empathy: number;
-        clarity: number;
-        effectiveness: number;
-        appropriateness: number;
-        strengths: string[];
-        areas_for_improvement: string[];
-        recommendations: string[];
-      };
-    };
-  }[];
-  feedback?: {
-    score: number;
-    message: string;
-    details?: {
-      empathy: number;
-      clarity: number;
-      effectiveness: number;
-      appropriateness: number;
-      strengths: string[];
-      areas_for_improvement: string[];
-      recommendations: string[];
-    };
-  };
-  created_at: string;
-  updated_at: string;
-  completed_at?: string;
-  duration?: number;
-}
-
-export interface SimulatorResult {
-  id: string;
-  session_id: string;
-  scenario_id: string;
-  score: number;
-  feedback: {
-    score: number;
-    message: string;
-    details?: {
-      empathy: number;
-      clarity: number;
-      effectiveness: number;
-      appropriateness: number;
-      strengths: string[];
-      areas_for_improvement: string[];
-      recommendations: string[];
-    };
-  };
-  duration: number;
-  details: {
-    messages_count: number;
-    scenario_difficulty: string;
-    scenario_category: string;
-  };
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SimulatorUserStats {
-  id: string;
-  user_id: string;
-  total_sessions: number;
-  completed_sessions: number;
-  average_score: number;
-  total_duration: number;
-  skills_progress: {
-    [key: string]: number;
-  };
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SimulatorUserSettings {
-  id: string;
-  user_id: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  language: string;
-  feedback_frequency: "always" | "end" | "never";
-  auto_suggestions: boolean;
-  timer: boolean;
-  feedback_detail: "basic" | "detailed" | "comprehensive";
-  emotional_tracking: boolean;
-  learning_goals: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SimulatorFeedback {
-  overall_score: number;
-  strengths: string[];
-  improvements: string[];
-  metrics: FeedbackMetrics;
-  details: FeedbackDetails;
-}
-
-export interface SimulatorState {
-  id: string;
-  user_id: string;
-  scenario_id: string;
-  messages: Message[];
-  status: "active" | "completed" | "failed";
-  feedback: SimulatorFeedback | null;
-  created_at: string;
-  updated_at: string;
-  registers?: Record<string, any>;
-}
-
+// Message interface
 export interface Message {
   id: string;
-  role: "user" | "system" | "assistant";
+  role: "user" | "assistant";
   content: string;
   timestamp: string;
-  sender: {
-    id?: string;
+  created_at: string;
+  updated_at: string;
+  sender: MessageSender;
+  feedback?: FeedbackDetails;
+  function_call?: {
     name: string;
-    role: string;
-    avatar?: string;
+    arguments: string;
   };
-  feedback?: MessageFeedback;
-  created_at?: string;
 }
 
-export interface MessageFeedback {
-  score: number;
-  message: string;
-  comments: string[];
-  suggestions: string[];
-  details: FeedbackDetails;
+// Message sender interface
+export interface MessageSender {
+  id: string;
+  role: "user" | "assistant";
+  name: string;
+  avatar_url?: string;
 }
 
+// Feedback metrics interface
 export interface FeedbackMetrics {
-  clarity: number;
-  professionalism: number;
   empathy: number;
-  problem_solving: number;
+  clarity: number;
   effectiveness: number;
   appropriateness: number;
+  professionalism: number;
+  problem_solving: number;
+  overall: number;
 }
 
+// Feedback details interface
 export interface FeedbackDetails {
-  message_scores: number[];
-  key_moments: {
-    timestamp: string;
-    description: string;
-    impact: number;
-  }[];
-  learning_points: string[];
-  empathy: number;
-  clarity: number;
-  effectiveness: number;
-  appropriateness: number;
+  metrics: FeedbackMetrics;
   strengths: string[];
   improvements: string[];
   tips: string[];
+  comments: string;
   suggestions: string[];
-  comments: string[];
   score: number;
   overallProgress: {
-    empathy: number;
-    clarity: number;
-    effectiveness: number;
-    appropriateness: number;
+    score: number;
+    level: string;
+    nextLevel: string;
+    requiredScore: number;
   };
 }
 
+// Simulator scenario interface
 export interface SimulatorScenario {
   id: string;
   title: string;
   description: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   category: string;
+  tags: string[];
   initial_message: string;
-  suggested_responses: string[];
+  suggested_responses?: string[];
   learning_objectives: string[];
   success_criteria: {
-    type: string;
-    value: any;
-    minScore?: number;
-  }[];
+    minScore: number;
+    requiredSkills: string[];
+    minDuration: number;
+    maxDuration: number;
+  };
   created_at: string;
   updated_at: string;
 }
 
-export interface SimulationResponse {
-  message: Message;
-  feedback?: MessageFeedback;
+// Simulator state interface
+export interface SimulatorState {
+  id: string;
+  user_id: string;
+  scenario_id: string;
+  scenario: SimulatorScenario;
+  status: "active" | "completed";
+  messages: Message[];
+  feedback?: FeedbackDetails;
+  state: "initial" | "in_progress" | "completed";
+  created_at: string;
+  updated_at: string;
+  settings?: {
+    difficulty: "beginner" | "intermediate" | "advanced";
+    language: "he" | "en";
+    feedback_frequency: "high" | "medium" | "low";
+    auto_suggestions: boolean;
+  };
+}
+
+// Simulator session interface
+export interface SimulatorSession {
+  id: string;
+  user_id: string;
+  scenario_id: string;
+  scenario: SimulatorScenario;
+  status: "active" | "completed" | "failed";
   state: SimulatorState;
+  messages: Message[];
+  feedback?: FeedbackDetails;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface APIResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
+// Simulator user stats interface
+export interface SimulatorUserStats {
+  total_scenarios: number;
+  completed_scenarios: number;
+  average_score: number;
+  total_messages: number;
+  practice_time: number;
+  strengths: string[];
+  areas_for_improvement: string[];
 }
 
+// Simulator user settings interface
+export interface SimulatorUserSettings {
+  difficulty: "beginner" | "intermediate" | "advanced";
+  language: "he" | "en";
+  feedback_frequency: "high" | "medium" | "low";
+  auto_suggestions: boolean;
+  theme: "light" | "dark" | "system";
+}
+
+// Simulator action types
 export type SimulatorAction =
   | { type: "START_SCENARIO"; scenario: SimulatorScenario }
   | { type: "SEND_MESSAGE"; message: string }
   | { type: "RECEIVE_MESSAGE"; message: string }
   | { type: "SUBMIT_FEEDBACK"; rating: number; comment?: string }
   | { type: "RESET" };
+
+// Chat completion message interface
+export interface ChatCompletionMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+  name?: string;
+  function_call?: {
+    name: string;
+    arguments: string;
+  };
+}
+
+// Simulator event interface
+export interface SimulatorEvent {
+  type: string;
+  data: Record<string, any>;
+  timestamp: string;
+}
+
+// Simulator response interface
+export interface SimulatorResponse {
+  state: SimulatorState;
+  feedback?: FeedbackDetails;
+  message?: string;
+  status?: number;
+}
+
+// API response interface
+export interface APIResponse<T = any> {
+  data?: T;
+  error?: string;
+  message?: string;
+  status?: number;
+  success?: boolean;
+  state?: SimulatorState;
+}
+
+// Simulation state type alias
+export type SimulationState = SimulatorState;

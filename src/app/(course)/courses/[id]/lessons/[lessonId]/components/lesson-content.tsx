@@ -1,37 +1,48 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 import type { Lesson } from "@/types/api";
 
 interface LessonContentProps {
   lesson: Lesson;
-  className?: string;
+  onComplete?: () => void;
 }
 
-export function LessonContent({ lesson, className }: LessonContentProps) {
+export function LessonContent({ lesson, onComplete }: LessonContentProps) {
   return (
-    <div className={cn("space-y-4", className)}>
-      <Card>
-        <CardHeader>
-          <CardTitle>{lesson.title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {lesson.videoUrl && (
-            <div className="aspect-video overflow-hidden rounded-lg bg-muted">
-              <iframe
-                src={lesson.videoUrl}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="h-full w-full"
-              />
-            </div>
+    <Card className="p-4">
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">{lesson.title}</h2>
+        <p className="text-muted-foreground">{lesson.description}</p>
+
+        {/* Video Player */}
+        <div className="aspect-video overflow-hidden rounded-lg bg-muted">
+          {lesson.video_url && (
+            <video
+              className="h-full w-full"
+              controls
+              src={lesson.video_url}
+              poster="/images/video-placeholder.jpg"
+            />
           )}
-          <div className="prose prose-sm mt-4 max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: lesson.content || "" }} />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        {/* Content */}
+        <div
+          className="prose prose-sm dark:prose-invert"
+          dangerouslySetInnerHTML={{ __html: lesson.content }}
+        />
+
+        {/* Complete Button */}
+        {onComplete && (
+          <button
+            onClick={onComplete}
+            className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground"
+          >
+            סיימתי את השיעור
+          </button>
+        )}
+      </div>
+    </Card>
   );
 }

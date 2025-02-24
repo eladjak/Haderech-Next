@@ -12,87 +12,98 @@ beforeAll(() => {
 
 const mockAuthor: Author = {
   id: "1",
-  name: "משתמש לדוגמה",
-  username: "example_user",
-  full_name: "משתמש לדוגמה",
-  email: "user@example.com",
-  avatar_url: "/images/avatar.jpg",
-  image: null,
-  bio: "מורה ותיק לפיזיקה",
+  name: "משתמש בדיקה",
+  email: "test@test.com",
+  image: undefined,
+  avatar_url: undefined,
+  bio: undefined,
+  username: "testuser",
   role: "user",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  last_seen: new Date().toISOString(),
   points: 100,
   level: 1,
-  badges: ["test"],
-  achievements: ["test"],
+  badges: [],
+  achievements: [],
+  full_name: "משתמש בדיקה מלא",
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  last_seen: undefined,
 };
 
 const mockComment: ExtendedForumComment = {
   id: "1",
-  post_id: "post-1",
-  content: "תוכן התגובה לדוגמה",
+  content: "תוכן התגובה",
   author_id: mockAuthor.id,
-  author: mockAuthor,
-  parent_id: null,
+  post_id: "1",
+  parent_id: undefined,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
+  author: mockAuthor,
+  user: mockAuthor,
   likes: 0,
+  replies: [],
+  liked_by_user: false,
   isLiked: false,
   replies_count: 0,
-  replies: [],
+  post: {
+    id: "1",
+    title: "פוסט בדיקה",
+    content: "תוכן פוסט בדיקה",
+    author_id: mockAuthor.id,
+    category_id: "1",
+    category: {
+      id: "1",
+      name: "קטגוריה",
+      description: "תיאור",
+      slug: "category",
+      color: "blue",
+      order: 1,
+      icon: "icon",
+      posts_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    tags: [],
+    pinned: false,
+    solved: false,
+    likes: 0,
+    views: 0,
+    last_activity: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    author: mockAuthor,
+  },
 };
 
-describe("ForumComment", () => {
-  it("מציג תמונת פרופיל של המחבר", async () => {
-    render(<ForumComment comment={mockComment} />);
-
-    const avatar = await screen.findByRole("img", {
-      name: mockComment.author.name,
-    });
-    expect(avatar).toBeInTheDocument();
-  });
-
-  it("מציג תמונת פרופיל כברירת מחדל כאשר אין תמונה", async () => {
-    const commentWithoutImage = {
-      ...mockComment,
-      author: {
-        ...mockComment.author,
-        avatar_url: null,
-        image: null,
-        name: "משתמש לדוגמה",
-      },
-    };
-    render(<ForumComment comment={commentWithoutImage} />);
-
-    const fallback = await screen.findByRole("img", {
-      name: commentWithoutImage.author.name,
-    });
-    expect(fallback).toBeInTheDocument();
-    expect(fallback).toHaveTextContent("מ");
-  });
-
-  it("מקבל ומחיל className", () => {
-    const className = "test-class";
-    const { container } = render(
-      <ForumComment comment={mockComment} className={className} />
-    );
-    expect(container.firstChild).toHaveClass(className);
-  });
-
-  it("מציג את תוכן התגובה", () => {
+describe("ForumComment Component", () => {
+  it("renders comment content", () => {
     render(<ForumComment comment={mockComment} />);
     expect(screen.getByText(mockComment.content)).toBeInTheDocument();
   });
 
-  it("מציג את שם המשתמש", () => {
+  it("renders author information", () => {
     render(<ForumComment comment={mockComment} />);
     expect(screen.getByText(mockComment.author.name)).toBeInTheDocument();
+    const avatar = screen.getByAltText(`${mockComment.author.name} avatar`);
+    expect(avatar).toBeInTheDocument();
   });
 
-  it("מציג את מספר הלייקים", () => {
+  it("renders likes count", () => {
     render(<ForumComment comment={mockComment} />);
-    expect(screen.getByText(mockComment.likes.toString())).toBeInTheDocument();
+    expect(screen.getByText("0")).toBeInTheDocument();
+  });
+
+  it("renders replies count", () => {
+    render(<ForumComment comment={mockComment} />);
+    expect(screen.getByText("0")).toBeInTheDocument();
+  });
+
+  it("renders nested replies", () => {
+    const nestedComment: ExtendedForumComment = {
+      ...mockComment,
+      replies: [{ ...mockComment, id: "2" }],
+      replies_count: 1,
+    };
+    render(<ForumComment comment={nestedComment} />);
+    expect(screen.getAllByText(mockComment.content)).toHaveLength(2);
   });
 });

@@ -20,6 +20,10 @@ import { GET, PATCH, POST } from "../courses/[id]/lessons/route";
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
+// Mock environment variables
+process.env.NEXT_PUBLIC_SUPABASE_URL = "http://localhost:54321";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
+
 describe("Lessons API", () => {
   const mockUser = {
     id: "test-user-id",
@@ -29,6 +33,7 @@ describe("Lessons API", () => {
   const mockCourse = {
     id: "test-course-id",
     title: "Test Course",
+    instructor_id: mockUser.id,
   };
 
   const mockLesson = {
@@ -53,14 +58,15 @@ describe("Lessons API", () => {
       })),
     })),
     auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: { user: mockUser } },
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: mockUser },
         error: null,
       }),
     },
   };
 
   vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
+  vi.mocked(createServerClient).mockReturnValue(mockSupabase as any);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -194,8 +200,8 @@ describe("Lessons API", () => {
     });
 
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
-      mockSupabase.auth.getSession.mockResolvedValueOnce({
-        data: { session: null },
+      mockSupabase.auth.getUser.mockResolvedValueOnce({
+        data: { user: null },
         error: null,
       });
 
@@ -255,8 +261,8 @@ describe("Lessons API", () => {
     });
 
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
-      mockSupabase.auth.getSession.mockResolvedValueOnce({
-        data: { session: null },
+      mockSupabase.auth.getUser.mockResolvedValueOnce({
+        data: { user: null },
         error: null,
       });
 
@@ -306,8 +312,8 @@ describe("Lessons API", () => {
     });
 
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
-      mockSupabase.auth.getSession.mockResolvedValueOnce({
-        data: { session: null },
+      mockSupabase.auth.getUser.mockResolvedValueOnce({
+        data: { user: null },
         error: null,
       });
 

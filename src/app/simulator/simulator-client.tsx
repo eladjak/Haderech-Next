@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { EXAMPLE_SCENARIOS } from "@/constants/simulator";
-import type { SimulationState, SimulatorScenario } from "@/types/simulator";
+import type { SimulatorScenario, SimulatorState } from "@/types/simulator";
 
 interface SimulatorClientProps {
   initialScenario?: SimulatorScenario;
@@ -22,7 +22,7 @@ export default function SimulatorClient({
     SimulatorScenario | undefined
   >(initialScenario);
   const [simulationState, setSimulationState] = useState<
-    SimulationState | undefined
+    SimulatorState | undefined
   >();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -135,6 +135,10 @@ export default function SimulatorClient({
     }
   };
 
+  const handleReset = (): void => {
+    setSimulationState(undefined);
+  };
+
   return (
     <div className="space-y-8">
       {!simulationState && (
@@ -164,6 +168,7 @@ export default function SimulatorClient({
           <ChatSimulator
             state={simulationState}
             onSendMessage={handleSendMessage}
+            onReset={handleReset}
             isLoading={isLoading}
             showFeedback={true}
           />

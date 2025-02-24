@@ -2,15 +2,39 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "types": ["jest", "@testing-library/jest-dom"],
-    "isolatedModules": false
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "types": [
+      "vitest/globals",
+      "node",
+      "@testing-library/jest-dom",
+      "axe-core"
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
-    "src",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "jest.setup.js"
-  ]
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "src/tests/**/*.ts",
+    "src/tests/**/*.tsx",
+    "vitest.config.ts",
+    "src/tests/types/*.d.ts"
+  ],
+  "exclude": ["node_modules", "src/tests/e2e", "e2e-tests", ".next", "dist"]
 }

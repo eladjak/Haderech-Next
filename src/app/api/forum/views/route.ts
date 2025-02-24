@@ -16,81 +16,58 @@ import type { Database } from "@/types/database";
  *
  * Creates or updates a view record for a post and increments the post's view count.
  *
- * @requires Authentication
  * @param {Request} request - The incoming request object
  * @returns {Promise<NextResponse>} JSON response containing the view record or error message
  */
 export async function POST(request: NextRequest) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
-
   try {
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
-    }
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     const json = await request.json();
-    const { post_id } = json;
+    const { post_id, ip_address, user_agent } = json;
 
-    if (!post_id) {
-      return NextResponse.json({ error: "נדרש מזהה פוסט" }, { status: 400 });
+    if (!post_id || !ip_address || !user_agent) {
+      return NextResponse.json({ error: "חסרים שדות חובה" }, { status: 400 });
     }
 
     // בדיקה שהפוסט קיים
     const { data: post, error: postError } = await supabase
       .from("forum_posts")
-      .select("*")
+      .select("id, views")
       .eq("id", post_id)
       .single();
 
     if (postError || !post) {
+      console.error("Post error:", postError);
       return NextResponse.json({ error: "הפוסט לא נמצא" }, { status: 404 });
     }
 
-    // בדיקה אם המשתמש כבר צפה בפוסט
-    const { data: existingView, error: _viewError } = await supabase
+    // קבלת המשתמש הנוכחי (אם מחובר)
+    const {
+      data: { session },
+      error: authError,
+    } = await supabase.auth.getSession();
+
+    // יצירת רשומת צפייה חדשה
+    const viewData = {
+      post_id,
+      user_id: session?.user?.id,
+      ip_address,
+      user_agent,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: view, error: viewError } = await supabase
       .from("forum_views")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("post_id", post_id)
-      .single();
-
-    if (existingView) {
-      // עדכון זמן הצפייה האחרון
-      const { error: updateError } = await supabase
-        .from("forum_views")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", existingView.id);
-
-      if (updateError) {
-        return NextResponse.json(
-          { error: "שגיאה בעדכון הצפייה" },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({ view: existingView });
-    }
-
-    // יצירת צפייה חדשה
-    const { data: view, error } = await supabase
-      .from("forum_views")
-      .insert([
-        {
-          user_id: user.id,
-          post_id: post_id,
-        },
-      ])
+      .insert([viewData])
       .select()
       .single();
 
-    if (error) {
+    if (viewError) {
+      console.error("View error:", viewError);
       return NextResponse.json(
-        { error: "שגיאה ביצירת הצפייה" },
+        { error: "שגיאת מסד נתונים", details: viewError.message },
         { status: 500 }
       );
     }
@@ -98,18 +75,29 @@ export async function POST(request: NextRequest) {
     // עדכון מספר הצפיות בפוסט
     const { error: updateError } = await supabase
       .from("forum_posts")
-      .update({ views: post.views + 1 })
+      .update({
+        views: (post.views || 0) + 1,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", post_id);
 
     if (updateError) {
+      console.error("Update error:", updateError);
       return NextResponse.json(
-        { error: "שגיאה בעדכון מספר הצפיות" },
+        { error: "שגיאת מסד נתונים", details: updateError.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ view });
-  } catch (_error) {
-    return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
+    return NextResponse.json(view, { status: 201 });
+  } catch (error) {
+    console.error("Server error:", error);
+    return NextResponse.json(
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

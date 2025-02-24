@@ -1,27 +1,38 @@
+import type { ReactElement, ReactNode } from "react";
 import React from "react";
 
 import {
+  AlertCircle,
+  Briefcase,
+  CheckCircle,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  MessageCircle,
-  ThumbsDown,
+  Heart,
+  Sun,
+  Target,
   ThumbsUp,
+  Wrench,
 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import type { MessageFeedback } from "@/types/simulator";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { FeedbackDetails } from "@/types/simulator";
 
 interface FeedbackDisplayProps {
-  feedback: MessageFeedback;
+  feedback?: FeedbackDetails;
   messageId: string;
   isExpanded: boolean;
   onToggle: (messageId: string) => void;
+  className?: string;
 }
 
-interface FeedbackMetric {
+interface MetricItem {
   label: string;
   value: number;
+  icon: ReactNode;
+  color: string;
 }
 
 export function FeedbackDisplay({
@@ -29,105 +40,175 @@ export function FeedbackDisplay({
   messageId,
   isExpanded,
   onToggle,
-}: FeedbackDisplayProps): React.ReactElement {
-  const renderFeedbackIcon = (score: number): React.ReactElement => {
-    if (score >= 80) {
-      return <ThumbsUp className="h-4 w-4 text-green-500" />;
-    }
-    if (score >= 60) {
-      return <MessageCircle className="h-4 w-4 text-yellow-500" />;
-    }
-    return <ThumbsDown className="h-4 w-4 text-red-500" />;
-  };
-
-  const renderFeedbackDetails = (): React.ReactElement | null => {
-    if (!feedback.details) return null;
-
-    const { details } = feedback;
-    const { strengths, improvements, tips } = details;
-
-    const metrics: FeedbackMetric[] = [
-      { label: "אמפתיה", value: details.empathy },
-      { label: "בהירות", value: details.clarity },
-      { label: "אפקטיביות", value: details.effectiveness },
-      { label: "התאמה", value: details.appropriateness },
-    ];
-
+  className,
+}: FeedbackDisplayProps): ReactElement {
+  if (!feedback) {
     return (
-      <div className="mt-4 space-y-4">
-        {metrics.map(({ label, value }) => (
-          <div key={label} className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span>{label}</span>
-              <span>{value}%</span>
-            </div>
-            <Progress value={value} className="h-2" />
-          </div>
-        ))}
-
-        {strengths.length > 0 && (
-          <div>
-            <h4 className="mb-2 font-semibold">חוזקות</h4>
-            <ul className="list-inside list-disc">
-              {strengths.map((strength: string, index: number) => (
-                <li key={`strength-${index}`}>{strength}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {improvements.length > 0 && (
-          <div>
-            <h4 className="mb-2 font-semibold">נקודות לשיפור</h4>
-            <ul className="list-inside list-disc">
-              {improvements.map((improvement: string, index: number) => (
-                <li key={`improvement-${index}`}>{improvement}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {tips.length > 0 && (
-          <div>
-            <h4 className="mb-2 font-semibold">טיפים</h4>
-            <ul className="list-inside list-disc">
-              {tips.map((tip: string, index: number) => (
-                <li key={`tip-${index}`}>{tip}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+      <Alert variant="default" className={className}>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>אין משוב זמין</AlertTitle>
+        <AlertDescription>אין משוב זמין להודעה זו כרגע.</AlertDescription>
+      </Alert>
     );
+  }
+
+  const metrics: MetricItem[] = [
+    {
+      label: "אמפתיה",
+      value: feedback.metrics.empathy * 100,
+      icon: <Heart className="h-4 w-4" />,
+      color: "bg-red-200",
+    },
+    {
+      label: "בהירות",
+      value: feedback.metrics.clarity * 100,
+      icon: <Sun className="h-4 w-4" />,
+      color: "bg-yellow-200",
+    },
+    {
+      label: "אפקטיביות",
+      value: feedback.metrics.effectiveness * 100,
+      icon: <Target className="h-4 w-4" />,
+      color: "bg-blue-200",
+    },
+    {
+      label: "התאמה",
+      value: feedback.metrics.appropriateness * 100,
+      icon: <CheckCircle className="h-4 w-4" />,
+      color: "bg-green-200",
+    },
+    {
+      label: "מקצועיות",
+      value: feedback.metrics.professionalism * 100,
+      icon: <Briefcase className="h-4 w-4" />,
+      color: "bg-purple-200",
+    },
+    {
+      label: "פתרון בעיות",
+      value: feedback.metrics.problem_solving * 100,
+      icon: <Wrench className="h-4 w-4" />,
+      color: "bg-orange-200",
+    },
+  ];
+
+  const getScoreColor = (score: number): string => {
+    if (score >= 90) return "bg-green-500";
+    if (score >= 80) return "bg-green-400";
+    if (score >= 70) return "bg-yellow-400";
+    if (score >= 60) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   return (
-    <div className="w-full space-y-2">
-      <Alert
-        className={`cursor-pointer ${
-          feedback.score >= 80
-            ? "border-green-500"
-            : feedback.score >= 60
-              ? "border-yellow-500"
-              : "border-red-500"
-        }`}
-        onClick={() => onToggle(messageId)}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {renderFeedbackIcon(feedback.score)}
-            <AlertTitle>ציון: {feedback.score}</AlertTitle>
-          </div>
+    <Alert
+      variant="default"
+      className={cn("cursor-pointer", className)}
+      onClick={() => onToggle(messageId)}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ThumbsUp className="h-4 w-4" />
+          <AlertTitle>ציון: {feedback.score}</AlertTitle>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle(messageId);
+          }}
+        >
           {isExpanded ? (
-            <ChevronUp className="h-4 w-4" data-testid="chevron-up" />
+            <ChevronUp className="h-4 w-4" />
           ) : (
-            <ChevronDown className="h-4 w-4" data-testid="chevron-down" />
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
+      {isExpanded && (
+        <div className="mt-4 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {metrics.map((metric) => (
+              <div key={metric.label} className="space-y-1">
+                <div className="flex items-center gap-2">
+                  {metric.icon}
+                  <span className="text-sm font-medium">{metric.label}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={cn("h-full transition-all", metric.color)}
+                      style={{ width: `${metric.value}%` }}
+                    />
+                  </div>
+                  <span className="text-sm">{Math.round(metric.value)}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <h4 className="mb-2 font-semibold">התקדמות כללית</h4>
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={cn(
+                  "h-full transition-all",
+                  getScoreColor(feedback.overallProgress.score)
+                )}
+                style={{ width: `${feedback.overallProgress.score}%` }}
+              />
+            </div>
+            <div className="mt-2 text-sm">
+              <p>רמה נוכחית: {feedback.overallProgress.level}</p>
+              <p>הרמה הבאה: {feedback.overallProgress.nextLevel}</p>
+              <p>
+                נדרש: {feedback.overallProgress.requiredScore}% להתקדמות לרמה
+                הבאה
+              </p>
+            </div>
+          </div>
+
+          {feedback.strengths.length > 0 && (
+            <div>
+              <h4 className="mb-2 font-semibold">חוזקות</h4>
+              <ul className="list-inside list-disc space-y-1">
+                {feedback.strengths.map((strength, index) => (
+                  <li key={index} className="text-sm">
+                    {strength}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {feedback.improvements.length > 0 && (
+            <div>
+              <h4 className="mb-2 font-semibold">נקודות לשיפור</h4>
+              <ul className="list-inside list-disc space-y-1">
+                {feedback.improvements.map((improvement, index) => (
+                  <li key={index} className="text-sm">
+                    {improvement}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {feedback.suggestions.length > 0 && (
+            <div>
+              <h4 className="mb-2 font-semibold">הצעות לשיפור</h4>
+              <ul className="list-inside list-disc space-y-1">
+                {feedback.suggestions.map((suggestion, index) => (
+                  <li key={index} className="text-sm">
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
-        <AlertDescription>{feedback.message}</AlertDescription>
-
-        {isExpanded && renderFeedbackDetails()}
-      </Alert>
-    </div>
+      )}
+    </Alert>
   );
 }

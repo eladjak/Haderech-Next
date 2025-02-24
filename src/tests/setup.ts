@@ -1,7 +1,11 @@
+import { vi } from "vitest";
+
 import "@testing-library/jest-dom";
 import { TextDecoder, TextEncoder } from "util";
 
 import { configure } from "@testing-library/react";
+
+import React from "react";
 
 // Configure testing library
 configure({
@@ -9,53 +13,58 @@ configure({
 });
 
 // Mock next/navigation
-jest.mock("next/navigation", () => ({
-  useRouter() {
-    return {
-      push: jest.fn(),
-      replace: jest.fn(),
-      prefetch: jest.fn(),
-      back: jest.fn(),
-    };
-  },
-  useSearchParams() {
-    return new URLSearchParams();
-  },
-  usePathname() {
-    return "";
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+// Mock next/image
+vi.mock("next/image", () => ({
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return React.createElement("img", { ...props });
   },
 }));
 
 // Mock next-auth
-jest.mock("next-auth/react", () => ({
-  useSession() {
-    return { data: null, status: "unauthenticated" };
-  },
+vi.mock("next-auth/react", () => ({
+  useSession: () => ({
+    data: null,
+    status: "unauthenticated",
+  }),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
 }));
 
 // Mock Supabase
-jest.mock("@supabase/supabase-js", () => ({
-  createClient: jest.fn(() => ({
+vi.mock("@supabase/supabase-js", () => ({
+  createClient: vi.fn(() => ({
     auth: {
-      signIn: jest.fn(),
-      signOut: jest.fn(),
-      onAuthStateChange: jest.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      onAuthStateChange: vi.fn(),
     },
-    from: jest.fn(() => ({
-      select: jest.fn(),
-      insert: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn(),
+      insert: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     })),
   })),
 }));
 
 // Mock OpenAI
-jest.mock("openai", () => ({
-  OpenAI: jest.fn(() => ({
+vi.mock("openai", () => ({
+  OpenAI: vi.fn(() => ({
     chat: {
       completions: {
-        create: jest.fn(),
+        create: vi.fn(),
       },
     },
   })),
@@ -64,39 +73,38 @@ jest.mock("openai", () => ({
 // Global mocks
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as any;
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+})) as unknown as typeof ResizeObserver;
 
 // Mock window.matchMedia
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: jest.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 });
 
 // Custom matchers
 expect.extend({
-  toHaveBeenCalledWithMatch(received: jest.Mock, expected: any) {
-    const pass = received.mock.calls.some((call) =>
-      JSON.stringify(call[0]).includes(JSON.stringify(expected))
+  toHaveBeenCalledWithMatch(received: any, expected: any) {
+    const pass = received.mock.calls.some((call: any[]) =>
+      JSON.stringify(call).includes(JSON.stringify(expected))
     );
+
     return {
       pass,
       message: () =>
-        `expected ${received.getMockName()} to have been called with an object matching ${JSON.stringify(
-          expected
-        )}`,
+        `expected ${received} ${pass ? "not " : ""}to have been called with arguments matching ${expected}`,
     };
   },
 });

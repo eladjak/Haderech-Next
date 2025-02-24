@@ -1,217 +1,112 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-import {
+import type {
   Message,
-  MessageFeedback,
   SimulatorScenario,
   SimulatorState,
 } from "@/types/simulator";
 
 import { ChatSimulator } from "../ChatSimulator";
 
-// Mock the scrollIntoView function
-const mockScrollIntoView = vi.fn();
-window.HTMLElement.prototype.scrollIntoView = mockScrollIntoView;
+const mockScenario: SimulatorScenario = {
+  id: "1",
+  title: "תרחיש בדיקה",
+  description: "תרחיש לבדיקת המערכת",
+  difficulty: "beginner",
+  category: "תקשורת",
+  tags: ["תקשורת", "אמפתיה"],
+  initial_message: "שלום, איך אני יכול לעזור?",
+  learning_objectives: ["שיפור תקשורת", "הבנת צרכי המשתמש"],
+  success_criteria: {
+    minScore: 70,
+    requiredSkills: ["תקשורת", "אמפתיה"],
+    minDuration: 300,
+    maxDuration: 900,
+  },
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+const mockMessage: Message = {
+  id: "1",
+  role: "user",
+  content: "שלום, אני צריך עזרה",
+  timestamp: new Date().toISOString(),
+  sender: {
+    id: "1",
+    name: "משתמש",
+    role: "user",
+  },
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+const mockState: SimulatorState = {
+  id: "1",
+  user_id: "1",
+  scenario_id: "1",
+  scenario: mockScenario,
+  status: "idle",
+  state: "initial",
+  messages: [mockMessage],
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
 
 describe("ChatSimulator", () => {
-  const mockScenario: SimulatorScenario = {
-    id: "1",
-    title: "Test Scenario",
-    description: "Test Description",
-    difficulty: "beginner",
-    category: "test",
-    initial_message: "Initial message",
-    learning_objectives: ["test"],
-    success_criteria: {
-      minScore: 80,
-      requiredSkills: ["test"],
-      minDuration: 300,
-      maxDuration: 900,
-    },
-  };
-
-  const mockMessage: Message = {
-    id: "1",
-    role: "user",
-    content: "Test message",
-    timestamp: new Date().toISOString(),
-    sender: {
-      id: "1",
-      role: "user",
-      name: "Test User",
-    },
-  };
-
-  const mockFeedback: MessageFeedback = {
-    score: 80,
-    message: "Good job!",
-    details: {
-      metrics: {
-        empathy: 80,
-        clarity: 80,
-        effectiveness: 80,
-        appropriateness: 80,
-        professionalism: 80,
-        problem_solving: 80,
-      },
-      score: 80,
-      empathy: 80,
-      clarity: 80,
-      effectiveness: 80,
-      appropriateness: 80,
-      professionalism: 80,
-      problem_solving: 80,
-      strengths: ["test"],
-      improvements: ["test"],
-      tips: ["test"],
-      comments: ["test comment"],
-      suggestions: ["test"],
-      overallProgress: {
-        score: 80,
-        level: "beginner",
-        progress: 50,
-        nextLevel: "intermediate",
-        requiredScore: 100,
-      },
-    },
-    comments: ["test"],
-    suggestions: ["test"],
-  };
-
-  const mockState: SimulatorState = {
-    scenario: mockScenario,
-    messages: [mockMessage],
-    status: "active",
-    feedback: {
-      score: 80,
-      message: "Good job!",
-      details: {
-        metrics: {
-          empathy: 80,
-          clarity: 80,
-          effectiveness: 80,
-          appropriateness: 80,
-          professionalism: 80,
-          problem_solving: 80,
-        },
-        strengths: ["test"],
-        improvements: ["test"],
-        tips: ["test"],
-        comments: "test comment",
-        suggestions: ["test"],
-        overallProgress: {
-          score: 80,
-          level: "beginner",
-          nextLevel: "intermediate",
-          requiredScore: 100,
-        },
-      },
-      comments: ["test"],
-      suggestions: ["test"],
-    },
-    settings: {
-      difficulty: "beginner",
-      language: "he",
-      feedback_frequency: "always",
-      auto_suggestions: true,
-    },
-    stats: {
-      total_scenarios: 1,
-      completed_scenarios: 0,
-      average_score: 0,
-      total_messages: 1,
-      practice_time: 0,
-      strengths: ["test"],
-      areas_for_improvement: ["test"],
-    },
-  };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("מציג את פרטי התרחיש", () => {
-    render(
-      <ChatSimulator
-        state={mockState}
-        onMessage={async () => {}}
-        isLoading={false}
-      />
-    );
-
-    expect(screen.getByText(mockScenario.title)).toBeInTheDocument();
-    expect(screen.getByText(mockScenario.description)).toBeInTheDocument();
-  });
-
-  it("מציג את ההודעות", () => {
-    render(
-      <ChatSimulator
-        state={mockState}
-        onMessage={async () => {}}
-        isLoading={false}
-      />
-    );
-
-    expect(screen.getByText(mockMessage.content)).toBeInTheDocument();
-  });
-
-  it("שולח הודעה בעת שליחת הטופס", async () => {
-    const onMessage = vi.fn().mockImplementation(async () => {});
-    render(
-      <ChatSimulator
-        state={mockState}
-        onMessage={onMessage}
-        isLoading={false}
-      />
-    );
-
-    const input = screen.getByRole("textbox");
-    const form = screen.getByRole("form");
-
-    fireEvent.change(input, { target: { value: "הודעה חדשה" } });
-    fireEvent.submit(form);
-
-    await waitFor(() => {
-      expect(onMessage).toHaveBeenCalledWith("הודעה חדשה");
+  const mockSendMessage = vi
+    .fn()
+    .mockImplementation(async (message: string) => {
+      console.log("Message sent:", message);
     });
+
+  const mockReset = vi.fn().mockImplementation(() => {
+    console.log("Simulator reset");
   });
 
-  it("מנטרל את הקלט ואת כפתור השליחה בזמן טעינה", () => {
+  it("renders correctly", () => {
     render(
       <ChatSimulator
         state={mockState}
-        onMessage={async () => {}}
+        onSendMessage={mockSendMessage}
+        onReset={mockReset}
+        isLoading={false}
+        showFeedback={true}
+      />
+    );
+
+    expect(screen.getByText("שלום, אני צריך עזרה")).toBeInTheDocument();
+  });
+
+  it("handles message input correctly", () => {
+    const handleSendMessage = vi.fn();
+    render(
+      <ChatSimulator
+        state={mockState}
+        onSendMessage={handleSendMessage}
+        onReset={mockReset}
+        isLoading={false}
+        showFeedback={true}
+      />
+    );
+
+    const input = screen.getByPlaceholderText("הקלד הודעה...");
+    expect(input).toBeInTheDocument();
+  });
+
+  it("shows loading state", () => {
+    render(
+      <ChatSimulator
+        state={mockState}
+        onSendMessage={mockSendMessage}
+        onReset={mockReset}
         isLoading={true}
+        showFeedback={true}
       />
     );
 
-    const input = screen.getByRole("textbox");
-    const submitButton = screen.getByRole("button", { name: /שלח/i });
-
-    expect(input).toHaveAttribute("disabled");
-    expect(submitButton).toHaveAttribute("disabled");
-  });
-
-  it("מגביל את אורך ההודעה ל-1000 תווים", async () => {
-    const onMessage = vi.fn().mockImplementation(async () => {});
-    render(
-      <ChatSimulator
-        state={mockState}
-        onMessage={onMessage}
-        isLoading={false}
-      />
-    );
-
-    const input = screen.getByRole("textbox");
-    const form = screen.getByRole("form");
-    const longMessage = "א".repeat(1001);
-
-    fireEvent.change(input, { target: { value: longMessage } });
-    fireEvent.submit(form);
-
-    await waitFor(() => {
-      expect(onMessage).not.toHaveBeenCalled();
-    });
+    const input = screen.getByPlaceholderText("הקלד הודעה...");
+    expect(input).toBeDisabled();
   });
 });

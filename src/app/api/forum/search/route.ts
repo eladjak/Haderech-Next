@@ -12,6 +12,9 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/types/database";
 import type { ForumPost } from "@/types/forum";
 
+// Import the dynamic directive
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/forum/search
  *

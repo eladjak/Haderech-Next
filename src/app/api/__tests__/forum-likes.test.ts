@@ -2,9 +2,10 @@ import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createMocks } from "node-mocks-http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DELETE, POST } from "../forum/likes/route";
+import { DELETE, GET, POST } from "../forum/likes/route";
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
@@ -114,6 +115,43 @@ describe("Forum Likes API", () => {
       expect(data).toEqual({
         error: "שגיאת מסד נתונים",
       });
+    });
+
+    it("מחזיר את כל הלייקים", async () => {
+      const { req } = createMocks({
+        method: "GET",
+      });
+
+      const response = await GET(req as NextRequest);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(Array.isArray(data)).toBe(true);
+    });
+
+    it("מחזיר לייקים לפוסט ספציפי", async () => {
+      const postId = "123";
+      const { req } = createMocks({
+        method: "GET",
+        query: { postId },
+      });
+
+      const response = await GET(req as NextRequest);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(Array.isArray(data)).toBe(true);
+    });
+
+    it("מחזיר שגיאה כאשר הפוסט לא קיים", async () => {
+      const postId = "nonexistent";
+      const { req } = createMocks({
+        method: "GET",
+        query: { postId },
+      });
+
+      const response = await GET(req as NextRequest);
+      expect(response.status).toBe(404);
     });
   });
 

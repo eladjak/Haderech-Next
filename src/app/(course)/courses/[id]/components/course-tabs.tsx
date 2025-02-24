@@ -47,7 +47,7 @@ export function CourseTabs({ course, className }: CourseTabsProps) {
       </TabsList>
       <TabsContent value="content">
         <div className="space-y-4">
-          {course.sections.map((section) => (
+          {course.sections?.map((section) => (
             <Card key={section.id}>
               <CardHeader
                 className="cursor-pointer"

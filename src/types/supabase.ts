@@ -87,3 +87,19 @@ export type {
   ForumPost,
 };
 export type { Database };
+
+export interface SocialGroup {
+  id: string;
+  name: string;
+  description: string;
+  type: "public" | "private";
+  owner_id: string;
+  members_count: number;
+  created_at: string;
+  updated_at: string;
+  members?: {
+    user_id: string;
+    role: "member" | "admin" | "moderator";
+    joined_at: string;
+  }[];
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -10,7 +10,7 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -23,7 +23,16 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "types": [
+      "node",
+      "react",
+      "vitest/globals",
+      "@testing-library/jest-dom",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-progress",
+      "@radix-ui/react-scroll-area"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -32,7 +41,12 @@
     "**/*.mjs",
     "**/*.cjs",
     ".next/types/**/*.ts",
-    "src/types/**/*.d.ts"
+    "src/types/**/*.d.ts",
+    "vitest.config.ts",
+    "src/tests/utils/test-setup.ts",
+    "src/tests/utils/test-matchers.ts",
+    "src/test/setup.ts",
+    "src/test/vitest-setup.ts"
   ],
   "exclude": ["node_modules"]
 }

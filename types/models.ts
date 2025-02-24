@@ -1,25 +1,19 @@
-import type { SimulatorScenario as SimulatorScenarioType } from "./simulator";
+import type { Author } from "./api";
+import type { Database } from "./database";
+import type { ForumComment, ForumPost, ForumStats } from "./forum";
+import type {
+  FeedbackDetails,
+  Message,
+  SimulatorScenario,
+  SimulatorSession,
+  SimulatorState,
+} from "./simulator";
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
+export interface User extends Author {
   full_name: string;
-  username: string;
-  avatar_url: string | null;
-  image: string | null;
-  bio: string | null;
-  role: string;
-  created_at: string;
-  updated_at: string;
-  level: number;
-  points: number;
-  badges: string[];
   completed_courses: string[];
   forum_posts: number;
   login_streak: number;
-  achievements?: string[];
-  courseProgress?: Record<string, number>;
 }
 
 export interface Course {
@@ -122,56 +116,12 @@ export interface UserProgress {
   achievements?: string[];
 }
 
-export interface SimulatorState {
-  messages: ChatMessage[];
-  scenario: SimulatorScenarioType | null;
-  feedback: {
-    rating: number | null;
-    comment: string | null;
-  };
-}
-
-export type SimulatorAction =
-  | { type: "START_SCENARIO"; scenario: SimulatorScenarioType }
-  | { type: "SEND_MESSAGE"; message: ChatMessage }
-  | { type: "RECEIVE_MESSAGE"; message: ChatMessage }
-  | { type: "SUBMIT_FEEDBACK"; rating: number; comment?: string }
-  | { type: "RESET" };
-
 export interface LessonProgress {
   id: string;
   lesson_id: string;
   user_id: string;
   completed: boolean;
   progress: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ForumPost {
-  id: string;
-  title: string;
-  content: string;
-  author_id: string;
-  author: User;
-  category: string;
-  tags: string[];
-  views: number;
-  likes: number;
-  comments: ForumComment[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ForumComment {
-  id: string;
-  post_id: string;
-  author_id: string;
-  author: User;
-  content: string;
-  likes: number;
-  parent_id: string | null;
-  replies: ForumComment[];
   created_at: string;
   updated_at: string;
 }
@@ -200,26 +150,50 @@ export interface Notification {
   updated_at: string;
 }
 
-export interface Profile extends User {}
+export type Profile = User;
 
 export interface UserState {
-  user: User | null;
-  preferences: UserPreferences;
-  progress: UserProgress;
-  loading: boolean;
-  error: string | null;
+  id: string | null;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+  role: "user" | "admin" | "instructor" | null;
+  points: number;
+  level: string;
+  badges: string[];
+  achievements: string[];
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface CourseState {
-  courses: Course[];
-  currentCourse: Course | null;
-  loading: boolean;
-  error: string | null;
+  id: string | null;
+  title: string | null;
+  description: string | null;
+  image: string | null;
+  price: number | null;
+  duration: number | null;
+  level: string | null;
+  category: string | null;
+  tags: string[];
+  instructor_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  published: boolean;
+  featured: boolean;
+  lessons_count: number;
+  students_count: number;
+  ratings_count: number;
+  average_rating: number;
+  instructor: User | null;
+  lessons: CourseLesson[];
+  ratings: CourseRating[];
+  comments: CourseComment[];
 }
 
 export interface ForumState {
   posts: ForumPost[];
-  currentPost: ForumPost | null;
+  stats: ForumStats;
   loading: boolean;
   error: string | null;
 }
@@ -229,3 +203,38 @@ export interface NotificationState {
   loading: boolean;
   error: string | null;
 }
+
+export interface CourseWithRelations extends Omit<Course, "instructor"> {
+  lessons: CourseLesson[];
+  ratings: CourseRating[];
+  comments: CourseComment[];
+  instructor: Author;
+}
+
+export interface SimulatorStateModel {
+  scenario: SimulatorScenario | null;
+  messages: Message[];
+  current_step: number;
+  total_steps: number;
+  score: number;
+  feedback: FeedbackDetails | null;
+  completed: boolean;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface AppState {
+  user: UserState;
+  course: CourseState;
+  forum: ForumState;
+  simulator: SimulatorStateModel;
+  theme: "light" | "dark" | "system";
+  language: string;
+  notifications: Notification[];
+  loading: boolean;
+  error: string | null;
+}
+
+export type { Author } from "./api";
+export type { ForumPost, ForumComment } from "./forum";
+export type { Message, FeedbackDetails, SimulatorState } from "./simulator";

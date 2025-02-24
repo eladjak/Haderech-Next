@@ -1,123 +1,174 @@
-// API Response Types
+import type { Database } from "./database";
+import type { ForumComment } from "./forum";
+
+export type ApiResponse<T = any> = {
+  data?: T;
+  error?: string;
+  message?: string;
+  status?: number;
+  success?: boolean;
+};
+
 export interface User {
   id: string;
+  name: string;
   email: string;
-  full_name: string;
   username: string;
-  avatar_url: string | null;
-  image: string | null;
-  bio: string | null;
-  role: string;
+  image?: string;
+  avatar_url?: string;
+  bio?: string;
+  role: "user" | "admin" | "instructor";
+  points: number;
+  level: string;
+  badges: string[];
+  achievements: string[];
   created_at: string;
   updated_at: string;
-  level: string;
-  points: number;
-  badges: string[];
-  completed_courses: string[];
-  forum_posts: number;
-  login_streak: number;
+  last_seen?: string;
+}
+
+export interface Author extends User {
+  full_name: string;
+  completed_courses?: string[];
+  forum_posts?: number;
+  login_streak?: number;
+}
+
+export interface CourseLesson {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  order: number;
+  duration: number;
+  course_id: string;
+  is_free: boolean;
+  video_url?: string | null;
+  created_at: string;
+  updated_at: string;
+  completed?: boolean;
+  progress?: number;
+  isCompleted?: boolean;
+}
+
+export interface CourseRating {
+  id: string;
+  rating: number;
+  review: string;
+  user_id: string;
+  course_id: string;
+  created_at: string;
+  updated_at: string;
+  user: Author;
+}
+
+export interface CourseComment extends ForumComment {
+  course_id: string;
 }
 
 export interface Course {
   id: string;
   title: string;
   description: string;
-  image_url: string | null;
-  instructor_id: string;
-  instructor: User;
+  image: string;
   price: number;
   duration: number;
   level: string;
   category: string;
   tags: string[];
-  ratings: CourseRating[];
-  lessons: CourseLesson[];
+  instructor_id: string;
   created_at: string;
   updated_at: string;
-  total_students: number;
+  published: boolean;
+  featured: boolean;
+  lessons_count: number;
+  students_count: number;
+  ratings_count: number;
+  average_rating: number;
+  instructor: Author;
+  lessons?: CourseLesson[];
+  ratings?: CourseRating[];
+  comments?: CourseComment[];
+  sections?: {
+    id: string;
+    title: string;
+    description: string;
+    order: number;
+    lessons: CourseLesson[];
+  }[];
 }
 
-export interface CourseLesson {
+export interface Notification {
   id: string;
-  course_id: string;
+  type: string;
   title: string;
   description: string;
-  content: string;
-  duration: number;
-  order: number;
-  is_free: boolean;
-  video_url: string | null;
-  progress: LessonProgress[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface LessonProgress {
-  id: string;
-  lesson_id: string;
+  message: string;
+  read: boolean;
   user_id: string;
-  completed: boolean;
-  progress: number;
+  data: Record<string, any>;
   created_at: string;
   updated_at: string;
-}
-
-export interface CourseRating {
-  id: string;
-  course_id: string;
-  user_id: string;
-  user: User;
-  rating: number;
-  comment: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ForumPost {
-  id: string;
-  title: string;
-  content: string;
-  author_id: string;
-  author: User;
-  category: string;
-  tags: string[];
-  views: number;
-  likes: number;
-  comments: ForumComment[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ForumComment {
-  id: string;
-  post_id: string;
-  author_id: string;
-  author: User;
-  content: string;
-  likes: number;
-  replies: ForumComment[];
-  created_at: string;
-  updated_at: string;
+  user: Author;
+  content?: string;
 }
 
 export interface Achievement {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  icon: string;
+  image: string;
   points: number;
   created_at: string;
   updated_at: string;
 }
 
-export interface Notification {
+export interface UserAchievement {
   id: string;
   user_id: string;
-  title: string;
-  message: string;
-  type: string;
-  read: boolean;
-  data: Record<string, any>;
+  achievement_id: string;
+  created_at: string;
+  updated_at: string;
+  achievement: Achievement;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
   created_at: string;
   updated_at: string;
 }
+
+export interface UserBadge {
+  id: string;
+  user_id: string;
+  badge_id: string;
+  created_at: string;
+  updated_at: string;
+  badge: Badge;
+}
+
+export interface UserProfile {
+  id: string;
+  user_id: string;
+  bio: string;
+  avatar_url: string;
+  social_links: {
+    twitter?: string;
+    github?: string;
+    linkedin?: string;
+    website?: string;
+  };
+  preferences: {
+    email_notifications: boolean;
+    push_notifications: boolean;
+    theme: "light" | "dark" | "system";
+    language: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+export type { Database };

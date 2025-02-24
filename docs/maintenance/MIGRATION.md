@@ -1,282 +1,264 @@
-# מדריך העברה - HaDerech Next 🚀
+# 🔄 מדריך מיגרציה
 
-## סקירה כללית 📋
+## תוכן עניינים
 
-מסמך זה מפרט את תהליך ההעברה מהגרסה הישנה לגרסה החדשה של פרויקט הדרך.
+1. [סקירה כללית](#סקירה-כללית)
+2. [הכנות למיגרציה](#הכנות-למיגרציה)
+3. [תהליך המיגרציה](#תהליך-המיגרציה)
+4. [בדיקות](#בדיקות)
+5. [פתרון בעיות](#פתרון-בעיות)
+6. [גיבוי ושחזור](#גיבוי-ושחזור)
 
-## שינויים עיקריים 🔄
+## סקירה כללית
 
-### 1. ארכיטקטורה
+מדריך זה מתאר את תהליך המיגרציה של מערכת הדרך לגרסה החדשה. המיגרציה כוללת:
 
-- מעבר ל-Next.js 14 עם App Router
-- שימוש ב-TypeScript
-- אינטגרציה עם Supabase
-- תמיכה ב-PWA
+1. שדרוג תשתיות
+2. עדכון מסד נתונים
+3. שדרוג קוד
+4. העברת תוכן
 
-### 2. בסיס נתונים
-
-```sql
--- העברת טבלאות
-CREATE TABLE users_new (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
-  role TEXT DEFAULT 'user',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- העתקת נתונים
-INSERT INTO users_new (id, email, full_name, role)
-SELECT
-  uuid_generate_v4(),
-  email,
-  CONCAT(first_name, ' ', last_name),
-  CASE
-    WHEN is_admin THEN 'admin'
-    WHEN is_teacher THEN 'teacher'
-    ELSE 'user'
-  END
-FROM users_old;
-```
-
-## תהליך העברה 📦
+## הכנות למיגרציה
 
 ### 1. גיבוי
 
 ```bash
-#!/bin/bash
-# גיבוי בסיס נתונים
-pg_dump $OLD_DATABASE_URL > backup.sql
+# גיבוי מסד נתונים
+pg_dump -Fc haderech > backup.dump
 
 # גיבוי קבצים
 tar -czf files_backup.tar.gz ./uploads
+
+# גיבוי קונפיגורציה
+cp .env .env.backup
 ```
 
-### 2. העברת נתונים
+### 2. בדיקת תלויות
+
+```bash
+# בדיקת חבילות מיושנות
+pnpm outdated
+
+# עדכון חבילות
+pnpm update
+
+# בדיקת שבירות
+pnpm audit
+```
+
+### 3. הכנת סביבת בדיקות
+
+```bash
+# יצירת סביבת בדיקות
+pnpm run setup:test
+
+# העתקת נתוני בדיקה
+pnpm run db:seed:test
+```
+
+## תהליך המיגרציה
+
+### 1. עדכון סכמת מסד נתונים
+
+```sql
+-- גיבוי טבלאות קיימות
+CREATE TABLE users_backup AS SELECT * FROM users;
+
+-- עדכון מבנה
+ALTER TABLE users
+ADD COLUMN role varchar(50),
+ADD COLUMN settings jsonb;
+
+-- העתקת נתונים
+INSERT INTO users (id, name, role)
+SELECT id, name, 'user' FROM users_backup;
+```
+
+### 2. עדכון קוד
 
 ```typescript
-// העברת משתמשים
-async function migrateUsers() {
-  const oldUsers = await oldDb.query("SELECT * FROM users");
-
-  for (const user of oldUsers) {
-    await supabase.from("users").insert({
-      email: user.email,
-      full_name: `${user.first_name} ${user.last_name}`,
-      role: mapRole(user.role),
-      metadata: {
-        old_id: user.id,
-        migrated_at: new Date(),
-      },
-    });
-  }
+// לפני
+interface User {
+  id: string;
+  name: string;
 }
 
-// העברת קורסים
-async function migrateCourses() {
-  const oldCourses = await oldDb.query("SELECT * FROM courses");
-
-  for (const course of oldCourses) {
-    await supabase.from("courses").insert({
-      title: course.title,
-      description: course.description,
-      author_id: await mapUserId(course.author_id),
-      status: mapStatus(course.status),
-    });
-  }
+// אחרי
+interface User {
+  id: string;
+  name: string;
+  role: "user" | "admin";
+  settings: UserSettings;
 }
 ```
 
-## בדיקות העברה ✅
-
-### 1. בדיקת שלמות
+### 3. העברת תוכן
 
 ```typescript
-// בדיקת שלמות נתונים
-async function verifyMigration() {
-  // בדיקת מספר רשומות
-  const oldCount = await oldDb.query("SELECT COUNT(*) FROM users");
-  const newCount = await supabase.from("users").select("count");
+async function migrateContent() {
+  // העברת משתמשים
+  const users = await oldDb.users.findMany();
+  await newDb.users.createMany({ data: users });
 
-  if (oldCount !== newCount) {
-    throw new Error("Data count mismatch");
-  }
+  // העברת קורסים
+  const courses = await oldDb.courses.findMany();
+  await newDb.courses.createMany({ data: courses });
 
-  // בדיקת תקינות נתונים
-  const sample = await supabase.from("users").select().limit(100);
-
-  for (const user of sample) {
-    validateUserData(user);
-  }
+  // העברת תוכן נוסף
+  const content = await oldDb.content.findMany();
+  await newDb.content.createMany({ data: content });
 }
 ```
 
-### 2. בדיקות פונקציונליות
+## בדיקות
+
+### 1. בדיקות יחידה
 
 ```typescript
-// בדיקת פונקציונליות
-describe("Migration Tests", () => {
-  it("should maintain user permissions", async () => {
-    const oldUser = await getOldUser(testId);
-    const newUser = await getNewUser(testId);
-
-    expect(mapRole(oldUser.role)).toBe(newUser.role);
+describe("Migration", () => {
+  it("should migrate user data correctly", async () => {
+    const user = await migrateUser(oldUser);
+    expect(user).toMatchSnapshot();
   });
 
-  it("should preserve course relationships", async () => {
-    const oldCourse = await getOldCourse(testId);
-    const newCourse = await getNewCourse(testId);
-
-    expect(await mapUserId(oldCourse.author_id)).toBe(newCourse.author_id);
+  it("should migrate course data correctly", async () => {
+    const course = await migrateCourse(oldCourse);
+    expect(course).toMatchSnapshot();
   });
 });
 ```
 
-## טיפול בשגיאות 🚨
-
-### 1. שגיאות העברה
+### 2. בדיקות אינטגרציה
 
 ```typescript
-// טיפול בשגיאות העברה
-class MigrationError extends Error {
-  constructor(
-    message: string,
-    public entity: string,
-    public oldId: string,
-    public details: any
-  ) {
-    super(message);
-    this.name = "MigrationError";
-  }
-}
+describe("System Integration", () => {
+  it("should maintain data relationships", async () => {
+    const user = await getUser(id);
+    expect(user.courses).toBeDefined();
+    expect(user.progress).toBeDefined();
+  });
+});
+```
 
-async function handleMigrationError(error: MigrationError) {
-  // תיעוד השגיאה
-  await logger.error({
-    type: "migration_error",
-    entity: error.entity,
-    old_id: error.oldId,
-    details: error.details,
-    timestamp: new Date(),
+### 3. בדיקות קבלה
+
+```typescript
+describe("Acceptance Tests", () => {
+  it("should allow user login", async () => {
+    const response = await login(user);
+    expect(response.status).toBe(200);
   });
 
-  // ניסיון תיקון
-  if (error.entity === "user") {
-    await fixUserMigration(error.oldId);
+  it("should display migrated content", async () => {
+    const content = await getContent(id);
+    expect(content).toBeDefined();
+  });
+});
+```
+
+## פתרון בעיות
+
+### 1. שגיאות נפוצות
+
+```typescript
+try {
+  await migrateData();
+} catch (error) {
+  if (error instanceof DatabaseError) {
+    await handleDatabaseError(error);
+  } else if (error instanceof ValidationError) {
+    await handleValidationError(error);
+  } else {
+    await handleGenericError(error);
   }
 }
 ```
 
-### 2. שחזור
+### 2. שחזור מגיבוי
+
+```bash
+# שחזור מסד נתונים
+pg_restore -d haderech backup.dump
+
+# שחזור קבצים
+tar -xzf files_backup.tar.gz
+
+# שחזור קונפיגורציה
+cp .env.backup .env
+```
+
+## גיבוי ושחזור
+
+### 1. גיבוי אוטומטי
 
 ```typescript
-// שחזור מגיבוי
-async function rollback() {
-  // שחזור בסיס נתונים
-  await exec("pg_restore backup.sql");
+// הגדרת גיבוי אוטומטי
+const backup = cron.schedule("0 0 * * *", async () => {
+  await createBackup();
+  await cleanOldBackups();
+  await notifyTeam("Backup completed");
+});
+```
 
-  // שחזור קבצים
-  await exec("tar -xzf files_backup.tar.gz");
+### 2. שחזור אוטומטי
 
-  // תיעוד
-  await logger.info({
-    type: "migration_rollback",
-    timestamp: new Date(),
-  });
+```typescript
+async function autoRestore() {
+  // בדיקת תקינות גיבוי
+  const isValid = await validateBackup(backupFile);
+  if (!isValid) {
+    throw new Error("Invalid backup");
+  }
+
+  // שחזור אוטומטי
+  await stopServices();
+  await restoreData();
+  await startServices();
+  await verifyRestore();
 }
 ```
 
-## תחזוקה לאחר העברה 🔧
-
-### 1. ניקוי נתונים
+### 3. ניטור
 
 ```typescript
-// ניקוי נתונים ישנים
-async function cleanupOldData() {
-  // מחיקת טבלאות ישנות
-  await supabase.query(`
-    DROP TABLE IF EXISTS users_old CASCADE;
-    DROP TABLE IF EXISTS courses_old CASCADE;
-  `);
+// ניטור תהליך המיגרציה
+const monitor = {
+  start: async () => {
+    await metrics.reset();
+    await startMonitoring();
+  },
 
-  // מחיקת קבצים ישנים
-  await fs.rm("./old_uploads", { recursive: true });
-}
-```
+  track: async (event: MigrationEvent) => {
+    await metrics.track(event);
+    await notifyProgress(event);
+  },
 
-### 2. אופטימיזציה
-
-```typescript
-// אופטימיזציית בסיס נתונים
-async function optimizeDatabase() {
-  // עדכון סטטיסטיקות
-  await supabase.query("ANALYZE VERBOSE");
-
-  // rebuild אינדקסים
-  await supabase.query(`
-    REINDEX TABLE users;
-    REINDEX TABLE courses;
-  `);
-}
-```
-
-## תיעוד שינויים 📝
-
-### 1. לוג שינויים
-
-```typescript
-// תיעוד שינויים
-const migrationLog = {
-  version: "2.0.0",
-  date: "2024-02-20",
-  changes: [
-    "מעבר ל-Next.js 14",
-    "שדרוג בסיס נתונים",
-    "שיפור אבטחה",
-    "תמיכה ב-PWA",
-  ],
-  breaking_changes: [
-    "שינוי מבנה טבלאות",
-    "שינוי API endpoints",
-    "שינוי מערכת הרשאות",
-  ],
-};
-```
-
-### 2. מעקב התקדמות
-
-```typescript
-// מעקב התקדמות
-const migrationProgress = {
-  trackProgress: async (stage: string, status: string) => {
-    await supabase.from("migration_log").insert({
-      stage,
-      status,
-      timestamp: new Date(),
-      details: {
-        memory_usage: process.memoryUsage(),
-        duration: performance.now(),
-      },
-    });
+  end: async () => {
+    await metrics.summarize();
+    await stopMonitoring();
   },
 };
 ```
 
-## סיכום 📊
+## רשימת תיוג למיגרציה
 
-### שלבי העברה
+### לפני המיגרציה
 
-1. גיבוי מלא
-2. העברת נתונים
-3. בדיקות מקיפות
-4. תיקון שגיאות
-5. אופטימיזציה
+- [ ] גיבוי מלא של כל הנתונים
+- [ ] בדיקת תלויות ועדכונן
+- [ ] הכנת סביבת בדיקות
+- [ ] תיעוד מצב נוכחי
 
-### המלצות
+### במהלך המיגרציה
 
-1. תכנון מפורט
-2. גיבוי כפול
-3. בדיקות מקיפות
-4. ניטור צמוד
-5. תיעוד מדויק
+- [ ] עדכון סכמת מסד נתונים
+- [ ] העברת נתונים
+- [ ] עדכון קוד
+- [ ] בדיקות שוטפות
+
+### אחרי המיגרציה
+
+- [ ] בדיקות מקיפות
+- [ ] אימות נתונים
+- [ ] עדכון תיעוד
+- [ ] ניטור מערכת

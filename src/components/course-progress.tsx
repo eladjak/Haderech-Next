@@ -1,6 +1,6 @@
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/use-auth";
-import type { Course } from "@/types/api";
+import type { Course, CourseProgress } from "@/types/api";
 
 interface CourseProgressProps {
   course: Course;
@@ -12,7 +12,12 @@ export function CourseProgress({ course, className }: CourseProgressProps) {
 
   const completedLessons =
     course.lessons?.filter((lesson) => {
-      const progress = lesson.progress?.find((p) => p.user_id === user?.id);
+      if (!lesson.progress || !Array.isArray(lesson.progress)) {
+        return false;
+      }
+      const progress = lesson.progress.find(
+        (p: CourseProgress) => p.user_id === user?.id
+      );
       return progress?.completed;
     })?.length || 0;
 

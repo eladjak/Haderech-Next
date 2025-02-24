@@ -4,11 +4,11 @@ import { z } from "zod";
 
 import { getScenarioById } from "@/lib/data/scenarios";
 import {
-  completeSimulation,
+  processUserMessage,
   saveSimulationResults,
   startSimulation,
 } from "@/lib/services/simulator";
-import type { SimulationState, SimulatorScenario } from "@/types/simulator";
+import type { SimulatorScenario, SimulatorSession } from "@/types/simulator";
 
 // Validation schemas
 const startSchema = z.object({
@@ -22,8 +22,8 @@ const simulatorScenarioSchema = z.object({
   description: z.string(),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]),
   category: z.string(),
+  tags: z.array(z.string()),
   initial_message: z.string(),
-  suggested_responses: z.array(z.string()),
   learning_objectives: z.array(z.string()),
   success_criteria: z.object({
     minScore: z.number(),
@@ -38,68 +38,54 @@ const simulatorScenarioSchema = z.object({
 const messageSchema = z.object({
   state: z.object({
     id: z.string(),
+    user_id: z.string(),
+    scenario_id: z.string(),
     scenario: simulatorScenarioSchema,
+    status: z.enum(["idle", "running", "completed", "error"]),
+    state: z.enum(["initial", "in_progress", "completed"]),
     messages: z.array(
       z.object({
         id: z.string(),
+        role: z.enum(["user", "assistant"]),
         content: z.string(),
-        role: z.enum(["user", "assistant", "system"]),
         timestamp: z.string(),
         sender: z.object({
-          role: z.enum(["user", "assistant", "system"]),
-          name: z.string().optional(),
+          id: z.string(),
+          role: z.enum(["user", "assistant"]),
+          name: z.string(),
           avatar_url: z.string().optional(),
         }),
+        created_at: z.string(),
+        updated_at: z.string(),
         feedback: z
           .object({
+            metrics: z.object({
+              empathy: z.number(),
+              clarity: z.number(),
+              effectiveness: z.number(),
+              appropriateness: z.number(),
+              professionalism: z.number(),
+              problem_solving: z.number(),
+              overall: z.number(),
+            }),
             score: z.number(),
-            message: z.string(),
-            details: z
-              .object({
-                empathy: z.number(),
-                clarity: z.number(),
-                effectiveness: z.number(),
-                appropriateness: z.number(),
-                strengths: z.array(z.string()),
-                improvements: z.array(z.string()),
-                tips: z.array(z.string()),
-                comments: z.string(),
-                suggestions: z.array(z.string()),
-                overallProgress: z.object({
-                  empathy: z.number(),
-                  clarity: z.number(),
-                  effectiveness: z.number(),
-                  appropriateness: z.number(),
-                }),
-              })
-              .optional(),
+            strengths: z.array(z.string()),
+            improvements: z.array(z.string()),
+            tips: z.array(z.string()),
+            comments: z.string(),
+            suggestions: z.array(z.string()),
+            overallProgress: z.object({
+              score: z.number(),
+              level: z.string(),
+              nextLevel: z.string(),
+              requiredScore: z.number(),
+            }),
           })
           .optional(),
       })
     ),
-    status: z.enum(["active", "completed", "failed"]),
-    feedback: z
-      .object({
-        empathy: z.number(),
-        clarity: z.number(),
-        effectiveness: z.number(),
-        appropriateness: z.number(),
-        strengths: z.array(z.string()),
-        improvements: z.array(z.string()),
-        tips: z.array(z.string()),
-        comments: z.string(),
-        suggestions: z.array(z.string()),
-        overallProgress: z.object({
-          empathy: z.number(),
-          clarity: z.number(),
-          effectiveness: z.number(),
-          appropriateness: z.number(),
-        }),
-      })
-      .optional(),
     created_at: z.string(),
     updated_at: z.string(),
-    completed_at: z.string().optional(),
   }),
   message: z.string().min(1).max(1000),
 });
@@ -143,7 +129,43 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { state, message } = messageSchema.parse(body);
 
-    const newState = await completeSimulation(state as SimulationState);
+    const session: SimulatorSession = {
+      id: state.id,
+      user_id: state.user_id,
+      scenario_id: state.scenario.id,
+      scenario: {
+        ...state.scenario,
+        tags: state.scenario.tags || [],
+      },
+      status: "running",
+      state: {
+        id: state.id,
+        user_id: state.user_id,
+        scenario_id: state.scenario.id,
+        scenario: {
+          ...state.scenario,
+          tags: state.scenario.tags || [],
+        },
+        status: "running",
+        state: "in_progress",
+        messages: state.messages.map((msg) => ({
+          ...msg,
+          created_at: msg.timestamp,
+          updated_at: msg.timestamp,
+        })),
+        created_at: state.created_at,
+        updated_at: state.updated_at,
+      },
+      messages: state.messages.map((msg) => ({
+        ...msg,
+        created_at: msg.timestamp,
+        updated_at: msg.timestamp,
+      })),
+      created_at: state.created_at,
+      updated_at: state.updated_at,
+    };
+
+    const newState = await processUserMessage(session, message);
     return NextResponse.json(newState);
   } catch (error) {
     console.error("Error processing message:", error);
@@ -164,7 +186,43 @@ export async function PATCH(req: Request) {
     const body = await req.json();
     const { state } = messageSchema.parse(body);
 
-    await saveSimulationResults(state as SimulationState);
+    const session: SimulatorSession = {
+      id: state.id,
+      user_id: state.user_id,
+      scenario_id: state.scenario.id,
+      scenario: {
+        ...state.scenario,
+        tags: state.scenario.tags || [],
+      },
+      status: "running",
+      state: {
+        id: state.id,
+        user_id: state.user_id,
+        scenario_id: state.scenario.id,
+        scenario: {
+          ...state.scenario,
+          tags: state.scenario.tags || [],
+        },
+        status: "running",
+        state: "in_progress",
+        messages: state.messages.map((msg) => ({
+          ...msg,
+          created_at: msg.timestamp,
+          updated_at: msg.timestamp,
+        })),
+        created_at: state.created_at,
+        updated_at: state.updated_at,
+      },
+      messages: state.messages.map((msg) => ({
+        ...msg,
+        created_at: msg.timestamp,
+        updated_at: msg.timestamp,
+      })),
+      created_at: state.created_at,
+      updated_at: state.updated_at,
+    };
+
+    await saveSimulationResults(session);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error saving simulation:", error);

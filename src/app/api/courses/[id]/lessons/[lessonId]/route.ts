@@ -9,9 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createServerClient } from "@supabase/ssr";
 
-import { Database, DatabaseLesson } from "@/types/database";
-
-type Lesson = Database["public"]["Tables"]["lessons"]["Row"];
+import { Database } from "@/types/database";
 
 export async function GET(
   request: NextRequest,
@@ -31,6 +29,25 @@ export async function GET(
       }
     );
 
+    // בדיקה שהקורס קיים
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("id", params.id)
+      .single();
+
+    if (courseError) {
+      console.error("Course error:", courseError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: courseError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!course) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
+    }
+
     const { data: lesson, error } = await supabase
       .from("lessons")
       .select("*")
@@ -39,17 +56,25 @@ export async function GET(
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Lesson error:", error);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: error.message },
+        { status: 500 }
+      );
     }
 
     if (!lesson) {
-      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+      return NextResponse.json({ error: "השיעור לא נמצא" }, { status: 404 });
     }
 
-    return NextResponse.json({ lesson });
+    return NextResponse.json(lesson, { status: 200 });
   } catch (error) {
+    console.error("Server error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -79,7 +104,7 @@ export async function PATCH(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
     }
 
     // בדיקה שהמשתמש הוא המדריך של הקורס
@@ -89,25 +114,66 @@ export async function PATCH(
       .eq("id", params.id)
       .single();
 
-    if (courseError || !course) {
-      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    if (courseError) {
+      console.error("Course error:", courseError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: courseError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!course) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
     }
 
     if (course.instructor_id !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "אין לך הרשאה לעדכן שיעור בקורס זה" },
+        { status: 403 }
+      );
+    }
+
+    // בדיקה שהשיעור קיים
+    const { data: existingLesson, error: lessonError } = await supabase
+      .from("lessons")
+      .select("id")
+      .eq("id", params.lessonId)
+      .eq("course_id", params.id)
+      .single();
+
+    if (lessonError) {
+      console.error("Lesson error:", lessonError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: lessonError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!existingLesson) {
+      return NextResponse.json({ error: "השיעור לא נמצא" }, { status: 404 });
     }
 
     const json = await request.json();
     const { title, content, order, duration, status } = json;
 
+    // בדיקת שדות חובה
+    if (!title?.trim()) {
+      return NextResponse.json({ error: "חסרה כותרת" }, { status: 400 });
+    }
+
+    if (!content?.trim()) {
+      return NextResponse.json({ error: "חסר תוכן" }, { status: 400 });
+    }
+
     const { data: lesson, error } = await supabase
       .from("lessons")
       .update({
-        title,
-        content,
+        title: title.trim(),
+        content: content.trim(),
         order,
         duration,
         status,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", params.lessonId)
       .eq("course_id", params.id)
@@ -115,13 +181,21 @@ export async function PATCH(
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Update error:", error);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: error.message },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ lesson });
+    return NextResponse.json(lesson, { status: 200 });
   } catch (error) {
+    console.error("Server error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -151,7 +225,7 @@ export async function DELETE(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
     }
 
     // בדיקה שהמשתמש הוא המדריך של הקורס
@@ -161,12 +235,43 @@ export async function DELETE(
       .eq("id", params.id)
       .single();
 
-    if (courseError || !course) {
-      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    if (courseError) {
+      console.error("Course error:", courseError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: courseError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!course) {
+      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
     }
 
     if (course.instructor_id !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "אין לך הרשאה למחוק שיעור בקורס זה" },
+        { status: 403 }
+      );
+    }
+
+    // בדיקה שהשיעור קיים
+    const { data: existingLesson, error: lessonError } = await supabase
+      .from("lessons")
+      .select("id")
+      .eq("id", params.lessonId)
+      .eq("course_id", params.id)
+      .single();
+
+    if (lessonError) {
+      console.error("Lesson error:", lessonError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: lessonError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!existingLesson) {
+      return NextResponse.json({ error: "השיעור לא נמצא" }, { status: 404 });
     }
 
     const { error } = await supabase
@@ -176,13 +281,24 @@ export async function DELETE(
       .eq("course_id", params.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Delete error:", error);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: error.message },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { message: "השיעור נמחק בהצלחה" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Server error:", error);
+    return NextResponse.json(
+      {
+        error: "שגיאת שרת פנימית",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

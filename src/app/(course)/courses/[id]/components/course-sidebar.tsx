@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { Course, Lesson, Section } from "@/types/api";
+import type { Course, CourseLesson, Section } from "@/types/api";
 
 interface CourseSidebarProps {
   course: Course;
@@ -63,7 +63,7 @@ export function CourseSidebar({ course, className }: CourseSidebarProps) {
           {expandedSections.includes(section.id) && (
             <CardContent>
               <div className="space-y-2">
-                {section.lessons.map((lesson: Lesson) => (
+                {section.lessons.map((lesson: CourseLesson) => (
                   <div
                     key={lesson.id}
                     className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent"

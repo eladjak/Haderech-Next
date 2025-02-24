@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 import type { Database } from "@/types/database";
-import type { ForumStats, ForumTag } from "@/types/forum";
+import type { ForumStats, ForumPost, ForumTag } from "@/types/forum";
 
 /**
  * GET /api/forum/stats
@@ -21,185 +21,152 @@ import type { ForumStats, ForumTag } from "@/types/forum";
  * @returns {Promise<NextResponse>} JSON response containing the forum stats or error message
  */
 export async function GET(_request: NextRequest) {
-  try {
-    const supabase = createRouteHandlerClient<Database>({ cookies });
+  const supabase = createRouteHandlerClient<Database>({ cookies });
 
-    // קבלת מספר הפוסטים הכולל
-    const { data: postsCount, error: postsError } = await supabase
+  try {
+    // Get total posts
+    const { data: postsData, error: postsError } = await supabase
       .from("forum_posts")
-      .select("id", { count: "exact" });
+      .select("*");
 
     if (postsError) {
-      console.error("Error in GET /api/forum/stats (posts count):", postsError);
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch posts" },
+        { status: 500 }
+      );
     }
 
-    // קבלת מספר התגובות הכולל
-    const { data: commentsCount, error: commentsError } = await supabase
+    // Get total comments
+    const { data: commentsData, error: commentsError } = await supabase
       .from("forum_comments")
-      .select("id", { count: "exact" });
+      .select("*");
 
     if (commentsError) {
-      console.error(
-        "Error in GET /api/forum/stats (comments count):",
-        commentsError
+      return NextResponse.json(
+        { error: "Failed to fetch comments" },
+        { status: 500 }
       );
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
-    // קבלת מספר הצפיות הכולל
-    const { data: viewsCount, error: viewsError } = await supabase
-      .from("forum_views")
-      .select("id", { count: "exact" });
-
-    if (viewsError) {
-      console.error("Error in GET /api/forum/stats (views count):", viewsError);
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
-    }
-
-    // קבלת מספר הלייקים הכולל
-    const { data: likesCount, error: likesError } = await supabase
-      .from("forum_likes")
-      .select("id", { count: "exact" });
-
-    if (likesError) {
-      console.error("Error in GET /api/forum/stats (likes count):", likesError);
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
-    }
-
-    // קבלת מספר המשתמשים הפעילים
-    const { data: activeUsers, error: usersError } = await supabase
-      .from("forum_posts")
-      .select("author_id")
-      .gte(
-        "created_at",
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-      )
-      .limit(1000);
+    // Get total users
+    const { data: usersData, error: usersError } = await supabase
+      .from("users")
+      .select("*");
 
     if (usersError) {
-      console.error(
-        "Error in GET /api/forum/stats (active users):",
-        usersError
+      return NextResponse.json(
+        { error: "Failed to fetch users" },
+        { status: 500 }
       );
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
-    // קבלת מספר הפוסטים מהיום
-    const { data: todayPosts, error: todayError } = await supabase
-      .from("forum_posts")
-      .select("id", { count: "exact" })
-      .gte(
-        "created_at",
-        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-      );
+    // Get total views
+    const totalViews = postsData.reduce((acc: number, post: ForumPost) => acc + post.views, 0);
 
-    if (todayError) {
-      console.error("Error in GET /api/forum/stats (today posts):", todayError);
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
-    }
+    // Get total likes
+    const totalLikes = postsData.reduce((acc: number, post: ForumPost) => acc + post.likes, 0);
 
-    // קבלת התגיות הפופולריות
-    const { data: tags, error: tagsError } = await supabase
-      .from("forum_post_tags")
-      .select(
-        `
-        tag:forum_tags (
-          id,
-          name,
-          description,
-          color
+    // Get total solved posts
+    const totalSolved = postsData.filter((post: ForumPost) => post.solved).length;
+
+    // Get active users (users who posted in the last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const activeUsers = new Set(
+      postsData
+        .filter(
+          (post: ForumPost) => new Date(post.created_at) > thirtyDaysAgo
         )
-      `
-      )
-      .limit(1000);
+        .map((post: ForumPost) => post.author_id)
+    ).size;
 
-    if (tagsError) {
-      console.error("Error in GET /api/forum/stats (tags):", tagsError);
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
-    }
+    // Get posts created today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // עיבוד התגיות
+    const postsToday = postsData.filter(
+      (post: ForumPost) => new Date(post.created_at) > today
+    ).length;
+
+    // Get trending tags
     const tagCounts = new Map<string, { tag: ForumTag; count: number }>();
-    tags.forEach((post) => {
-      if (post.tag) {
-        const existingTag = tagCounts.get(post.tag.id);
+
+    postsData.forEach((post: ForumPost) => {
+      if (post.tags && post.tags.length > 0) {
+        const existingTag = tagCounts.get(post.tags[0].id);
         if (existingTag) {
-          existingTag.count += 1;
+          existingTag.count++;
         } else {
-          tagCounts.set(post.tag.id, { tag: post.tag, count: 1 });
+          tagCounts.set(post.tags[0].id, { tag: post.tags[0], count: 1 });
         }
       }
     });
 
     const trendingTags = Array.from(tagCounts.values())
       .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Get popular tags (all-time)
+    const popularTags = Array.from(tagCounts.values())
+      .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // קבלת התורמים המובילים
-    const { data: contributors, error: contributorsError } = await supabase
-      .from("forum_posts")
-      .select(
-        `
-        author:users (
-          id,
-          name,
-          username,
-          full_name,
-          avatar_url,
-          image,
-          role
-        ),
-        author_id,
-        id
-      `
-      )
-      .limit(1000);
+    // Get top contributors
+    const userPostCounts = new Map<string, number>();
+    const userLikesReceived = new Map<string, number>();
 
-    if (contributorsError) {
-      console.error(
-        "Error in GET /api/forum/stats (contributors):",
-        contributorsError
-      );
-      return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
-    }
+    postsData.forEach((post: ForumPost) => {
+      const postCount = userPostCounts.get(post.author_id) || 0;
+      userPostCounts.set(post.author_id, postCount + 1);
 
-    // עיבוד התורמים
-    const contributorCounts = new Map<string, { author: any; count: number }>();
-    contributors.forEach((post) => {
-      const current = contributorCounts.get(post.author_id) || {
-        author: post.author,
-        count: 0,
-      };
-      contributorCounts.set(post.author_id, {
-        author: post.author,
-        count: current.count + 1,
-      });
+      const likesReceived = userLikesReceived.get(post.author_id) || 0;
+      userLikesReceived.set(post.author_id, likesReceived + post.likes);
     });
 
-    const topContributors = Array.from(contributorCounts.values())
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10)
-      .map(({ author, count }) => ({
-        author,
-        posts_count: count,
-        likes_received: 0, // נצטרך להוסיף שאילתה נפרדת בשביל זה
-      }));
+    const topContributors = await Promise.all(
+      Array.from(userPostCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(async ([userId, posts_count]) => {
+          const { data: user } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", userId)
+            .single();
+
+          return {
+            author: user,
+            posts_count,
+            likes_received: userLikesReceived.get(userId) || 0,
+          };
+        })
+    );
 
     const stats: ForumStats = {
-      total_posts: postsCount?.length || 0,
-      total_comments: commentsCount?.length || 0,
-      total_views: viewsCount?.length || 0,
-      total_likes: likesCount?.length || 0,
-      active_users: new Set(activeUsers?.map((u) => u.author_id)).size,
-      posts_today: todayPosts?.length || 0,
+      total_posts: postsData.length,
+      total_comments: commentsData.length,
+      total_users: usersData.length,
+      total_views: totalViews,
+      total_likes: totalLikes,
+      total_solved: totalSolved,
+      active_users: activeUsers,
+      posts_today: postsToday,
       trending_tags: trendingTags,
-      top_contributors: topContributors,
+      popular_tags: popularTags,
+      top_contributors: topContributors.map((contributor) => ({
+        ...contributor.author,
+        posts_count: contributor.posts_count,
+        likes_received: contributor.likes_received,
+      })),
     };
 
-    return NextResponse.json(stats, { status: 200 });
-  } catch (_error) {
-    console.error("Error in GET /api/forum/stats:", _error);
-    return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
+    return NextResponse.json(stats);
+  } catch (error) {
+    console.error("Error fetching forum stats:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch forum stats" },
+      { status: 500 }
+    );
   }
 }

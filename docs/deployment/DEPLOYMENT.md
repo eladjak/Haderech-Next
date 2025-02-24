@@ -75,14 +75,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
+      - name: Type Check
+        run: pnpm run type-check
       - name: Run Tests
-        run: npm test
+        run: pnpm run test
       - name: Run Linting
-        run: npm run lint
+        run: pnpm run lint:strict
       - name: Build
-        run: npm run build
+        run: pnpm run build
 ```
 
 ### הפצה רציפה (CD)
@@ -91,15 +101,96 @@ jobs:
 # vercel.json
 {
   "version": 2,
-  "builds": [{ "src": "package.json", "use": "@vercel/next" }],
-  "routes": [{ "src": "/(.*)", "dest": "/$1" }],
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "regions": ["fra1"],
   "env":
     {
-      "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_key",
+      "NEXT_PUBLIC_APP_URL": "@next_public_app_url",
+      "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+      "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+      "OPENAI_API_KEY": "@openai_api_key",
+      "NEXTAUTH_URL": "@nextauth_url",
+      "NEXTAUTH_SECRET": "@nextauth_secret",
     },
+  "headers":
+    [
+      {
+        "source": "/(.*)",
+        "headers":
+          [
+            { "key": "X-Content-Type-Options", "value": "nosniff" },
+            { "key": "X-Frame-Options", "value": "DENY" },
+            { "key": "X-XSS-Protection", "value": "1; mode=block" },
+            {
+              "key": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin",
+            },
+          ],
+      },
+    ],
 }
 ```
+
+## ✅ רשימת תיוג לפני הפצה
+
+### 1. הכנת קוד
+
+- [ ] כל הבדיקות עוברות (`pnpm run test`)
+- [ ] אין שגיאות לינטינג (`pnpm run lint:strict`)
+- [ ] אין שגיאות טיפוסים (`pnpm run type-check`)
+- [ ] הבנייה מצליחה (`pnpm run build`)
+- [ ] כל הקבצים נשמרו ונדחפו ל-Git
+
+### 2. הגדרת Vercel
+
+- [ ] פרויקט חדש נוצר ב-Vercel
+- [ ] הגדרת משתני סביבה:
+  - [ ] `NEXT_PUBLIC_APP_URL`
+  - [ ] `NEXT_PUBLIC_SUPABASE_URL`
+  - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - [ ] `SUPABASE_SERVICE_ROLE_KEY`
+  - [ ] `OPENAI_API_KEY`
+  - [ ] `NEXTAUTH_URL`
+  - [ ] `NEXTAUTH_SECRET`
+- [ ] הגדרת דומיין מותאם אישית
+- [ ] הגדרת SSL/TLS
+- [ ] הגדרת אזור הפצה (Region)
+
+### 3. בדיקות אבטחה
+
+- [ ] סריקת חולשות אבטחה
+- [ ] בדיקת הרשאות API
+- [ ] וידוא CORS תקין
+- [ ] בדיקת תוקף SSL
+- [ ] בדיקת Headers אבטחה
+
+### 4. בדיקות ביצועים
+
+- [ ] ציון Lighthouse מעל 90
+- [ ] זמני טעינה תקינים
+- [ ] אופטימיזציה לתמונות
+- [ ] מטמון תקין
+- [ ] בדיקת Core Web Vitals
+
+### 5. בדיקות תוכן
+
+- [ ] תרגומים מלאים
+- [ ] תקינות קישורים
+- [ ] תקינות תמונות
+- [ ] בדיקת נגישות
+- [ ] תקינות טפסים
+
+### 6. ניטור והתראות
+
+- [ ] הגדרת Sentry
+- [ ] הגדרת Google Analytics
+- [ ] הגדרת התראות Slack
+- [ ] הגדרת Status Page
+- [ ] בדיקת לוגים
 
 ## 🔒 אבטחה
 
@@ -127,7 +218,7 @@ jobs:
 
 ### ניטור אפליקציה
 
-```javascript
+```typescript
 // monitoring.ts
 import * as Sentry from "@sentry/nextjs";
 

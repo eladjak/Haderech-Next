@@ -1,84 +1,134 @@
+/**
+ * @file Forum.test.tsx
+ * @description Unit tests for the Forum component
+ * Tests cover:
+ * - Component rendering
+ * - Post display
+ * - Empty state handling
+ * - Loading state
+ * - Error state
+ * - Forum statistics display
+ */
+
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 
 import { Forum } from "@/components/forum/Forum";
-import { Author, ExtendedForumPost } from "@/types/forum";
+import type {
+  Author,
+  ForumCategory,
+  ForumPost,
+  ForumStats as ForumStatsType,
+  ForumTag,
+} from "@/types/forum";
 
-describe("Forum", () => {
-  const mockAuthor: Author = {
-    id: "1",
-    name: "Test User",
-    username: "testuser",
-    full_name: "Test User",
-    email: "test@example.com",
-    avatar_url: "/images/avatar.jpg",
-    image: null,
-    bio: "Test bio",
-    role: "user",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    last_seen: new Date().toISOString(),
-    points: 100,
-    level: 1,
-    badges: ["test"],
-    achievements: ["test"],
-  };
+/**
+ * Mock data for forum tests
+ */
 
-  const mockPosts: ExtendedForumPost[] = [
-    {
-      id: "1",
-      title: "Test Post",
-      content: "Test content",
-      author_id: mockAuthor.id,
-      author: mockAuthor,
-      category: "test",
-      tags: ["test"],
-      pinned: false,
-      solved: false,
-      likes: 0,
-      views: 0,
-      last_activity: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      isLiked: false,
-      isBookmarked: false,
-      replies_count: 0,
-      last_reply: null,
-      comments: [],
-    },
-  ];
+// Mock author data representing a test user
+const mockAuthor: Author = {
+  id: "1",
+  name: "Test User",
+  email: "test@test.com",
+  image: undefined,
+  avatar_url: undefined,
+  bio: "Test user description",
+  username: "testuser",
+  role: "user",
+  points: 100,
+  level: 1,
+  badges: [],
+  achievements: [],
+  full_name: "Test User Full Name",
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  last_seen: undefined,
+};
 
-  it("מציג את הפוסטים כשיש פוסטים", () => {
-    render(<Forum posts={mockPosts} />);
-    expect(screen.getByText("Test Post")).toBeInTheDocument();
+// Mock category for forum posts
+const mockCategory: ForumCategory = {
+  id: "1",
+  name: "Test Category",
+  description: "Test category description",
+  slug: "test-category",
+  order: 1,
+  icon: "test-icon",
+  color: "blue",
+  posts_count: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+// Mock tag for categorizing posts
+const mockTag: ForumTag = {
+  id: "1",
+  name: "Test Tag",
+  description: "Test tag description",
+  slug: "test-tag",
+  color: "blue",
+  posts_count: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+const mockPost: ForumPost = {
+  id: "1",
+  title: "פוסט בדיקה",
+  content: "תוכן פוסט בדיקה",
+  author_id: mockAuthor.id,
+  category_id: mockCategory.id,
+  category: mockCategory,
+  tags: [mockTag],
+  pinned: false,
+  solved: false,
+  likes: 0,
+  views: 0,
+  comments_count: 0,
+  last_activity: new Date().toISOString(),
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  author: mockAuthor,
+  comments: [],
+};
+
+const mockStats: ForumStatsType = {
+  total_posts: 1,
+  total_comments: 0,
+  total_users: 1,
+  total_solved: 0,
+  total_views: 0,
+  total_likes: 0,
+  active_users: 1,
+  posts_today: 1,
+  popular_tags: [{ tag: mockTag, count: 1 }],
+  top_contributors: [mockAuthor],
+  trending_tags: [{ tag: mockTag, count: 1 }],
+};
+
+describe("Forum Component", () => {
+  it("renders forum posts", () => {
+    render(<Forum posts={[mockPost]} stats={mockStats} />);
+    expect(screen.getByText(mockPost.title)).toBeInTheDocument();
   });
 
-  it("מציג הודעה כשאין פוסטים", () => {
-    render(<Forum posts={[]} />);
-    expect(
-      screen.getByText("עדיין אין פוסטים בפורום. היה הראשון ליצור פוסט!")
-    ).toBeInTheDocument();
+  it("renders empty state when no posts", () => {
+    render(<Forum posts={[]} stats={mockStats} />);
+    expect(screen.getByText(/אין פוסטים/i)).toBeInTheDocument();
   });
 
-  it("מציג מצב טעינה", () => {
-    render(<Forum isLoading={true} />);
-    const loadingStatus = screen.getByTestId("loading-status");
-    expect(loadingStatus).toHaveTextContent("טוען פוסטים...");
+  it("renders loading state", () => {
+    render(<Forum posts={[]} stats={mockStats} isLoading={true} />);
+    expect(screen.getByTestId("forum-loading")).toBeInTheDocument();
   });
 
-  it("מציג הודעת שגיאה כאשר יש בעיה בטעינה", () => {
-    const errorMessage = "שגיאה בטעינת הפוסטים";
-    render(<Forum error={errorMessage} />);
-    const errorElement = screen.getByRole("alert");
-    expect(errorElement).toBeInTheDocument();
-    expect(errorElement).toHaveTextContent(errorMessage);
+  it("renders error state", () => {
+    const errorMessage = "שגיאה בטעינת הפורום";
+    render(<Forum posts={[]} stats={mockStats} error={errorMessage} />);
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it("מספק תיאורים נגישים לכל הפוסטים", () => {
-    render(<Forum posts={mockPosts} />);
-    const articles = screen.getAllByRole("article");
-    articles.forEach((article) => {
-      expect(article).toHaveAttribute("aria-labelledby");
-    });
+  it("renders forum stats", () => {
+    render(<Forum posts={[mockPost]} stats={mockStats} />);
+    expect(screen.getByText(/סה"כ פוסטים/i)).toBeInTheDocument();
   });
 });

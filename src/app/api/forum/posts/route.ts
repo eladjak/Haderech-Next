@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 import type { Database } from "@/types/database";
-import type { _ForumPost } from "@/types/forum";
+import type { ForumPost } from "@/types/forum";
 
 /**
  * GET /api/forum/posts/[id]

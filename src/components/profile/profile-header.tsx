@@ -18,7 +18,9 @@ export function ProfileHeader({ profile, isCurrentUser }: ProfileHeaderProps) {
         <div className="flex items-center space-x-4 rtl:space-x-reverse">
           <Avatar className="h-20 w-20">
             <AvatarImage src={profile.avatar_url || undefined} />
-            <AvatarFallback>{profile.full_name[0]}</AvatarFallback>
+            <AvatarFallback>
+              {profile.full_name?.[0] || profile.name[0]}
+            </AvatarFallback>
           </Avatar>
           <div className="space-y-1">
             <h2 className="text-2xl font-bold">{profile.full_name}</h2>

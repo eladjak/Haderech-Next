@@ -28,7 +28,11 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import type { ForumPost as ForumPostType } from "@/types/api";
+import type {
+  Author,
+  ForumPost as ForumPostType,
+  ForumTag,
+} from "@/types/forum";
 
 const formSchema = z.object({
   content: z
@@ -41,43 +45,117 @@ const formSchema = z.object({
     }),
 });
 
+const mockAuthor: Author = {
+  id: "1",
+  name: "משתמש בדיקה",
+  email: "test@test.com",
+  username: "testuser",
+  role: "user",
+  points: 100,
+  level: 1,
+  badges: [],
+  achievements: [],
+  full_name: "משתמש בדיקה",
+  avatar_url: undefined,
+  bio: undefined,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+const mockTags: ForumTag[] = [
+  {
+    id: "1",
+    name: "תכנות",
+    description: "נושאי תכנות",
+    slug: "programming",
+    color: "blue",
+    posts_count: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    name: "התחלה",
+    description: "שאלות למתחילים",
+    slug: "beginners",
+    color: "green",
+    posts_count: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    name: "המלצות",
+    description: "המלצות ועצות",
+    slug: "recommendations",
+    color: "purple",
+    posts_count: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
 const EXAMPLE_POST: ForumPostType = {
   id: "1",
   title: "איך להתחיל ללמוד תכנות?",
   content:
     "אני רוצה להתחיל ללמוד תכנות אבל לא יודע מאיפה להתחיל. אשמח להמלצות!",
-  author: {
+  author_id: mockAuthor.id,
+  category_id: "1",
+  category: {
     id: "1",
-    name: "יוסי כהן",
-    email: "yossi@example.com",
-    avatar_url: null,
-    bio: null,
-  },
-  user: {
-    id: "1",
-    name: "יוסי כהן",
-    email: "yossi@example.com",
-    avatar_url: null,
-    bio: null,
+    name: "כללי",
+    description: "דיונים כלליים",
+    slug: "general",
+    order: 1,
+    icon: "MessageSquare",
+    color: "blue",
+    posts_count: 0,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    role: "user",
-    settings: {
-      notifications: true,
-      language: "he",
-      theme: "light",
-    },
   },
-  userId: "1",
-  createdAt: new Date("2024-01-01T00:00:00Z"),
-  updatedAt: new Date("2024-01-01T00:00:00Z"),
-  likes: 5,
-  likes_count: 5,
-  comments_count: 2,
+  tags: mockTags,
+  pinned: false,
+  solved: false,
+  likes: 0,
+  views: 0,
+  last_activity: new Date().toISOString(),
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  author: mockAuthor,
   comments: [],
-  tags: ["תכנות", "התחלה", "המלצות"],
-  is_liked: false,
 };
+
+const mockPost = {
+  id: "1",
+  title: "איך להתחיל ללמוד תכנות?",
+  content:
+    "אני רוצה להתחיל ללמוד תכנות אבל לא יודע מאיפה להתחיל. אשמח להמלצות!",
+  author_id: EXAMPLE_POST.author.id,
+  category_id: "1",
+  category: {
+    id: "1",
+    name: "כללי",
+    description: "דיונים כלליים",
+    slug: "general",
+    order: 1,
+    icon: "MessageSquare",
+    color: "blue",
+    posts_count: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  tags: mockTags,
+  pinned: false,
+  solved: false,
+  likes: 0,
+  views: 0,
+  last_activity: new Date().toISOString(),
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  author: EXAMPLE_POST.author,
+  comments: [],
+} as ForumPostType;
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
@@ -115,7 +193,7 @@ export default function Page({ params }: { params: { id: string } }) {
     fetchPost();
   }, [params.id, toast]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const handleSubmit = async (values: { content: string }) => {
     try {
       setIsLoading(true);
 
@@ -143,9 +221,9 @@ export default function Page({ params }: { params: { id: string } }) {
 
       const comment = await response.json();
 
-      setPost((prev) => ({
+      setPost((prev: ForumPostType) => ({
         ...prev,
-        comments: [...prev.comments, comment],
+        comments: prev.comments ? [...prev.comments, comment] : [comment],
       }));
 
       form.reset();
@@ -163,7 +241,7 @@ export default function Page({ params }: { params: { id: string } }) {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container py-8">
@@ -178,7 +256,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <CardContent>
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(handleSubmit)}
                 className="space-y-4"
               >
                 <FormField
@@ -206,7 +284,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </Form>
 
             <div className="mt-8 space-y-4">
-              {post.comments.map((comment) => (
+              {post.comments?.map((comment) => (
                 <ForumComment key={comment.id} comment={comment} />
               ))}
             </div>

@@ -41,16 +41,35 @@ export function ScenarioSelector({
               <p className="text-sm text-muted-foreground">
                 {scenario.description}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {scenario.learning_objectives.map((objective, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
-                  >
-                    {objective}
-                  </span>
-                ))}
-              </div>
+              {scenario.learning_objectives &&
+                scenario.learning_objectives.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {scenario.learning_objectives.map((objective, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                      >
+                        {objective}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              {/* אם אין learning_objectives אבל יש objectives רגילים, נציג אותם במקום */}
+              {(!scenario.learning_objectives ||
+                scenario.learning_objectives.length === 0) &&
+                scenario.objectives &&
+                scenario.objectives.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {scenario.objectives.map((objective, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                      >
+                        {objective}
+                      </span>
+                    ))}
+                  </div>
+                )}
             </div>
           </Card>
         ))}

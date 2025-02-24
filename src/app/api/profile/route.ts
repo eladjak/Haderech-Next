@@ -10,6 +10,9 @@ import { createServerClient } from "@supabase/ssr";
 
 import { Database } from "@/types/supabase";
 
+// Import the dynamic directive
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/profile
  *

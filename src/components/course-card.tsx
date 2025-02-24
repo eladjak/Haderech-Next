@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -64,13 +66,17 @@ export function CourseCard({ course, className }: CourseCardProps) {
             {course.description}
           </div>
         </div>
-        {course.author && (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={course.author.avatar_url || undefined} />
-              <AvatarFallback>{course.author.name[0]}</AvatarFallback>
-            </Avatar>
-            <div className="text-sm font-medium">{course.author.name}</div>
+        {course.instructor && (
+          <div className="flex items-center space-x-2">
+            <div className="relative h-8 w-8">
+              <Image
+                src={course.instructor.avatar_url || "/placeholder.png"}
+                alt={course.instructor.name}
+                fill
+                className="rounded-full object-cover"
+              />
+            </div>
+            <div className="text-sm font-medium">{course.instructor.name}</div>
           </div>
         )}
       </CardContent>

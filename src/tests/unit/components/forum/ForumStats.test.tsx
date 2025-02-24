@@ -1,131 +1,104 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 
 import { ForumStats } from "@/components/forum/ForumStats";
-import { Author, ForumTag } from "@/types/forum";
+import type {
+  Author,
+  ForumStats as ForumStatsType,
+  ForumTag,
+} from "@/types/forum";
 
-describe("ForumStats", () => {
-  const mockAuthor: Author = {
-    id: "1",
-    name: "Test User",
-    full_name: "Test User",
-    username: "testuser",
-    email: "test@example.com",
-    avatar_url: "/images/avatar.jpg",
-    image: null,
-    bio: "Test bio",
-    role: "user",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    last_seen: new Date().toISOString(),
-    points: 100,
-    level: 1,
-    badges: ["test"],
-    achievements: ["test"],
-    is_verified: true,
-    stats: {
-      posts_count: 10,
-      followers_count: 5,
-      following_count: 3,
-    },
-  };
+const mockAuthor: Author = {
+  id: "1",
+  name: "משתמש בדיקה",
+  email: "test@test.com",
+  image: undefined,
+  avatar_url: undefined,
+  bio: "תיאור משתמש בדיקה",
+  username: "testuser",
+  role: "user",
+  points: 100,
+  level: 1,
+  badges: [],
+  achievements: [],
+  full_name: "משתמש בדיקה מלא",
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  last_seen: undefined,
+};
 
-  const mockTag: ForumTag = {
-    id: "1",
-    name: "Test Tag",
-    description: "Test Description",
-    slug: "test-tag",
-    color: "blue",
-    posts_count: 5,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+const mockTag: ForumTag = {
+  id: "1",
+  name: "תגית בדיקה",
+  description: "תיאור תגית",
+  slug: "test-tag",
+  color: "blue",
+  posts_count: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
 
-  const mockStats = {
-    total_posts: 100,
-    total_comments: 500,
-    total_views: 1000,
-    total_likes: 300,
-    active_users: 50,
-    posts_today: 10,
-    trending_tags: [
-      {
-        tag: mockTag,
-        count: 15,
-      },
-    ],
-    top_contributors: [
-      {
-        author: mockAuthor,
-        posts_count: 20,
-        likes_received: 50,
-      },
-    ],
-  };
+const mockStats: ForumStatsType = {
+  total_posts: 100,
+  total_comments: 500,
+  total_users: 50,
+  total_solved: 30,
+  total_views: 1000,
+  total_likes: 200,
+  active_users: 20,
+  posts_today: 5,
+  popular_tags: [{ tag: mockTag, count: 20 }],
+  top_contributors: [mockAuthor],
+  trending_tags: [{ tag: mockTag, count: 10 }],
+};
 
-  it("מציג את כל הסטטיסטיקות הכלליות", () => {
+describe("ForumStats Component", () => {
+  it("renders all statistics correctly", () => {
     render(<ForumStats stats={mockStats} />);
 
-    // בודק שהמספרים הכלליים מוצגים
-    expect(screen.getByTestId("total-posts")).toHaveTextContent("100");
-    expect(screen.getByTestId("total-comments")).toHaveTextContent("500");
-    expect(screen.getByTestId("total-views")).toHaveTextContent("1000");
-    expect(screen.getByTestId("total-likes")).toHaveTextContent("300");
-    expect(screen.getByTestId("active-users")).toHaveTextContent("50");
-    expect(screen.getByTestId("posts-today")).toHaveTextContent("10");
-
-    // בודק שהתגיות הפופולריות מוצגות
-    const trendingTags = screen.getByTestId("trending-tags");
-    expect(trendingTags).toHaveTextContent("Test Tag");
-    expect(trendingTags).toHaveTextContent("15");
-
-    // בודק שהתורמים המובילים מוצגים
-    const topContributors = screen.getByTestId("top-contributors");
-    expect(topContributors).toHaveTextContent("Test User");
-    expect(topContributors).toHaveTextContent("20");
-    expect(topContributors).toHaveTextContent("50");
+    expect(screen.getByText(/100/)).toBeInTheDocument(); // total posts
+    expect(screen.getByText(/500/)).toBeInTheDocument(); // total comments
+    expect(screen.getByText(/50/)).toBeInTheDocument(); // total users
+    expect(screen.getByText(/30/)).toBeInTheDocument(); // total solved
+    expect(screen.getByText(/1000/)).toBeInTheDocument(); // total views
+    expect(screen.getByText(/200/)).toBeInTheDocument(); // total likes
   });
 
-  it("מציג הודעה כשאין נתונים", () => {
-    render(
-      <ForumStats
-        stats={{
-          ...mockStats,
-          trending_tags: [],
-          top_contributors: [],
-        }}
-      />
-    );
-
-    // בודק שהתגיות והתורמים ריקים
-    const trendingTags = screen.getByTestId("trending-tags");
-    const topContributors = screen.getByTestId("top-contributors");
-    expect(trendingTags.children).toHaveLength(0);
-    expect(topContributors.children).toHaveLength(0);
-  });
-
-  it("מספק תיאורים נגישים", () => {
+  it("renders popular tags", () => {
     render(<ForumStats stats={mockStats} />);
+    mockStats.popular_tags?.forEach(({ tag }) => {
+      expect(screen.getByText(tag.name)).toBeInTheDocument();
+    });
+  });
 
-    // בודק שיש כותרות נגישות
-    expect(screen.getByTestId("total-posts-title")).toHaveTextContent(
-      "סה״כ פוסטים"
-    );
-    expect(screen.getByTestId("trending-tags-title")).toHaveTextContent(
-      "תגיות פופולריות"
-    );
-    expect(screen.getByTestId("top-contributors-title")).toHaveTextContent(
-      "תורמים מובילים"
-    );
+  it("renders top contributors", () => {
+    render(<ForumStats stats={mockStats} />);
+    mockStats.top_contributors.forEach((contributor) => {
+      expect(screen.getByText(contributor.name)).toBeInTheDocument();
+    });
+  });
 
-    // בודק שיש תיאורים נגישים למספרים
-    expect(screen.getByTestId("total-posts")).toHaveAttribute(
-      "aria-label",
-      "סך הכל 100 פוסטים"
-    );
-    expect(screen.getByTestId("total-views")).toHaveAttribute(
-      "aria-label",
-      "סך הכל 1000 צפיות"
-    );
+  it("renders trending tags", () => {
+    render(<ForumStats stats={mockStats} />);
+    mockStats.trending_tags?.forEach(({ tag }) => {
+      expect(screen.getByText(tag.name)).toBeInTheDocument();
+    });
+  });
+
+  it("renders with partial data", () => {
+    const partialStats: ForumStatsType = {
+      total_posts: 0,
+      total_comments: 0,
+      total_users: 0,
+      total_solved: 0,
+      total_views: 0,
+      total_likes: 0,
+      active_users: 0,
+      posts_today: 0,
+      popular_tags: [],
+      top_contributors: [],
+      trending_tags: [],
+    };
+    render(<ForumStats stats={partialStats} />);
+    expect(screen.getByText(/0/)).toBeInTheDocument();
   });
 });

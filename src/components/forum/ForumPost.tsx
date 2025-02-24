@@ -25,6 +25,7 @@ import { he } from "date-fns/locale";
 import { MessageSquare, ThumbsUp } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ForumPost as ForumPostType } from "@/types/forum";
@@ -46,45 +47,78 @@ export function ForumPost({
     created_at,
     likes = 0,
     comments = [],
+    category,
+    tags = [],
   } = post;
 
-  const avatarUrl = author.avatar_url || undefined;
+  const avatarUrl = author?.image || author?.avatar_url;
+  const authorName = author?.name || "משתמש אנונימי";
+  const authorInitial =
+    author?.name?.[0] || author?.role?.[0]?.toUpperCase() || "מ";
 
-  const timeAgo = formatDistanceToNow(new Date(created_at), {
+  const timeAgo = formatDistanceToNow(new Date(created_at || new Date()), {
     addSuffix: true,
     locale: he,
   });
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div
+      className={cn("space-y-4", className)}
+      role="article"
+      aria-labelledby={`post-title-${id}`}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4">
           <Avatar>
             <AvatarImage
               src={avatarUrl}
-              alt={`תמונת הפרופיל של ${author.name}`}
+              alt={`תמונת הפרופיל של ${authorName}`}
             />
-            <AvatarFallback aria-label={`תמונת הפרופיל של ${author.name}`}>
-              {author.name[0]}
+            <AvatarFallback
+              aria-label={`תמונת הפרופיל של ${authorName}`}
+              role="img"
+            >
+              {authorInitial}
             </AvatarFallback>
           </Avatar>
           <div>
             <Link
-              href={`/community/${id}`}
+              href={`/forum/post/${id}`}
               className="font-semibold hover:underline"
               id={`post-title-${id}`}
               data-testid={`post-link-${id}`}
+              aria-label={`פוסט: ${title}`}
             >
               {title}
             </Link>
             <div className="text-sm text-muted-foreground">
-              נכתב על ידי {author.name} לפני {timeAgo}
+              נכתב על ידי {authorName} לפני {timeAgo}
             </div>
+            {category && (
+              <div className="mt-1 text-sm text-muted-foreground">
+                קטגוריה: {category.name}
+              </div>
+            )}
+            {tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    style={{ backgroundColor: tag.color }}
+                  >
+                    {tag.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="text-sm">{content}</div>
+      <div className="text-sm" aria-label={`תוכן הפוסט: ${content}`}>
+        {content}
+      </div>
 
       <div className="flex items-center space-x-4">
         <Button
