@@ -5,6 +5,10 @@
   "description": "Advanced learning platform for software development",
   "author": "HaDerech Team",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.x <21.x",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -149,10 +153,6 @@
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^1.6.1",
     "whatwg-fetch": "^3.6.20"
-  },
-  "engines": {
-    "node": ">=18.x",
-    "npm": ">=9.x"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

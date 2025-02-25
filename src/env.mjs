@@ -1,6 +1,19 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+// פונקציית עזר שמאפשרת להגדיר משתנה כנדרש רק בסביבת פיתוח
+const requiredInDev = (schema) => {
+  return process.env.NODE_ENV === "production" ? schema.optional() : schema;
+};
+
+// פונקציית עזר שמאפשרת להגדיר ערכים ריקים למשתנים בזמן בנייה
+const optionalInBuild = (schema) => {
+  return process.env.VERCEL_ENV === "preview" ||
+    process.env.VERCEL_ENV === "production"
+    ? schema.optional()
+    : schema;
+};
+
 export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
@@ -10,14 +23,20 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
     NEXTAUTH_URL: z.string().url(),
     NEXTAUTH_SECRET: z.string().min(1),
-    GOOGLE_CLIENT_ID: z.string().min(1),
-    GOOGLE_CLIENT_SECRET: z.string().min(1),
-    GOOGLE_REDIRECT_URI: z.string().url(),
-    EMAIL_SERVER_HOST: z.string().min(1),
-    EMAIL_SERVER_PORT: z.string().min(1),
-    EMAIL_SERVER_USER: z.string().min(1),
-    EMAIL_SERVER_PASSWORD: z.string().min(1),
-    EMAIL_FROM: z.string().email(),
+
+    // Google services - אופציונלי בסביבת בנייה
+    GOOGLE_CLIENT_ID: optionalInBuild(z.string().min(1)),
+    GOOGLE_CLIENT_SECRET: optionalInBuild(z.string().min(1)),
+    GOOGLE_REDIRECT_URI: optionalInBuild(z.string().url()),
+
+    // Email settings - אופציונלי בסביבת בנייה
+    EMAIL_SERVER_HOST: optionalInBuild(z.string().min(1)),
+    EMAIL_SERVER_PORT: optionalInBuild(z.string().min(1)),
+    EMAIL_SERVER_USER: optionalInBuild(z.string().min(1)),
+    EMAIL_SERVER_PASSWORD: optionalInBuild(z.string().min(1)),
+    EMAIL_FROM: optionalInBuild(z.string().email()),
+
+    // שירותים נוספים אופציונליים
     REDIS_URL: z.string().url().optional(),
     STRIPE_SECRET_KEY: z.string().min(1).optional(),
     STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
@@ -28,19 +47,25 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+
+    // שירותי אנליטיקה ותכונות
     NEXT_PUBLIC_ANALYTICS_ID: z.string().min(1).optional(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string().min(1).optional(),
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
     NEXT_PUBLIC_CLOUDINARY_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+
+    // דגלי תכונות
     NEXT_PUBLIC_FEATURE_FORUMS: z.enum(["true", "false"]).optional(),
     NEXT_PUBLIC_FEATURE_GROUPS: z.enum(["true", "false"]).optional(),
     NEXT_PUBLIC_FEATURE_SIMULATOR: z.enum(["true", "false"]).optional(),
     NEXT_PUBLIC_FEATURE_BOT: z.enum(["true", "false"]).optional(),
-    NEXT_PUBLIC_SITE_URL: z.string().url(),
-    NEXT_PUBLIC_APP_NAME: z.string().min(1),
-    NEXT_PUBLIC_APP_DESCRIPTION: z.string().min(1),
+
+    // מידע על האפליקציה - אופציונלי בסביבת בנייה
+    NEXT_PUBLIC_SITE_URL: optionalInBuild(z.string().url()),
+    NEXT_PUBLIC_APP_NAME: optionalInBuild(z.string().min(1)),
+    NEXT_PUBLIC_APP_DESCRIPTION: optionalInBuild(z.string().min(1)),
   },
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
@@ -82,5 +107,9 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_APP_DESCRIPTION: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
   },
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  // אפשר לדלג על תיקוף בסביבת בנייה
+  skipValidation:
+    !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.VERCEL_ENV === "production" ||
+    process.env.VERCEL_ENV === "preview",
 });
