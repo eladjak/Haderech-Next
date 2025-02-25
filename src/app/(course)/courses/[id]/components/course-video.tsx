@@ -38,7 +38,7 @@ export function CourseVideo({ course, className }: CourseVideoProps) {
         <CardDescription>{course.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="aspect-video relative">
+        <div className="relative aspect-video">
           {!isPlaying ? (
             <div className="absolute inset-0 flex items-center justify-center bg-black">
               <Button

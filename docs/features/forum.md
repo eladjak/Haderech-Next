@@ -279,7 +279,7 @@ function LessonDiscussionLinks({ lessonId }: { lessonId: string }) {
           ))}
         </ul>
       ) : (
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 text-muted-foreground">
           אין דיונים קשורים כרגע.{" "}
           <Link href="/forum/new" className="text-blue-600 hover:underline">
             פתח דיון חדש!

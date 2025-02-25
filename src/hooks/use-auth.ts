@@ -3,14 +3,10 @@
  * @description Custom hook for managing authentication state and user session
  */
 
-import { useCallback, useEffect, useState } from "react";
-
-import { useRouter } from "next/navigation";
-
 import { User as SupabaseUser } from "@supabase/supabase-js";
-
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/api";
 import { createSupabaseClient } from "@/lib/services/supabase";
 import { setError, setLoading, setUser } from "@/store/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";

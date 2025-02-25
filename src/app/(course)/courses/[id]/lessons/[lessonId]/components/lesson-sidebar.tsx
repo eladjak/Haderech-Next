@@ -101,7 +101,7 @@ export function LessonSidebar({
                         {String(lesson.duration % 60).padStart(2, "0")}
                       </span>
                       {lesson.isCompleted && (
-                        <span className="text-sm text-success">✓</span>
+                        <span className="text-success text-sm">✓</span>
                       )}
                     </div>
                   </div>

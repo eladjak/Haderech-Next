@@ -7,7 +7,6 @@ import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers"
 import type { AxeResults } from "axe-core";
 import type { Mock } from "vitest";
 
-
 // הרחבת הגדרות matchers עבור jest-dom
 expect.extend(matchers);
 

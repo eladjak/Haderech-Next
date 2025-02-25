@@ -22,15 +22,10 @@ export function ErrorDisplay({
       <AlertTitle>שגיאה</AlertTitle>
       <AlertDescription>{error}</AlertDescription>
       {onRetry && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRetry}
-          className="mt-2"
-        >
+        <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
           נסה שוב
         </Button>
       )}
     </Alert>
   );
-} 
+}

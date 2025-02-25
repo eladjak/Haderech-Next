@@ -1,6 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import type { Message, FeedbackDetails, SimulatorState, SimulatorScenario } from "@/types/simulator";
+import type {
+  FeedbackDetails,
+  Message,
+  SimulatorScenario,
+  SimulatorState,
+} from "@/types/simulator";
 
 import type { PayloadAction } from "@reduxjs/toolkit";
 
@@ -29,31 +34,49 @@ const simulatorSlice = createSlice({
   name: "simulator",
   initialState,
   reducers: {
-    setState: (state: SimulatorStateModel, action: PayloadAction<SimulatorState>) => {
+    setState: (
+      state: SimulatorStateModel,
+      action: PayloadAction<SimulatorState>
+    ) => {
       state.state = action.payload;
       state.messages = action.payload.messages;
       state.currentScenario = action.payload.scenario;
       state.feedback = action.payload.feedback || null;
     },
-    setLoading: (state: SimulatorStateModel, action: PayloadAction<boolean>) => {
+    setLoading: (
+      state: SimulatorStateModel,
+      action: PayloadAction<boolean>
+    ) => {
       state.isLoading = action.payload;
     },
-    setError: (state: SimulatorStateModel, action: PayloadAction<string | null>) => {
+    setError: (
+      state: SimulatorStateModel,
+      action: PayloadAction<string | null>
+    ) => {
       state.error = action.payload;
     },
-    addMessage: (state: SimulatorStateModel, action: PayloadAction<Message>) => {
+    addMessage: (
+      state: SimulatorStateModel,
+      action: PayloadAction<Message>
+    ) => {
       if (state.state) {
         state.state.messages.push(action.payload);
         state.messages.push(action.payload);
       }
     },
-    setFeedback: (state: SimulatorStateModel, action: PayloadAction<FeedbackDetails>) => {
+    setFeedback: (
+      state: SimulatorStateModel,
+      action: PayloadAction<FeedbackDetails>
+    ) => {
       if (state.state) {
         state.state.feedback = action.payload;
         state.feedback = action.payload;
       }
     },
-    setCurrentScenario: (state: SimulatorStateModel, action: PayloadAction<SimulatorScenario>) => {
+    setCurrentScenario: (
+      state: SimulatorStateModel,
+      action: PayloadAction<SimulatorScenario>
+    ) => {
       state.currentScenario = action.payload;
     },
     reset: (state: SimulatorStateModel) => {
@@ -68,12 +91,24 @@ const simulatorSlice = createSlice({
 });
 
 // Selectors
-export const selectSimulatorState = (state: { simulator: SimulatorStateModel }): SimulatorState | null => state.simulator.state;
-export const selectIsLoading = (state: { simulator: SimulatorStateModel }): boolean => state.simulator.isLoading;
-export const selectError = (state: { simulator: SimulatorStateModel }): string | null => state.simulator.error;
-export const selectCurrentScenario = (state: { simulator: SimulatorStateModel }): SimulatorScenario | null => state.simulator.currentScenario;
-export const selectFeedback = (state: { simulator: SimulatorStateModel }): FeedbackDetails | null => state.simulator.feedback;
-export const selectMessages = (state: { simulator: SimulatorStateModel }): Message[] => state.simulator.messages;
+export const selectSimulatorState = (state: {
+  simulator: SimulatorStateModel;
+}): SimulatorState | null => state.simulator.state;
+export const selectIsLoading = (state: {
+  simulator: SimulatorStateModel;
+}): boolean => state.simulator.isLoading;
+export const selectError = (state: {
+  simulator: SimulatorStateModel;
+}): string | null => state.simulator.error;
+export const selectCurrentScenario = (state: {
+  simulator: SimulatorStateModel;
+}): SimulatorScenario | null => state.simulator.currentScenario;
+export const selectFeedback = (state: {
+  simulator: SimulatorStateModel;
+}): FeedbackDetails | null => state.simulator.feedback;
+export const selectMessages = (state: {
+  simulator: SimulatorStateModel;
+}): Message[] => state.simulator.messages;
 
 // Actions
 export const {

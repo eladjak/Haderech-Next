@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 import type { Database } from "@/types/database";
-import type { ForumStats, ForumPost, ForumTag } from "@/types/forum";
+import type { ForumPost, ForumStats, ForumTag } from "@/types/forum";
 
 /**
  * GET /api/forum/stats
@@ -61,13 +61,21 @@ export async function GET(_request: NextRequest) {
     }
 
     // Get total views
-    const totalViews = postsData.reduce((acc: number, post: ForumPost) => acc + post.views, 0);
+    const totalViews = postsData.reduce(
+      (acc: number, post: ForumPost) => acc + post.views,
+      0
+    );
 
     // Get total likes
-    const totalLikes = postsData.reduce((acc: number, post: ForumPost) => acc + post.likes, 0);
+    const totalLikes = postsData.reduce(
+      (acc: number, post: ForumPost) => acc + post.likes,
+      0
+    );
 
     // Get total solved posts
-    const totalSolved = postsData.filter((post: ForumPost) => post.solved).length;
+    const totalSolved = postsData.filter(
+      (post: ForumPost) => post.solved
+    ).length;
 
     // Get active users (users who posted in the last 30 days)
     const thirtyDaysAgo = new Date();
@@ -75,9 +83,7 @@ export async function GET(_request: NextRequest) {
 
     const activeUsers = new Set(
       postsData
-        .filter(
-          (post: ForumPost) => new Date(post.created_at) > thirtyDaysAgo
-        )
+        .filter((post: ForumPost) => new Date(post.created_at) > thirtyDaysAgo)
         .map((post: ForumPost) => post.author_id)
     ).size;
 
