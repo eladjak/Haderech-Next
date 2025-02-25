@@ -7,8 +7,9 @@
  * @module services/supabase
  */
 
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+"use client";
 
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { env } from "@/env.mjs";
 import {
   DatabaseCourse,
@@ -104,8 +105,8 @@ export async function checkAuthStatus() {
 
 // Create a single supabase client for interacting with your database
 export const createSupabaseClient = (): SupabaseClient<Database> => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     console.error("Missing Supabase environment variables");
