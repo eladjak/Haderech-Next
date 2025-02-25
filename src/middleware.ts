@@ -1,15 +1,12 @@
 /**
  * @file middleware.ts
- * @description Middleware for handling authentication and protected routes
+ * @description Middleware for handling authentication, protected routes, and security headers
  */
 
-import { NextResponse, type NextRequest } from "next/server";
-
 import { createServerClient } from "@supabase/ssr";
-
-import type { Database } from "@/types/supabase";
-
 import type { CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import type { Database } from "@/types/supabase";
 
 /**
  * Array of public routes that don't require authentication
@@ -24,7 +21,7 @@ const publicRoutes = [
 ];
 
 /**
- * Middleware to handle authentication and authorization.
+ * Middleware to handle authentication, authorization, and security headers.
  *
  * @param {NextRequest} request - The incoming request
  * @returns {Promise<NextResponse>} The response or redirect
@@ -36,6 +33,31 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       headers: request.headers,
     },
   });
+
+  // הוספת כותרות אבטחה
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' *.vercel.app vercel.com;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: *.cloudinary.com;
+    font-src 'self' data:;
+    frame-src 'self';
+    connect-src 'self' *.supabase.co *.vercel-insights.com *.vercel.app;
+    form-action 'self';
+  `
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  response.headers.set("X-DNS-Prefetch-Control", "on");
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload"
+  );
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "origin-when-cross-origin");
+  response.headers.set("Content-Security-Policy", cspHeader);
 
   // Create Supabase client
   const supabase = createServerClient<Database>(
@@ -109,7 +131,10 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public (public files)
+     * - api (API routes)
+     * - _vercel (Vercel specific)
+     * - _static (static assets)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public|api|_vercel|_static).*)",
   ],
 };

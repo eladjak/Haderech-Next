@@ -609,6 +609,29 @@ npm run build
 - הורדת גרסת TypeScript ל-5.2.0
 - הוספת התעלמות מאזהרה זו בתצורת ESLint
 
+#### 5. שגיאות הידרציה בצד הלקוח
+
+**בעיה**: שגיאות הידרציה בצד הלקוח גורמות לתצוגה שבורה או חוסר תפקוד של האפליקציה.
+
+**פתרון**:
+
+- הפרדת קומפוננטות לצד לקוח וצד שרת
+- שימוש בתגית `use client` רק בקבצים שצריכים להיות בצד הלקוח
+- העברת מטה-דאטה לקבצי צד שרת בלבד
+- הוספת מנגנון אופטימלי לטיפול בהידרציה באמצעות `useEffect` בצד הלקוח
+- הוספת תכונה `suppressHydrationWarning` ל-HTML כדי למנוע אזהרות הידרציה לא נחוצות
+
+#### 6. הגדרות אבטחה וכותרות HTTP
+
+**בעיה**: ללא כותרות HTTP מתאימות, האתר עלול להיות פגיע לסוגים שונים של התקפות.
+
+**פתרון**:
+
+- הוספת קובץ `middleware.ts` לטיפול בכותרות HTTP כגון CSP, CORS, ו-XSS Protection
+- שילוב הגדרות אבטחה בקובץ `next.config.js`
+- איחוד לוגיקת האבטחה במקום אחד במידת האפשר
+- הגדרת מדיניות CSP נכונה שמאפשרת את הפעולות הנדרשות אך חוסמת ניסיונות זדוניים
+
 ## רשימת תיוג
 
 להלן רשימת תיוג להבטחת פריסה מוצלחת:
@@ -621,6 +644,11 @@ npm run build
 - [ ] תוכן `.env.example` מעודכן עם כל המשתנים הדרושים
 - [ ] גרסת Node.js מתאימה לדרישות בהגדרות Vercel (18.x)
 - [ ] המשתנה `SKIP_ENV_VALIDATION=true` מוגדר לפריסות בשרת הייצור
+- [ ] הקבצים הבאים נבדקו ועודכנו אם נדרש:
+  - [ ] `.npmrc` - מכיל הגדרות עבור מנהל החבילות
+  - [ ] `next.config.js` - הגדרות עבור Next.js, כולל אבטחה וביצועים
+  - [ ] `src/middleware.ts` - הגדרות אבטחה וניתוב
+  - [ ] `src/env.mjs` - תיקוף משתני סביבה
 
 ### תיוג פוסט-פריסה
 
@@ -630,6 +658,9 @@ npm run build
 - [ ] בדיקת עומסים בסיסית (אם רלוונטי)
 - [ ] בדיקת תאימות בדפדפנים שונים
 - [ ] בדיקת ביצועים (מהירות טעינה, ציון Lighthouse)
+- [ ] בדיקה שכל ה-API פועלים כראוי
+- [ ] בדיקה שאין שגיאות הידרציה או אזהרות בקונסול
+- [ ] וידוא שכותרות האבטחה מוגדרות כראוי
 
 </div>
 
@@ -749,6 +780,29 @@ The production environment is the public environment that end users will access.
 - Downgrade TypeScript to version 5.2.0
 - Add an ignore for this warning in the ESLint configuration
 
+#### 5. Client-Side Hydration Errors
+
+**Problem**: Hydration errors on the client side cause broken UI or non-functioning application.
+
+**Solution**:
+
+- Separate components into client and server-side
+- Use the `use client` directive only in files that need to be on the client side
+- Move metadata to server-side files only
+- Add an optimal mechanism for handling hydration using `useEffect` on the client side
+- Add the `suppressHydrationWarning` attribute to HTML to prevent unnecessary hydration warnings
+
+#### 6. Security Settings and HTTP Headers
+
+**Problem**: Without proper HTTP headers, the site may be vulnerable to various types of attacks.
+
+**Solution**:
+
+- Add a `middleware.ts` file to handle HTTP headers such as CSP, CORS, and XSS Protection
+- Integrate security settings in the `next.config.js` file
+- Unify security logic in one place when possible
+- Set a correct CSP policy that allows required operations but blocks malicious attempts
+
 ## Checklist
 
 Below is a checklist to ensure successful deployment:
@@ -761,6 +815,11 @@ Below is a checklist to ensure successful deployment:
 - [ ] The content of `.env.example` is updated with all required variables
 - [ ] Node.js version is compatible with the requirements in Vercel settings (18.x)
 - [ ] The `SKIP_ENV_VALIDATION=true` variable is defined for server deployments
+- [ ] The following files have been checked and updated if necessary:
+  - [ ] `.npmrc` - contains settings for the package manager
+  - [ ] `next.config.js` - settings for Next.js, including security and performance
+  - [ ] `src/middleware.ts` - security and routing settings
+  - [ ] `src/env.mjs` - environment variable validation
 
 ### Post-Deployment Checklist
 
@@ -770,5 +829,8 @@ Below is a checklist to ensure successful deployment:
 - [ ] Basic load testing (if relevant)
 - [ ] Cross-browser compatibility testing
 - [ ] Performance testing (load speed, Lighthouse score)
+- [ ] Check that all APIs are working properly
+- [ ] Check that there are no hydration errors or warnings in the console
+- [ ] Verify that security headers are properly set
 
 </div>
