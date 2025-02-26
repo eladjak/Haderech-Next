@@ -1,3 +1,8 @@
+import { ThemeProvider } from "next-themes";
+import { Provider } from "react-redux";
+import React from "react";
+import { store } from "@/store/store";
+
 /**
  * Providers Component
  *
@@ -5,12 +10,7 @@
  * Currently includes the theme provider for dark/light mode support.
  */
 
-"use client";
-
-import { ThemeProvider } from "next-themes";
-import { Provider } from "react-redux";
-import React from "react";
-import { store } from "@/store/store";
+("use client");
 
 interface ProvidersProps {
   children: React.ReactNode;

@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-
 import he from "@/locales/he.json";
 
 type LocaleKey = keyof typeof he | (string & {});

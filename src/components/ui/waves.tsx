@@ -1,3 +1,6 @@
+import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
+
 /**
  * @file waves.tsx
  * @description A component that creates an animated wave effect using HTML5 Canvas.
@@ -25,11 +28,7 @@
  * ```
  */
 
-"use client";
-
-import { useEffect, useRef } from "react";
-
-import { cn } from "@/lib/utils";
+("use client");
 
 /**
  * Props for the Waves component

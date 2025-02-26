@@ -1,12 +1,9 @@
-"use client";
-
-import * as React from "react";
-
-import Link from "next/link";
-
 import { ChevronLeft } from "lucide-react";
-
+import * as React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+
+("use client");
 
 interface BreadcrumbsProps extends React.HTMLAttributes<HTMLElement> {
   segments: {

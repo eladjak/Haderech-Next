@@ -1,3 +1,7 @@
+import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
+
 /**
  * @file glow.tsx
  * @description A component that adds a dynamic glowing effect to its children.
@@ -29,13 +33,7 @@
  * ```
  */
 
-"use client";
-
-import { useEffect, useRef } from "react";
-
-import { motion } from "framer-motion";
-
-import { cn } from "@/lib/utils";
+("use client");
 
 /**
  * Props for the Glow component

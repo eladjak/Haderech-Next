@@ -1,0 +1,70 @@
+﻿[
+  {
+    "filePath": "C:\\Users\\eladj\\Documents\\haderech-next\\src\\components\\course\\course-content.tsx",
+    "messages": [
+      {
+        "ruleId": "@typescript-eslint/no-unused-vars",
+        "severity": 1,
+        "message": "'ChevronLeft' is defined but never used. Allowed unused vars must match /^_/u.",
+        "line": 10,
+        "column": 3,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 10,
+        "endColumn": 14
+      },
+      {
+        "ruleId": "@typescript-eslint/no-unused-vars",
+        "severity": 1,
+        "message": "'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u.",
+        "line": 11,
+        "column": 3,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 11,
+        "endColumn": 15
+      },
+      {
+        "ruleId": "import/order",
+        "severity": 1,
+        "message": "There should be at least one empty line between import groups",
+        "line": 15,
+        "column": 1,
+        "nodeType": "ImportDeclaration",
+        "endLine": 15,
+        "endColumn": 45,
+        "fix": { "range": [395, 395], "text": "\n" }
+      },
+      {
+        "ruleId": "@typescript-eslint/no-unused-vars",
+        "severity": 1,
+        "message": "'useRouter' is defined but never used. Allowed unused vars must match /^_/u.",
+        "line": 15,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 15,
+        "endColumn": 19
+      },
+      {
+        "ruleId": "@typescript-eslint/no-unused-vars",
+        "severity": 1,
+        "message": "'ScrollArea' is defined but never used. Allowed unused vars must match /^_/u.",
+        "line": 18,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 18,
+        "endColumn": 20
+      }
+    ],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 5,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 1,
+    "source": "/**\n * @file course-content.tsx\n * @description Content component for course pages showing lessons list and content.\n * Displays a list of course lessons with their status (locked/completed),\n * duration, and provides navigation to individual lessons.\n */\n\nimport {\n  CheckCircle,\n  ChevronLeft,\n  ChevronRight,\n  Lock,\n  Play,\n} from \"lucide-react\";\nimport { useRouter } from \"next/navigation\";\nimport { Button } from \"@/components/ui/button\";\nimport { Card, CardContent, CardHeader, CardTitle } from \"@/components/ui/card\";\nimport { ScrollArea } from \"@/components/ui/scroll-area\";\nimport type { CourseWithRelations } from \"@/types/courses\";\nimport type { CourseLesson, CourseProgress } from \"@/types/models\";\n\n/**\n * Extended course lesson type that includes progress and access information\n */\ninterface ExtendedCourseLesson extends CourseLesson {\n  progress?: CourseProgress[]; // Progress tracking for each user\n  is_free: boolean; // Whether the lesson is freely accessible\n}\n\n/**\n * Props for the CourseContent component\n */\ninterface CourseContentProps {\n  course: CourseWithRelations & {\n    lessons: ExtendedCourseLesson[];\n  };\n  isEnrolled: boolean; // Whether the current user is enrolled in the course\n  isInstructor?: boolean; // Whether the current user is the course instructor\n}\n\n/**\n * CourseContent Component\n *\n * Renders a list of course lessons with their status, progress, and access controls.\n * Handles lesson navigation and displays completion status for enrolled users.\n *\n * @param props - Component properties\n * @returns React component\n */\nexport function CourseContent({\n  course,\n  isEnrolled,\n  isInstructor,\n}: CourseContentProps) {\n  // Sort lessons by their defined order\n  const sortedLessons = (course.lessons || []).sort(\n    (a, b) => a.order - b.order\n  );\n\n  // Calculate completion statistics\n  const completedLessons = sortedLessons.filter((lesson) =>\n    lesson.progress?.some((p) => p.completed)\n  ).length;\n\n  // Count free lessons for display\n  const freeLessons = sortedLessons.filter((lesson) => lesson.is_free).length;\n\n  return (\n    <div className=\"space-y-8\">\n      {/* Course statistics summary */}\n      <div>\n        <h2 className=\"text-2xl font-bold\">╫¬╫ץ╫¢╫ƒ ╫פ╫º╫ץ╫¿╫í</h2>\n        <p className=\"text-muted-foreground\">\n          {sortedLessons.length} ╫⌐╫ש╫ó╫ץ╫¿╫ש╫¥ Γאó{\" \"}\n          {sortedLessons.reduce(\n            (acc, lesson) => acc + (lesson.duration || 0),\n            0\n          )}{\" \"}\n          ╫ף╫º╫ץ╫¬ Γאó ╫פ╫ץ╫⌐╫£╫₧╫ץ {completedLessons} ╫⌐╫ש╫ó╫ץ╫¿╫ש╫¥ Γאó {freeLessons} ╫⌐╫ש╫ó╫ץ╫¿╫ש╫¥\n          ╫ק╫ש╫á╫₧╫ש╫ש╫¥\n        </p>\n      </div>\n\n      {/* Lessons list */}\n      <div className=\"space-y-4\">\n        {sortedLessons.map((lesson) => {\n          // Determine lesson status\n          const isCompleted = lesson.progress?.some((p) => p.completed);\n          const isLocked = !isEnrolled && !lesson.is_free && !isInstructor;\n\n          return (\n            <Card key={lesson.id} className={isLocked ? \"opacity-75\" : \"\"}>\n              <CardHeader>\n                <CardTitle className=\"flex items-center gap-2\">\n                  {/* Lesson order indicator */}\n                  <span className=\"flex h-6 w-6 items-center justify-center rounded-full bg-muted text-sm\">\n                    {lesson.order}\n                  </span>\n                  {lesson.title}\n                  {/* Status indicators */}\n                  {isLocked && <Lock className=\"h-4 w-4\" />}\n                  {isCompleted && (\n                    <CheckCircle className=\"h-4 w-4 text-green-500\" />\n                  )}\n                </CardTitle>\n              </CardHeader>\n              <CardContent>\n                <div className=\"flex items-center justify-between\">\n                  {/* Lesson duration */}\n                  <div className=\"text-sm text-muted-foreground\">\n                    {lesson.duration} ╫ף╫º╫ץ╫¬\n                  </div>\n                  {/* Lesson access button */}\n                  <Button\n                    variant={isLocked ? \"outline\" : \"default\"}\n                    size=\"sm\"\n                    className=\"gap-2\"\n                    asChild\n                  >\n                    <a\n                      href={\n                        isLocked\n                          ? \"#\"\n                          : `/courses/${course.id}/lessons/${lesson.id}`\n                      }\n                    >\n                      <Play className=\"h-4 w-4\" />\n                      {isLocked ? \"╫á╫ó╫ץ╫£\" : \"╫ª╫ñ╫פ ╫ס╫⌐╫ש╫ó╫ץ╫¿\"}\n                    </a>\n                  </Button>\n                </div>\n              </CardContent>\n            </Card>\n          );\n        })}\n      </div>\n    </div>\n  );\n}\n",
+    "usedDeprecatedRules": []
+  }
+]

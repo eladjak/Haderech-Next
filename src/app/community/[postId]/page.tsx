@@ -1,15 +1,10 @@
-"use client";
-
-import { useCallback, useEffect, useState } from "react";
-
-import { useRouter } from "next/navigation";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -17,9 +12,11 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { createForumComment, getForumPost } from "@/lib/api";
+import { _getForumPost, createForumComment } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { ForumComment, ForumPost } from "@/types/forum";
+
+("use client");
 
 const formSchema = z.object({
   content: z.string().min(1, {
@@ -39,7 +36,7 @@ export default function ForumPostPage({ params }: ForumPostPageProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [post, setPost] = useState<ForumPost | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, _setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({

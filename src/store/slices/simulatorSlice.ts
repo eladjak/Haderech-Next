@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 import type { SimulatorState } from "@/types/simulator";
 
 interface SimulatorStateModel {

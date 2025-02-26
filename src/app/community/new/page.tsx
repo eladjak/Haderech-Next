@@ -1,5 +1,3 @@
-"use client";
-
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +5,18 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { _FormLabel, Form, FormControl, FormField, FormItem, FormMessage} from "@/components/ui/";\nimport { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { createForumPost } from "@/lib/api";
+
+"use client";
+
+
+
+
+
+
 import {
   Card,
   CardContent,
@@ -15,17 +25,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  _FormLabel,
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
-import { createForumPost } from "@/lib/api";
+
+
+
+
 
 const formSchema = z.object({
   title: z

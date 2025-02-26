@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { processUserMessage, startSimulation } from "@/lib/services/simulator";
 import type { SimulatorScenario } from "@/types/simulator";
 

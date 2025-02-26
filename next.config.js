@@ -34,7 +34,7 @@ const nextConfig = {
   i18n: {
     locales: ["he", "en"],
     defaultLocale: "he",
-    localeDetection: true,
+    localeDetection: false,
   },
   // הגדרות בנייה ודפים דינמיים
   // output: "standalone", // הוסר כדי למנוע בעיות symlink ב-Windows

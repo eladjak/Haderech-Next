@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-
 import { ForumFilters } from "@/components/forum/ForumFilters";
 import type { ForumFilters as ForumFiltersType } from "@/types/forum";
 

@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 import type { Course, Lesson } from "@/types/models";
 
 interface CourseState {

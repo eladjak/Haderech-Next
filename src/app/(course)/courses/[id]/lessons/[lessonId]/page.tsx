@@ -1,12 +1,10 @@
-"use client";
-
 import { useEffect, useState } from "react";
-
 import { useToast } from "@/components/ui/use-toast";
 import type { Course, Lesson } from "@/types/api";
-
 import { LessonContent } from "./components/lesson-content";
 import { LessonSidebar } from "./components/lesson-sidebar";
+
+("use client");
 
 export default function LessonPage({
   params,

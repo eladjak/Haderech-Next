@@ -1,12 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
-
-import { useRouter } from "next/navigation";
-
 import { createClient } from "@supabase/supabase-js";
-
-import type { Tables } from "@/types/database";
-
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { Tables } from "@/types/database";
 
 interface AuthContextType {
   user: User | null;

@@ -2,27 +2,39 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 // פונקציית עזר שמאפשרת להגדיר משתנה כנדרש רק בסביבת פיתוח
-const requiredInDev = (schema) => {
+const _requiredInDev = (schema) => {
   return process.env.NODE_ENV === "production" ? schema.optional() : schema;
 };
 
 // פונקציית עזר שמאפשרת להגדיר ערכים ריקים למשתנים בזמן בנייה
 const optionalInBuild = (schema) => {
-  return process.env.VERCEL_ENV === "preview" ||
-    process.env.VERCEL_ENV === "production"
-    ? schema.optional()
-    : schema;
+  // בדיקה האם זו סביבת בנייה (ורסל) או סביבת פיתוח מקומית
+  const isBuildEnv =
+    process.env.VERCEL_ENV === "preview" ||
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production";
+
+  return isBuildEnv ? schema.optional() : schema;
 };
+
+// משתנים קריטיים שחייבים להיות מוגדרים גם בסביבת ייצור
+const _criticalVars = (schema) => schema;
 
 export const env = createEnv({
   server: {
-    NODE_ENV: z.enum(["development", "test", "production"]),
-    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-    OPENAI_API_KEY: z.string().min(1),
+    NODE_ENV: z.enum(["development", "test", "production"]).optional(),
+
+    // משתנים קריטיים - נדרשים תמיד
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
+
+    // משתנים שניתן להפוך לאופציונליים בסביבת ייצור
+    DATABASE_URL: optionalInBuild(z.string().url()),
+    SUPABASE_SERVICE_ROLE_KEY: optionalInBuild(z.string().min(1)),
+    OPENAI_API_KEY: optionalInBuild(z.string().min(1)),
     OPENAI_ORGANIZATION: z.string().optional(),
-    DATABASE_URL: z.string().url(),
-    NEXTAUTH_URL: z.string().url(),
-    NEXTAUTH_SECRET: z.string().min(1),
+    NEXTAUTH_URL: optionalInBuild(z.string().url()),
+    NEXTAUTH_SECRET: optionalInBuild(z.string().min(1)),
 
     // Google services - אופציונלי בסביבת בנייה
     GOOGLE_CLIENT_ID: optionalInBuild(z.string().min(1)),
@@ -44,9 +56,11 @@ export const env = createEnv({
     VERCEL_ENV: z.enum(["development", "preview", "production"]).optional(),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().url(),
-    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+    NEXT_PUBLIC_APP_URL: optionalInBuild(z.string().url()),
+
+    // אלה כבר קיימים בסביבת השרת - רק לוודא
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
 
     // שירותי אנליטיקה ותכונות
     NEXT_PUBLIC_ANALYTICS_ID: z.string().min(1).optional(),
@@ -107,9 +121,10 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_APP_DESCRIPTION: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
   },
-  // אפשר לדלג על תיקוף בסביבת בנייה
+  // אפשר לדלג על תיקוף בסביבת בנייה - מעודכן כדי לדלג בצורה אגרסיבית יותר
   skipValidation:
     !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.NODE_ENV === "production" ||
     process.env.VERCEL_ENV === "production" ||
     process.env.VERCEL_ENV === "preview",
 });

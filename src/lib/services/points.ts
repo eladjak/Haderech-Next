@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-
 import type { Database, DatabaseUser } from "@/types/database";
 
 interface Level {

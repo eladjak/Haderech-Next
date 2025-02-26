@@ -1,16 +1,14 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { _Database } from "@/types/supabase";
+
 /**
  * @file route.ts
  * @description API route handlers for courses collection operations
  */
 
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import type { Database } from "@/types/supabase";
-
-interface CreateCourseBody {
+interface _CreateCourseBody {
   title: string;
   description: string;
   image_url?: string;

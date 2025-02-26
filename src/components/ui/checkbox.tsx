@@ -1,8 +1,7 @@
-"use client";
-
+import clsx from "clsx";
 import * as React from "react";
 
-import clsx from "clsx";
+("use client");
 
 /**
  * Checkbox Component

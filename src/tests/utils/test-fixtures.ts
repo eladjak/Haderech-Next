@@ -1,11 +1,10 @@
-import type {
+import type { Author, ForumCategory, ForumComment, ForumPost, ForumStats, ForumTag} from "@/components/ui/";\nimport type {
   Author,
   ForumCategory,
   ForumComment,
   ForumPost,
   ForumStats,
-  ForumTag,
-} from "@/types/forum";
+  ForumTag,} from "@/types/forum";
 
 // פיקסצ'רים למשתמשים
 export const users = {

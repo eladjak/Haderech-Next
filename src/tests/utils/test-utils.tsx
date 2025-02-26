@@ -1,12 +1,10 @@
-import React from "react";
-
 import { configureStore } from "@reduxjs/toolkit";
 import { RenderOptions, render as tlRender } from "@testing-library/react";
 import { ThemeProvider } from "next-themes";
 import { Provider } from "react-redux";
 import { expect } from "vitest";
-
 import type { Mock } from "vitest";
+import React from "react";
 
 // מוק סטור בסיסי לטסטים
 const mockStore = configureStore({

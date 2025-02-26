@@ -1,12 +1,9 @@
-"use client";
-
+import { createBrowserClient } from "@supabase/ssr";
+import type { User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
-
 import { useRouter } from "next/navigation";
 
-import { createBrowserClient } from "@supabase/ssr";
-
-import type { User } from "@supabase/supabase-js";
+("use client");
 
 const AuthContext = createContext<{
   user: User | null;

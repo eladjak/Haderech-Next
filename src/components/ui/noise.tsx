@@ -1,3 +1,6 @@
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
 /**
  * @file noise.tsx
  * @description A component that creates an interactive noise effect using HTML5 Canvas.
@@ -24,11 +27,7 @@
  * ```
  */
 
-"use client";
-
-import * as React from "react";
-
-import { cn } from "@/lib/utils";
+("use client");
 
 interface NoiseProps extends React.HTMLAttributes<HTMLDivElement> {
   /** עוצמת הרעש */

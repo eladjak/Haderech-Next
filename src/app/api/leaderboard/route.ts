@@ -1,16 +1,14 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/services/supabase";
+import { Database } from "@/types/supabase";
+
 /**
  * @file leaderboard/route.ts
  * @description API route for retrieving user rankings based on points and achievements.
  * Provides a leaderboard of top users with their profiles and scores.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { supabase } from "@/lib/services/supabase";
-import { Database } from "@/types/supabase";
 
 // Constants for pagination and time periods
 const PAGE_SIZE = 10;
@@ -103,7 +101,7 @@ export async function GET(request: NextRequest) {
     const to = from + PAGE_SIZE - 1;
     query = query.range(from, to);
 
-    const { data: users, error, count } = await query;
+    const { data: users, error, _count } = await query;
 
     if (error) {
       console.error("Error fetching leaderboard:", error);

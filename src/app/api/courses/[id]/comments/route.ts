@@ -1,15 +1,13 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { Database } from "@/types/supabase";
+
 /**
  * @file courses/[id]/comments/route.ts
  * @description API routes for managing course comments. Provides endpoints for retrieving,
  * creating, updating, and deleting comments on courses.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import type { Database } from "@/types/supabase";
 
 interface RouteParams {
   params: {

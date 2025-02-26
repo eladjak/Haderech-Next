@@ -1,19 +1,17 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { Database } from "@/types/supabase";
+
 /**
  * @file bookmarks/route.ts
  * @description API endpoints for managing user bookmarks
  */
 
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import { Database } from "@/types/supabase";
-
 /**
  * GET handler for retrieving user bookmarks
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
     const { data: session } = await supabase.auth.getSession();

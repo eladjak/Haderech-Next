@@ -1,6 +1,6 @@
 import type {
+  User as _ApiUser,
   Lesson as ApiLesson,
-  User as ApiUser,
   Author,
   Course,
   CourseComment,
@@ -12,7 +12,6 @@ import type {
   ForumTag,
 } from "./api";
 import type { Database } from "./database";
-import type { ForumCategory } from "./forum";
 import type {
   FeedbackDetails,
   Message,
@@ -26,6 +25,18 @@ import type {
   SimulatorUserStats,
 } from "./simulator";
 
+// ForumCategory מוגדר מקומית כי חסר בקובץ api.ts
+export interface ForumCategory {
+  id: string;
+  name: string;
+  description?: string;
+  slug: string;
+  parent_id?: string;
+  created_at: string;
+  updated_at: string;
+  posts_count?: number;
+}
+
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
 
@@ -38,7 +49,6 @@ export type {
   ForumComment,
   ForumTag,
   ForumStats,
-  ForumCategory,
   Message,
   SimulatorMessage,
   SimulatorScenario,

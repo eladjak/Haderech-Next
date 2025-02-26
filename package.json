@@ -20,6 +20,9 @@
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint:fix": "next lint --fix",
+    "fix:import-order": "node scripts/fix-import-order.js",
+    "fix:unused-vars": "node scripts/fix-unused-in-files.js",
+    "fix:all": "pnpm run lint:fix && pnpm run fix:import-order && pnpm run format:fix",
     "test": "vitest",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -101,7 +104,8 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.26.9",
@@ -135,6 +139,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.1.0",
+    "glob": "^10.3.10",
     "husky": "^8.0.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",

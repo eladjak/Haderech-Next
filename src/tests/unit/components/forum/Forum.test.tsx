@@ -1,3 +1,8 @@
+import { render, screen } from "@testing-library/react";
+
+import { Forum } from "@/components/forum/Forum";
+import type { Author, ForumCategory, ForumPost, ForumStats as ForumStatsType, ForumTag,
+
 /**
  * @file Forum.test.tsx
  * @description Unit tests for the Forum component
@@ -10,16 +15,14 @@
  * - Forum statistics display
  */
 
-import { render, screen } from "@testing-library/react";
 
-import { Forum } from "@/components/forum/Forum";
+
 import type {
   Author,
   ForumCategory,
   ForumPost,
   ForumStats as ForumStatsType,
-  ForumTag,
-} from "@/types/forum";
+  ForumTag,} from "@/types/forum";
 
 /**
  * Mock data for forum tests

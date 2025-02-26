@@ -1,18 +1,22 @@
+import { render, screen } from "@testing-library/react";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+
+import { ForumPost } from "@/components/forum/ForumPost";
+import type { Author, ExtendedForumPost, ForumCategory, ForumTag,
+
 /**
  * @file ForumPost.test.tsx
  * @description Tests for the ForumPost component
  */
 
-import { render, screen } from "@testing-library/react";
-import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { ForumPost } from "@/components/forum/ForumPost";
+
+
 import type {
   Author,
   ExtendedForumPost,
   ForumCategory,
-  ForumTag,
-} from "@/types/forum";
+  ForumTag,} from "@/types/forum";
 
 beforeAll(() => {
   Element.prototype.hasPointerCapture = () => false;

@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { createServerClient } from "@supabase/ssr";
-
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
 
 export async function GET(

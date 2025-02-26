@@ -1,7 +1,6 @@
 import OpenAI from "openai";
-
 import { env } from "@/env.mjs";
-import type { Message } from "@/types/simulator";
+import type { _Message } from "@/types/simulator";
 
 /**
  * מיפוי של כישורים שהבוט יכול ללמד

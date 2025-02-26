@@ -1,7 +1,6 @@
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
 
 // Achievement definitions
 const ACHIEVEMENTS_DATA = {

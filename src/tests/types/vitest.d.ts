@@ -1,5 +1,6 @@
-/// <reference types="vitest" />
 import type { AxeResults } from "axe-core";
+
+/// <reference types="vitest" />
 
 declare global {
   namespace Vi {

@@ -1,15 +1,14 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase-server";
+import type { Database } from "@/types/supabase";
+
 /**
  * @file notifications/[id]/route.ts
  * @description API routes for managing individual notifications. Provides endpoints for
  * marking notifications as read and deleting notifications. Includes authentication and
  * authorization checks.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@/lib/supabase-server";
-import type { Database } from "@/types/supabase";
 
 type Tables = Database["public"]["Tables"];
 type Notification = Tables["notifications"]["Row"];

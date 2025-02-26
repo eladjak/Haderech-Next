@@ -1,6 +1,5 @@
 import "@testing-library/jest-dom";
 import path from "path";
-
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
 import dotenv from "dotenv";
@@ -70,7 +69,7 @@ Object.defineProperty(window, "IntersectionObserver", {
 });
 
 // Mock window.scrollTo
-const mockScrollTo = (x = 0, y = 0) => {
+const mockScrollTo = (_x = 0, _y = 0) => {
   // פונקציית דמה - לא צריכה לעשות כלום במוקים
 };
 Object.defineProperty(window, "scrollTo", {
@@ -151,7 +150,7 @@ class IntersectionObserverMock {
 window.IntersectionObserver = IntersectionObserverMock;
 global.IntersectionObserver = IntersectionObserverMock;
 
-class DOMMatrixReadOnlyMock {
+class _DOMMatrixReadOnlyMock {
   a = 1;
   b = 0;
   c = 0;
@@ -177,7 +176,7 @@ class DOMMatrixReadOnlyMock {
   is2D = true;
   isIdentity = true;
 
-  constructor(transform?: string) {
+  constructor(_transform?: string) {
     // no-op for mock
   }
 

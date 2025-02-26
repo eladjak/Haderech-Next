@@ -1,14 +1,12 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { Database } from "@/types/supabase";
+
 /**
  * @file route.ts
  * @description API route handlers for file upload operations
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import type { Database } from "@/types/supabase";
 
 /**
  * POST handler for file uploads

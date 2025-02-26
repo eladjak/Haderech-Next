@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { ForumCategory, ForumFilters, ForumPost, ForumTag,} from "./forum";
 
 import type {
-  ForumCategory,
+  ForumCategory} from "./forum";
   ForumFilters,
   ForumPost,
   ForumTag,

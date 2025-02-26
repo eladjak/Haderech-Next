@@ -2,13 +2,12 @@ import { render, screen } from "@testing-library/react";
 
 import { Forum } from "@/components/forum/Forum";
 import { ForumStats } from "@/components/forum/ForumStats";
-import type {
+import type { Author, ForumCategory, ForumPost, ForumStats as ForumStatsType, ForumTag} from "@/components/ui/";\nimport type {
   Author,
   ForumCategory,
   ForumPost,
   ForumStats as ForumStatsType,
-  ForumTag,
-} from "@/types/forum";
+  ForumTag,} from "@/types/forum";
 
 const mockAuthor: Author = {
   id: "1",

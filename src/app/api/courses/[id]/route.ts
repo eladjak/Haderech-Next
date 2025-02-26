@@ -1,15 +1,13 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { _Database } from "@/types/supabase";
+
 /**
  * @file courses/[id]/route.ts
  * @description API routes for managing individual courses. Provides endpoints for retrieving,
  * updating, and deleting specific courses. Includes authentication and authorization checks.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/supabase";
 
 interface UpdateCourseBody {
   title?: string;

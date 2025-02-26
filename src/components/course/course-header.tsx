@@ -1,13 +1,13 @@
-/**
- * @file course-header.tsx
- * @description Header component for course pages showing course title, instructor, and enrollment status
- */
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CourseWithRelations } from "@/types/courses";
+
+/**
+ * @file course-header.tsx
+ * @description Header component for course pages showing course title, instructor, and enrollment status
+ */
 
 interface CourseHeaderProps {
   course: CourseWithRelations;

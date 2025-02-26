@@ -1,15 +1,13 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+
 /**
  * @file forum/notifications/route.ts
  * @description API routes for managing forum notifications. Provides endpoints for retrieving,
  * marking as read, and managing user notifications. Includes authentication checks and validation.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
 
 /**
  * GET /api/forum/notifications
@@ -20,7 +18,7 @@ import type { Database } from "@/types/database";
  * @param {Request} request - The incoming request object
  * @returns {Promise<NextResponse>} JSON response containing the notifications or error message
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const supabase = createRouteHandlerClient<Database>({ cookies });
 
   try {

@@ -1,21 +1,28 @@
+import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
+import { DELETE, GET as GET_LESSON, PATCH as PATCH_LESSON} from "@/components/ui/";\nimport { GET, PATCH, POST } from "../courses/[id]/lessons/route";
+
 /**
  * @file lessons.test.ts
  * @description Tests for course lessons API endpoints
  */
 
-import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
 
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { createServerClient } from "@supabase/ssr";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
+
+
 
 import {
   DELETE,
   GET as GET_LESSON,
   PATCH as PATCH_LESSON,
 } from "../courses/[id]/lessons/[lessonId]/route";
-import { GET, PATCH, POST } from "../courses/[id]/lessons/route";
+
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");

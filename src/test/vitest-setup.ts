@@ -1,11 +1,10 @@
 import "@testing-library/jest-dom";
 import matchers from "@testing-library/jest-dom/matchers";
+import type { _TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
+import type { _AxeResults } from "axe-core";
 import { afterEach, expect, vi } from "vitest";
-
-import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
-import type { AxeResults } from "axe-core";
-import type { Mock } from "vitest";
+import type { _Mock } from "vitest";
 
 // הרחבת הגדרות matchers עבור jest-dom
 expect.extend(matchers);
@@ -57,8 +56,8 @@ beforeAll(() => {
   function mockScrollTo(options?: ScrollToOptions): void;
   function mockScrollTo(x: number, y: number): void;
   function mockScrollTo(
-    optionsOrX?: ScrollToOptions | number,
-    y?: number
+    _optionsOrX?: ScrollToOptions | number,
+    _y?: number
   ): void {
     // פונקציה ריקה לצורך מוק
   }

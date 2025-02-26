@@ -1,8 +1,6 @@
-import React from "react";
-
-import { CreatePost } from "@/components/forum/CreatePost";
-
 import type { Metadata } from "next";
+import React from "react";
+import { CreatePost } from "@/components/forum/CreatePost";
 
 export const metadata: Metadata = {
   title: "יצירת פוסט חדש - הדרך",

@@ -1,14 +1,12 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { Database } from "@/types/supabase";
+
 /**
  * @file route.ts
  * @description API route handlers for user profile operations
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/supabase";
 
 // Import the dynamic directive
 export const dynamic = "force-dynamic";

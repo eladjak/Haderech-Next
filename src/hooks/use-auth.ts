@@ -1,18 +1,18 @@
-/**
- * @file use-auth.ts
- * @description Custom hook for managing authentication state and user session
- */
-
-"use client";
-
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { createSupabaseClient } from "@/lib/services/supabase";
 import { setError, setLoading, setUser } from "@/store/slices/userSlice";
-import { useAppDispatch, useAppSelector } from "@/store/store";
+import { _useAppSelector, useAppDispatch } from "@/store/store";
 import { User } from "@/types/models";
+
+/**
+ * @file use-auth.ts
+ * @description Custom hook for managing authentication state and user session
+ */
+
+("use client");
 
 interface AuthState {
   user: SupabaseUser | null;

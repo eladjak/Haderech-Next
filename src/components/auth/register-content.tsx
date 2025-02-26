@@ -1,6 +1,6 @@
-"use client";
-
 import RegisterForm from "@/components/auth/register-form";
+
+("use client");
 
 export function RegisterContent() {
   return (

@@ -1,10 +1,10 @@
+import type { OpenAI } from "openai";
+import type { Database } from "./database";
+import type { Author } from "./forum";
+
 /**
  * טיפוסים עבור מערכת הסימולציה
  */
-
-import type { Database } from "./database";
-import type { Author } from "./forum";
-import type { OpenAI } from "openai";
 
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
@@ -73,6 +73,21 @@ export interface SimulatorMessage extends BaseMessage {
   function_call?: OpenAI.Chat.ChatCompletionMessage.FunctionCall;
 }
 
+export interface _SimulatorMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface FeedbackResponse {
+  score: number;
+  feedback: string;
+}
+
+export interface _FeedbackResponse {
+  score: number;
+  feedback: string;
+}
+
 /**
  * Represents a simulation scenario with all necessary configuration
  */
@@ -129,7 +144,9 @@ export interface ChatSimulatorProps {
 
 export type SimulationState = SimulatorState;
 
-export async function completeSimulation(state: SimulatorState): Promise<void> {
+export async function completeSimulation(
+  _state: SimulatorState
+): Promise<void> {
   // Implementation will be added in the simulator service
 }
 
@@ -220,8 +237,6 @@ export interface ChatCompletionMessage {
     arguments: string;
   };
 }
-
-export type FeedbackResponse = FeedbackDetails;
 
 export interface SimulatorEvent {
   type: string;

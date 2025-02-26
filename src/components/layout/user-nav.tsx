@@ -1,12 +1,19 @@
-"use client";
-
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import Link from "next/link";
+
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+
+"use client";
+
+
+
+
+
+
 import {
   DropdownMenu,
   DropdownMenuContent,

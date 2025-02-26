@@ -1,3 +1,8 @@
+import { I18nextProvider } from "react-i18next";
+import { useEffect } from "react";
+import { useTranslations } from "@/hooks/use-translations";
+import i18next from "@/lib/i18n";
+
 /**
  * TranslationsProvider Component
  *
@@ -5,14 +10,7 @@
  * It also handles the initial language setup and direction changes.
  */
 
-"use client";
-
-import { useEffect } from "react";
-
-import { I18nextProvider } from "react-i18next";
-
-import { useTranslations } from "@/hooks/use-translations";
-import i18next from "@/lib/i18n";
+("use client");
 
 interface TranslationsProviderProps {
   children: React.ReactNode;

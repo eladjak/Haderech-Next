@@ -1,8 +1,8 @@
-/// <reference types="vitest" />
-/// <reference types="@testing-library/jest-dom" />
-
 import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
 import type { AxeResults } from "axe-core";
+
+/// <reference types="vitest" />
+/// <reference types="@testing-library/jest-dom" />
 
 // Define the shape of Mock objects
 export interface Mock<T = any> {

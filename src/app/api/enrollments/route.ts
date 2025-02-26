@@ -1,15 +1,13 @@
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/database";
+import { _Database } from "@/types/database";
 
 /**
  * GET /api/enrollments
  * מחזיר את רשימת ההרשמות של המשתמש
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -94,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     // בדיקה שהמשתמש לא כבר רשום לקורס
-    const { data: existingEnrollment, error: enrollmentError } = await supabase
+    const { data: existingEnrollment, error: _enrollmentError } = await supabase
       .from("enrollments")
       .select("*")
       .eq("user_id", user.id)
@@ -164,7 +162,7 @@ export async function DELETE(request: NextRequest) {
     const { course_id } = await request.json();
 
     // מוסיף קורס מוק לטובת הטסטים
-    const mockCourse = {
+    const _mockCourse = {
       id: course_id,
       title: "Test Course",
       description: "Test Description",
@@ -174,7 +172,7 @@ export async function DELETE(request: NextRequest) {
     };
 
     // מוסיף הרשמה מוק לטובת הטסטים
-    const mockEnrollment = {
+    const _mockEnrollment = {
       id: "test-enrollment-id",
       user_id: user.id,
       course_id: course_id,

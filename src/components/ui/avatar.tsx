@@ -1,3 +1,7 @@
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
 /**
  * Avatar Components
  *
@@ -13,13 +17,7 @@
  * ```
  */
 
-"use client";
-
-import * as React from "react";
-
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
-
-import { cn } from "@/lib/utils";
+("use client");
 
 // Avatar container component
 const Avatar = React.forwardRef<

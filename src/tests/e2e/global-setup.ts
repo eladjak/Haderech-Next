@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 // טעינת משתני סביבה
 dotenv.config({ path: ".env.test" });
 
-async function globalSetup(config: FullConfig) {
+async function globalSetup(_config: FullConfig) {
   // יצירת חיבור ל-Supabase
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

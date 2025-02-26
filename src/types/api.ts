@@ -1,9 +1,3 @@
-/**
- * API Types
- *
- * טיפוסים עבור ה-API של המערכת
- */
-
 import type {
   Author,
   ForumComment,
@@ -11,9 +5,15 @@ import type {
   ForumStats,
   ForumTag,
 } from "./forum";
-import type { User as ModelsUser } from "./models";
+import type { User as _ModelsUser } from "./models";
 import type { SimulatorState } from "./simulator";
 import type { Database } from "./supabase";
+
+/**
+ * API Types
+ *
+ * טיפוסים עבור ה-API של המערכת
+ */
 
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];

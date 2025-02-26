@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ExtendedForumComment } from "@/types/forum";

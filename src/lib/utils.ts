@@ -1,12 +1,12 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 /**
  * Utility Functions
  *
  * A collection of utility functions used throughout the application.
  * Includes functions for class name merging, date formatting, text manipulation, etc.
  */
-
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 
 /**
  * Merges multiple class names using clsx and tailwind-merge

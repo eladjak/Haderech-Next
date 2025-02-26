@@ -1,12 +1,9 @@
-"use client";
-
+import { _motion, _useMotionTemplate, _useMotionValue } from "framer-motion";
+import type { _HTMLMotionProps } from "framer-motion";
 import * as React from "react";
-
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
-
 import { cn } from "@/lib/utils";
 
-import type { HTMLMotionProps } from "framer-motion";
+("use client");
 
 interface GradientProps extends React.HTMLAttributes<HTMLDivElement> {
   conic?: boolean;

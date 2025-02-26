@@ -1,7 +1,6 @@
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
 
 // Get comments for a post
 export async function GET(_: Request, { params }: { params: { id: string } }) {

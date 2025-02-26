@@ -1,20 +1,27 @@
-"use client";
-
+import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Star } from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { _Avatar, _AvatarFallback, _AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader} from "@/components/ui/";\nimport type { Course } from "@/types/api";
+
+"use client";
+
+
+
+
+
+
+
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import type { Course } from "@/types/api";
+
 
 interface CourseCardProps {
   course: Course;

@@ -1,19 +1,16 @@
+import { Metadata } from "next";
+import React from "react";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { UserProfile } from "@/components/user-profile";
+import { createServerClient } from "@/lib/supabase-server";
+import type { User } from "@/types/api";
+
 /**
  * @file profile/page.tsx
  * @description Profile page component that displays and allows editing of user profile information.
  * This is a server component that fetches the initial profile data server-side.
  */
-
-import React from "react";
-
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
-
-import { Metadata } from "next";
-
-import { UserProfile } from "@/components/user-profile";
-import { createServerClient } from "@/lib/supabase-server";
-import type { User } from "@/types/api";
 
 export const metadata: Metadata = {
   title: "הפרופיל שלי | הדרך",

@@ -1,20 +1,24 @@
+import type { Button } from "@/components/ui/button";
+import type { Progress } from "@/components/ui/progress";
+import type { CourseWithRelations } from "@/types/courses";
+
 /**
  * @file course-sidebar.tsx
  * @description Sidebar component for course pages showing course details and enrollment options
  */
 
-import { BookOpen, Clock, Users } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+
 import {
-  Card,
+  Card
+} from "./forum";
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import type { CourseWithRelations } from "@/types/courses";
+
+
 
 interface CourseSidebarProps {
   course: CourseWithRelations;

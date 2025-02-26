@@ -90,3 +90,9 @@ if grep -r "API_KEY\|SECRET\|PASSWORD\|TOKEN" --exclude-dir={node_modules,.git,d
 fi
 
 echo "✅ כל הבדיקות עברו בהצלחה! 🎉"
+
+echo "🧹 בודק ומתקן בעיות פורמט ולינט..."
+pnpm run fix:all
+
+echo "🧪 בודק האם יש טסטים רלוונטיים..."
+npx lint-staged

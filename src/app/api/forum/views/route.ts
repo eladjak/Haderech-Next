@@ -1,15 +1,13 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+
 /**
  * @file forum/views/route.ts
  * @description API routes for managing forum post views. Provides endpoints for tracking
  * and updating view counts for forum posts. Includes authentication checks and validation.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
 
 /**
  * POST /api/forum/views
@@ -45,7 +43,7 @@ export async function POST(request: NextRequest) {
     // קבלת המשתמש הנוכחי (אם מחובר)
     const {
       data: { session },
-      error: authError,
+      error: _authError,
     } = await supabase.auth.getSession();
 
     // יצירת רשומת צפייה חדשה

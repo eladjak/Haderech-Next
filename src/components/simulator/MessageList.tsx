@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from "react";
-
 import { Message } from "@/types/simulator";
-
 import { FeedbackDisplay } from "./FeedbackDisplay";
 import { MessageItem } from "./MessageItem";
 

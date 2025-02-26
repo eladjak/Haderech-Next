@@ -1,9 +1,10 @@
+import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
+import type { Vi } from "vitest";
+
+import type { AxeResults } from "axe-core";
+
 /// <reference types="vitest" />
 /// <reference types="@testing-library/jest-dom" />
-
-import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
-import type { AxeResults } from "axe-core";
-import type { Vi } from "vitest";
 
 declare global {
   namespace Vi {

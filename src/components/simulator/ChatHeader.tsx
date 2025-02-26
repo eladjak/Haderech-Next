@@ -1,5 +1,4 @@
 import React from "react";
-
 import type { SimulatorScenario } from "@/types/simulator";
 
 interface ChatHeaderProps {

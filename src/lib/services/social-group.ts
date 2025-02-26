@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-
 import type { Activity } from "@/types/social";
 import type { Database, SocialGroup } from "@/types/supabase";
 

@@ -1,11 +1,12 @@
 import { beforeAll, describe, expect, it } from "vitest";
+import { processUserMessage, saveSimulationResults, startSimulation} from "@/components/ui/";\nimport type { SimulatorScenario, SimulatorSession } from "@/types/simulator";
 
 import {
   processUserMessage,
   saveSimulationResults,
   startSimulation,
 } from "@/lib/services/simulator";
-import type { SimulatorScenario, SimulatorSession } from "@/types/simulator";
+
 
 const mockScenario: SimulatorScenario = {
   id: "perf-test-scenario",

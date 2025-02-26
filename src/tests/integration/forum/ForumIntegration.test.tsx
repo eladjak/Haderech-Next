@@ -1,8 +1,3 @@
-/**
- * @file ForumIntegration.test.tsx
- * @description Integration tests for forum components
- */
-
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -13,13 +8,28 @@ import { ForumComment } from "@/components/forum/ForumComment";
 import { ForumFilters } from "@/components/forum/ForumFilters";
 import { ForumPost } from "@/components/forum/ForumPost";
 import { ForumStats } from "@/components/forum/ForumStats";
+import type { Author, ForumCategory, ForumPost as ForumPostType, ForumStats as ForumStatsType, ForumTag,
+
+/**
+ * @file ForumIntegration.test.tsx
+ * @description Integration tests for forum components
+ */
+
+
+
+
+
+
+
+
+
+
 import type {
   Author,
   ForumCategory,
   ForumPost as ForumPostType,
   ForumStats as ForumStatsType,
-  ForumTag,
-} from "@/types/forum";
+  ForumTag,} from "@/types/forum";
 
 // Mock useToast
 const mockToast = vi.fn();

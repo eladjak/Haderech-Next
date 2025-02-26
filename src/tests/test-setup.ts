@@ -1,6 +1,5 @@
-import React from "react";
-
 import { vi } from "vitest";
+import React from "react";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -140,7 +139,7 @@ if (typeof ResizeObserver === "undefined") {
       // Implement basic functionality
       this.callback([{ target } as ResizeObserverEntry], this);
     }
-    unobserve(target: Element) {
+    unobserve(_target: Element) {
       // Clean up observation
     }
     disconnect() {

@@ -1,15 +1,13 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { _Database } from "@/types/database";
+
 /**
  * @file courses/[id]/lessons/[lessonId]/route.ts
  * @description API routes for managing individual lessons. Provides endpoints for retrieving,
  * updating, and deleting specific lessons.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/database";
 
 export async function GET(
   request: NextRequest,

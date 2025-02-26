@@ -1,7 +1,7 @@
-"use client";
-
 import { Card } from "@/components/ui/card";
 import type { Lesson } from "@/types/api";
+
+("use client");
 
 interface LessonContentProps {
   lesson: Lesson;

@@ -1,5 +1,4 @@
 import { Star } from "lucide-react";
-
 import { CourseRating } from "@/components/course-rating";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Course } from "@/types/api";

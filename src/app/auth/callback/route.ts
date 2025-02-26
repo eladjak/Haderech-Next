@@ -1,12 +1,11 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase-server";
+
 /**
  * @file route.ts
  * @description Auth callback handler for processing OAuth redirects
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 

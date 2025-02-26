@@ -1,10 +1,10 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+
 /**
  * @file course-progress.tsx
  * @description Progress component for course pages showing completion status
  */
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 
 export interface CourseProgressProps {
   completedLessons: number;

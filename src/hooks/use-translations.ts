@@ -1,13 +1,12 @@
+import { useTranslation } from "react-i18next";
+import type { AvailableLanguages } from "@/locales";
+
 /**
  * useTranslations Hook
  *
  * A custom hook that provides type-safe translations using i18next.
  * It wraps the useTranslation hook from react-i18next and provides better TypeScript support.
  */
-
-import { useTranslation } from "react-i18next";
-
-import type { AvailableLanguages } from "@/locales";
 
 export function useTranslations() {
   const { t, i18n } = useTranslation();

@@ -1,3 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import React from "react";
+import { useRouter } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
+
 /**
  * Create Post Component
  *
@@ -15,19 +24,7 @@
  * ```
  */
 
-"use client";
-
-import React from "react";
-
-import { useRouter } from "next/navigation";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-import { buttonVariants } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { cn } from "@/lib/utils";
+("use client");
 
 const formSchema = z.object({
   title: z

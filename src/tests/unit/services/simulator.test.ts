@@ -1,3 +1,6 @@
+import { describe, expect, it, vi } from "vitest";
+import { processUserMessage, saveSimulationResults, SimulatorService, startSimulation} from "@/components/ui/";\nimport type { SimulationConfig, SimulationSession, SimulatorScenario, SimulatorSession, SimulatorState,
+
 /**
  * @file simulator.test.ts
  * @description Unit tests for the simulator service
@@ -10,21 +13,18 @@
  * - Message validation
  */
 
-import { describe, expect, it, vi } from "vitest";
 
 import {
   processUserMessage,
   saveSimulationResults,
   SimulatorService,
-  startSimulation,
-} from "@/lib/services/simulator";
+  startSimulation,} from "@/lib/services/simulator";
 import type {
   SimulationConfig,
   SimulationSession,
   SimulatorScenario,
   SimulatorSession,
-  SimulatorState,
-} from "@/types/simulator";
+  SimulatorState,} from "@/types/simulator";
 
 /**
  * Mock test data for simulator tests

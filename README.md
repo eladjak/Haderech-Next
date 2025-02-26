@@ -55,6 +55,16 @@ cp .env.example .env.local
 
 Update `.env.local` with appropriate values, especially the Supabase configuration.
 
+> **Note about environment variables:**  
+> The application has a sophisticated environment variable management system that distinguishes between critical variables (required in all environments) and optional variables (only required in development or with reduced functionality). See [Environment Variables Documentation](docs/lessons-learned/ENVIRONMENT_VARIABLES.md) for details about our approach.
+>
+> **Critical variables (required in all environments):**
+>
+> - `NEXT_PUBLIC_SUPABASE_URL`
+> - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+>
+> For development, most other variables are required. In production, many are optional with fallback mechanisms in place.
+
 4. Run the development server:
 
 ```bash
@@ -254,8 +264,21 @@ pnpm install
 
 3. הגדר משתני סביבה:
 
-   - צור קובץ `.env.local` בתיקית הפרויקט
-   - העתק את התוכן מ-`.env.example` והגדר את הערכים הנדרשים
+```bash
+cp .env.example .env.local
+```
+
+Update `.env.local` with appropriate values, especially the Supabase configuration.
+
+> **Note about environment variables:**  
+> The application has a sophisticated environment variable management system that distinguishes between critical variables (required in all environments) and optional variables (only required in development or with reduced functionality). See [Environment Variables Documentation](docs/lessons-learned/ENVIRONMENT_VARIABLES.md) for details about our approach.
+>
+> **Critical variables (required in all environments):**
+>
+> - `NEXT_PUBLIC_SUPABASE_URL`
+> - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+>
+> For development, most other variables are required. In production, many are optional with fallback mechanisms in place.
 
 4. הפעל את שרת הפיתוח:
 

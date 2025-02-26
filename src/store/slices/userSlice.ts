@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 import type { User, UserPreferences, UserProgress } from "@/types/models";
 
 interface UserState {

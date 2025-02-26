@@ -1,16 +1,15 @@
-"use client";
+import { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import type { CourseComment } from "@/types/api";
+
+("use client");
 
 /**
  * @file course-comments.tsx
  * @description Comments component for course pages showing user discussions
  */
-import { useState } from "react";
-
-import Image from "next/image";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import type { CourseComment } from "@/types/api";
 
 interface CourseCommentsProps {
   comments: CourseComment[];
@@ -21,9 +20,9 @@ interface CourseCommentsProps {
 
 export function CourseComments({
   comments,
-  courseId,
-  onAddComment,
-  onAddReply,
+  _courseId,
+  _onAddComment,
+  _onAddReply,
 }: CourseCommentsProps) {
   const [showAll, setShowAll] = useState(false);
 

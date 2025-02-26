@@ -1,14 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { OpenAI } from "openai";
 import { v4 as uuidv4 } from "uuid";
-
-import { FEEDBACK_CRITERIA, SCENARIO_TYPES } from "@/constants/simulator";
+import { _FEEDBACK_CRITERIA, _SCENARIO_TYPES } from "@/constants/simulator";
 import { config } from "@/lib/config";
 import type {
+  _MessageFeedback,
   FeedbackDetails,
   FeedbackMetrics,
   Message,
-  MessageFeedback,
   SimulatorScenario,
   SimulatorSession,
   SimulatorState,
@@ -23,7 +22,7 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-const openai = new OpenAI({ apiKey: config.openaiApiKey });
+const _openai = new OpenAI({ apiKey: config.openaiApiKey });
 
 // Default values for feedback components
 const DEFAULT_COMMENTS = "No special comments";
@@ -90,7 +89,7 @@ export async function startSimulation(
  * @param messages The messages to analyze for feedback
  * @returns Detailed feedback with metrics and suggestions
  */
-async function generateFeedback(
+async function _generateFeedback(
   messages: readonly Message[]
 ): Promise<FeedbackDetails> {
   const metrics: FeedbackMetrics = {

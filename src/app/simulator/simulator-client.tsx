@@ -1,7 +1,4 @@
-"use client";
-
 import React, { useState } from "react";
-
 import { ChatSimulator } from "@/components/simulator/ChatSimulator";
 import { ScenarioSelector } from "@/components/simulator/ScenarioSelector";
 import { Button } from "@/components/ui/button";
@@ -9,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { EXAMPLE_SCENARIOS } from "@/constants/simulator";
 import type { SimulatorScenario, SimulatorState } from "@/types/simulator";
+
+("use client");
 
 interface SimulatorClientProps {
   initialScenario?: SimulatorScenario;

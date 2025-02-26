@@ -1,16 +1,21 @@
-"use client";
-
 import { MessageSquare, ThumbsUp, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader} from "@/components/ui/";\nimport type { ForumComment } from "@/types/api";
+
+"use client";
+
+
+
+
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import type { ForumComment } from "@/types/api";
+
 
 interface ForumCommentProps {
   comment: ForumComment;

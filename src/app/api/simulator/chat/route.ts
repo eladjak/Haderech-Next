@@ -1,8 +1,7 @@
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { z } from "zod";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
 const messageSchema = z.object({
   message: z

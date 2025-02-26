@@ -1,18 +1,15 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
+import { mockSupabaseClient } from "@/tests/utils/test-mocks";
+import { DELETE, GET as GET_ID, PATCH } from "../courses/[id]/route";
+import { GET, POST } from "../courses/route";
+
 /**
  * @file course.test.ts
  * @description Tests for specific course API endpoints
  */
-
-import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { mockSupabaseClient } from "@/tests/utils/test-mocks";
-
-import { DELETE, GET as GET_ID, PATCH } from "../courses/[id]/route";
-import { GET, POST } from "../courses/route";
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");

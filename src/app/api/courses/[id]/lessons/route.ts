@@ -1,14 +1,12 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { _Database } from "@/types/database";
+
 /**
  * @file courses/[id]/lessons/route.ts
  * @description API routes for managing course lessons. Provides endpoints for retrieving and creating lessons.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/database";
 
 interface CreateLessonBody {
   title: string;

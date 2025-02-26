@@ -1,12 +1,12 @@
-import type {
-  ExtendedForumPost,
-  ForumCategory,
-  ForumPost,
-  ForumTag,
-} from "@/types/forum";
-
 import { mockAuthor, mockCategory, mockTag } from "./forum";
-import { MOCK_USERS } from "./users";
+import { _MOCK_USERS } from "./users";
+import type { _ForumCategory, _ForumTag, ExtendedForumPost, ForumPost} from "@/components/ui/";\nimport type {
+  _ForumCategory,
+  _ForumTag,
+  ExtendedForumPost,
+  ForumPost,} from "@/types/forum";
+
+
 
 export const SAMPLE_POSTS: ExtendedForumPost[] = [
   {

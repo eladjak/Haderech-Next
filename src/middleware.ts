@@ -1,12 +1,12 @@
-/**
- * @file middleware.ts
- * @description Middleware for handling authentication, protected routes, and security headers
- */
-
 import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/supabase";
+
+/**
+ * @file middleware.ts
+ * @description Middleware for handling authentication, protected routes, and security headers
+ */
 
 /**
  * Array of public routes that don't require authentication

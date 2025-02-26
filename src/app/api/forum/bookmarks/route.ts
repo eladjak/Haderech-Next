@@ -1,15 +1,13 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+
 /**
  * @file forum/bookmarks/route.ts
  * @description API routes for managing forum post bookmarks. Provides endpoints for retrieving,
  * creating, and deleting bookmarks. Includes authentication checks and validation.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
 
 /**
  * GET /api/forum/bookmarks

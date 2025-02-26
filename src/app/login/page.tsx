@@ -1,12 +1,9 @@
+import type { Metadata } from "next";
 import React from "react";
-
 import Link from "next/link";
-
 import { LoginForm } from "@/components/auth/login-form";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "התחברות - הדרך",

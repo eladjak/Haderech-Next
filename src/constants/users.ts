@@ -1,6 +1,6 @@
 import type { Author } from "@/types/forum";
 import type { User } from "@/types/models";
-import type { SimulatorUserSettings } from "@/types/simulator";
+import type { _SimulatorUserSettings } from "@/types/simulator";
 
 export const MOCK_USERS: User[] = [
   {

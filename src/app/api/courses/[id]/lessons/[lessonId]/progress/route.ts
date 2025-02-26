@@ -1,14 +1,12 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { Database } from "@/types/supabase";
+
 /**
  * @file courses/[id]/lessons/[lessonId]/progress/route.ts
  * @description API routes for managing lesson progress. Provides endpoints for retrieving and updating progress.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import type { Database } from "@/types/supabase";
 
 interface RouteParams {
   params: {

@@ -1,16 +1,14 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { _NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+import type { _ForumComment } from "@/types/forum";
+
 /**
  * @file forum/comments/route.ts
  * @description API routes for managing forum comments. Provides endpoints for retrieving,
  * creating, updating, and deleting comments. Includes authentication checks and validation.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
-import type { ForumComment } from "@/types/forum";
 
 /**
  * GET /api/forum/comments

@@ -1,10 +1,8 @@
-"use client";
-
-import * as React from "react";
-
 import { motion, type HTMLMotionProps } from "framer-motion";
-
+import * as React from "react";
 import { cn } from "@/lib/utils";
+
+("use client");
 
 interface RevealProps extends Omit<HTMLMotionProps<"div">, "children"> {
   children: React.ReactNode;

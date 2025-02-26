@@ -1,14 +1,12 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { Database } from "@/types/supabase";
+
 /**
  * @file courses/[id]/enroll/route.ts
  * @description API routes for managing course enrollments. Provides endpoints for enrolling in and unenrolling from courses.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import type { Database } from "@/types/supabase";
 
 interface RouteParams {
   params: {

@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 import { DELETE, GET, POST } from "../forum/bookmarks/route";
 
 vi.mock("next/headers");

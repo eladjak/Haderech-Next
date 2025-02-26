@@ -1,3 +1,11 @@
+import { cleanup, fireEvent, render, screen, waitFor} from "@/components/ui/";\nimport { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ThemeProvider, useTheme } from "next-themes";
+
+import { ThemeToggle } from "@/components/theme-toggle";
+
+import type { UseThemeProps } from "next-themes/dist/types";
+
 import {
   cleanup,
   fireEvent,
@@ -5,12 +13,10 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { ThemeProvider, useTheme } from "next-themes";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 
-import type { UseThemeProps } from "next-themes/dist/types";
+
+
 
 // Mock next-themes
 vi.mock("next-themes", () => ({

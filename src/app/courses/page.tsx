@@ -1,7 +1,5 @@
-import React from "react";
-
 import { Metadata } from "next";
-
+import React from "react";
 import { CourseCard } from "@/components/course-card";
 import { courses } from "@/constants/courses";
 

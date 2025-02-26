@@ -2,11 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ChatSimulator } from "@/components/simulator/ChatSimulator";
-import type {
+import type { Message, SimulatorScenario, SimulatorState} from "@/components/ui/";\nimport type {
   Message,
   SimulatorScenario,
-  SimulatorState,
-} from "@/types/simulator";
+  SimulatorState,} from "@/types/simulator";
 
 const mockScenario: SimulatorScenario = {
   id: "1",

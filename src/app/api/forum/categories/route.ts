@@ -1,16 +1,14 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+import type { _ForumCategory } from "@/types/forum";
+
 /**
  * @file forum/categories/route.ts
  * @description API routes for managing forum categories. Provides endpoints for retrieving,
  * creating, updating, and deleting categories. Includes authentication checks and validation.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
-import type { ForumCategory } from "@/types/forum";
 
 /**
  * GET /api/forum/categories
@@ -20,7 +18,7 @@ import type { ForumCategory } from "@/types/forum";
  * @param {Request} request - The incoming request object
  * @returns {Promise<NextResponse>} JSON response containing the categories or error message
  */
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const supabase = createRouteHandlerClient<Database>({ cookies });
 
   try {

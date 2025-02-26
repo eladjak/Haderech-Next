@@ -1,16 +1,14 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+import type { _ForumPost } from "@/types/forum";
+
 /**
  * @file forum/search/route.ts
  * @description API route for searching forum posts. Provides endpoints for searching
  * posts by title, content, tags, and other criteria. Includes pagination and sorting.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
-import type { ForumPost } from "@/types/forum";
 
 // Import the dynamic directive
 export const dynamic = "force-dynamic";

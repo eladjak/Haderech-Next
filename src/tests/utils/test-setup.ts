@@ -1,18 +1,14 @@
-import "@testing-library/dom";
-import "@testing-library/jest-dom";
+import { TextDecoder, TextEncoder } from "util";
 import React from "react";
-
+import "@testing-library/jest-dom";
+import { afterEach, expect, vi } from "vitest";
+import "@testing-library/dom";
 import matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, configure } from "@testing-library/react";
 import axe from "axe-core";
-import { afterEach, expect, vi } from "vitest";
-
 import "./test-matchers";
-import { TextDecoder, TextEncoder } from "util";
-
-import { mockSupabaseClient } from "./test-mocks";
-
 import type { Mock } from "vitest";
+import { mockSupabaseClient } from "./test-mocks";
 
 // הגדרת axe-core
 global.axe = axe;
@@ -162,7 +158,7 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 // מוק ל-scrollTo
-const mockScrollTo = (x = 0, y = 0) => {
+const mockScrollTo = (_x = 0, _y = 0) => {
   // פונקציית דמה - לא צריכה לעשות כלום במוקים
 };
 Object.defineProperty(window, "scrollTo", {

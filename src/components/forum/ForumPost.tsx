@@ -1,3 +1,14 @@
+import { formatDistanceToNow } from "date-fns";
+import { he } from "date-fns/locale";
+import { MessageSquare, ThumbsUp } from "lucide-react";
+import React from "react";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { ForumPost as ForumPostType } from "@/types/forum";
+
 /**
  * Forum Post Component
  *
@@ -14,21 +25,7 @@
  * ```
  */
 
-"use client";
-
-import React from "react";
-
-import Link from "next/link";
-
-import { formatDistanceToNow } from "date-fns";
-import { he } from "date-fns/locale";
-import { MessageSquare, ThumbsUp } from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { ForumPost as ForumPostType } from "@/types/forum";
+("use client");
 
 export interface ForumPostProps {
   post: ForumPostType;

@@ -74,3 +74,6 @@ node_modules/
 # Dependency directories
 frontend/node_modules/
 backend/node_modules/
+
+# Broken files
+*.broken

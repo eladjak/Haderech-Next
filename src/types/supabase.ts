@@ -1,12 +1,12 @@
+import type { Course, CourseLesson, CourseRating, User } from "./api";
+import type { Database } from "./database";
+import type { Author, ForumComment, ForumPost } from "./forum";
+
 /**
  * Supabase Types
  *
  * This module provides type definitions for Supabase database tables and extended types.
  */
-
-import type { Course, CourseLesson, CourseRating, User } from "./api";
-import type { Database } from "./database";
-import type { Author, ForumComment, ForumPost } from "./forum";
 
 // Base type helpers
 export type Tables<T extends keyof Database["public"]["Tables"]> =

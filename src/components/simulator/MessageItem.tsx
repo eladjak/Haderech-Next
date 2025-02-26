@@ -1,5 +1,4 @@
 import React from "react";
-
 import { FeedbackDisplay } from "@/components/simulator/FeedbackDisplay";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -14,13 +13,13 @@ interface MessageItemProps {
 
 export function MessageItem({
   message,
-  isLast = false,
+  _isLast = false,
   isExpanded = false,
   onToggleFeedback,
 }: MessageItemProps): React.ReactElement {
   const isUser = message.role === "user";
   const handleToggleFeedback =
-    onToggleFeedback || ((messageId: string) => void 0);
+    onToggleFeedback || ((_messageId: string) => void 0);
 
   return (
     <div

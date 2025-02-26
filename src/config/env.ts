@@ -1,10 +1,10 @@
+import { config } from "@/lib/config";
+
 /**
  * Environment variables configuration
  * This file is being replaced by the centralized config in /src/lib/config.ts
  * It remains for backward compatibility with existing code
  */
-
-import { config } from "@/lib/config";
 
 // Re-export environment variables for backward compatibility
 export const OPENAI_API_KEY = config.openaiApiKey;

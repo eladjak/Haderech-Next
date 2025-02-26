@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
-
 import { ForumComment } from "@/components/forum/ForumComment";
 import type { Author, ExtendedForumComment } from "@/types/forum";
 

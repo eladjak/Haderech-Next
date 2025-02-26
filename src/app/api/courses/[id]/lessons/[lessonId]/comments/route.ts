@@ -1,16 +1,14 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { Database } from "@/types/supabase";
+
 /**
  * @file courses/[id]/lessons/[lessonId]/comments/route.ts
  * @description API routes for managing lesson comments. Provides endpoints for retrieving and creating comments.
  */
 
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/supabase";
-
-interface RouteParams {
+interface _RouteParams {
   params: {
     id: string;
     lessonId: string;

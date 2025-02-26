@@ -1,14 +1,12 @@
+import { createClient } from "@supabase/supabase-js";
+import { useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
+import type { Tables } from "@/types/database";
+
 /**
  * @file use-profile.ts
  * @description Custom hook for managing user profile data and operations
  */
-
-import { useCallback } from "react";
-
-import { createClient } from "@supabase/supabase-js";
-
-import { useToast } from "@/hooks/use-toast";
-import type { Tables } from "@/types/database";
 
 export type Profile = Tables<"users"> & {
   avatar_url?: string | null;

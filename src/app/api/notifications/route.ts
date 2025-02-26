@@ -1,19 +1,17 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { Database } from "@/types/database";
+
 /**
  * @file route.ts
  * @description API route handlers for user notifications
  */
 
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/database";
-
 /**
  * GET handler for retrieving user notifications
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(

@@ -1,11 +1,13 @@
-import type { ReactElement, ReactNode } from "react";
+import { _CheckCircle2, AlertCircle, Briefcase, CheckCircle, ChevronDown, ChevronUp, Heart, Sun, Target, ThumbsUp, Wrench,} from "./forum";
 import React from "react";
+import type { Button } from "@/components/ui/button";
+import type { ReactElement, ReactNode } from "react";
 
-import {
+import type {
+  _CheckCircle2} from "./forum";
   AlertCircle,
   Briefcase,
   CheckCircle,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Heart,
@@ -15,10 +17,11 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { FeedbackDetails } from "@/types/simulator";
+
+
+
+
+
 
 interface FeedbackDisplayProps {
   feedback?: FeedbackDetails;

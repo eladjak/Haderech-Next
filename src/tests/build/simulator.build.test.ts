@@ -1,14 +1,12 @@
 import fs from "fs";
 import path from "path";
-
 import { describe, expect, it } from "vitest";
 
 import * as simulator from "@/lib/services/simulator";
-import type {
+import type { SimulatorScenario, SimulatorSession, SimulatorState} from "@/components/ui/";\nimport type {
   SimulatorScenario,
   SimulatorSession,
-  SimulatorState,
-} from "@/types/simulator";
+  SimulatorState,} from "@/types/simulator";
 
 describe("Simulator Build Tests", () => {
   it("should export all required functions", () => {

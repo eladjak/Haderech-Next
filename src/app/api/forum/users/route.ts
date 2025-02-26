@@ -1,16 +1,14 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+import type { _Author } from "@/types/forum";
+
 /**
  * @file forum/users/route.ts
  * @description API routes for managing forum users. Provides endpoints for retrieving
  * and updating user information. Includes authentication checks and validation.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
-import type { Author } from "@/types/forum";
 
 /**
  * GET /api/forum/users

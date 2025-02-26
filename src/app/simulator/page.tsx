@@ -1,8 +1,6 @@
-import React from "react";
-
-import SimulatorClient from "./simulator-client";
-
 import type { Metadata } from "next";
+import React from "react";
+import SimulatorClient from "./simulator-client";
 
 export const metadata: Metadata = {
   title: "סימולטור שיחה",

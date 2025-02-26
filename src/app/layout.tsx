@@ -1,12 +1,12 @@
 import { Analytics } from "@vercel/analytics/react";
 import { Viewport } from "next";
-import type { Metadata } from "next";
 import React from "react";
 import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {

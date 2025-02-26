@@ -1,16 +1,14 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+import type { ForumPost, ForumStats, ForumTag } from "@/types/forum";
+
 /**
  * @file forum/stats/route.ts
  * @description API route for retrieving forum statistics. Provides endpoints for getting
  * various forum metrics like post counts, active users, trending tags, etc.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
-import type { ForumPost, ForumStats, ForumTag } from "@/types/forum";
 
 /**
  * GET /api/forum/stats

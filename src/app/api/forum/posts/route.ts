@@ -1,16 +1,14 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { _NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+import type { _ForumPost } from "@/types/forum";
+
 /**
  * @file forum/posts/route.ts
  * @description API routes for managing individual forum posts. Provides endpoints for retrieving,
  * updating, and deleting specific posts. Includes authentication checks and post validation.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
-import type { ForumPost } from "@/types/forum";
 
 /**
  * GET /api/forum/posts/[id]

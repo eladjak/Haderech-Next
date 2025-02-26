@@ -1,15 +1,13 @@
-"use client";
-
-import React from "react";
-
 import { Maximize2, Minimize2, Send, X } from "lucide-react";
-
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+
+("use client");
 
 export interface ChatMessage {
   id: string;

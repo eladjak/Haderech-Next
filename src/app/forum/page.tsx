@@ -1,11 +1,9 @@
+import type { Metadata } from "next";
 import React from "react";
-
 import { CreatePost } from "@/components/forum/CreatePost";
 import { Forum } from "@/components/forum/Forum";
 import { mockPosts } from "@/constants/forum";
 import type { ForumStats } from "@/types/forum";
-
-import type { Metadata } from "next";
 
 const mockStats: ForumStats = {
   total_posts: 100,

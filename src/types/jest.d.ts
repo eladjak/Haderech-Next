@@ -1,6 +1,6 @@
-/// <reference types="@testing-library/jest-dom" />
-
 import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
+
+/// <reference types="@testing-library/jest-dom" />
 
 declare global {
   namespace Vi {

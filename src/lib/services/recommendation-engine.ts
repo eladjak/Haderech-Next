@@ -100,7 +100,7 @@ const calculateRelevanceScore = (
 };
 
 export const getRecommendations = async (
-  userId: string
+  _userId: string
 ): Promise<Recommendations> => {
   // Fetch user preferences and history
   const userPreferences: UserPreferences = {

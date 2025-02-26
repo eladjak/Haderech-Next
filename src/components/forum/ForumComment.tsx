@@ -1,3 +1,12 @@
+import { formatDistanceToNow } from "date-fns";
+import { he } from "date-fns/locale";
+import { MessageSquare } from "lucide-react";
+import React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { ForumComment as ForumCommentType } from "@/types/forum";
+
 /**
  * Forum Comment Component
  *
@@ -13,18 +22,7 @@
  * ```
  */
 
-"use client";
-
-import React from "react";
-
-import { formatDistanceToNow } from "date-fns";
-import { he } from "date-fns/locale";
-import { MessageSquare } from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { ForumComment as ForumCommentType } from "@/types/forum";
+("use client");
 
 export interface ForumCommentProps {
   comment: ForumCommentType;

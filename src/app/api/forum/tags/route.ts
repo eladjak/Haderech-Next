@@ -1,16 +1,14 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { _NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database";
+import type { _ForumTag } from "@/types/forum";
+
 /**
  * @file forum/tags/route.ts
  * @description API routes for managing forum tags. Provides endpoints for retrieving,
  * creating, updating, and deleting tags. Includes authentication checks and validation.
  */
-
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-
-import type { Database } from "@/types/database";
-import type { ForumTag } from "@/types/forum";
 
 /**
  * GET /api/forum/tags
@@ -20,7 +18,7 @@ import type { ForumTag } from "@/types/forum";
  * @param {Request} request - The incoming request object
  * @returns {Promise<NextResponse>} JSON response containing the tags or error message
  */
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const supabase = createRouteHandlerClient<Database>({ cookies });
 
   try {

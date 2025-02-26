@@ -1,11 +1,9 @@
-"use client";
-
-import * as React from "react";
-
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+("use client");
 
 interface Carousel3DProps {
   items: React.ReactNode[];
@@ -21,7 +19,7 @@ export function Carousel3D({
   interval = 3000,
 }: Carousel3DProps) {
   const [activeIndex, setActiveIndex] = React.useState(0);
-  const [isHovered, setIsHovered] = React.useState(false);
+  const [_isHovered, setIsHovered] = React.useState(false);
 
   const nextSlide = React.useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % items.length);

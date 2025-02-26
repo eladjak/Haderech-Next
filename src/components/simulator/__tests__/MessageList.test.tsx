@@ -1,8 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { Message } from "@/types/simulator";
-
 import { MessageList } from "../MessageList";
 
 const mockMessages: Message[] = [

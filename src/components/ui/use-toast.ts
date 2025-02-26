@@ -1,7 +1,7 @@
-// Inspired by react-hot-toast library
 import * as React from "react";
+import type { _ToastProps, ToastActionElement } from "@/components/ui/toast";
 
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
+// Inspired by react-hot-toast library
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
@@ -143,7 +143,7 @@ type Toast = Omit<ToasterToast, "id">;
 function toast({ ...props }: Toast): string {
   const id = genId();
 
-  const update = (props: ToasterToast): void =>
+  const _update = (props: ToasterToast): void =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },

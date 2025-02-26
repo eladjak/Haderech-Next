@@ -1,3 +1,5 @@
+import { SimulatorScenario } from "@/types/simulator";
+
 /**
  * @file simulator.ts
  * @description Constants and default values for the simulator module
@@ -5,8 +7,6 @@
  * This file provides centralized configuration for simulator scenarios,
  * feedback criteria, and default values used throughout the simulator features.
  */
-
-import { SimulatorScenario } from "@/types/simulator";
 
 /**
  * Scenario types for the simulator

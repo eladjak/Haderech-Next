@@ -1,5 +1,4 @@
 import type { Course } from "@/types/api";
-
 import { mockAuthor } from "./forum";
 
 export const courses: Course[] = [

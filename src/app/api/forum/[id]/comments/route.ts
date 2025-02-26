@@ -1,14 +1,13 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase-server";
+import type { Database } from "@/types/supabase";
+
 /**
  * @file forum/[id]/comments/route.ts
  * @description API routes for managing forum post comments. Provides endpoints for retrieving
  * comments for a post and adding new comments. Includes authentication checks and comment validation.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@/lib/supabase-server";
-import type { Database } from "@/types/supabase";
 
 type Tables = Database["public"]["Tables"];
 type ForumComment = Tables["forum_comments"]["Row"];

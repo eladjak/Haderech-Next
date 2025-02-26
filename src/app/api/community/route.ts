@@ -1,15 +1,13 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { Database } from "@/types/supabase";
+
 /**
  * @file community/route.ts
  * @description API routes for managing community posts. Provides endpoints for listing all posts
  * and creating new posts. Includes authentication checks and post validation.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
-
-import { Database } from "@/types/supabase";
 
 /**
  * GET /api/community

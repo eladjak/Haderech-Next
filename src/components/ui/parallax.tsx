@@ -1,10 +1,8 @@
-"use client";
-
-import * as React from "react";
-
 import { motion, useScroll, useTransform } from "framer-motion";
-
+import * as React from "react";
 import { cn } from "@/lib/utils";
+
+("use client");
 
 interface ParallaxProps extends React.HTMLAttributes<HTMLDivElement> {
   offset?: number;

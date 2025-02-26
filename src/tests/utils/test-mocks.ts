@@ -1,17 +1,15 @@
-import { vi } from "vitest";
-
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { _Mock } from "@/types/mock-types";
 import type {
-  Author,
+  Author} from "./forum";
   ForumCategory,
   ForumComment,
   ForumPost,
   ForumStats,
   ForumTag,
 } from "@/types/forum";
-import type { Mock } from "@/types/mock-types";
-import type { Database } from "@/types/supabase";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+
 
 // מוקים למשתמשים
 export const mockAuthor: Author = {

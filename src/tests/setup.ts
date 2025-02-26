@@ -1,14 +1,12 @@
-import { vi } from "vitest";
-
-import "@testing-library/jest-dom";
 import { TextDecoder, TextEncoder } from "util";
-
-import { configure } from "@testing-library/react";
-
+import { afterEach, beforeAll, expect, vi } from "vitest";
 import React from "react";
+import "@testing-library/jest-dom";
+import { cleanup, configure } from "@testing-library/react";
 
 // Configure testing library
 configure({
+  // @ts-expect-error - testIdAttribute קיים בספריה אך לא מוגדר בטיפוס
   testIdAttribute: "data-testid",
 });
 

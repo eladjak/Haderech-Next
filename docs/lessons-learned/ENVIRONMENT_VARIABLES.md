@@ -10,6 +10,7 @@
 4. [שיטות מומלצות](#שיטות-מומלצות)
 5. [כלים ותשתיות](#כלים-ותשתיות)
 6. [תיעוד תשתיות](#תיעוד-תשתיות)
+7. [לקחים נוספים שלמדנו](#לקחים-נוספים-שלמדנו)
 
 ## רקע
 
@@ -244,6 +245,120 @@ jobs:
 | קדם-ייצור   | משתנים חיוניים + משתני קדם-ייצור | ממשק Vercel (סביבת Preview)       |
 | ייצור       | משתנים חיוניים + משתני ייצור     | ממשק Vercel (סביבת Production)    |
 
+## לקחים נוספים שלמדנו
+
+### 1. הפרדה בין משתנים קריטיים לאופציונליים
+
+בפרויקט שלנו עשינו שימוש בשלוש קטגוריות של משתני סביבה:
+
+```js
+// משתנים קריטיים חייבים להיות מוגדרים בכל הסביבות
+const criticalVars = (schema) => schema;
+
+// משתנים אופציונליים בסביבת בנייה ויצור, אך נדרשים בסביבת פיתוח
+const optionalInBuild = (schema) => {
+  return process.env.VERCEL_ENV === "preview" ||
+    process.env.VERCEL_ENV === "production"
+    ? schema.optional()
+    : schema;
+};
+
+// משתנים שנדרשים רק בסביבת פיתוח
+const requiredInDev = (schema) => {
+  return process.env.NODE_ENV === "production" ? schema.optional() : schema;
+};
+```
+
+חלוקה זו מאפשרת לנו גמישות רבה יותר וצמצום השגיאות בסביבת הייצור.
+
+### 2. זיהוי המשתנים הקריטיים באמת
+
+למדנו כי יש להגדיר רק מספר מצומצם של משתנים כקריטיים באמת:
+
+- `NEXT_PUBLIC_SUPABASE_URL` ו-`NEXT_PUBLIC_SUPABASE_ANON_KEY` - נדרשים לפעולה בסיסית של האפליקציה
+- משתנים אחרים יכולים להיות מוגדרים כאופציונליים בסביבת ייצור
+
+המשתנים הבאים הוגדרו כאופציונליים בסביבת ייצור אך נדרשים בסביבת פיתוח:
+
+```js
+DATABASE_URL: optionalInBuild(z.string().url()),
+SUPABASE_SERVICE_ROLE_KEY: optionalInBuild(z.string().min(1)),
+OPENAI_API_KEY: optionalInBuild(z.string().min(1)),
+NEXTAUTH_URL: optionalInBuild(z.string().url()),
+NEXTAUTH_SECRET: optionalInBuild(z.string().min(1)),
+
+// שירותי Google
+GOOGLE_CLIENT_ID: optionalInBuild(z.string().min(1)),
+GOOGLE_CLIENT_SECRET: optionalInBuild(z.string().min(1)),
+GOOGLE_REDIRECT_URI: optionalInBuild(z.string().url()),
+
+// הגדרות אימייל
+EMAIL_SERVER_HOST: optionalInBuild(z.string().min(1)),
+EMAIL_SERVER_PORT: optionalInBuild(z.string().min(1)),
+EMAIL_SERVER_USER: optionalInBuild(z.string().min(1)),
+EMAIL_SERVER_PASSWORD: optionalInBuild(z.string().min(1)),
+EMAIL_FROM: optionalInBuild(z.string().email()),
+```
+
+### 3. התמודדות עם שגיאות "Invalid environment variables"
+
+כאשר נתקלנו בשגיאות "Invalid environment variables" בסביבת הייצור, זיהינו שתי סיבות עיקריות:
+
+1. **משתנים מוגדרים כחובה אך חסרים בסביבת הייצור** - הפתרון היה להגדיר אותם כאופציונליים בסביבת הבנייה באמצעות `optionalInBuild`
+2. **דילוג על תיקוף בסביבת בנייה** - הוספנו את ההגדרה הבאה:
+
+```js
+// אפשר לדלג על תיקוף בסביבת בנייה
+skipValidation:
+  !!process.env.SKIP_ENV_VALIDATION ||
+  process.env.VERCEL_ENV === "production" ||
+  process.env.VERCEL_ENV === "preview",
+```
+
+### 4. שימוש נכון ב-Vercel
+
+בממשק הניהול של Vercel, חשוב להגדיר באופן ברור:
+
+- את המשתנים הקריטיים בכל הסביבות (Development, Preview, Production)
+- רק את המשתנים הנחוצים באמת לכל סביבה, כאשר אין צורך להגדיר את כל המשתנים בסביבת הייצור
+
+### 5. קוד הגנה בשירותים
+
+אף על פי שהגדרנו משתנים כאופציונליים בסביבת הייצור, חשוב להוסיף קוד הגנה בכל שירות שמשתמש במשתני סביבה:
+
+```js
+// דוגמה: שירות OpenAI
+const apiKey = env.OPENAI_API_KEY || "";
+if (!apiKey && process.env.NODE_ENV === "development") {
+  console.warn("OpenAI API key not found. Some features will be disabled.");
+}
+
+const openai = apiKey ? new OpenAI({ apiKey }) : createDummyOpenAIClient();
+
+function createDummyOpenAIClient() {
+  return {
+    chat: {
+      completions: {
+        create: async () => ({
+          choices: [{ message: { content: "API key not configured" } }],
+        }),
+      },
+    },
+  };
+}
+```
+
+כך האפליקציה יכולה לפעול גם כאשר חלק מהשירותים אינם מוגדרים, עם טיפול מתאים בחריגים.
+
+### 6. איזון בין פיתוח לייצור
+
+המטרה העיקרית היא להבטיח:
+
+1. **סביבת פיתוח קפדנית** - בה כל המשתנים נדרשים, כדי לאתר בעיות מוקדם
+2. **סביבת ייצור גמישה** - שיכולה לפעול גם כשחלק מהמשתנים חסרים (עם פונקציונליות מופחתת)
+
+דרך איזון זו מאפשרת פיתוח יעיל ופריסה אמינה.
+
 </div>
 
 # Managing Environment Variables in Next.js
@@ -258,6 +373,7 @@ jobs:
 4. [Best Practices](#best-practices)
 5. [Tools and Infrastructure](#tools-and-infrastructure)
 6. [Infrastructure Documentation](#infrastructure-documentation)
+7. [Additional Lessons Learned](#additional-lessons-learned)
 
 ## Background
 
@@ -491,5 +607,66 @@ jobs:
 | CI Tests          | Essential variables only                       | GitHub Secrets                            |
 | Pre-production    | Essential variables + pre-production variables | Vercel interface (Preview environment)    |
 | Production        | Essential variables + production variables     | Vercel interface (Production environment) |
+
+## Additional Lessons Learned
+
+### 1. Handling Invalid Environment Variables
+
+When faced with "Invalid environment variables" errors in production, we discovered two key reasons:
+
+1. **Essential variables missing in production environment** - The solution was to define them as optional in the build process using `optionalInBuild`
+2. **Skipping validation in build process** - We added the following:
+
+```js
+// Optional in build process
+skipValidation:
+  !!process.env.SKIP_ENV_VALIDATION ||
+  process.env.VERCEL_ENV === "production" ||
+  process.env.VERCEL_ENV === "preview",
+```
+
+### 2. Proper Vercel Configuration
+
+In the Vercel management interface, it's important to configure:
+
+- Essential variables in all environments (Development, Preview, Production)
+- Only the variables needed in each environment, without defining all variables in production
+
+### 3. Security in Services
+
+Even though we defined variables as optional in production, it's important to add security checks in every service that uses environment variables:
+
+```js
+// Example: OpenAI service
+const apiKey = env.OPENAI_API_KEY || "";
+if (!apiKey && process.env.NODE_ENV === "development") {
+  console.warn("OpenAI API key not found. Some features will be disabled.");
+}
+
+const openai = apiKey ? new OpenAI({ apiKey }) : createDummyOpenAIClient();
+
+function createDummyOpenAIClient() {
+  return {
+    chat: {
+      completions: {
+        create: async () => ({
+          choices: [{ message: { content: "API key not configured" } }],
+        }),
+      },
+    },
+  };
+}
+```
+
+This ensures that the application can still function even when some services are not configured, with appropriate handling of errors.
+
+### 4. Balancing Development and Production
+
+The primary goal is to ensure:
+
+1. **Development Environment Thoroughness** - In development, all variables are required to catch issues early
+2. **Production Environment Flexibility** - In production, it can still function even when some variables are missing (with reduced functionality)
+
+This balance allows for efficient development and secure deployment.
 
 </div>

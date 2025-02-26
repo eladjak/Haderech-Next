@@ -1,3 +1,6 @@
+import clsx from "clsx";
+import React from "react";
+
 /**
  * Textarea Component
  *
@@ -11,10 +14,6 @@
  * />
  * ```
  */
-
-import React from "react";
-
-import clsx from "clsx";
 
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {

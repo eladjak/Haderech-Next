@@ -1,12 +1,11 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+
 /**
  * @file route.ts
  * @description API route handler for global search operations
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@supabase/ssr";
 
 export const dynamic = "force-dynamic";
 

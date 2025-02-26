@@ -1,15 +1,7 @@
-/**
- * @file courses/[id]/page.tsx
- * @description Course details page component
- */
-
+import { Metadata } from "next";
 import React from "react";
-
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-
-import { Metadata } from "next";
-
 import { CourseComments } from "@/components/course/course-comments";
 import { CourseContent } from "@/components/course/course-content";
 import { CourseHeader } from "@/components/course/course-header";
@@ -18,6 +10,11 @@ import { CourseRatings } from "@/components/course/course-ratings";
 import { CourseSidebar } from "@/components/course/course-sidebar";
 import { createServerClient } from "@/lib/supabase-server";
 import type { CourseWithRelations } from "@/types/courses";
+
+/**
+ * @file courses/[id]/page.tsx
+ * @description Course details page component
+ */
 
 interface RouteParams {
   params: {

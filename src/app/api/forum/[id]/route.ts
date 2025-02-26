@@ -1,13 +1,12 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase-server";
+
 /**
  * @file forum/[id]/route.ts
  * @description API routes for managing individual forum posts. Provides endpoints for retrieving,
  * updating, and deleting specific posts. Includes authentication and authorization checks.
  */
-
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
-import { createServerClient } from "@/lib/supabase-server";
 
 interface RouteParams {
   params: {

@@ -1,3 +1,7 @@
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
 /**
  * @file sparkles.tsx
  * @description A component that adds a sparkling effect to its children. Creates animated sparkle
@@ -22,12 +26,7 @@
  * ```
  */
 
-"use client";
-
-import * as React from "react";
-import { useEffect, useState } from "react";
-
-import { cn } from "@/lib/utils";
+("use client");
 
 /**
  * Interface defining the style properties for individual sparkle elements
@@ -199,7 +198,7 @@ export function Sparkles({
     return Array.from({ length: numSparkles }, () => generateSparkle(color));
   }, [color, minSparkles, maxSparkles]);
 
-  const stopInterval = useRandomInterval(
+  const _stopInterval = useRandomInterval(
     () => {
       setSparkles(generateSparkles());
     },
