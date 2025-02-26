@@ -1,5 +1,3 @@
-import type { createClient } from "@supabase/supabase-js";
-
 import type { Database } from "@/types/database";
 import type { _ExtendedForumComment, _ForumPost, Course, ExtendedForumPost} from "./forum";
 /**

@@ -1,6 +1,5 @@
 import { _CheckCircle2, AlertCircle, Briefcase, CheckCircle, ChevronDown, ChevronUp, Heart, Sun, Target, ThumbsUp, Wrench,} from "./forum";
 import React from "react";
-import type { Button } from "@/components/ui/button";
 import type { ReactElement, ReactNode } from "react";
 
 import type {

@@ -1,11 +1,11 @@
 import type {
-  Author,
+  Author
+} from "./forum";
   ForumComment,
   ForumPost,
   ForumStats,
   ForumTag,
 } from "./forum";
-import type { User as _ModelsUser } from "./models";
 import type { SimulatorState } from "./simulator";
 import type { Database } from "./supabase";
 

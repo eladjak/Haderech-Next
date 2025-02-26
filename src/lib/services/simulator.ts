@@ -1,9 +1,8 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { OpenAI } from "openai";
-import { v4 as uuidv4 } from "uuid";
-import { getScenarioById } from "@/lib/data/scenarios";
+import type { OpenAI } from "openai";
+import type { getScenarioById } from "@/lib/data/scenarios";
 import type {
-  BaseMessage,
+  BaseMessage
+} from "./forum";
   ChatCompletionMessage,
   FeedbackDetails,
   FeedbackMetrics,
@@ -14,8 +13,7 @@ import type {
   SimulatorResponse,
   SimulatorScenario,
   SimulatorSession,
-  SimulatorState,
-} from "@/types/simulator";
+  SimulatorState,} from "@/types/simulator";
 
 /**
  * @file simulator.ts

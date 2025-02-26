@@ -1,7 +1,4 @@
-import type { _useRouter } from "next/navigation";
-
 import type { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { CourseWithRelations } from "@/types/courses";
 import type { CourseLesson, CourseProgress } from "@/types/models";
 
 /**

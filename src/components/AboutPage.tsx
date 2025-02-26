@@ -1,5 +1,16 @@
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import type {
+  Card
+} from "./forum";
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
-  ArrowLeft,
+  ArrowLeft
+} from "./forum";
   BookOpen,
   HeartHandshake,
   Lightbulb,
@@ -7,18 +18,8 @@ import {
   Target,
   Users,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
-("use client");
+"use client";
 
 export default function AboutPage() {
   // מצב מוגן מפני שגיאות הידרציה

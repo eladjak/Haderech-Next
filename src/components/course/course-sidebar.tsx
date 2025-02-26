@@ -1,4 +1,3 @@
-import type { Button } from "@/components/ui/button";
 import type { Progress } from "@/components/ui/progress";
 import type { CourseWithRelations } from "@/types/courses";
 

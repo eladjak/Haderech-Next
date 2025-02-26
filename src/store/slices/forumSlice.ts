@@ -1,5 +1,3 @@
-import type { ForumCategory, ForumFilters, ForumPost, ForumTag,} from "./forum";
-
 import type {
   ForumCategory} from "./forum";
   ForumFilters,
