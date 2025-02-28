@@ -1,7 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "types/database";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { Database } from "@/types/supabase";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
+export {};
 
 /**
  * @file courses/[id]/lessons/[lessonId]/comments/route.ts
@@ -55,17 +58,7 @@ export async function GET(
 ) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     const { data: comments, error } = await supabase
       .from("lesson_comments")
@@ -119,17 +112,7 @@ export async function POST(
 ) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     const {
       data: { user },

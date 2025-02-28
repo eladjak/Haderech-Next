@@ -1,16 +1,13 @@
-import { NextResponse } from "next/server";
-
 import { z } from "zod";
-
-import { getScenarioById } from "@/lib/data/scenarios";
-import { processUserMessage, saveSimulationResults, startSimulation} from "@/components/ui/";\nimport type { _SimulatorScenario, SimulatorSession } from "@/types/simulator";
-
+import { NextResponse } from "next/server";
 import {
+  getScenarioById,
   processUserMessage,
   saveSimulationResults,
   startSimulation,
 } from "@/lib/services/simulator";
-
+import type { SimulatorSession } from "@/types";
+import type { _SimulatorScenario } from "@/types/simulator";
 
 // Validation schemas
 const startSchema = z.object({

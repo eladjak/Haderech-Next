@@ -13,6 +13,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "check-api": "node scripts/check-api-directives.js",
     "lint": "next lint",
     "lint:strict": "next lint --max-warnings=0",
     "type-check": "tsc --noEmit",

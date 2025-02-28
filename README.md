@@ -14,6 +14,14 @@ HaDerech is an advanced learning platform combining an interactive simulator, co
 - **Achievement System** - Points system, badges, and achievements
 - **Modern User Interface** - Clean, modern design with full RTL support
 
+## 🔄 Recent Updates
+
+- **Next.js 14 Compatibility** - Updated API routes to use Next.js 14 standards:
+  - Removed unnecessary "use client" directives from API files
+  - Updated Supabase client from createServerClient to createRouteHandlerClient
+  - Standardized Database type imports
+  - [See detailed documentation](docs/api-client-directive-fixes.md)
+
 ## 🛠 Technologies
 
 - **Frontend**: Next.js 14, React 18, TypeScript
@@ -119,6 +127,33 @@ haderech-next/
 ```bash
 pnpm type-check
 ```
+
+### TypeScript Error Fixes
+
+The project includes several Python scripts to help with common TypeScript errors:
+
+- `scripts/code-fixes/run_all_fixes.py` - Runner script for all code fixes
+- `scripts/code-fixes/fix_type_files.py` - Fixes issues in TypeScript type files (interfaces, types)
+- `scripts/code-fixes/fix_component_files.py` - Fixes common issues in React component files
+- `scripts/code-fixes/fix_test_files.py` - Fixes issues in test files
+- `scripts/code-fixes/fix_ui_components.py` - Fixes issues in UI component files
+- `scripts/code-fixes/fix_api_and_models.py` - Fixes issues in API and model files
+- `scripts/code-fixes/fix_forum_and_store.py` - Fixes issues in forum and store files
+- `scripts/code-fixes/fix_imports_and_semis.py` - Fixes import order and unnecessary semicolons
+
+To run all fixes:
+
+```bash
+python scripts/code-fixes/run_all_fixes.py
+```
+
+Or run individual scripts:
+
+```bash
+python scripts/code-fixes/fix_type_files.py
+```
+
+For more details, see the [Code Correction Documentation](docs/code-correction.md).
 
 ### Unit Tests
 

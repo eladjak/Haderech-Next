@@ -1,8 +1,9 @@
-import { createServerClient } from "@supabase/ssr";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/services/supabase";
-import { Database } from "@/types/supabase";
+
+export {};
 
 /**
  * @file leaderboard/route.ts
@@ -47,6 +48,7 @@ type TimePeriod = keyof typeof TIME_PERIODS;
  */
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
     const searchParams = request.nextUrl.searchParams;
     const period = (searchParams.get("period") as TimePeriod) || "all";
     const page = parseInt(searchParams.get("page") || "1");
@@ -139,17 +141,7 @@ export async function GET(request: NextRequest) {
 // Update user score
 export async function PATCH(req: Request) {
   try {
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookies().get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     // Check authentication
     const {
