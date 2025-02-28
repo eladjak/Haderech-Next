@@ -1,7 +1,11 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { _Database } from "@/types/supabase";
+import type { _Database } from "@/types";
+
+("use client");
+
+export {};
 
 /**
  * @file route.ts

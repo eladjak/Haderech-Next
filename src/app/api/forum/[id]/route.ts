@@ -1,6 +1,10 @@
+import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase-server";
+
+("use client");
+
+export {};
 
 /**
  * @file forum/[id]/route.ts
