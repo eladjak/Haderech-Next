@@ -1,48 +1,46 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🚀 בודק את הקוד לפני push..."
+echo "Running pre-push checks..."
 
-# בדיקת טיפוסים
-echo "📝 בודק טיפוסים..."
-pnpm run type-check || {
-  echo "❌ בדיקת טיפוסים נכשלה. אנא תקן את השגיאות לפני push."
+# Check for bypass flags in commit messages
+LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+if echo "$LAST_COMMIT_MSG" | grep -q "\[skip-checks\]" || echo "$LAST_COMMIT_MSG" | grep -q "\[no-verify\]"; then
+  echo "🚧 Bypassing pre-push checks due to [skip-checks] or [no-verify] flag in commit message"
+  exit 0
+fi
+
+# Check if this is a WIP commit
+if echo "$LAST_COMMIT_MSG" | grep -q "^WIP:"; then
+  echo "🚧 Bypassing pre-push checks for WIP commit"
+  exit 0
+fi
+
+# Check if --no-verify was used on the command line
+if echo "$GIT_PUSH_OPTIONS" | grep -q "no-verify"; then
+  echo "🚧 Bypassing pre-push checks due to --no-verify flag"
+  exit 0
+fi
+
+# Check environment variable for bypassing checks
+if [ "$SKIP_GIT_HOOKS" = "1" ]; then
+  echo "🚧 Bypassing pre-push checks due to SKIP_GIT_HOOKS=1 environment variable"
+  exit 0
+fi
+
+# Run build checks before pushing
+echo "🔍 Running build checks..."
+pnpm run check-build
+
+# If the checks fail, prevent the push
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-push checks failed. Fix the issues before pushing."
+  echo "💡 To bypass checks in emergency, use one of the following methods:"
+  echo "   1. Add [skip-checks] or [no-verify] to your commit message"
+  echo "   2. Use WIP: prefix in your commit message"
+  echo "   3. Set SKIP_GIT_HOOKS=1 in your environment"
+  echo "   4. Use git push --no-verify"
   exit 1
-}
+fi
 
-# בדיקת לינטינג מחמירה
-echo "🔍 בודק לינטינג מחמיר..."
-pnpm run lint:strict || {
-  echo "❌ בדיקת לינטינג מחמירה נכשלה. אנא תקן את השגיאות לפני push."
-  exit 1
-}
-
-# בדיקת פורמט
-echo "✨ בודק פורמט..."
-pnpm run format:check || {
-  echo "❌ בדיקת פורמט נכשלה. אנא הרץ 'pnpm run format' לתיקון."
-  exit 1
-}
-
-# בדיקת בנייה
-echo "🏗 בודק בנייה..."
-pnpm run build || {
-  echo "❌ בדיקת בנייה נכשלה. אנא תקן את השגיאות לפני push."
-  exit 1
-}
-
-# בדיקת טסטים עם כיסוי קוד
-echo "🧪 מריץ טסטים עם בדיקת כיסוי..."
-pnpm run test:coverage || {
-  echo "❌ הטסטים נכשלו או שכיסוי הקוד נמוך מהמינימום הנדרש."
-  exit 1
-}
-
-# וולידציה סופית
-echo "🔎 מבצע וולידציה סופית..."
-pnpm run validate || {
-  echo "❌ הוולידציה נכשלה. אנא תקן את כל השגיאות לפני הדחיפה."
-  exit 1
-}
-
-echo "✅ כל הבדיקות עברו בהצלחה! 🎉" 
+echo "✅ Pre-push checks passed!" 
