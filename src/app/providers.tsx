@@ -1,16 +1,13 @@
+"use client";
+
 import { ThemeProvider } from "next-themes";
-import { Provider } from "react-redux";
-import React from "react";
-import { store } from "@/store/store";
+import { ReactNode } from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 /**
- * Providers Component
- *
- * A component that wraps the application with various providers.
+ * Providers component wraps the entire application with context providers.
  * Currently includes the theme provider for dark/light mode support.
  */
-
-("use client");
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -18,13 +15,9 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <Provider store={store}>{children}</Provider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+      <Toaster />
     </ThemeProvider>
   );
 }

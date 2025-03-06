@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -12,33 +14,27 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { _getForumPost, createForumComment } from "@/lib/api";
+import { createForumComment } from "@/lib/services/forum";
 import { cn } from "@/lib/utils";
-import type { ForumComment, ForumPost } from "@/types/forum";
-
-("use client");
+import type { Author, ForumComment, ForumPost } from "@/types/forum";
 
 const formSchema = z.object({
-  content: z.string().min(1, {
-    message: "התגובה לא יכולה להיות ריקה",
-  }),
+  content: z.string().min(1, { message: "התגובה לא יכולה להיות ריקה" }),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface ForumPostPageProps {
-  params: {
-    postId: string;
-  };
+  params: { postId: string };
 }
 
 export default function ForumPostPage({ params }: ForumPostPageProps) {
+  const [post, setPost] = useState<ForumPost | null>(null);
+  const [comments, setComments] = useState<ForumComment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [commentLoading, setCommentLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const [post, setPost] = useState<ForumPost | null>(null);
-  const [isLoading, _setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,158 +42,198 @@ export default function ForumPostPage({ params }: ForumPostPageProps) {
     },
   });
 
-  const loadPost = useCallback(async () => {
+  const fetchPostData = useCallback(async () => {
     try {
-      const response = await fetch(`/api/forum/posts/${params.postId}`);
+      setLoading(true);
+      const response = await fetch(`/api/community/${params.postId}`);
       if (!response.ok) {
-        throw new Error("Failed to load post");
+        throw new Error("Failed to fetch post");
       }
       const data = await response.json();
       setPost(data);
+
+      const commentsResponse = await fetch(
+        `/api/community/${params.postId}/comments`
+      );
+      if (!commentsResponse.ok) {
+        throw new Error("Failed to fetch comments");
+      }
+      const commentsData = await commentsResponse.json();
+      setComments(commentsData);
     } catch (error) {
+      console.error("Error fetching post:", error);
       toast({
         title: "שגיאה",
-        description: "לא ניתן לטעון את הפוסט",
+        description: "אירעה שגיאה בטעינת הפוסט והתגובות",
         variant: "destructive",
       });
-      router.push("/community");
+    } finally {
+      setLoading(false);
     }
-  }, [params.postId, router, toast]);
+  }, [params.postId, toast]);
 
   useEffect(() => {
-    loadPost();
-  }, [loadPost]);
+    fetchPostData();
+  }, [fetchPostData]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      setIsSubmitting(true);
+      setCommentLoading(true);
+
       await createForumComment({
         postId: params.postId,
         content: data.content,
       });
+
       form.reset();
-      void loadPost();
+
+      // עדכון התגובות
+      await fetchPostData();
+
       toast({
-        title: "התגובה נוספה בהצלחה",
+        title: "התגובה פורסמה בהצלחה",
         description: "התגובה שלך נוספה לדיון",
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "אירעה שגיאה בהוספת התגובה";
+      console.error("Error posting comment:", error);
       toast({
-        variant: "destructive",
         title: "שגיאה",
-        description: errorMessage,
+        description: "אירעה שגיאה בפרסום התגובה",
+        variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setCommentLoading(false);
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-32 w-full" />
+      <div className="container max-w-4xl py-8">
+        <Skeleton className="h-[200px] w-full" />
+        <div className="mt-8 space-y-4">
+          <Skeleton className="h-[100px] w-full" />
+          <Skeleton className="h-[100px] w-full" />
+        </div>
       </div>
     );
   }
 
   if (!post) {
-    return null;
+    return (
+      <div className="container flex h-[50vh] flex-col items-center justify-center">
+        <h2 className="text-2xl font-bold">הפוסט לא נמצא</h2>
+        <p className="text-muted-foreground">הפוסט המבוקש אינו קיים או הוסר</p>
+        <Button className="mt-4" onClick={() => router.push("/community")}>
+          חזרה לקהילה
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{post.title}</h1>
-        <div className="mt-2 flex items-center space-x-4 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Avatar className="h-6 w-6">
-              <AvatarImage
-                src={post.author.avatar_url || post.author.image || undefined}
-                alt={`תמונת הפרופיל של ${post.author.name}`}
-              />
-              <AvatarFallback>
-                {post.author.name?.charAt(0).toUpperCase() || "?"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="mr-2">{post.author.name}</span>
+    <div className="container max-w-4xl py-8">
+      {/* פרטי הפוסט */}
+      <Card className="mb-8">
+        <CardHeader className="flex flex-row items-start gap-4">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={post.author.image || ""} alt={post.author.name} />
+            <AvatarFallback>{post.author.name?.[0] || "U"}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">{post.title}</h1>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>{post.author.name}</span>
+              <span>•</span>
+              <time dateTime={post.created_at.toString()}>
+                {format(new Date(post.created_at), "d בMMM, yyyy", {
+                  locale: he,
+                })}
+              </time>
+            </div>
           </div>
-          <span>•</span>
-          <time>{format(new Date(post.created_at), "PP", { locale: he })}</time>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>
+          <div className="prose max-w-none dark:prose-invert">
+            <p>{post.content}</p>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="prose prose-stone max-w-none dark:prose-invert">
-        {post.content}
-      </div>
+      {/* תגובות */}
+      <h2 className="mb-4 text-xl font-bold">תגובות ({comments.length})</h2>
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">תגובות</h2>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      placeholder="הוסף תגובה..."
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              className={cn(isSubmitting && "cursor-not-allowed opacity-50")}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "שולח תגובה..." : "שלח תגובה"}
-            </Button>
-          </form>
-        </Form>
-
-        <div className="space-y-4">
-          {post.comments?.map((comment: ForumComment) => (
-            <Card key={comment.id}>
-              <CardHeader>
-                <div className="flex items-center space-x-4 space-x-reverse">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={
-                        comment.author.avatar_url ||
-                        comment.author.image ||
-                        undefined
-                      }
-                      alt={`תמונת הפרופיל של ${comment.author.name}`}
-                    />
-                    <AvatarFallback>
-                      {comment.author.name?.charAt(0).toUpperCase() || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">{comment.author.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(comment.created_at), "PP", {
-                        locale: he,
-                      })}
-                    </p>
-                  </div>
+      <div className="mb-8 space-y-4">
+        {comments.map((comment) => (
+          <Card key={comment.id} className={cn("border")}>
+            <CardHeader className="flex flex-row items-start gap-4 py-4">
+              <Avatar className="h-10 w-10">
+                <AvatarImage
+                  src={comment.author.image || ""}
+                  alt={comment.author.name}
+                />
+                <AvatarFallback>
+                  {comment.author.name?.[0] || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">{comment.author.name}</h3>
+                  <time
+                    className="text-sm text-muted-foreground"
+                    dateTime={comment.created_at.toString()}
+                  >
+                    {format(new Date(comment.created_at), "d בMMM, yyyy", {
+                      locale: he,
+                    })}
+                  </time>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap">{comment.content}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <p className="text-sm">{comment.content}</p>
+              </div>
+            </CardHeader>
+          </Card>
+        ))}
+
+        {comments.length === 0 && (
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <p className="text-muted-foreground">
+              עדיין אין תגובות לפוסט זה. היה הראשון להגיב!
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* טופס הוספת תגובה */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold">הוספת תגובה</h3>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        placeholder="כתוב את התגובה שלך כאן..."
+                        className="min-h-28"
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <div className="mt-4 flex justify-end">
+                <Button type="submit" disabled={commentLoading}>
+                  {commentLoading ? "שולח..." : "הוסף תגובה"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
