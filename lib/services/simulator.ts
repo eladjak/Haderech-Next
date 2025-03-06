@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { FEEDBACK_CRITERIA, SCENARIO_TYPES } from "@/constants/simulator";
 import { config } from "@/lib/config";
-import { ApiResponse } from "@/types/api";
 import type {
+  APIResponse,
   Message,
   SimulatorResponse,
   SimulatorScenario,
