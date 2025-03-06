@@ -1,0 +1,10 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": { "installCommand": "pnpm install --no-frozen-lockfile" }
+    }
+  ],
+  "build": { "env": { "NPM_FLAGS": "--no-frozen-lockfile" } }
+}
