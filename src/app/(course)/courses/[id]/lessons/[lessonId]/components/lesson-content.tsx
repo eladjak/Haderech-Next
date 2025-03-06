@@ -1,7 +1,15 @@
-import { Card } from "@/components/ui/card";
-import type { Lesson } from "@/types/api";
+"use client";
 
-("use client");
+import { Card } from "@/components/ui/card";
+
+// טיפוס Lesson מוגדר מקומית במקום מייבוא לא קיים
+interface Lesson {
+  id: string;
+  title: string;
+  description?: string;
+  content: string;
+  video_url?: string;
+}
 
 interface LessonContentProps {
   lesson: Lesson;
