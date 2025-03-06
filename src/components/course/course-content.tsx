@@ -1,142 +1,158 @@
-import type { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { CourseLesson, CourseProgress } from "@/types/models";
+"use client";
+
+import { CheckCircle, ChevronRight, Lock, Play } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type {
+  CourseLesson,
+  CourseProgress,
+  CourseWithRelations,
+} from "@/types/courses";
 
 /**
  * @file course-content.tsx
  * @description Content component for course pages showing lessons list and content.
  * Displays a list of course lessons with their status (locked/completed),
- * duration, and provides navigation to individual lessons.
+ * and allows navigation to individual lessons.
  */
 
-import {
-  _ChevronLeft
-} from "./forum";
-  _ChevronRight,
-  CheckCircle,
-  Lock,
-  Play,
-} from "lucide-react";
-
-
-
-
-
-
-
-/**
- * Extended course lesson type that includes progress and access information
- */
-interface ExtendedCourseLesson extends CourseLesson {
-  progress?: CourseProgress[]; // Progress tracking for each user
-  is_free: boolean; // Whether the lesson is freely accessible
-}
-
-/**
- * Props for the CourseContent component
- */
 interface CourseContentProps {
-  course: CourseWithRelations & {
-    lessons: ExtendedCourseLesson[];
-  };
-  isEnrolled: boolean; // Whether the current user is enrolled in the course
-  isInstructor?: boolean; // Whether the current user is the course instructor
+  course: CourseWithRelations;
+  userProgress?: CourseProgress;
+  currentLessonId?: string;
+  isEnrolled?: boolean;
 }
 
-/**
- * CourseContent Component
- *
- * Renders a list of course lessons with their status, progress, and access controls.
- * Handles lesson navigation and displays completion status for enrolled users.
- *
- * @param props - Component properties
- * @returns React component
- */
 export function CourseContent({
   course,
-  isEnrolled,
-  isInstructor,
+  userProgress,
+  currentLessonId,
+  isEnrolled = false,
 }: CourseContentProps) {
-  // Sort lessons by their defined order
-  const sortedLessons = (course.lessons || []).sort(
-    (a, b) => a.order - b.order
-  );
+  // Helper to check if a lesson is completed
+  const isLessonCompleted = (lessonId: string) => {
+    if (!userProgress || !userProgress.completedLessons) return false;
+    return userProgress.completedLessons.includes(lessonId);
+  };
 
-  // Calculate completion statistics
-  const completedLessons = sortedLessons.filter((lesson) =>
-    lesson.progress?.some((p) => p.completed)
-  ).length;
+  // Helper to check if a lesson is locked
+  const isLessonLocked = (index: number, sectionIndex: number) => {
+    if (!isEnrolled) return true;
 
-  // Count free lessons for display
-  const freeLessons = sortedLessons.filter((lesson) => lesson.is_free).length;
+    // הנחה: השיעור הראשון בכל קורס פתוח תמיד למשתמשים רשומים
+    if (sectionIndex === 0 && index === 0) return false;
+
+    // בדיקה האם השיעור הקודם הושלם
+    const flatLessons = course.sections.flatMap((section) => section.lessons);
+    const currentFlatIndex =
+      course.sections
+        .slice(0, sectionIndex)
+        .reduce((count, section) => count + section.lessons.length, 0) + index;
+
+    if (currentFlatIndex === 0) return false;
+
+    const previousLesson = flatLessons[currentFlatIndex - 1];
+    return previousLesson && !isLessonCompleted(previousLesson.id);
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Course statistics summary */}
-      <div>
-        <h2 className="text-2xl font-bold">תוכן הקורס</h2>
-        <p className="text-muted-foreground">
-          {sortedLessons.length} שיעורים •{" "}
-          {sortedLessons.reduce(
-            (acc, lesson) => acc + (lesson.duration || 0),
-            0
-          )}{" "}
-          דקות • הושלמו {completedLessons} שיעורים • {freeLessons} שיעורים
-          חינמיים
-        </p>
-      </div>
-
-      {/* Lessons list */}
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">תוכן הקורס</h2>
       <div className="space-y-4">
-        {sortedLessons.map((lesson) => {
-          // Determine lesson status
-          const isCompleted = lesson.progress?.some((p) => p.completed);
-          const isLocked = !isEnrolled && !lesson.is_free && !isInstructor;
+        {course.sections.map((section, sectionIndex) => (
+          <Card key={section.id} className="overflow-hidden">
+            <CardHeader className="bg-muted/50 py-4">
+              <CardTitle className="text-lg">
+                {section.title}
+                <span className="mr-2 text-sm font-normal text-muted-foreground">
+                  ({section.lessons.length} שיעורים)
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ul className="divide-y">
+                {section.lessons.map((lesson, index) => {
+                  const isCompleted = isLessonCompleted(lesson.id);
+                  const isLocked = isLessonLocked(index, sectionIndex);
+                  const isActive = currentLessonId === lesson.id;
 
-          return (
-            <Card key={lesson.id} className={isLocked ? "opacity-75" : ""}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  {/* Lesson order indicator */}
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-sm">
-                    {lesson.order}
-                  </span>
-                  {lesson.title}
-                  {/* Status indicators */}
-                  {isLocked && <Lock className="h-4 w-4" />}
-                  {isCompleted && (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  {/* Lesson duration */}
-                  <div className="text-sm text-muted-foreground">
-                    {lesson.duration} דקות
-                  </div>
-                  {/* Lesson access button */}
-                  <Button
-                    variant={isLocked ? "outline" : "default"}
-                    size="sm"
-                    className="gap-2"
-                    asChild
-                  >
-                    <a
-                      href={
-                        isLocked
-                          ? "#"
-                          : `/courses/${course.id}/lessons/${lesson.id}`
-                      }
+                  return (
+                    <li
+                      key={lesson.id}
+                      className={`relative ${
+                        isActive ? "bg-accent" : "hover:bg-muted/50"
+                      }`}
                     >
-                      <Play className="h-4 w-4" />
-                      {isLocked ? "נעול" : "צפה בשיעור"}
-                    </a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                      <div className="flex items-center p-4">
+                        <div className="mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          {isCompleted ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          ) : isLocked ? (
+                            <Lock className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <Play className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          {isLocked ? (
+                            <div>
+                              <p className="truncate font-medium text-muted-foreground">
+                                {lesson.title}
+                              </p>
+                              {lesson.duration && (
+                                <p className="text-xs text-muted-foreground">
+                                  {Math.floor(lesson.duration / 60)}:
+                                  {String(lesson.duration % 60).padStart(
+                                    2,
+                                    "0"
+                                  )}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <Link
+                              href={`/courses/${course.id}/lessons/${lesson.id}`}
+                              className="block"
+                            >
+                              <p className="truncate font-medium">
+                                {lesson.title}
+                              </p>
+                              {lesson.duration && (
+                                <p className="text-xs text-muted-foreground">
+                                  {Math.floor(lesson.duration / 60)}:
+                                  {String(lesson.duration % 60).padStart(
+                                    2,
+                                    "0"
+                                  )}
+                                </p>
+                              )}
+                            </Link>
+                          )}
+                        </div>
+                        {!isLocked && (
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="icon"
+                            className="ml-4 flex-shrink-0"
+                          >
+                            <Link
+                              href={`/courses/${course.id}/lessons/${lesson.id}`}
+                            >
+                              <ChevronRight className="h-5 w-5" />
+                              <span className="sr-only">צפה בשיעור</span>
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

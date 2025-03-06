@@ -1,9 +1,9 @@
+"use client";
+
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CourseWithRelations } from "@/types/courses";
-
-("use client");
 
 /**
  * @file course-ratings.tsx
@@ -16,58 +16,130 @@ interface CourseRatingsProps {
 }
 
 export function CourseRatings({ course, showAll = false }: CourseRatingsProps) {
-  const ratings = course.ratings || [];
-  const averageRating =
-    ratings.length > 0
-      ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
-      : 0;
+  // הנחה: המדרוג נמצא בשדה rating והביקורות בשדה reviews
+  const rating = course.rating || 0;
+  const reviews = course.reviews || [];
+
+  // הצג רק עד 3 ביקורות אם לא נדרש להציג את כולן
+  const displayedReviews = showAll ? reviews : reviews.slice(0, 3);
+
+  // יצירת מערך של אחוזי דירוג עבור כל כוכב (מ-1 עד 5)
+  const ratingDistribution = Array.from({ length: 5 }, (_, i) => {
+    const starsCount = reviews.filter(
+      (review) => review.rating === 5 - i
+    ).length;
+    return {
+      stars: 5 - i,
+      count: starsCount,
+      percentage: reviews.length ? (starsCount / reviews.length) * 100 : 0,
+    };
+  });
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>דירוגים</CardTitle>
+        <CardTitle>דירוגים וביקורות</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold">
-              {averageRating.toFixed(1)}
-            </span>
-            <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-            <span className="text-muted-foreground">
-              ({ratings.length} דירוגים)
-            </span>
-          </div>
+        {reviews.length === 0 ? (
+          <p className="text-center text-muted-foreground">
+            אין עדיין ביקורות לקורס זה.
+          </p>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-5xl font-bold">{rating.toFixed(1)}</div>
+                <div className="mt-1 flex justify-center">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-5 w-5 ${
+                        i < Math.round(rating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "fill-gray-200 text-gray-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {reviews.length} ביקורות
+                </p>
+              </div>
 
-          {(showAll ? ratings : ratings.slice(0, 3)).map((rating) => (
-            <div key={rating.id} className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Avatar>
-                  <AvatarImage src={rating.user.avatar_url || undefined} />
-                  <AvatarFallback>{rating.user.name[0]}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-medium">{rating.user.name}</div>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < rating.rating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "fill-gray-200 text-gray-200"
-                        }`}
+              <div className="flex-1 space-y-2">
+                {ratingDistribution.map((dist) => (
+                  <div
+                    key={dist.stars}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <div className="w-6 text-right">{dist.stars}</div>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
+                      <div
+                        className="h-full bg-yellow-400"
+                        style={{ width: `${dist.percentage}%` }}
                       />
-                    ))}
+                    </div>
+                    <div className="w-9 text-muted-foreground">
+                      {dist.count}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold">ביקורות אחרונות</h3>
+              {displayedReviews.map((review) => (
+                <div key={review.id} className="border-b pb-4">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={review.user.image || undefined}
+                        alt={review.user.name}
+                      />
+                      <AvatarFallback>
+                        {review.user.name.substring(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">{review.user.name}</h4>
+                        <div className="flex">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "fill-gray-200 text-gray-200"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(review.created_at).toLocaleDateString()}
+                      </p>
+                      <p className="mt-2 text-sm">{review.content}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {rating.review && (
-                <p className="text-sm text-muted-foreground">{rating.review}</p>
+              ))}
+
+              {!showAll && reviews.length > 3 && (
+                <div className="pt-2 text-center">
+                  <a
+                    href="#all-reviews"
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    הצג את כל {reviews.length} הביקורות
+                  </a>
+                </div>
               )}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
