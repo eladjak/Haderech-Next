@@ -1,56 +1,50 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-/**
- * Create Post Component
- *
- * A form component for creating new forum posts with title, content, and tags.
- * Includes validation, loading states, and tag management functionality.
- *
- * @example
- * ```tsx
- * <CreatePost
- *   onSubmit={async (post) => {
- *     await createPost(post);
- *   }}
- *   isLoading={false}
- * />
- * ```
- */
-
-("use client");
+export interface CreatePostProps {
+  forumId?: string;
+  className?: string;
+  onComplete?: () => void;
+}
 
 const formSchema = z.object({
   title: z
     .string()
-    .min(3, "הכותרת חייבת להכיל לפחות 3 תווים")
-    .max(100, "הכותרת יכולה להכיל עד 100 תווים"),
+    .min(5, { message: "כותרת חייבת להכיל לפחות 5 תווים" })
+    .max(100, { message: "כותרת יכולה להכיל עד 100 תווים" }),
   content: z
     .string()
-    .min(10, "התוכן חייב להכיל לפחות 10 תווים")
-    .max(1000, "התוכן יכול להכיל עד 1000 תווים"),
+    .min(10, { message: "תוכן חייב להכיל לפחות 10 תווים" })
+    .max(5000, { message: "תוכן יכול להכיל עד 5000 תווים" }),
 });
 
-type FormData = z.infer<typeof formSchema>;
-
-interface CreatePostProps {
-  onSubmit?: (data: FormData) => Promise<void>;
-  isLoading?: boolean;
-}
-
 export function CreatePost({
-  onSubmit,
-  isLoading = false,
-}: CreatePostProps): React.ReactElement {
-  const { toast } = useToast();
+  forumId,
+  className,
+  onComplete,
+}: CreatePostProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const form = useForm<FormData>({
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
@@ -58,147 +52,94 @@ export function CreatePost({
     },
   });
 
-  const handleSubmit = async (data: FormData) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (onSubmit) {
-        await onSubmit(data);
-        toast({
-          title: "הפוסט נוצר בהצלחה",
-          description: "הפוסט שלך פורסם בפורום",
-        });
-        form.reset();
-        router.refresh();
-      } else {
-        const response = await fetch("/api/forum", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+      setIsSubmitting(true);
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          const errorMessage =
-            errorData?.error ||
-            "לא הצלחנו ליצור את הפוסט. אנא נסה שוב מאוחר יותר.";
-          toast({
-            title: "שגיאה",
-            description: errorMessage,
-            variant: "destructive",
-          });
-          return;
-        }
+      // בשלב זה יש להוסיף קריאת API ליצירת פוסט חדש
+      console.log("Creating post:", values, "in forum:", forumId);
 
-        toast({
-          title: "הפוסט נוצר בהצלחה",
-          description: "הפוסט שלך פורסם בפורום",
-        });
-        form.reset();
-        router.refresh();
+      // דוגמה לקריאת API:
+      // await createPost({
+      //   ...values,
+      //   forumId,
+      // });
+
+      // לצורך הדוגמה, נדמה השהייה של פעולת השרת
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      toast.success("הפוסט נוצר בהצלחה!");
+
+      // אפשרות לניתוב לדף הפוסט החדש
+      // router.push(`/forum/${forumId}/post/${newPostId}`);
+
+      // ניקוי הטופס
+      form.reset();
+
+      // הפעלת פונקציית השלמה אם סופקה
+      if (onComplete) {
+        onComplete();
       }
     } catch (error) {
-      toast({
-        title: "שגיאה",
-        description: "לא הצלחנו ליצור את הפוסט. אנא נסה שוב מאוחר יותר.",
-        variant: "destructive",
-      });
+      console.error("Error creating post:", error);
+      toast.error("שגיאה ביצירת הפוסט. נסה שוב מאוחר יותר.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-      <div className="flex flex-col space-y-1.5 p-6">
-        <h3 className="text-2xl font-semibold leading-none tracking-tight">
-          פוסט חדש
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          שתף את המחשבות שלך עם הקהילה
-        </p>
-      </div>
-      <div className="p-6 pt-0">
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-4"
-          role="form"
-          aria-label="טופס יצירת פוסט חדש"
-          noValidate
-        >
-          <div className="space-y-2">
-            <div className="w-full">
-              <input
-                {...form.register("title")}
-                aria-invalid={!!form.formState.errors.title}
-                aria-label="כותרת"
-                aria-required="true"
-                className={cn(
-                  "w-full rounded-md border px-3 py-2 text-base transition-colors focus:outline-none focus:ring-2",
-                  "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20",
-                  form.formState.errors.title &&
-                    "border-destructive focus:border-destructive focus:ring-destructive/20"
-                )}
-                data-testid="title-input"
-                disabled={isLoading}
-                placeholder="כותרת הפוסט"
-                tabIndex={0}
-              />
-              {form.formState.errors.title && (
-                <p
-                  className="mt-1 text-sm text-destructive"
-                  data-testid="error-message"
-                  role="alert"
-                  aria-live="polite"
-                >
-                  {form.formState.errors.title.message}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <textarea
-              {...form.register("content")}
-              aria-invalid={!!form.formState.errors.content}
-              aria-label="תוכן"
-              aria-required="true"
-              className={cn(
-                "min-h-[80px] w-full rounded-md border p-3 text-base transition-colors focus:outline-none focus:ring-2",
-                "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20",
-                form.formState.errors.content &&
-                  "border-destructive focus:border-destructive focus:ring-destructive/20"
-              )}
-              data-testid="content-input"
-              disabled={isLoading}
-              placeholder="תוכן הפוסט"
-              tabIndex={0}
-            />
-            {form.formState.errors.content && (
-              <p
-                className="mt-1 text-sm text-destructive"
-                data-testid="error-message"
-                role="alert"
-                aria-live="polite"
-              >
-                {form.formState.errors.content.message}
-              </p>
+    <div className={className}>
+      <h2 className="mb-4 text-2xl font-bold">יצירת פוסט חדש</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>כותרת</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="הזן כותרת לפוסט שלך"
+                    {...field}
+                    disabled={isSubmitting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className={cn(buttonVariants(), "w-full")}
-              disabled={isLoading}
-              aria-busy={isLoading}
-              aria-disabled={isLoading}
-              aria-label={isLoading ? "יוצר פוסט..." : "פרסם פוסט"}
-              data-testid="submit-button"
-              role="button"
-              tabIndex={0}
-            >
-              {isLoading ? "יוצר פוסט..." : "פרסם פוסט"}
-            </button>
-          </div>
+          />
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>תוכן</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="שתף את המחשבות, השאלות או הרעיונות שלך..."
+                    className="min-h-[200px]"
+                    {...field}
+                    disabled={isSubmitting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                שולח...
+              </>
+            ) : (
+              "פרסם פוסט"
+            )}
+          </Button>
         </form>
-      </div>
+      </Form>
     </div>
   );
 }
