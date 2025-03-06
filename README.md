@@ -17,10 +17,22 @@ HaDerech is an advanced learning platform combining an interactive simulator, co
 ## 🔄 Recent Updates
 
 - **Next.js 14 Compatibility** - Updated API routes to use Next.js 14 standards:
+
   - Removed unnecessary "use client" directives from API files
   - Updated Supabase client from createServerClient to createRouteHandlerClient
   - Standardized Database type imports
   - [See detailed documentation](docs/api-client-directive-fixes.md)
+
+- **Build Fixes** - Fixed several build issues:
+
+  - Corrected "use client" directive placement in client components
+  - Fixed component imports and type definitions
+  - Standardized service function interfaces
+  - [See detailed documentation](docs/build-issues-fixes.md)
+
+- **Supabase Client Upgrade** - Upgraded Supabase client to support Next.js 14
+- **Redux Type Fixes** - Fixed type issues in Redux and recommendation engine
+- **Zod Usage Fixes** - Fixed issues in Zod usage
 
 ## 🛠 Technologies
 
@@ -255,13 +267,22 @@ This project is distributed under the MIT License. See the `LICENSE` file for mo
 
 **הדרך** היא פלטפורמת למידה אינטראקטיבית המאפשרת לפתח כישורים מקצועיים דרך קורסים, פורומים קהילתיים, וסימולטורים.
 
-## תכונות מרכזיות
+## עדכונים אחרונים
 
-- **מערכת קורסים**: קורסים מובנים עם וידאו, טקסט ותרגולים אינטראקטיביים
-- **פורום קהילתי**: לשאלות, דיונים ושיתוף ידע
-- **סימולטור תרגול**: להתנסות בתרחישים מציאותיים
-- **מערכת הישגים**: מעקב אחר התקדמות ופרסים וירטואליים
-- **ממשק משתמש מודרני**: חוויית משתמש נוחה ונגישה
+לאחרונה ביצענו מספר תיקונים משמעותיים:
+
+1. שדרוג השימוש ב-Supabase Client לתמיכה ב-Next.js 14
+2. תיקוני טיפוסים ב-Redux ובמנוע ההמלצות
+3. תיקון בעיות שימוש בספריית Zod
+
+הערה חשובה:
+
+- ✅ האפליקציה עובדת כראוי בסביבת פיתוח (`npm run dev`)
+- ⚠️ יש מספר שגיאות טיפוסים שעדיין מונעות בניית גרסת ייצור מלאה
+- 📝 התיקונים והבעיות הנותרות מתועדים בתיקיה `docs/fixes/`
+
+לפרטים נוספים על התיקונים, ראה את הקובץ `docs/fixes/supabase-client-fix.md`.
+לרשימת הבעיות הנותרות, ראה את הקובץ `docs/fixes/remaining-issues.md`.
 
 ## טכנולוגיות
 
@@ -325,7 +346,6 @@ pnpm dev
 
 ```bash
 pnpm build
-pnpm start
 ```
 
 ## מבנה הפרויקט
@@ -396,9 +416,26 @@ supabase db push
 
 ## מדדי איכות
 
-- **ביצועים**: עמידה בסטנדרטים של Web Vitals (LCP < 2.5s, FID < 100ms, CLS < 0.1)
-- **נגישות**: תאימות ל-WCAG 2.1 AA
-- **אבטחה**: בדיקות אבטחה סדירות וטיפול בסיכונים
+### Performance
+
+- Initial load time: < 2 seconds
+- First Contentful Paint: < 1 second
+- Time to Interactive: < 3 seconds
+- Lighthouse score: > 90
+
+### Accessibility
+
+- WCAG score: AA
+- Lighthouse accessibility score: > 90
+- ARIA coverage: 100%
+- Full keyboard support
+
+### Security
+
+- OWASP compliance
+- Zero critical vulnerabilities
+- Package freshness: 100%
+- Security coverage: > 95%
 
 ## תרומה לפרויקט
 

@@ -1,6 +1,7 @@
-import type { Course, CourseLesson, CourseRating, User } from "./api";
+import type { Course, CourseLesson, CourseRating } from "./courses";
 import type { Database } from "./database";
 import type { Author, ForumComment, ForumPost } from "./forum";
+import type { User } from "./profile";
 
 /**
  * Supabase Types
