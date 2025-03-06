@@ -1,6 +1,7 @@
-import type { _Mock } from "@/types/mock-types";
+import { vi } from "vitest";
+
 import type {
-  Author} from "./forum";
+  Author,
   ForumCategory,
   ForumComment,
   ForumPost,
@@ -8,10 +9,47 @@ import type {
   ForumTag,
 } from "@/types/forum";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "types/database";
 
+// היבוא עם הטיפוסים הדרושים
+
+import type { Database } from "types/database";
+
+// הגדרת טיפוס המשתמש לטסטים
+interface TestAuthor {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | undefined;
+  avatar_url?: string | undefined;
+  bio?: string | undefined;
+  username: string;
+  role: string;
+  full_name: string;
+  points: number;
+  level: number;
+  badges: string[];
+  achievements: string[];
+  created_at: string;
+  updated_at: string;
+  last_seen?: string | undefined;
+  posts_count?: number;
+  likes_received?: number;
+}
+
+// עטיפת הטיפוסים כדי להתאים לטסטים
+type TestForumComment = Omit<ForumComment, "author" | "user"> & {
+  author: TestAuthor;
+  user: TestAuthor;
+};
+type TestForumPost = Omit<ForumPost, "author"> & { author: TestAuthor };
+type TestForumStats = Omit<ForumStats, "top_contributors"> & {
+  top_contributors: TestAuthor[];
+};
 
 // מוקים למשתמשים
-export const mockAuthor: Author = {
+export const mockAuthor = {
   id: "1",
   name: "Test User",
   email: "test@example.com",
@@ -28,7 +66,9 @@ export const mockAuthor: Author = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   last_seen: undefined,
-};
+  posts_count: 10,
+  likes_received: 5,
+} as any;
 
 // מוקים לקטגוריות
 export const mockCategory: ForumCategory = {

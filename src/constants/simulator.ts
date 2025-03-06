@@ -90,75 +90,11 @@ export const CLASSROOM_MANAGEMENT_SCENARIO: SimulatorScenario = {
 };
 
 /**
- * Example scenario for facilitating discussions
- * Provides a structured simulation for managing group discussions
- */
-export const DISCUSSION_FACILITATION_SCENARIO: SimulatorScenario = {
-  id: "discussion-1",
-  title: "Group Discussion Facilitation",
-  description: "Facilitate a discussion where opinions are divided",
-  difficulty: "advanced",
-  category: SCENARIO_TYPES.DISCUSSION,
-  initial_message:
-    "You're leading a discussion about a controversial topic, and the group is divided with strong opinions on both sides. Several participants are becoming visibly frustrated. How do you facilitate this discussion?",
-  context:
-    "You're facilitating a professional development workshop for teachers discussing teaching methods.",
-  objectives: [
-    "Ensure all voices are heard",
-    "De-escalate tension",
-    "Guide the discussion productively",
-    "Maintain a respectful environment",
-  ],
-  expected_outcomes: [
-    "Participants feel their perspectives were respected",
-    "The discussion remains constructive despite differences",
-    "Key insights are identified from multiple perspectives",
-  ],
-  max_turns: 7,
-  time_limit: 900,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
-
-/**
- * Example scenario for behavior management
- * Provides a structured simulation for handling challenging behaviors
- */
-export const BEHAVIOR_MANAGEMENT_SCENARIO: SimulatorScenario = {
-  id: "behavior-1",
-  title: "Handling Defiant Behavior",
-  description: "Respond to a student refusing to follow instructions",
-  difficulty: "expert",
-  category: SCENARIO_TYPES.BEHAVIOR,
-  initial_message:
-    "A student is refusing to participate in a group activity and has said, 'This is stupid, I'm not doing it.' Other students are watching how you'll respond. What do you do?",
-  context:
-    "This is a high school classroom, and the student has been struggling with engagement recently.",
-  objectives: [
-    "Address the refusal appropriately",
-    "Minimize disruption to other students",
-    "Understand potential underlying causes",
-    "Maintain the student's dignity",
-  ],
-  expected_outcomes: [
-    "The student eventually participates or accepts an alternative",
-    "The classroom dynamic remains positive",
-    "The student feels respected despite the behavioral issue",
-  ],
-  max_turns: 6,
-  time_limit: 720,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
-
-/**
  * Collection of example scenarios for use throughout the application
  * These are used for demo purposes and as templates for creating new scenarios
  */
 export const EXAMPLE_SCENARIOS: SimulatorScenario[] = [
   CLASSROOM_MANAGEMENT_SCENARIO,
-  DISCUSSION_FACILITATION_SCENARIO,
-  BEHAVIOR_MANAGEMENT_SCENARIO,
   // Basic scenario example
   {
     id: "basic-1",
@@ -182,33 +118,6 @@ export const EXAMPLE_SCENARIOS: SimulatorScenario[] = [
     ],
     max_turns: 4,
     time_limit: 300,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  // Advanced scenario example
-  {
-    id: "advanced-1",
-    title: "Parent Conference",
-    description: "Navigate a challenging parent-teacher conference",
-    difficulty: "advanced",
-    category: SCENARIO_TYPES.ADVANCED,
-    initial_message:
-      "You're meeting with a parent who is upset about their child's recent grade on a major project. The parent begins by saying, 'My child worked very hard on this and deserves a better grade.' How do you handle this conversation?",
-    context:
-      "The student received a C on a project that was worth 20% of their final grade. The rubric was provided in advance.",
-    objectives: [
-      "Maintain a professional demeanor",
-      "Explain your grading decisions clearly",
-      "Listen to the parent's concerns",
-      "Find a constructive path forward",
-    ],
-    expected_outcomes: [
-      "The parent understands the grading rationale",
-      "The conversation remains respectful",
-      "A plan is developed to support the student",
-    ],
-    max_turns: 6,
-    time_limit: 600,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
