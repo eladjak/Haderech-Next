@@ -1,6 +1,6 @@
-import RegisterForm from "@/components/auth/register-form";
+"use client";
 
-("use client");
+import RegisterForm from "@/components/auth/register-form";
 
 export function RegisterContent() {
   return (
@@ -16,40 +16,49 @@ export function RegisterContent() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="ml-2 h-6 w-6"
+            className="mr-2 h-6 w-6"
           >
             <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
           </svg>
-          הדרך
+          HaDerech Academy
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;הצטרפתי להדרך לפני חודש ואני כבר מרגיש שינוי משמעותי
-              במערכות היחסים שלי.&rdquo;
+              &ldquo;הדרך האקדמיה שינתה לי את החיים. מורים מקצועיים, תכנים
+              עדכניים וקהילה תומכת. מומלץ בחום!&rdquo;
             </p>
-            <footer className="text-sm">דוד דוידוב</footer>
+            <footer className="text-sm">ישראל ישראלי</footer>
           </blockquote>
         </div>
       </div>
-      <div className="p-8">
+      <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               צור חשבון חדש
             </h1>
             <p className="text-sm text-muted-foreground">
-              הזן את הפרטים שלך כדי להתחיל את המסע
+              הזן את הפרטים שלך כדי ליצור חשבון חדש
             </p>
           </div>
           <RegisterForm />
           <p className="px-8 text-center text-sm text-muted-foreground">
+            על ידי המשך, אתה מסכים ל
             <a
-              href="/login"
-              className="hover:text-brand underline underline-offset-4"
+              href="/terms"
+              className="underline underline-offset-4 hover:text-primary"
             >
-              יש לך כבר חשבון? התחבר כאן
+              תנאי השימוש
+            </a>{" "}
+            ו
+            <a
+              href="/privacy"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              מדיניות הפרטיות
             </a>
+            .
           </p>
         </div>
       </div>
