@@ -4,7 +4,6 @@ import { config } from "@/lib/config";
 import type {
   APIResponse,
   Message,
-  SimulatorResponse,
   SimulatorScenario,
   SimulatorSession,
   SimulatorState,
@@ -14,6 +13,7 @@ import type {
 // נוצר כפתרון זמני לבעיות בבנייה
 
 /**
- * ייבוא של הפונקציות מהקובץ העיקרי
+ * מייצא את כל הפונקציות והטיפוסים מהקובץ העיקרי
+ * פתרון זמני לבעיות בבנייה
  */
 export * from "@/lib/services/simulator";
