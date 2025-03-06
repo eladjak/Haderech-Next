@@ -3,9 +3,10 @@
 import { Mail, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { User } from "@/types/models";
+import type { User } from "@/types/api";
 
 // הגדרת טיפוס מותאם עבור פרופיל משתמש
 interface UserProfile {

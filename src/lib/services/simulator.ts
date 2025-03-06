@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ApiResponse } from "@/types/api";
 import {
   Message,
+  SimulatorResponse,
   SimulatorScenario,
   SimulatorSession,
   SimulatorState,
