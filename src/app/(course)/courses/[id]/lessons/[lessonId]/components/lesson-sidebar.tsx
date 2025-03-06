@@ -1,18 +1,9 @@
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
-import { ChevronDown, ChevronUp, Play } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { cn } from "@/lib/utils";
-import type { Course } from "@/types/api";
-
 "use client";
 
-
-
-
-
+import { ChevronDown, ChevronUp, Play } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -20,13 +11,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-
+import { cn } from "@/lib/utils";
 
 interface LessonSidebarProps {
-  course: Course;
+  course: any; // במקום Course
   currentLessonId: string;
   className?: string;
+}
+
+interface Section {
+  id: string;
+  title: string;
+  description: string;
+  lessons: CourseLesson[];
+}
+
+interface CourseLesson {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  completed?: boolean;
 }
 
 export function LessonSidebar({
@@ -55,7 +60,7 @@ export function LessonSidebar({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {course.sections.map((section) => (
+      {course.sections.map((section: Section) => (
         <Card key={section.id}>
           <CardHeader
             className="cursor-pointer"
@@ -78,7 +83,7 @@ export function LessonSidebar({
           {expandedSections.includes(section.id) && (
             <CardContent>
               <div className="space-y-2">
-                {section.lessons.map((lesson) => (
+                {section.lessons.map((lesson: CourseLesson) => (
                   <div
                     key={lesson.id}
                     className={cn(
@@ -106,7 +111,7 @@ export function LessonSidebar({
                         {Math.floor(lesson.duration / 60)}:
                         {String(lesson.duration % 60).padStart(2, "0")}
                       </span>
-                      {lesson.isCompleted && (
+                      {lesson.completed && (
                         <span className="text-success text-sm">✓</span>
                       )}
                     </div>
