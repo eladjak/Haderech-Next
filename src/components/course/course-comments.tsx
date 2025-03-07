@@ -1,10 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { useSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import type { CourseComment } from "@/types/courses";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 /**
  * @file course-comments.tsx
@@ -17,168 +38,177 @@ interface CommentWithReplies extends CourseComment {
 }
 
 interface CourseCommentsProps {
-  comments?: CommentWithReplies[];
-  maxComments?: number;
-  showAll?: boolean;
+  courseId: string;
+  comments: Comment[];
+  className?: string;
 }
 
+interface Comment {
+  id: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  courseId: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image: string;
+  };
+}
+
+const formSchema = z.object({
+  content: z.string().min(1, {
+    message: "תוכן התגובה לא יכול להיות ריק.",
+  }),
+});
+
 export function CourseComments({
-  comments = [],
-  maxComments = 5,
-  showAll = false,
+  courseId,
+  comments: initialComments,
+  className,
 }: CourseCommentsProps) {
-  const [showAllComments, setShowAllComments] = useState(showAll);
-  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
-  const [replyText, setReplyText] = useState("");
+  const [comments, setComments] = useState<Comment[]>(initialComments || []);
+  const { data: session } = useSession();
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const visibleComments = showAllComments
-    ? comments
-    : comments.slice(0, maxComments);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      content: "",
+    },
+  });
 
-  const handleReplyClick = (commentId: string) => {
-    setActiveReplyId(activeReplyId === commentId ? null : commentId);
-    setReplyText("");
-  };
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!session) {
+      toast({
+        title: "התחברות נדרשת",
+        description: "עליך להתחבר כדי להוסיף תגובה.",
+        variant: "destructive",
+      });
+      router.push("/login");
+      return;
+    }
 
-  const handleReplySubmit = (commentId: string) => {
-    console.log(`Submitting reply to comment ${commentId}: ${replyText}`);
-    // כאן יבוא קוד לשליחת התגובה לשרת
-    setReplyText("");
-    setActiveReplyId(null);
-  };
+    try {
+      const response = await fetch(`/api/courses/${courseId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
-  if (comments.length === 0) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">
-            אין תגובות עדיין. היה הראשון להגיב!
-          </p>
-        </CardContent>
-      </Card>
-    );
+      if (!response.ok) {
+        throw new Error("Failed to add comment");
+      }
+
+      const newComment = await response.json();
+
+      // Add the new comment to the comments array
+      setComments((prev) => [
+        {
+          ...newComment,
+          user: {
+            id: session.user.id,
+            name: session.user.name || "",
+            email: session.user.email || "",
+            image: session.user.image || "",
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        ...prev,
+      ]);
+
+      // Reset the form
+      form.reset();
+
+      toast({
+        title: "תגובה נוספה בהצלחה",
+        description: "תודה על התגובה שלך!",
+      });
+    } catch (error) {
+      toast({
+        title: "שגיאה",
+        description: "לא היה ניתן להוסיף את התגובה שלך. נסה שוב מאוחר יותר.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
-    <div className="space-y-4">
-      {visibleComments.map((comment) => (
-        <Card key={comment.id} className="overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex gap-4">
-              <div className="flex-shrink-0">
-                <div className="relative h-10 w-10 overflow-hidden rounded-full">
-                  <Image
-                    src={comment.user.image || "/images/avatars/default.png"}
+    <div className={cn("space-y-6", className)}>
+      <Card>
+        <CardHeader>
+          <CardTitle>תגובות</CardTitle>
+          <CardDescription>שתף את דעתך על הקורס או שאל שאלות</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        placeholder="הוסף תגובה..."
+                        className="min-h-32 resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="mr-auto">
+                שלח תגובה
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {comments.length > 0 ? (
+        <div className="space-y-4">
+          {comments.map((comment) => (
+            <Card key={comment.id}>
+              <CardHeader className="flex flex-row items-start gap-4 pb-2">
+                <Avatar>
+                  <AvatarImage
+                    src={comment.user.image || ""}
                     alt={comment.user.name}
-                    fill
-                    className="object-cover"
                   />
-                </div>
-              </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">{comment.user.name}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(comment.created_at).toLocaleDateString("he-IL")}
-                    </p>
+                  <AvatarFallback>
+                    {comment.user.name
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid gap-1">
+                  <div className="font-semibold">{comment.user.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {format(new Date(comment.createdAt), "dd/MM/yyyy HH:mm")}
                   </div>
-                  {comment.rating && (
-                    <div className="flex items-center">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={`h-4 w-4 text-${
-                            i < comment.rating! ? "yellow-400" : "gray-200"
-                          }`}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
+              </CardHeader>
+              <CardContent>
                 <p className="text-sm">{comment.content}</p>
-                <div className="flex justify-end">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleReplyClick(comment.id)}
-                  >
-                    {activeReplyId === comment.id ? "ביטול" : "הגב"}
-                  </Button>
-                </div>
-
-                {activeReplyId === comment.id && (
-                  <div className="mt-2 space-y-2">
-                    <textarea
-                      className="w-full rounded-md border p-2 text-sm"
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="הוסף תגובה..."
-                      rows={3}
-                    />
-                    <div className="flex justify-end">
-                      <Button
-                        size="sm"
-                        onClick={() => handleReplySubmit(comment.id)}
-                        disabled={!replyText.trim()}
-                      >
-                        שלח
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {comment.replies && comment.replies.length > 0 && (
-                  <div className="mt-4 space-y-3 border-r border-gray-200 pr-4">
-                    {comment.replies.map((reply) => (
-                      <div key={reply.id} className="flex gap-2">
-                        <div className="flex-shrink-0">
-                          <div className="relative h-8 w-8 overflow-hidden rounded-full">
-                            <Image
-                              src={
-                                reply.user.image ||
-                                "/images/avatars/default.png"
-                              }
-                              alt={reply.user.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center">
-                            <h5 className="text-sm font-medium">
-                              {reply.user.name}
-                            </h5>
-                            <span className="mx-2 text-xs text-muted-foreground">
-                              •
-                            </span>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(reply.created_at).toLocaleDateString(
-                                "he-IL"
-                              )}
-                            </p>
-                          </div>
-                          <p className="text-sm">{reply.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="pt-6 text-center text-muted-foreground">
+            אין תגובות עדיין. היה הראשון להגיב!
           </CardContent>
         </Card>
-      ))}
-
-      {comments.length > maxComments && !showAllComments && (
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={() => setShowAllComments(true)}>
-            הצג את כל {comments.length} התגובות
-          </Button>
-        </div>
       )}
     </div>
   );
