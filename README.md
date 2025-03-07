@@ -265,177 +265,52 @@ This project is distributed under the MIT License. See the `LICENSE` file for mo
 
 # הדרך - פלטפורמת למידה מתקדמת
 
-**הדרך** היא פלטפורמת למידה אינטראקטיבית המאפשרת לפתח כישורים מקצועיים דרך קורסים, פורומים קהילתיים, וסימולטורים.
+**מעודכן לאחרונה: 15/07/2024**
 
-## עדכונים אחרונים
+פלטפורמת למידה בעברית המשלבת תכנים איכותיים, תרגולים אינטראקטיביים וטכנולוגיות מתקדמות כמו צ'אטבוט AI ומשחוק (Gamification).
 
-לאחרונה ביצענו מספר תיקונים משמעותיים:
+## שיפורים אחרונים
 
-1. שדרוג השימוש ב-Supabase Client לתמיכה ב-Next.js 14
-2. תיקוני טיפוסים ב-Redux ובמנוע ההמלצות
-3. תיקון בעיות שימוש בספריית Zod
+- תיקון שגיאות בנייה ב-Vercel
+- שיפור התמיכה בדירקטיבת `"use client"`
+- עדכון והרחבת קומפוננטות UI
+- שיפור טיפול בשגיאות תחביר בקבצים שונים
 
-הערה חשובה:
+## התקנה והפעלה
 
-- ✅ האפליקציה עובדת כראוי בסביבת פיתוח (`npm run dev`)
-- ⚠️ יש מספר שגיאות טיפוסים שעדיין מונעות בניית גרסת ייצור מלאה
-- 📝 התיקונים והבעיות הנותרות מתועדים בתיקיה `docs/fixes/`
-
-לפרטים נוספים על התיקונים, ראה את הקובץ `docs/fixes/supabase-client-fix.md`.
-לרשימת הבעיות הנותרות, ראה את הקובץ `docs/fixes/remaining-issues.md`.
-
-## טכנולוגיות
-
-הפרויקט משתמש בטכנולוגיות המתקדמות ביותר:
-
-- **Next.js 14**: עם App Router לניהול דפים ונתיבים
-- **React 18**: לממשק משתמש תגובתי ומודרני
-- **TypeScript**: לכתיבת קוד יציב ומתוחזק
-- **Tailwind CSS**: לעיצוב מהיר ומותאם
-- **Supabase**: לניהול משתמשים, אימות, ובסיס נתונים
-- **Redux Toolkit**: לניהול מצב אפליקציה
-- **OpenAI API**: לאלמנטים מבוססי בינה מלאכותית
-- **ShadcnUI & Radix UI**: לקומפוננטות נגישות
-
-## דרישות מערכת
-
-- Node.js 18.0.0 ומעלה
-- pnpm 8.0.0 ומעלה
-- חשבון Supabase
-
-## התקנה
-
-1. שכפל את הפרויקט:
-
-```bash
-git clone https://github.com/yourusername/haderech-next.git
-cd haderech-next
-```
-
-2. התקן את התלויות:
+1. התקן את תלויות הפרויקט:
 
 ```bash
 pnpm install
 ```
 
-3. הגדר משתני סביבה:
-
-```bash
-cp .env.example .env.local
-```
-
-Update `.env.local` with appropriate values, especially the Supabase configuration.
-
-> **Note about environment variables:**  
-> The application has a sophisticated environment variable management system that distinguishes between critical variables (required in all environments) and optional variables (only required in development or with reduced functionality). See [Environment Variables Documentation](docs/lessons-learned/ENVIRONMENT_VARIABLES.md) for details about our approach.
->
-> **Critical variables (required in all environments):**
->
-> - `NEXT_PUBLIC_SUPABASE_URL`
-> - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
->
-> For development, most other variables are required. In production, many are optional with fallback mechanisms in place.
-
-4. הפעל את שרת הפיתוח:
+2. הפעל את סביבת הפיתוח:
 
 ```bash
 pnpm dev
 ```
 
-5. בנה לסביבת ייצור:
+3. פתח את הדפדפן בכתובת: http://localhost:3000
 
-```bash
-pnpm build
-```
+## יכולות עיקריות
 
-## מבנה הפרויקט
+- **קורסים אינטראקטיביים** - למידה אינטראקטיבית עם תרגולים מעשיים ומשוב מיידי
+- **צ'אטבוט חכם** - עוזר אישי המבוסס על AI שעונה על שאלות ומכוון את הלמידה
+- **מערכת משחוק** - נקודות, תגים והישגים המעודדים התקדמות ופעילות
+- **פורום קהילתי** - שיתוף ידע ולמידת עמיתים
+- **אזור אישי** - מעקב אחר התקדמות, הישגים ופעילות
 
-```
-haderech-next/
-├── docs/               # תיעוד פרויקט
-├── lib/                # קוד משותף וספריות
-├── public/             # קבצים סטטיים
-├── src/
-│   ├── app/            # רכיבי דפים ונתיבי API
-│   ├── components/     # רכיבי React משותפים
-│   ├── constants/      # קבועים וערכים מוגדרים מראש
-│   ├── hooks/          # React hooks מותאמים
-│   ├── lib/            # פונקציות שירות וכלים
-│   ├── store/          # Redux store וslices
-│   ├── styles/         # קבצי CSS
-│   ├── tests/          # בדיקות אוטומטיות
-│   └── types/          # הגדרות TypeScript
-├── .env.example        # דוגמה למשתני סביבה
-├── .eslintrc.js        # תצורת ESLint
-├── next.config.js      # תצורת Next.js
-├── package.json        # תלויות פרויקט
-└── tsconfig.json       # תצורת TypeScript
-```
+## טכנולוגיות
 
-## קישורי תיעוד
+- **Next.js 14** - פריימוורק React המוביל לפיתוח אפליקציות מודרניות
+- **TypeScript** - הבטחת איכות קוד ותחזוקה קלה
+- **Tailwind CSS** - עיצוב מודרני ותגובתי
+- **Prisma** - תקשורת יעילה וטיפוסית עם בסיס הנתונים
+- **NextAuth.js** - אימות משתמשים בצורה מאובטחת וגמישה
 
-- [סקירת ארכיטקטורה](./docs/ARCHITECTURE.md)
-- [תיעוד API](./docs/API.md)
-- [ספריית רכיבים](./docs/COMPONENTS.md)
-- [אסטרטגיית בדיקות](./docs/TESTING.md)
+## רישיון
 
-## פיתוח
-
-```bash
-# בדיקת טיפוסים
-pnpm type-check
-
-# הרצת בדיקות יחידה
-pnpm test
-
-# הרצת בדיקות קצה-לקצה
-pnpm test:e2e
-
-# בדיקות לינט
-pnpm lint
-
-# שרת פיתוח
-pnpm dev
-```
-
-## בסיס נתונים
-
-הפרויקט משתמש ב-Supabase לניהול בסיס נתונים, אימות משתמשים ואחסון.
-
-```bash
-# התקנת CLI של Supabase
-npm install -g supabase
-
-# התחברות לפרויקט
-supabase login
-supabase link --project-ref <your-project-id>
-
-# דחיפת סכמה לבסיס הנתונים
-supabase db push
-```
-
-## מדדי איכות
-
-### Performance
-
-- Initial load time: < 2 seconds
-- First Contentful Paint: < 1 second
-- Time to Interactive: < 3 seconds
-- Lighthouse score: > 90
-
-### Accessibility
-
-- WCAG score: AA
-- Lighthouse accessibility score: > 90
-- ARIA coverage: 100%
-- Full keyboard support
-
-### Security
-
-- OWASP compliance
-- Zero critical vulnerabilities
-- Package freshness: 100%
-- Security coverage: > 95%
+הפרויקט מפותח על ידי צוות "הדרך" ומוגן בזכויות יוצרים. כל שימוש מסחרי דורש אישור מפורש מבעלי הזכויות.
 
 ## תרומה לפרויקט
 
@@ -444,14 +319,6 @@ supabase db push
 3. בצע את השינויים שלך
 4. דחוף לענף (`git push origin feature/amazing-feature`)
 5. פתח בקשת משיכה (Pull Request)
-
-## רישיון
-
-הפרויקט מופץ תחת רישיון MIT. ראה קובץ `LICENSE` לפרטים נוספים.
-
-## צוות
-
-- **אלעד יעקבי** - מייסד ומפתח ראשי - [GitHub](https://github.com/username)
 
 ## יצירת קשר
 
