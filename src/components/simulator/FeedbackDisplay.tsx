@@ -1,216 +1,81 @@
-import { _CheckCircle2, AlertCircle, Briefcase, CheckCircle, ChevronDown, ChevronUp, Heart, Sun, Target, ThumbsUp, Wrench,} from "./forum";
-import React from "react";
-import type { ReactElement, ReactNode } from "react";
+"use client";
 
-import type {
-  _CheckCircle2} from "./forum";
-  AlertCircle,
-  Briefcase,
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Heart,
-  Sun,
-  Target,
-  ThumbsUp,
-  Wrench,
-} from "lucide-react";
-
-
-
-
-
-
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { FeedbackDetails } from "@/types/simulator";
 
 interface FeedbackDisplayProps {
-  feedback?: FeedbackDetails;
-  messageId: string;
-  isExpanded: boolean;
-  onToggle: (messageId: string) => void;
-  className?: string;
+  feedback: FeedbackDetails;
 }
 
-interface MetricItem {
-  label: string;
-  value: number;
-  icon: ReactNode;
-  color: string;
-}
-
-export function FeedbackDisplay({
-  feedback,
-  messageId,
-  isExpanded,
-  onToggle,
-  className,
-}: FeedbackDisplayProps): ReactElement {
-  if (!feedback) {
-    return (
-      <Alert variant="default" className={className}>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>אין משוב זמין</AlertTitle>
-        <AlertDescription>אין משוב זמין להודעה זו כרגע.</AlertDescription>
-      </Alert>
-    );
-  }
-
-  const metrics: MetricItem[] = [
-    {
-      label: "אמפתיה",
-      value: feedback.metrics.empathy * 100,
-      icon: <Heart className="h-4 w-4" />,
-      color: "bg-red-200",
-    },
-    {
-      label: "בהירות",
-      value: feedback.metrics.clarity * 100,
-      icon: <Sun className="h-4 w-4" />,
-      color: "bg-yellow-200",
-    },
-    {
-      label: "אפקטיביות",
-      value: feedback.metrics.effectiveness * 100,
-      icon: <Target className="h-4 w-4" />,
-      color: "bg-blue-200",
-    },
-    {
-      label: "התאמה",
-      value: feedback.metrics.appropriateness * 100,
-      icon: <CheckCircle className="h-4 w-4" />,
-      color: "bg-green-200",
-    },
-    {
-      label: "מקצועיות",
-      value: feedback.metrics.professionalism * 100,
-      icon: <Briefcase className="h-4 w-4" />,
-      color: "bg-purple-200",
-    },
-    {
-      label: "פתרון בעיות",
-      value: feedback.metrics.problem_solving * 100,
-      icon: <Wrench className="h-4 w-4" />,
-      color: "bg-orange-200",
-    },
-  ];
-
-  const getScoreColor = (score: number): string => {
-    if (score >= 90) return "bg-green-500";
-    if (score >= 80) return "bg-green-400";
-    if (score >= 70) return "bg-yellow-400";
-    if (score >= 60) return "bg-yellow-500";
-    return "bg-red-500";
-  };
+export const FeedbackDisplay = ({ feedback }: FeedbackDisplayProps) => {
+  if (!feedback) return null;
 
   return (
-    <Alert
-      variant="default"
-      className={cn("cursor-pointer", className)}
-      onClick={() => onToggle(messageId)}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ThumbsUp className="h-4 w-4" />
-          <AlertTitle>ציון: {feedback.score}</AlertTitle>
+    <Card className="mt-4">
+      <CardHeader>
+        <CardTitle>משוב</CardTitle>
+        <CardDescription>הנה המשוב על התשובה שלך בסימולציה</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <h3 className="mb-2 text-lg font-semibold">ציון כולל</h3>
+          <div className="mb-1 flex items-center justify-between">
+            <span>{feedback.overallScore}%</span>
+            <Badge
+              variant={feedback.overallScore >= 70 ? "success" : "destructive"}
+            >
+              {feedback.overallScore >= 70 ? "עבר" : "לא עבר"}
+            </Badge>
+          </div>
+          <Progress value={feedback.overallScore} className="h-2" />
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle(messageId);
-          }}
-        >
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
 
-      {isExpanded && (
-        <div className="mt-4 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            {metrics.map((metric) => (
-              <div key={metric.label} className="space-y-1">
-                <div className="flex items-center gap-2">
-                  {metric.icon}
-                  <span className="text-sm font-medium">{metric.label}</span>
+        {feedback.criteria && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold">קריטריונים</h3>
+            {Object.entries(feedback.criteria).map(([key, value]) => (
+              <div key={key}>
+                <div className="mb-1 flex items-center justify-between">
+                  <span>{key}</span>
+                  <span>{value.score}/10</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={cn("h-full transition-all", metric.color)}
-                      style={{ width: `${metric.value}%` }}
-                    />
-                  </div>
-                  <span className="text-sm">{Math.round(metric.value)}%</span>
-                </div>
+                <Progress value={value.score * 10} className="h-2" />
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {value.comment}
+                </p>
               </div>
             ))}
           </div>
+        )}
 
+        {feedback.suggestions && (
           <div>
-            <h4 className="mb-2 font-semibold">התקדמות כללית</h4>
-            <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className={cn(
-                  "h-full transition-all",
-                  getScoreColor(feedback.overallProgress.score)
-                )}
-                style={{ width: `${feedback.overallProgress.score}%` }}
-              />
-            </div>
-            <div className="mt-2 text-sm">
-              <p>רמה נוכחית: {feedback.overallProgress.level}</p>
-              <p>הרמה הבאה: {feedback.overallProgress.nextLevel}</p>
-              <p>
-                נדרש: {feedback.overallProgress.requiredScore}% להתקדמות לרמה
-                הבאה
-              </p>
-            </div>
+            <h3 className="mb-2 text-lg font-semibold">הצעות לשיפור</h3>
+            <ul className="list-inside list-disc space-y-1">
+              {feedback.suggestions.map((suggestion, index) => (
+                <li key={index} className="text-sm">
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
           </div>
+        )}
 
-          {feedback.strengths.length > 0 && (
-            <div>
-              <h4 className="mb-2 font-semibold">חוזקות</h4>
-              <ul className="list-inside list-disc space-y-1">
-                {feedback.strengths.map((strength, index) => (
-                  <li key={index} className="text-sm">
-                    {strength}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {feedback.improvements.length > 0 && (
-            <div>
-              <h4 className="mb-2 font-semibold">נקודות לשיפור</h4>
-              <ul className="list-inside list-disc space-y-1">
-                {feedback.improvements.map((improvement, index) => (
-                  <li key={index} className="text-sm">
-                    {improvement}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {feedback.suggestions.length > 0 && (
-            <div>
-              <h4 className="mb-2 font-semibold">הצעות לשיפור</h4>
-              <ul className="list-inside list-disc space-y-1">
-                {feedback.suggestions.map((suggestion, index) => (
-                  <li key={index} className="text-sm">
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-    </Alert>
+        {feedback.comment && (
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">הערות נוספות</h3>
+            <p className="text-sm">{feedback.comment}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
-}
+};

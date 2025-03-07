@@ -1,241 +1,173 @@
-import type {
-  User as _ApiUser
-} from "./forum";
-  Lesson as ApiLesson,
-  Author,
-  Course,
-  CourseComment,
-  CourseProgress,
-  CourseRating,
-  ForumComment,
-  ForumPost,
-  ForumStats,
-  ForumTag,} from "./api";
-import type {
-  FeedbackDetails
-} from "./forum";
-  Message,
-  SimulatorAction,
-  SimulatorMessage,
-  SimulatorResult,
-  SimulatorScenario,
-  SimulatorSession,
-  SimulatorState,
-  SimulatorUserSettings,
-  SimulatorUserStats,} from "./simulator";
-
-// ForumCategory מוגדר מקומית כי חסר בקובץ api.ts
-export interface ForumCategory {
-  id: string;
-  name: string;
-  description?: string;
-  slug: string;
-  parent_id?: string;
-  created_at: string;
-  updated_at: string;
-  posts_count?: number;
-}
-
-export type Tables<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"];
-
-export type {
-  Course,
-  CourseProgress,
-  CourseRating,
-  CourseComment,
-  ForumPost,
-  ForumComment,
-  ForumTag,
-  ForumStats,
-  Message,
-  SimulatorMessage,
-  SimulatorScenario,
-  SimulatorState,
-  SimulatorUserSettings,
-  SimulatorUserStats,
-  SimulatorResult,
-  SimulatorSession,
-  SimulatorAction,
-};
-
-export interface CourseWithRelations extends Omit<Course, "lessons"> {
-  lessons: CourseLesson[];
-  ratings: CourseRating[];
-  comments: CourseComment[];
-  instructor: Author;
-}
-
-export interface CourseState {
-  currentCourse: Course | null;
-  currentLesson: ApiLesson | null;
-  userProgress: {
-    completed_lessons: string[];
-    progress: number;
-  };
-}
-
-export type Notification = Tables<"notifications">;
-
-export interface UserPreferences {
-  theme: "light" | "dark" | "system";
-  language: "he" | "en";
-  notifications: {
-    email: boolean;
-    push: boolean;
-    desktop: boolean;
-  };
-  simulator: SimulatorUserSettings;
-}
-
-export interface UserProgress {
-  id: string;
-  user_id: string;
-  points: number;
-  level: number;
-  xp: number;
-  next_level_xp: number;
-  badges: string[];
-  achievements: string[];
-  created_at: string;
-  updated_at: string;
-  completedLessons: string[];
-  courseProgress: Record<string, number>;
-  courses: {
-    completed: string[];
-    in_progress: string[];
-    bookmarked: string[];
-  };
-  lessons: {
-    completed: string[];
-    in_progress: string[];
-  };
-  simulator: {
-    completed_scenarios: string[];
-    results: SimulatorResult[];
-    stats: {
-      total_sessions: number;
-      average_score: number;
-      time_spent: number;
-    };
-  };
-  forum: {
-    posts: string[];
-    comments: string[];
-    likes: string[];
-    bookmarks: string[];
-  };
-}
-
-export interface BaseUser {
+// User related interfaces
+export interface User {
   id: string;
   name: string;
   email: string;
-  image?: string | null;
-  avatar_url?: string | null;
+  password: string;
+  image?: string;
+  role: UserRole;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type UserRole = "user" | "admin" | "moderator";
+
+export interface UserProfile extends User {
   bio?: string;
-  username?: string;
-  full_name?: string;
-  role: "user" | "admin" | "instructor";
-  points: number;
-  level: number;
-  badges: string[];
-  achievements: string[];
-  preferences: UserPreferences;
-  progress: UserProgress;
-  created_at: string;
-  updated_at: string;
+  location?: string;
+  social_links?: SocialLinks;
+  preferences?: UserPreferences;
 }
 
-export type User = BaseUser;
+export interface SocialLinks {
+  website?: string;
+  twitter?: string;
+  github?: string;
+  linkedin?: string;
+}
 
-export interface Achievement {
+export interface UserPreferences {
+  email_notifications: boolean;
+  theme: "light" | "dark" | "system";
+  language: string;
+}
+
+// Course related interfaces
+export interface Course {
   id: string;
-  name: string;
+  title: string;
   description: string;
-  icon: string;
-  points: number;
-  created_at: string;
-  updated_at: string;
-  earned_at?: string;
+  price: number;
+  image: string;
+  instructorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  instructor: User;
+  lessons: Lesson[];
+  enrollments: Enrollment[];
+  ratings: Rating[];
 }
 
-export interface Badge {
+export type CourseStatus = "draft" | "published" | "archived";
+export type CourseLevel = "beginner" | "intermediate" | "advanced";
+
+export interface Lesson {
   id: string;
-  name: string;
-  description: string;
-  icon: string;
-  level: number;
-  requirements: {
-    type: string;
-    value: number;
-  }[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserState {
-  id: string | null;
-  email: string | null;
-  name: string | null;
-  avatar_url: string | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  progress: UserProgress;
-  preferences: UserPreferences;
-}
-
-export interface ForumState {
-  posts: ForumPost[];
-  categories: ForumCategory[];
-  tags: ForumTag[];
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface NotificationState {
-  notifications: Notification[];
-  unreadCount: number;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export type Profile = Omit<User, "achievements"> & {
-  stats: {
-    total_courses: number;
-    completed_courses: number;
-    total_lessons: number;
-    completed_lessons: number;
-    total_points: number;
-    streak_days: number;
-    active_days: number;
-  };
-  achievements: Achievement[];
-  progress: {
-    [key: string]: {
-      completed: boolean;
-      score: number;
-      last_activity: string;
-    };
-  };
-};
-
-export interface CourseLesson {
-  id: string;
-  course_id: string;
   title: string;
   description: string;
   content: string;
-  order: number;
+  videoUrl: string;
   duration: number;
-  video_url?: string;
-  created_at: string;
-  updated_at: string;
-  progress?: CourseProgress[];
+  position: number;
+  courseId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  course: Course;
 }
 
-export type { CourseLesson as Lesson };
+export interface Enrollment {
+  id: string;
+  userId: string;
+  courseId: string;
+  progress: number;
+  isCompleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  user: User;
+  course: Course;
+}
 
-export type ExtendedCourseLesson = CourseLesson & {
-  progress?: CourseProgress[];
-};
+export interface LessonProgress {
+  id: string;
+  user_id: string;
+  lesson_id: string;
+  course_id: string;
+  is_completed: boolean;
+  progress_percentage: number;
+  last_position?: number; // video position in seconds
+  updated_at: string;
+}
+
+export interface Rating {
+  id: string;
+  rating: number;
+  comment: string;
+  userId: string;
+  courseId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: User;
+  course: Course;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  userId: string;
+  courseId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: User;
+}
+
+// Forum related interfaces
+export interface ForumPost {
+  id: string;
+  title: string;
+  content: string;
+  userId: string;
+  categoryId: string;
+  views: number;
+  createdAt: Date;
+  updatedAt: Date;
+  user: User;
+  comments: ForumComment[];
+  likes: ForumLike[];
+  category: ForumCategory;
+  tags: ForumTag[];
+}
+
+export interface ForumComment {
+  id: string;
+  content: string;
+  userId: string;
+  postId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: User;
+  post: ForumPost;
+}
+
+export interface ForumLike {
+  id: string;
+  userId: string;
+  postId: string;
+  createdAt: Date;
+  user: User;
+  post: ForumPost;
+}
+
+export interface ForumCategory {
+  id: string;
+  name: string;
+  description: string;
+  posts: ForumPost[];
+}
+
+export interface ForumTag {
+  id: string;
+  name: string;
+  posts: ForumPost[];
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  content: string;
+  userId: string;
+  read: boolean;
+  type: string;
+  linkId: string;
+  createdAt: Date;
+  user: User;
+}

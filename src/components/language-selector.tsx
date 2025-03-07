@@ -1,5 +1,8 @@
-import { useTranslation } from "react-i18next";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/";\nimport {
+"use client";
+
+import { Globe } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -7,29 +10,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/
   SelectValue,
 } from "@/components/ui/select";
 
-const languages = [
-  { code: "he", name: "עברית" },
-  { code: "en", name: "English" },
-];
+interface LanguageSelectorProps {
+  className?: string;
+}
 
-export function LanguageSelector() {
-  const { i18n } = useTranslation();
+export function LanguageSelector({ className }: LanguageSelectorProps) {
+  const [language, setLanguage] = useState("he");
+
+  useEffect(() => {
+    // שמירת השפה הנבחרת ב-localStorage
+    localStorage.setItem("language", language);
+    document.documentElement.lang = language;
+  }, [language]);
 
   return (
-    <Select
-      value={i18n.language}
-      onValueChange={(value) => i18n.changeLanguage(value)}
-    >
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="בחר שפה" />
-      </SelectTrigger>
-      <SelectContent>
-        {languages.map((lang) => (
-          <SelectItem key={lang.code} value={lang.code}>
-            {lang.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className={className}>
+      <Select value={language} onValueChange={setLanguage}>
+        <SelectTrigger className="w-[120px]">
+          <Globe className="mr-2 h-4 w-4" />
+          <SelectValue placeholder="שפה" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="he">עברית</SelectItem>
+          <SelectItem value="en">English</SelectItem>
+          <SelectItem value="ar">العربية</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
