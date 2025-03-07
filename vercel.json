@@ -3,9 +3,21 @@
     {
       "src": "package.json",
       "use": "@vercel/next",
-      "config": { "installCommand": "pnpm install --no-frozen-lockfile" }
+      "config": {
+        "installCommand": "pnpm install --no-frozen-lockfile"
+      }
     }
   ],
-  "build": { "env": { "NPM_FLAGS": "--no-frozen-lockfile" } },
-  "ignorePatterns": ["course-comments-temp.tsx"]
+  "build": {
+    "env": {
+      "NPM_FLAGS": "--no-frozen-lockfile"
+    }
+  },
+  "ignorePatterns": [
+    "**/course-comments-temp.tsx",
+    "**/fixed-*.tsx",
+    "**/fixed-*.txt",
+    "**/fixed-content.txt",
+    "**/*.bak"
+  ]
 }
