@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import React from "react";
 import { CreatePost } from "@/components/forum/CreatePost";
 import { Forum } from "@/components/forum/Forum";
-import { mockPosts } from "@/constants/forum";
+import { mockPosts } from "@/lib/data/mock-posts";
 import type { ForumStats } from "@/types/forum";
 
 const mockStats: ForumStats = {

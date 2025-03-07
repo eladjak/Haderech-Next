@@ -1,4 +1,7 @@
+"use client";
+
 import { Star } from "lucide-react";
+import * as React from "react";
 
 interface RatingProps {
   value: number;

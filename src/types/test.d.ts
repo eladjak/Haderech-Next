@@ -1,15 +1,14 @@
 import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
-import type { Vi } from "vitest";
-
 import type { AxeResults } from "axe-core";
+import type { Vi } from "vitest";
 
 /// <reference types="vitest" />
 /// <reference types="@testing-library/jest-dom" />
 
 declare global {
   namespace Vi {
-    interface JestMatchers<T> {
-      toHaveBeenCalledWithMatch: (...args: any[]) => void;
+    export interface JestMatchers<T> {
+      toHaveBeenCalledWithMatch: (...args: unknown[]) => void;
       toBeInTheDocument: () => void;
       toHaveAttribute: (attr: string, value?: string) => void;
       toHaveProperty: (prop: string) => void;
@@ -20,7 +19,8 @@ declare global {
       toThrow: (message?: string) => void;
     }
 
-    interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {
+    export interface Assertion<T = unknown>
+      extends TestingLibraryMatchers<T, void> {
       toBe: (expected: T) => void;
       toEqual: (expected: T) => void;
       toBeInTheDocument: () => void;
@@ -51,21 +51,21 @@ declare global {
       toBeLessThanOrEqual: (number: number) => void;
       toBeCloseTo: (number: number, precision?: number) => void;
       toMatch: (regex: RegExp | string) => void;
-      toContain: (item: any) => void;
+      toContain: (item: unknown) => void;
       toThrow: (error?: string | RegExp | Error) => void;
       toThrowError: (error?: string | RegExp | Error) => void;
       toHaveBeenCalled: () => void;
       toHaveBeenCalledTimes: (times: number) => void;
-      toHaveBeenCalledWith: (...args: any[]) => void;
-      toHaveBeenLastCalledWith: (...args: any[]) => void;
-      toHaveBeenNthCalledWith: (nthCall: number, ...args: any[]) => void;
+      toHaveBeenCalledWith: (...args: unknown[]) => void;
+      toHaveBeenLastCalledWith: (...args: unknown[]) => void;
+      toHaveBeenNthCalledWith: (nthCall: number, ...args: unknown[]) => void;
       toHaveReturned: () => void;
       toHaveReturnedTimes: (times: number) => void;
-      toHaveReturnedWith: (value: any) => void;
-      toHaveLastReturnedWith: (value: any) => void;
-      toHaveNthReturnedWith: (nthCall: number, value: any) => void;
-      toHaveProperty: (keyPath: string | string[], value?: any) => void;
-      toBeInstanceOf: (Class: any) => void;
+      toHaveReturnedWith: (value: unknown) => void;
+      toHaveLastReturnedWith: (value: unknown) => void;
+      toHaveNthReturnedWith: (nthCall: number, value: unknown) => void;
+      toHaveProperty: (keyPath: string | string[], value?: unknown) => void;
+      toBeInstanceOf: (Class: unknown) => void;
       toMatchObject: (object: object) => void;
       toMatchSnapshot: (name?: string) => void;
       toMatchInlineSnapshot: (snapshot: string) => void;
@@ -118,63 +118,63 @@ declare global {
       toBeValidRegex(): void;
     }
 
-    interface Mock<T = any> {
-      (...args: any[]): T;
+    export interface Mock<T = unknown> {
+      (...args: unknown[]): T;
       mock: {
-        calls: any[][];
-        instances: any[];
+        calls: unknown[][];
+        instances: unknown[];
         invocationCallOrder: number[];
-        results: { type: string; value: any }[];
-        lastCall: any[];
+        results: { type: string; value: unknown }[];
+        lastCall: unknown[];
       };
       mockClear(): void;
       mockReset(): void;
       mockRestore(): void;
-      mockImplementation(fn: (...args: any[]) => any): Mock<T>;
-      mockImplementationOnce(fn: (...args: any[]) => any): Mock<T>;
+      mockImplementation(fn: (...args: unknown[]) => unknown): Mock<T>;
+      mockImplementationOnce(fn: (...args: unknown[]) => unknown): Mock<T>;
       mockName(name: string): Mock<T>;
       mockReturnThis(): Mock<T>;
       mockReturnValue(value: T): Mock<T>;
       mockReturnValueOnce(value: T): Mock<T>;
       mockResolvedValue(value: T): Mock<Promise<T>>;
       mockResolvedValueOnce(value: T): Mock<Promise<T>>;
-      mockRejectedValue(value: any): Mock<Promise<any>>;
-      mockRejectedValueOnce(value: any): Mock<Promise<any>>;
+      mockRejectedValue(value: unknown): Mock<Promise<unknown>>;
+      mockRejectedValueOnce(value: unknown): Mock<Promise<unknown>>;
     }
 
-    interface AsymmetricMatchersContaining {
-      any: (constructor: any) => any;
-      stringMatching: (expected: string | RegExp) => any;
-      objectContaining: <T = any>(expected: T) => any;
+    export interface AsymmetricMatchersContaining {
+      any: (constructor: unknown) => unknown;
+      stringMatching: (expected: string | RegExp) => unknown;
+      objectContaining: <T = unknown>(expected: T) => unknown;
       toHaveBeenCalledWithMatch: (...args: unknown[]) => void;
     }
   }
 }
 
 declare module "vitest" {
-  export type Assertion<T = any> = Vi.Assertion<T>;
-  export type Mock<T = any> = Vi.Mock<T>;
+  export type Assertion<T = unknown> = Vi.Assertion<T>;
+  export type Mock<T = unknown> = Vi.Mock<T>;
   export interface Expect {
-    <T = any>(actual: T): Assertion<T>;
+    <T = unknown>(actual: T): Assertion<T>;
     extend(
       matchers: Record<
         string,
-        (...args: any[]) => { pass: boolean; message: () => string }
+        (...args: unknown[]) => { pass: boolean; message: () => string }
       >
     ): void;
   }
 
-  interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {
+  export interface Assertion<T = unknown>
+    extends TestingLibraryMatchers<T, void> {
     toHaveBeenCalledWithMatch: (...args: unknown[]) => void;
     any: (constructor: unknown) => unknown;
   }
 
-  interface AsymmetricMatchersContaining {
+  export interface AsymmetricMatchersContaining {
     toHaveBeenCalledWithMatch: (...args: unknown[]) => void;
     any: (constructor: unknown) => unknown;
   }
-
-  interface MockInstance<T extends (...args: any[]) => any> {
+  export interface MockInstance<T extends (...args: unknown[]) => unknown> {
     mockImplementation: (fn: T) => MockInstance<T>;
     mockReturnValue: (value: ReturnType<T>) => MockInstance<T>;
     mockReturnThis: () => MockInstance<T>;
@@ -182,7 +182,7 @@ declare module "vitest" {
     mockRejectedValue: (value: unknown) => MockInstance<T>;
   }
 
-  interface Mocked<T> {
+  export interface Mocked<T> {
     mockImplementation: (fn: T) => Mocked<T>;
     mockReturnValue: (value: ReturnType<T>) => Mocked<T>;
     mockReturnThis: () => Mocked<T>;
@@ -190,30 +190,27 @@ declare module "vitest" {
     mockRejectedValue: (value: unknown) => Mocked<T>;
   }
 
-  interface ExpectStatic {
+  export interface ExpectStatic {
     extend: (matchers: Record<string, unknown>) => void;
     any: (constructor: unknown) => unknown;
   }
-
-  interface Vi {
-    fn: <T extends (...args: any[]) => any>(
+  export interface Vi {
+    fn: <T extends (...args: unknown[]) => unknown>(
       implementation?: T
     ) => MockInstance<T>;
     mocked: <T>(item: T) => Mocked<T>;
   }
-
-  interface InlineConfig {
+  export interface InlineConfig {
     globals: boolean;
     setupFiles: string[];
   }
-
-  interface UserConfig {
+  export interface UserConfig {
     test: InlineConfig;
   }
 }
 
 declare global {
-  interface Window {
+  export interface Window {
     ResizeObserver: {
       new (callback: ResizeObserverCallback): ResizeObserver;
       prototype: ResizeObserver;

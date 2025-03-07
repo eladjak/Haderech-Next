@@ -1,25 +1,35 @@
+import { useRouter } from "next/navigation";
+
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useRouter } from "next/navigation";
 import { CreatePost } from "@/components/forum/CreatePost";
 import { useToast } from "@/components/ui/use-toast";
+
+"use client";
+
+export {}
+
+
+
+
+
+
+
+
+
 
 // Mock useToast
 const mockToast = vi.fn();
 vi.mock("@/components/ui/use-toast", () => ({
   useToast: () => ({
-    toast: mockToast,
-  }),
-}));
+    toast: mockToast})}));
 
 // Mock useRouter
 const mockRefresh = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    refresh: mockRefresh,
-  }),
-}));
+    refresh: mockRefresh})}));
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -32,8 +42,7 @@ describe("CreatePost", () => {
     mockRefresh.mockClear();
     mockFetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ id: "test-post-id" }),
-    });
+      json: async () => ({ id: "test-post-id" })});
   });
 
   afterEach(() => {
@@ -45,15 +54,15 @@ describe("CreatePost", () => {
     const contentInput = screen.getByPlaceholderText(/תוכן הפוסט/i);
     await user.type(titleInput, "Test Title");
     await user.type(contentInput, "Test Content");
-    return { titleInput, contentInput };
-  };
+    return { titleInput, contentInput }
+  }
 
   const getFormElements = () => {
     const titleInput = screen.getByPlaceholderText(/כותרת הפוסט/i);
     const contentInput = screen.getByPlaceholderText(/תוכן הפוסט/i);
     const submitButton = screen.getByRole("button", { name: /פרסם פוסט/i });
-    return { titleInput, contentInput, submitButton };
-  };
+    return { titleInput, contentInput, submitButton }
+  }
 
   it("מאפשר יצירת פוסט חדש", async () => {
     const user = userEvent.setup();
@@ -67,13 +76,10 @@ describe("CreatePost", () => {
       expect(mockFetch).toHaveBeenCalledWith("/api/forum", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-        },
+          "Content-Type": "application/json"},
         body: JSON.stringify({
           title: "Test Title",
-          content: "Test Content",
-        }),
-      });
+          content: "Test Content"});});
     });
 
     await waitFor(() => {
@@ -94,8 +100,7 @@ describe("CreatePost", () => {
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith({
         title: "הפוסט נוצר בהצלחה",
-        description: "הפוסט שלך פורסם בפורום",
-      });
+        description: "הפוסט שלך פורסם בפורום"});
       expect(titleInput).toHaveValue("");
       expect(contentInput).toHaveValue("");
     });
@@ -115,8 +120,7 @@ describe("CreatePost", () => {
       expect(mockToast).toHaveBeenCalledWith({
         title: "שגיאה",
         description: "לא הצלחנו ליצור את הפוסט. אנא נסה שוב מאוחר יותר.",
-        variant: "destructive",
-      });
+        variant: "destructive"});
       expect(titleInput).toHaveValue("Test Title");
       expect(contentInput).toHaveValue("Test Content");
     });
@@ -126,8 +130,7 @@ describe("CreatePost", () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 400,
-      statusText: "Bad Request",
-    });
+      statusText: "Bad Request"});
 
     const user = userEvent.setup();
     render(<CreatePost />);
@@ -140,8 +143,7 @@ describe("CreatePost", () => {
       expect(mockToast).toHaveBeenCalledWith({
         title: "שגיאה",
         description: "לא הצלחנו ליצור את הפוסט. אנא נסה שוב מאוחר יותר.",
-        variant: "destructive",
-      });
+        variant: "destructive"});
       expect(titleInput).toHaveValue("Test Title");
       expect(contentInput).toHaveValue("Test Content");
     });
@@ -151,8 +153,7 @@ describe("CreatePost", () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 400,
-      json: async () => ({ error: "כותרת הפוסט חייבת להכיל לפחות 3 תווים" }),
-    });
+      json: async () => ({ error: "כותרת הפוסט חייבת להכיל לפחות 3 תווים" })});
 
     const user = userEvent.setup();
     render(<CreatePost />);
@@ -165,8 +166,7 @@ describe("CreatePost", () => {
       expect(mockToast).toHaveBeenCalledWith({
         title: "שגיאה",
         description: "כותרת הפוסט חייבת להכיל לפחות 3 תווים",
-        variant: "destructive",
-      });
+        variant: "destructive"});
       expect(titleInput).toHaveValue("Test Title");
       expect(contentInput).toHaveValue("Test Content");
     });
@@ -176,8 +176,7 @@ describe("CreatePost", () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 401,
-      json: async () => ({ error: "יש להתחבר כדי ליצור פוסט" }),
-    });
+      json: async () => ({ error: "יש להתחבר כדי ליצור פוסט" })});
 
     const user = userEvent.setup();
     render(<CreatePost />);
@@ -190,8 +189,7 @@ describe("CreatePost", () => {
       expect(mockToast).toHaveBeenCalledWith({
         title: "שגיאה",
         description: "יש להתחבר כדי ליצור פוסט",
-        variant: "destructive",
-      });
+        variant: "destructive"});
       expect(titleInput).toHaveValue("Test Title");
       expect(contentInput).toHaveValue("Test Content");
     });
@@ -255,8 +253,7 @@ describe("CreatePost", () => {
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
         title: "Test Title",
-        content: "Test content that is long enough",
-      });
+        content: "Test content that is long enough"});
     });
   });
 });

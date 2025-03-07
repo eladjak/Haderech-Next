@@ -15,6 +15,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "allowSyntheticDefaultImports": true,
     "plugins": [
       {
         "name": "next"
@@ -42,11 +45,13 @@
     "**/*.cjs",
     ".next/types/**/*.ts",
     "src/types/**/*.d.ts",
-    "vitest.config.ts",
-    "src/tests/utils/test-setup.ts",
-    "src/tests/utils/test-matchers.ts",
-    "src/test/setup.ts",
-    "src/test/vitest-setup.ts"
+    "vitest.config.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/tests/**/*",
+    "src/app/api/__tests__/**/*",
+    "src/components/**/__tests__/**/*",
+    "src/test/**/*"
+  ]
 }

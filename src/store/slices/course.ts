@@ -58,7 +58,7 @@ const initialState: CourseState = {
   error: null,
 };
 
-export const courseSlice = createSlice({
+const courseSlice = createSlice({
   name: "course",
   initialState,
   reducers: {
@@ -101,4 +101,6 @@ export const {
   setError,
 } = courseSlice.actions;
 
-export const courseReducer = courseSlice.reducer;
+const courseReducer = courseSlice.reducer;
+
+export { courseSlice, courseReducer };

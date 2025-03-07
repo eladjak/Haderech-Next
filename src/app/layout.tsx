@@ -1,22 +1,54 @@
-import { Analytics } from "@vercel/analytics/react";
-import { Viewport } from "next";
 import React from "react";
-import { Providers } from "@/app/providers";
+import { Analytics } from "@/components/analytics";
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
+import { Viewport as ViewportComponent } from "@/components/viewport";
 import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   title: {
     default: "הדרך",
     template: "%s | הדרך",
   },
-  description: "פלטפורמת למידה מתקדמת לשיפור מערכות יחסים",
+  description: "פלטפורמת למידה מקוונת לפיתוח אישי ומקצועי",
+  keywords: [
+    "למידה מקוונת",
+    "פיתוח אישי",
+    "פיתוח מקצועי",
+    "קורסים",
+    "הדרכה",
+    "מנטורינג",
+  ],
+  authors: [
+    {
+      name: "הדרך",
+      url: "https://haderech.co.il",
+    },
+  ],
+  creator: "הדרך",
+  openGraph: {
+    type: "website",
+    locale: "he_IL",
+    url: "https://haderech.co.il",
+    title: "הדרך - פלטפורמת למידה מקוונת",
+    description: "פלטפורמת למידה מקוונת לפיתוח אישי ומקצועי",
+    siteName: "הדרך",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "הדרך - פלטפורמת למידה מקוונת",
+    description: "פלטפורמת למידה מקוונת לפיתוח אישי ומקצועי",
+    creator: "@haderech",
+  },
   icons: {
     icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -26,17 +58,14 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
-  children,
-}: {
+interface RootLayoutProps {
   children: React.ReactNode;
-}): React.ReactElement {
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
+      <head />
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
@@ -44,6 +73,7 @@ export default function RootLayout({
         )}
       >
         <Providers>
+          <ViewportComponent />
           {children}
           <Analytics />
           <Toaster />

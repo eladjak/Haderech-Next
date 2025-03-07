@@ -1,9 +1,21 @@
 import "@testing-library/jest-dom";
+rary/jest-dom";
 import path from "path";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
 import dotenv from "dotenv";
 import { afterEach, expect, vi } from "vitest";
+
+
+export {}
+
+
+
+
+
+
+
+
 
 // Load environment variables from .env.test
 dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
@@ -26,21 +38,18 @@ const mockMatchMedia = (query: string) => ({
   removeListener: vi.fn(),
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
-});
+  dispatchEvent: vi.fn()});
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: mockMatchMedia,
-});
+  value: mockMatchMedia});
 
 // Mock localStorage
 const localStorageMock = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
-  clear: vi.fn(),
-};
+  clear: vi.fn()};
 Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 // Mock ResizeObserver
@@ -52,8 +61,7 @@ class MockResizeObserver {
 
 Object.defineProperty(window, "ResizeObserver", {
   writable: true,
-  value: MockResizeObserver,
-});
+  value: MockResizeObserver});
 
 // Mock IntersectionObserver
 class MockIntersectionObserver {
@@ -65,17 +73,15 @@ class MockIntersectionObserver {
 
 Object.defineProperty(window, "IntersectionObserver", {
   writable: true,
-  value: MockIntersectionObserver,
-});
+  value: MockIntersectionObserver});
 
 // Mock window.scrollTo
 const mockScrollTo = (_x = 0, _y = 0) => {
   // פונקציית דמה - לא צריכה לעשות כלום במוקים
-};
+}
 Object.defineProperty(window, "scrollTo", {
   writable: true,
-  value: mockScrollTo,
-});
+  value: mockScrollTo});
 
 // Mock console methods
 console.error = vi.fn();
@@ -100,10 +106,8 @@ expect.extend({
       message: () =>
         pass
           ? `expected ${received} not to have been called with matching arguments ${expectedArgs}`
-          : `expected ${received} to have been called with matching arguments ${expectedArgs}`,
-    };
-  },
-});
+          : `expected ${received} to have been called with matching arguments ${expectedArgs}`};
+  }});
 
 window.ResizeObserver = MockResizeObserver;
 global.ResizeObserver = MockResizeObserver;
@@ -139,8 +143,7 @@ class IntersectionObserverMock {
           intersectionRatio: 1,
           intersectionRect: element.getBoundingClientRect(),
           rootBounds: null,
-          time: Date.now(),
-        };
+          time: Date.now()};
       }
     );
     this.callback(entries, this);
@@ -193,6 +196,6 @@ class _DOMMatrixReadOnlyMock {
   }
 
   transformPoint(x = 0, y = 0) {
-    return { x, y };
+    return { x, y }
   }
 }

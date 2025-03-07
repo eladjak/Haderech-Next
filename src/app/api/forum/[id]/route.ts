@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase-server";
+import { createClient } from "@/lib/supabase-server";
 
 /**
  * @file forum/[id]/route.ts
@@ -52,7 +52,7 @@ interface RouteParams {
 export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+    const supabase = createClient(cookieStore);
 
     const { data: post, error } = await supabase
       .from("forum_posts")
@@ -96,7 +96,7 @@ export async function GET(_: Request, { params }: RouteParams) {
 }
 
 /**
- * PATCH /api/forum/[id]
+ * PUT /api/forum/[id]
  *
  * Updates a forum post.
  *
@@ -110,15 +110,20 @@ export async function GET(_: Request, { params }: RouteParams) {
  * ```json
  * {
  *   "title": "Updated Title",
- *   "content": "Updated content..."
+ *   "content": "Updated content...",
+ *   "tags": ["tag1", "tag2"],
+ *   "category": "General"
  * }
  * ```
  */
-export async function PATCH(request: Request, { params }: RouteParams) {
-  try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
 
+  try {
     // Verify authentication
     const {
       data: { session },
@@ -127,47 +132,50 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get post to verify ownership
-    const { data: post } = await supabase
+    const { title, content, tags, category } = await request.json();
+
+    // Validate input
+    if (!title || !content) {
+      return NextResponse.json(
+        { error: "Title and content are required" },
+        { status: 400 }
+      );
+    }
+
+    // Check post ownership
+    const { data: postData } = await supabase
       .from("forum_posts")
-      .select("author_id")
+      .select("user_id")
       .eq("id", params.id)
       .single();
 
-    if (!post) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    }
-
-    // Verify post ownership
-    if (post.author_id !== session.user.id) {
+    if (!postData || postData.user_id !== session.user.id) {
       return NextResponse.json(
-        { error: "Not authorized to update this post" },
+        { error: "You don't have permission to edit this post" },
         { status: 403 }
       );
     }
 
-    // Get update data from request
-    const updates = await request.json();
-
-    // Update post
-    const { data: updatedPost, error } = await supabase
+    // צ׳יין מספר שיטות יחד
+    const queryChain = supabase
       .from("forum_posts")
       .update({
-        ...updates,
+        title,
+        content,
+        tags,
+        category,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", params.id)
+      .eq("id", params.id);
+
+    const { data: post, error } = await queryChain
       .select(
         `
         *,
-        author:users(*),
-        comments:forum_comments(
-          *,
-          author:users(*),
-          replies:forum_comments(
-            *,
-            author:users(*)
-          )
+        author:user_id (
+          id,
+          name,
+          avatar_url
         )
       `
       )
@@ -181,9 +189,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       );
     }
 
-    return NextResponse.json(updatedPost);
+    return NextResponse.json({ post }, { status: 200 });
   } catch (error) {
-    console.error("Error in PATCH /api/forum/[id]:", error);
+    console.error("Error in forum post PUT:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -205,7 +213,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+    const supabase = createClient(cookieStore);
 
     // Verify authentication
     const {
@@ -218,7 +226,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     // Get post to verify ownership
     const { data: post } = await supabase
       .from("forum_posts")
-      .select("author_id")
+      .select("user_id")
       .eq("id", params.id)
       .single();
 
@@ -227,7 +235,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     }
 
     // Verify post ownership
-    if (post.author_id !== session.user.id) {
+    if (post.user_id !== session.user.id) {
       return NextResponse.json(
         { error: "Not authorized to delete this post" },
         { status: 403 }

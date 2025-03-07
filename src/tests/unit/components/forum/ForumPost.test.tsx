@@ -1,8 +1,23 @@
 import { render, screen } from "@testing-library/react";
-import { beforeAll, describe, expect, it, vi } from "vitest";
 
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { ForumPost } from "@/components/forum/ForumPost";
 import type { Author, ExtendedForumPost, ForumCategory, ForumTag,
+import type {
+import type {
+
+"use client";
+
+ Author, ExtendedForumPost, ForumCategory,
+
+
+export {}
+
+
+
+
+
+
 
 /**
  * @file ForumPost.test.tsx
@@ -12,11 +27,10 @@ import type { Author, ExtendedForumPost, ForumCategory, ForumTag,
 
 
 
-import type {
   Author,
   ExtendedForumPost,
   ForumCategory,
-  ForumTag,} from "@/types/forum";
+  ForumTag} from "@/types/forum";
 
 beforeAll(() => {
   Element.prototype.hasPointerCapture = () => false;
@@ -39,8 +53,7 @@ const mockAuthor: Author = {
   full_name: "משתמש בדיקה מלא",
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
-  last_seen: undefined,
-};
+  last_seen: undefined};
 
 const mockCategory: ForumCategory = {
   id: "1",
@@ -52,8 +65,7 @@ const mockCategory: ForumCategory = {
   color: "blue",
   posts_count: 0,
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockTag: ForumTag = {
   id: "1",
@@ -63,8 +75,7 @@ const mockTag: ForumTag = {
   color: "blue",
   posts_count: 0,
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockPost: ExtendedForumPost = {
   id: "1",
@@ -84,8 +95,7 @@ const mockPost: ExtendedForumPost = {
   updated_at: new Date().toISOString(),
   author: mockAuthor,
   comments: [],
-  replies_count: 0,
-};
+  replies_count: 0};
 
 describe("ForumPost Component", () => {
   it("renders post title and content", () => {
@@ -119,13 +129,13 @@ describe("ForumPost Component", () => {
   });
 
   it("shows pinned status when post is pinned", () => {
-    const pinnedPost = { ...mockPost, pinned: true };
+    const pinnedPost = { ...mockPost, pinned: true }
     render(<ForumPost post={pinnedPost} />);
     expect(screen.getByTestId("pinned-icon")).toBeInTheDocument();
   });
 
   it("shows solved status when post is solved", () => {
-    const solvedPost = { ...mockPost, solved: true };
+    const solvedPost = { ...mockPost, solved: true }
     render(<ForumPost post={solvedPost} />);
     expect(screen.getByTestId("solved-icon")).toBeInTheDocument();
   });

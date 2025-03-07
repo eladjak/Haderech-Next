@@ -1,10 +1,10 @@
+"use client";
+
 import * as SelectPrimitive from "@radix-ui/react-select";
 import clsx from "clsx";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 const Select = SelectPrimitive.Root;
 
@@ -183,7 +183,7 @@ export interface BaseSelectProps
   placeholder?: string;
 }
 
-export const BaseSelect = React.forwardRef<HTMLSelectElement, BaseSelectProps>(
+const BaseSelect = React.forwardRef<HTMLSelectElement, BaseSelectProps>(
   (
     {
       options,
@@ -271,6 +271,7 @@ export {
   SelectSeparator,
   SelectScrollUpButton,
   SelectScrollDownButton,
+  BaseSelect,
 };
 
 export type SelectProps = React.ComponentProps<typeof Select>;

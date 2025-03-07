@@ -1,25 +1,15 @@
 import { Tables } from "@/types/supabase";
-import { UserStats } from "./profile";
-import type { CourseLesson } from "./api";
 import type { ForumComment, ForumStats } from "./forum";
-import type { _CourseComment, _CourseProgress, _Lesson, Course, CourseRating, ForumPost, Notification, SimulatorResult, SimulatorScenario, SimulatorSession, SimulatorUserSettings, SimulatorUserStats, User} from "@/components/ui/";\nimport type { SimulatorState } from "./simulator";
-
+import type { Course, CourseRating, ForumPost, Lesson, User } from "./models";
+import { UserStats } from "./profile";
 import type {
-  _CourseComment,
-  _CourseProgress,
-  _Lesson,
-  Course,
-  CourseRating,
-  ForumPost,
-  Notification,
   SimulatorResult,
   SimulatorScenario,
   SimulatorSession,
+  SimulatorState,
   SimulatorUserSettings,
   SimulatorUserStats,
-  User,} from "./models";
-
-
+} from "./simulator";
 
 export interface UserStatsProps {
   stats: UserStats;
@@ -79,7 +69,7 @@ export interface CourseCommentsProps {
 
 export interface CourseContentProps {
   course: Course;
-  currentLesson?: CourseLesson;
+  currentLesson?: Lesson;
 }
 
 export interface CourseHeaderProps {
@@ -101,7 +91,7 @@ export interface CourseRatingsProps {
 
 export interface CourseSidebarProps {
   course: Course;
-  currentLesson?: CourseLesson;
+  currentLesson?: Lesson;
 }
 
 export interface ProfileProps {
@@ -140,7 +130,7 @@ export interface UserProfileProps {
 }
 
 export interface NotificationListProps {
-  notifications: Notification[];
+  notifications: unknown[];
   onMarkAsRead?: (notificationId: string) => Promise<void>;
   onMarkAllAsRead?: () => Promise<void>;
   isLoading?: boolean;
@@ -154,7 +144,7 @@ export interface ForumCommentProps {
 }
 
 export interface NotificationProps {
-  notification: Notification;
+  notification: unknown;
   onRead: () => Promise<void>;
 }
 
@@ -188,14 +178,14 @@ export interface CourseTabsProps {
 }
 
 export interface LessonContentProps {
-  lesson: CourseLesson;
+  lesson: Lesson;
   onComplete?: () => void;
 }
 
 export interface LessonSidebarProps {
   course: Course;
-  currentLesson: CourseLesson;
-  onLessonSelect: (lesson: CourseLesson) => void;
+  currentLesson: Lesson;
+  onLessonSelect: (lesson: Lesson) => void;
 }
 
 export interface ForumProps {

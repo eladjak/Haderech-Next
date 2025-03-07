@@ -1,5 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+"use client";
+
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database, DatabaseUser } from "@/types/database";
+
+export {};
 
 interface Level {
   name: string;
@@ -215,10 +219,7 @@ export const BADGES: Badge[] = [
   },
 ];
 
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClientComponentClient<Database>();
 
 export const awardPoints = async (
   userId: string,

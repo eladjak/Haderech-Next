@@ -1,7 +1,18 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import type { FeedbackDetails } from "@/types/simulator";
-import { FeedbackDisplay } from "../FeedbackDisplay";
+import {
+  describe,
+  expect,
+  FeedbackDisplay,
+  fireEvent,
+  it,
+  render,
+  screen,
+  vi,
+} from "@/lib/utils";
+import type { FeedbackDetails } from "@/types";
+
+("use client");
+
+export {};
 
 const mockFeedback: FeedbackDetails = {
   metrics: {

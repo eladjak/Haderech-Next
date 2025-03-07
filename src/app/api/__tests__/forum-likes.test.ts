@@ -1,14 +1,17 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { createMocks } from "node-mocks-http";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
-import { DELETE, GET, POST } from "../forum/likes/route";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { NextRequest } from "@/lib/utils";
+
+import { createMocks } from "@/lib/utils";
+import { beforeEach, describe, expect, it, vi } from "@/lib/utils";
+import { NextRequest } from "@/lib/utils";
+import { DELETE, GET, POST } from "@/lib/utils";
+
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
-describe("Forum Likes API", () => {
+describe("Forum Likes API",  => {
   const mockUser = {
     id: "test-user-id",
     email: "test@example.com",
@@ -17,19 +20,17 @@ describe("Forum Likes API", () => {
     full_name: "משתמש לדוגמה",
     avatar_url: "/avatar1.jpg",
     image: "/avatar1.jpg",
-    role: "user",
-  };
+    role: "user"};
 
   const mockLike = {
     id: "test-like-id",
     post_id: "test-post-id",
     comment_id: null,
     user_id: mockUser.id,
-    created_at: new Date().toISOString(),
-  };
+    created_at: new Date.toISOString};
 
   const mockSupabase = {
-    from: vi.fn(() => ({
+    from: vi.fn( => ({
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
@@ -37,22 +38,16 @@ describe("Forum Likes API", () => {
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(async () => ({
         data: mockLike,
-        error: null,
-      })),
-    })),
+        error: null}))})),
     auth: {
       getSession: vi.fn().mockResolvedValue({
         data: { session: { user: mockUser } },
-        error: null,
-      }),
-    },
-  };
+        error: null})}};
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(cookies).mockReturnValue({
-      get: vi.fn().mockReturnValue({ value: "test-token" }),
-    } as any);
+      get: vi.fn().mockReturnValue({ value: "test-token" })} as any);
     vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
   });
 
@@ -64,8 +59,7 @@ describe("Forum Likes API", () => {
         .order()
         .eq.mockResolvedValueOnce({
           data: [mockLike],
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes");
       const response = await GET(request);
@@ -82,8 +76,7 @@ describe("Forum Likes API", () => {
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes");
       const response = await GET(request);
@@ -91,8 +84,7 @@ describe("Forum Likes API", () => {
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר יש בעיה בשליפת הלייקים", async () => {
@@ -102,8 +94,7 @@ describe("Forum Likes API", () => {
         .order()
         .eq.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        });
+          error: { message: "שגיאת מסד נתונים" }});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes");
       const response = await GET(request);
@@ -111,14 +102,12 @@ describe("Forum Likes API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
 
     it("מחזיר את כל הלייקים", async () => {
       const { req } = createMocks({
-        method: "GET",
-      });
+        method: "GET"});
 
       const response = await GET(req as NextRequest);
       const data = await response.json();
@@ -131,8 +120,7 @@ describe("Forum Likes API", () => {
       const postId = "123";
       const { req } = createMocks({
         method: "GET",
-        query: { postId },
-      });
+        query: { postId }});
 
       const response = await GET(req as NextRequest);
       const data = await response.json();
@@ -145,8 +133,7 @@ describe("Forum Likes API", () => {
       const postId = "nonexistent";
       const { req } = createMocks({
         method: "GET",
-        query: { postId },
-      });
+        query: { postId }});
 
       const response = await GET(req as NextRequest);
       expect(response.status).toBe(404);
@@ -156,8 +143,7 @@ describe("Forum Likes API", () => {
   describe("POST /api/forum/likes", () => {
     const newLike = {
       post_id: "test-post-id",
-      comment_id: null,
-    };
+      comment_id: null};
 
     it("יוצר לייק חדש בהצלחה", async () => {
       mockSupabase.from().insert.mockReturnThis();
@@ -168,13 +154,11 @@ describe("Forum Likes API", () => {
         .select()
         .single.mockResolvedValueOnce({
           data: { id: "new-like-1", ...newLike },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "POST",
-        body: JSON.stringify(newLike),
-      });
+        body: JSON.stringify(newLike)});
 
       const response = await POST(request);
       const data = await response.json();
@@ -187,21 +171,18 @@ describe("Forum Likes API", () => {
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "POST",
-        body: JSON.stringify(newLike),
-      });
+        body: JSON.stringify(newLike)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר הפוסט לא נמצא", async () => {
@@ -211,28 +192,24 @@ describe("Forum Likes API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: null,
-          error: { message: "הפוסט לא נמצא" },
-        });
+          error: { message: "הפוסט לא נמצא" }});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "POST",
-        body: JSON.stringify(newLike),
-      });
+        body: JSON.stringify(newLike)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "הפוסט לא נמצא",
-      });
+        error: "הפוסט לא נמצא"});
     });
 
     it("מחזיר שגיאה כאשר התגובה לא נמצאה", async () => {
       const likeWithComment = {
         ...newLike,
-        comment_id: "non-existent-id",
-      };
+        comment_id: "non-existent-id"};
 
       mockSupabase
         .from()
@@ -240,25 +217,21 @@ describe("Forum Likes API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "test-post-id" },
-          error: null,
-        })
+          error: null})
         .mockResolvedValueOnce({
           data: null,
-          error: { message: "התגובה לא נמצאה" },
-        });
+          error: { message: "התגובה לא נמצאה" }});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "POST",
-        body: JSON.stringify(likeWithComment),
-      });
+        body: JSON.stringify(likeWithComment)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "התגובה לא נמצאה",
-      });
+        error: "התגובה לא נמצאה"});
     });
 
     it("מחזיר שגיאה כאשר כבר קיים לייק", async () => {
@@ -268,25 +241,21 @@ describe("Forum Likes API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "test-post-id" },
-          error: null,
-        })
+          error: null})
         .mockResolvedValueOnce({
           data: { id: "existing-like" },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "POST",
-        body: JSON.stringify(newLike),
-      });
+        body: JSON.stringify(newLike)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "כבר נתת לייק לפריט זה",
-      });
+        error: "כבר נתת לייק לפריט זה"});
     });
   });
 
@@ -294,62 +263,52 @@ describe("Forum Likes API", () => {
     it("מוחק לייק בהצלחה", async () => {
       mockSupabase.from().delete().eq.mockResolvedValueOnce({
         data: null,
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "DELETE",
         body: JSON.stringify({
           post_id: "test-post-id",
-          comment_id: null,
-        }),
-      });
+          comment_id: null})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data).toEqual({
-        message: "הלייק הוסר בהצלחה",
-      });
+        message: "הלייק הוסר בהצלחה"});
     });
 
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "DELETE",
         body: JSON.stringify({
           post_id: "test-post-id",
-          comment_id: null,
-        }),
-      });
+          comment_id: null})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר חסר מזהה פוסט", async () => {
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "DELETE",
-        body: JSON.stringify({}),
-      });
+        body: JSON.stringify({})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "נדרש מזהה פוסט",
-      });
+        error: "נדרש מזהה פוסט"});
     });
 
     it("מחזיר שגיאה כאשר הלייק לא נמצא", async () => {
@@ -358,24 +317,20 @@ describe("Forum Likes API", () => {
         .delete()
         .eq.mockResolvedValueOnce({
           data: null,
-          error: { message: "הלייק לא נמצא" },
-        });
+          error: { message: "הלייק לא נמצא" }});
 
       const request = new NextRequest("http://localhost:3000/api/forum/likes", {
         method: "DELETE",
         body: JSON.stringify({
           post_id: "test-post-id",
-          comment_id: null,
-        }),
-      });
+          comment_id: null})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "הלייק לא נמצא",
-      });
+        error: "הלייק לא נמצא"});
     });
   });
 });

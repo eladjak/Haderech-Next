@@ -1,7 +1,17 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Profile } from "@/types/models";
+
+// הגדרת ממשק Profile ישירות
+interface Profile {
+  name: string;
+  avatarUrl?: string;
+  joinDate?: string;
+  level?: number;
+  bio?: string;
+}
 
 interface ProfileHeaderProps {
   profile: Profile;
@@ -17,14 +27,14 @@ export function ProfileHeader({ profile, isCurrentUser }: ProfileHeaderProps) {
       <CardContent>
         <div className="flex items-center space-x-4 rtl:space-x-reverse">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={profile.avatar_url || undefined} />
+            <AvatarImage src={profile.avatarUrl || undefined} />
             <AvatarFallback>
-              {profile.full_name?.[0] || profile.name[0]}
+              {profile.name?.[0] || profile.name[0]}
             </AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold">{profile.full_name}</h2>
-            <p className="text-sm text-muted-foreground">@{profile.username}</p>
+            <h2 className="text-2xl font-bold">{profile.name}</h2>
+            <p className="text-sm text-muted-foreground">@{profile.name}</p>
             {profile.bio && (
               <p className="text-sm text-muted-foreground">{profile.bio}</p>
             )}

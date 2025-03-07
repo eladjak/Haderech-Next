@@ -50,7 +50,7 @@ const initialState: ForumState = {
   error: null,
 };
 
-export const forumSlice = createSlice({
+const forumSlice = createSlice({
   name: "forum",
   initialState,
   reducers: {
@@ -99,4 +99,6 @@ export const {
   setError,
 } = forumSlice.actions;
 
-export const forumReducer = forumSlice.reducer;
+const forumReducer = forumSlice.reducer;
+
+export { forumSlice, forumReducer };

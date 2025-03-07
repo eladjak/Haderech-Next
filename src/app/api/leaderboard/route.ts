@@ -1,7 +1,7 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase-server";
 
 export {};
 
@@ -48,7 +48,8 @@ type TimePeriod = keyof typeof TIME_PERIODS;
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient<Database>({ cookies });
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const searchParams = request.nextUrl.searchParams;
     const period = (searchParams.get("period") as TimePeriod) || "all";
     const page = parseInt(searchParams.get("page") || "1");
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
     const to = from + PAGE_SIZE - 1;
     query = query.range(from, to);
 
-    const { data: users, error, _count } = await query;
+    const { data: users, error, count } = await query;
 
     if (error) {
       console.error("Error fetching leaderboard:", error);
@@ -114,10 +115,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count for pagination
-    const totalQuery = supabase.from("users").select("id", { count: "exact" });
+    const totalQuery = supabase.from("users").select("id");
     if (startDate) {
       totalQuery.gte("updated_at", startDate);
     }
+
     const { count: total } = await totalQuery;
 
     return NextResponse.json({
@@ -141,67 +143,54 @@ export async function GET(request: NextRequest) {
 // Update user score
 export async function PATCH(req: Request) {
   try {
-    const supabase = createRouteHandlerClient<Database>({ cookies });
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
-    // Check authentication
+    // בדיקת אימות
     const {
       data: { session },
     } = await supabase.auth.getSession();
     if (!session) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
     }
 
-    // Get score data
-    const { score } = await req.json();
-    if (typeof score !== "number") {
+    // קבלת הנתונים מהבקשה
+    const data = await req.json();
+    const { points, actionType } = data;
+    const userId = session.user.id;
+
+    if (typeof points !== "number") {
       return NextResponse.json(
-        { error: "Score must be a number" },
+        { error: "נדרש מספר נקודות תקף" },
         { status: 400 }
       );
     }
 
-    // Get current score
-    const { data: currentProfile } = await supabase
-      .from("profiles")
-      .select("score")
-      .eq("id", session.user.id)
-      .single();
+    // עדכון טבלת המשתמשים
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ points })
+      .eq("id", userId);
 
-    if (!currentProfile) {
-      return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
-    }
-
-    // Update score
-    const { data: updatedProfile, error } = await supabase
-      .from("profiles")
-      .update({
-        score: currentProfile.score + score,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", session.user.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Error updating score:", error);
+    if (updateError) {
+      console.error("שגיאה בעדכון נקודות:", updateError);
       return NextResponse.json(
-        { error: "שגיאה בעדכון הניקוד" },
+        { error: "נכשל בעדכון נקודות" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({
-      message: "הניקוד עודכן בהצלחה",
-      newScore: updatedProfile.score,
+    // הוספה להיסטוריית נקודות
+    await supabase.from("points_history").insert({
+      user_id: userId,
+      points: points,
+      reason: actionType || "score_update",
+      created_at: new Date().toISOString(),
     });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in PATCH /api/leaderboard:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("שגיאה בעדכון נקודות:", error);
+    return NextResponse.json({ error: "שגיאה בלתי צפויה" }, { status: 500 });
   }
 }

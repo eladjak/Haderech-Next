@@ -6,8 +6,7 @@ import {
   saveSimulationResults,
   startSimulation,
 } from "@/lib/services/simulator";
-import type { SimulatorSession } from "@/types";
-import type { _SimulatorScenario } from "@/types/simulator";
+import type { SimulatorScenario, SimulatorSession } from "@/types/simulator";
 
 // Validation schemas
 const startSchema = z.object({

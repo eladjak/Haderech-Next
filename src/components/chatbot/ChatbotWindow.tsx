@@ -1,13 +1,13 @@
+"use client";
+
 import { Maximize2, Minimize2, Send, X } from "lucide-react";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 export interface ChatMessage {
   id: string;
@@ -22,7 +22,7 @@ export interface ChatMessage {
   };
 }
 
-interface ChatbotWindowProps {
+export interface ChatbotWindowProps {
   /** האם החלון פתוח */
   isOpen?: boolean;
   /** האם החלון ממוזער */
@@ -42,6 +42,9 @@ interface ChatbotWindowProps {
   className?: string;
 }
 
+/**
+ * רכיב חלון הצ'טבוט
+ */
 export function ChatbotWindow({
   isOpen = true,
   isMinimized = false,
@@ -53,43 +56,38 @@ export function ChatbotWindow({
   onNavigateToContent,
   className,
 }: ChatbotWindowProps) {
-  const [messageInput, setMessageInput] = React.useState("");
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const [inputValue, setInputValue] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  React.useEffect(() => {
-    scrollToBottom();
+  // גלילה אוטומטית למטה כאשר מתווספות הודעות חדשות
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
+  // טיפול בשליחת הודעה
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() || !onSendMessage) return;
+    if (!inputValue.trim() || !onSendMessage) return;
 
-    onSendMessage(messageInput.trim());
-    setMessageInput("");
+    onSendMessage(inputValue.trim());
+    setInputValue("");
   };
 
   if (!isOpen) return null;
 
   return (
     <Card
-      className={cn(
-        "fixed bottom-4 left-4 w-[400px] transition-all duration-200",
-        isMinimized && "h-[60px]",
-        !isMinimized && "h-[600px]",
-        className
-      )}
+      className={cn("fixed bottom-4 left-4 z-50 w-80 shadow-lg", className)}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b p-4">
-        <CardTitle className="text-lg">צ'אט עם המערכת</CardTitle>
-        <div className="flex items-center gap-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3">
+        <CardTitle className="text-base font-medium">צ'אט עזרה</CardTitle>
+        <div className="flex gap-1">
           <Button
             variant="ghost"
-            className="h-8 w-8 p-0"
+            size="icon"
+            className="h-8 w-8"
             onClick={onToggleMinimize}
           >
             {isMinimized ? (
@@ -98,89 +96,101 @@ export function ChatbotWindow({
               <Minimize2 className="h-4 w-4" />
             )}
           </Button>
-          <Button variant="ghost" className="h-8 w-8 p-0" onClick={onClose}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={onClose}
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+      </CardHeader>
 
       {!isMinimized && (
         <>
-          {/* Messages */}
-          <CardContent className="h-[calc(100%-120px)] overflow-y-auto p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
+          <CardContent className="max-h-[300px] overflow-y-auto p-3">
+            {messages.length === 0 ? (
+              <div className="py-4 text-center text-muted-foreground">
+                שלח הודעה כדי להתחיל את השיחה
+              </div>
+            ) : (
+              messages.map((message) => (
                 <div
                   key={message.id}
                   className={cn(
-                    "flex gap-3",
-                    message.sender === "user" && "flex-row-reverse"
+                    "mb-3",
+                    message.sender === "user" ? "text-right" : "text-left"
                   )}
                 >
-                  <Avatar>
-                    {message.sender === "user" ? (
-                      <AvatarImage src="/avatars/user.png" />
-                    ) : (
-                      <AvatarImage src="/avatars/bot.png" />
+                  <div className="flex items-start gap-2">
+                    {message.sender !== "user" && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="/images/bot-avatar.png" />
+                        <AvatarFallback>בוט</AvatarFallback>
+                      </Avatar>
                     )}
-                    <AvatarFallback>
-                      {message.sender === "user" ? "U" : "B"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div
-                    className={cn(
-                      "rounded-lg p-3",
-                      message.sender === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    )}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    {message.relatedContent && (
-                      <Button
-                        variant="link"
-                        className="mt-2 h-auto p-0 text-xs"
-                        onClick={() =>
-                          onNavigateToContent?.(message.relatedContent)
-                        }
-                      >
-                        צפה ב
-                        {message.relatedContent.type === "lesson"
-                          ? "שיעור"
-                          : message.relatedContent.type === "article"
-                            ? "מאמר"
-                            : "תרגיל"}
-                      </Button>
+                    <div
+                      className={cn(
+                        "inline-block max-w-[80%] rounded-lg px-3 py-2",
+                        message.sender === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      )}
+                    >
+                      {message.content}
+                      {message.relatedContent && (
+                        <div className="mt-2 text-xs">
+                          <button
+                            onClick={() =>
+                              onNavigateToContent &&
+                              onNavigateToContent(message.relatedContent)
+                            }
+                            className="text-blue-500 underline hover:text-blue-700"
+                          >
+                            צפה ב
+                            {message.relatedContent.type === "lesson"
+                              ? "שיעור"
+                              : message.relatedContent.type === "article"
+                                ? "מאמר"
+                                : "תרגיל"}
+                            : {message.relatedContent.title}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {message.sender === "user" && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="/images/user-avatar.png" />
+                        <AvatarFallback>אני</AvatarFallback>
+                      </Avatar>
                     )}
                   </div>
                 </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
+              ))
+            )}
+            {isLoading && (
+              <div className="py-2 text-center">
+                <Spinner className="inline-block" />
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </CardContent>
 
-          {/* Input */}
-          <form
-            onSubmit={handleSubmit}
-            className="absolute bottom-0 left-0 right-0 border-t bg-background p-4"
-          >
+          <form onSubmit={handleSubmit} className="border-t p-3">
             <div className="flex gap-2">
               <Textarea
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
                 placeholder="הקלד הודעה..."
                 className="min-h-[40px] resize-none"
               />
               <Button
                 type="submit"
-                disabled={!messageInput.trim() || isLoading}
+                disabled={!inputValue.trim() || isLoading}
                 className="h-10 w-10 p-0"
               >
-                {isLoading ? (
-                  <Spinner className="h-4 w-4" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
+                <Send className="h-4 w-4" />
               </Button>
             </div>
           </form>

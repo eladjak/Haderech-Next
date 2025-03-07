@@ -4,7 +4,8 @@ import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers"
 
 declare global {
   namespace Vi {
-    interface JestMatchers<T = any> extends TestingLibraryMatchers<T, void> {
+    export interface JestMatchers<T = unknown>
+      extends TestingLibraryMatchers<T, void> {
       toBe: (expected: T) => void;
       toEqual: (expected: T) => void;
       toBeInTheDocument: () => void;
@@ -37,21 +38,21 @@ declare global {
       toBeLessThanOrEqual: (number: number) => void;
       toBeCloseTo: (number: number, precision?: number) => void;
       toMatch: (regex: RegExp | string) => void;
-      toContain: (item: any) => void;
+      toContain: (item: unknown) => void;
       toThrow: (error?: string | RegExp | Error) => void;
       toThrowError: (error?: string | RegExp | Error) => void;
       toHaveBeenCalled: () => void;
       toHaveBeenCalledTimes: (times: number) => void;
-      toHaveBeenCalledWith: (...args: any[]) => void;
-      toHaveBeenLastCalledWith: (...args: any[]) => void;
-      toHaveBeenNthCalledWith: (nthCall: number, ...args: any[]) => void;
+      toHaveBeenCalledWith: (...args: unknown[]) => void;
+      toHaveBeenLastCalledWith: (...args: unknown[]) => void;
+      toHaveBeenNthCalledWith: (nthCall: number, ...args: unknown[]) => void;
       toHaveReturned: () => void;
       toHaveReturnedTimes: (times: number) => void;
-      toHaveReturnedWith: (value: any) => void;
-      toHaveLastReturnedWith: (value: any) => void;
-      toHaveNthReturnedWith: (nthCall: number, value: any) => void;
-      toHaveProperty: (keyPath: string | string[], value?: any) => void;
-      toBeInstanceOf: (Class: any) => void;
+      toHaveReturnedWith: (value: unknown) => void;
+      toHaveLastReturnedWith: (value: unknown) => void;
+      toHaveNthReturnedWith: (nthCall: number, value: unknown) => void;
+      toHaveProperty: (keyPath: string | string[], value?: unknown) => void;
+      toBeInstanceOf: (Class: unknown) => void;
       toMatchObject: (object: object) => void;
       toMatchSnapshot: (name?: string) => void;
       toMatchInlineSnapshot: (snapshot: string) => void;
@@ -60,14 +61,14 @@ declare global {
       resolves: JestMatchers<T>;
       rejects: JestMatchers<T>;
       not: JestMatchers<T>;
-      toHaveBeenCalledWithMatch: (...args: any[]) => void;
+      toHaveBeenCalledWithMatch: (...args: unknown[]) => void;
     }
   }
 }
 
 declare module "vitest" {
-  type Assertion<T = any> = Vi.JestMatchers<T>;
-  interface AsymmetricMatchersContaining extends Vi.JestMatchers<void> {
+  export type Assertion<T = unknown> = Vi.JestMatchers<T>;
+  export interface AsymmetricMatchersContaining extends Vi.JestMatchers<void> {
     toMatchPattern(pattern: RegExp): void;
   }
 }

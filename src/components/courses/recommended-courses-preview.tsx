@@ -1,8 +1,10 @@
-import { CourseCard } from "@/components/course-card";
-import type { Course } from "@/types/api";
+"use client";
+
+import { CourseCard } from "@/components/courses/course-card";
+import type { CourseWithRelations } from "@/types/courses";
 
 interface RecommendedCoursesPreviewProps {
-  courses: Course[];
+  courses: Partial<CourseWithRelations>[];
 }
 
 export function RecommendedCoursesPreview({
@@ -16,11 +18,25 @@ export function RecommendedCoursesPreview({
           <CourseCard
             key={course.id}
             course={{
-              ...course,
+              id: course.id || "",
+              title: course.title || "",
+              description: course.description || "",
+              level: course.level || "מתחילים",
+              price: course.price || 0,
+              duration: course.duration || 0,
+              total_students: course.total_students || 0,
+              created_at: course.created_at || new Date().toISOString(),
+              updated_at: course.updated_at || new Date().toISOString(),
+              thumbnail: course.thumbnail,
               lessons: course.lessons || [],
               ratings: course.ratings || [],
               comments: course.comments || [],
-              instructor: course.instructor,
+              instructor: course.instructor || {
+                name: "מרצה לא ידוע",
+              },
+              _count: {
+                students: course._count?.students || 0,
+              },
             }}
           />
         ))}

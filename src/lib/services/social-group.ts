@@ -1,46 +1,55 @@
-import { createClient } from "@supabase/supabase-js";
-import type { Activity } from "@/types/social";
-import type { Database, SocialGroup } from "@/types/supabase";
+"use client";
 
-if (
-  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-) {
-  throw new Error("Missing Supabase environment variables");
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "@/types/database";
+
+// הגדרת סוגים פנימיים שחסרים
+interface Activity {
+  id: string;
+  title: string;
+  description: string;
+  type: "meeting" | "workshop" | "social" | "other";
+  date: string;
+  location?: string;
+  max_participants?: number;
+  participants: string[];
+  created_at: string;
 }
 
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+interface SocialGroup {
+  id: string;
+  name: string;
+  description: string;
+  creator_id: string;
+  members: string[];
+  activities: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+const supabase = createClientComponentClient<Database>();
 
 export const createSocialGroup = async (
   name: string,
   description: string,
   creatorId: string
 ): Promise<SocialGroup> => {
-  try {
-    const { data: group, error } = await supabase
-      .from("social_groups")
-      .insert({
-        name,
-        description,
-        members: [creatorId],
-        activities: [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from("social_groups")
+    .insert({
+      name,
+      description,
+      creator_id: creatorId,
+      members: [creatorId],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .select("*")
+    .single();
 
-    if (error) throw error;
-    if (!group) throw new Error("Failed to create social group");
+  if (error) throw new Error(error.message);
 
-    return group;
-  } catch (error) {
-    console.error("Error creating social group:", error);
-    throw new Error("שגיאה ביצירת קבוצה חברתית");
-  }
+  return data as unknown as SocialGroup;
 };
 
 export const addMemberToGroup = async (

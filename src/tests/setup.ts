@@ -4,6 +4,10 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { cleanup, configure } from "@testing-library/react";
 
+("use client");
+
+export {};
+
 // Configure testing library
 configure({
   // @ts-expect-error - testIdAttribute קיים בספריה אך לא מוגדר בטיפוס

@@ -1,3 +1,7 @@
+"use client";
+
+export {};
+
 export const formatDate = (date: string | Date): string => {
   const d = new Date(date);
   return new Intl.DateTimeFormat("he-IL", {

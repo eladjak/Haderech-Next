@@ -1,8 +1,11 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
-import { GET, POST } from "../courses/route";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { NextRequest } from "@/lib/utils";
+
+import { beforeEach, describe, expect, it, vi } from "@/lib/utils";
+import { NextRequest } from "@/lib/utils";
+import { GET, POST } from "@/lib/utils";
+
 
 /**
  * @file courses.test.ts
@@ -12,20 +15,18 @@ import { GET, POST } from "../courses/route";
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
-describe("Courses API", () => {
+describe("Courses API",  => {
   const mockUser = {
     id: "test-user-id",
-    email: "test@example.com",
-  };
+    email: "test@example.com"};
 
   const mockCourse = {
     id: "test-course-id",
     title: "Test Course",
     description: "Test Description",
     author_id: mockUser.id,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+    created_at: new Date.toISOString,
+    updated_at: new Date.toISOString()};
 
   const mockSupabase = {
     from: vi.fn(() => ({
@@ -34,24 +35,18 @@ describe("Courses API", () => {
       order: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(async () => ({
         data: mockCourse,
-        error: null,
-      })),
-    })),
+        error: null}))})),
     auth: {
       getSession: vi.fn().mockResolvedValue({
         data: { session: { user: mockUser } },
-        error: null,
-      }),
-    },
-  };
+        error: null})}};
 
   vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(cookies).mockReturnValue({
-      get: vi.fn().mockReturnValue({ value: "test-token" }),
-    } as any);
+      get: vi.fn().mockReturnValue({ value: "test-token" })} as any);
   });
 
   describe("GET /api/courses", () => {
@@ -61,8 +56,7 @@ describe("Courses API", () => {
         .select()
         .order.mockResolvedValueOnce({
           data: [mockCourse],
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest("http://localhost:3000/api/courses");
       const response = await GET(request);
@@ -78,8 +72,7 @@ describe("Courses API", () => {
         .select()
         .order.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        });
+          error: { message: "שגיאת מסד נתונים" }});
 
       const request = new NextRequest("http://localhost:3000/api/courses");
       const response = await GET(request);
@@ -87,8 +80,7 @@ describe("Courses API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
   });
 
@@ -100,8 +92,7 @@ describe("Courses API", () => {
       status: "draft" as const,
       level: "beginner" as const,
       duration: 60,
-      tags: ["javascript", "react"],
-    };
+      tags: ["javascript", "react"]};
 
     it("יוצר קורס חדש בהצלחה", async () => {
       mockSupabase.from().insert.mockReturnThis();
@@ -112,13 +103,11 @@ describe("Courses API", () => {
         .select()
         .single.mockResolvedValueOnce({
           data: { id: "new-course-1", ...newCourse },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest("http://localhost:3000/api/courses", {
         method: "POST",
-        body: JSON.stringify(newCourse),
-      });
+        body: JSON.stringify(newCourse)});
 
       const response = await POST(request);
       const data = await response.json();
@@ -131,36 +120,31 @@ describe("Courses API", () => {
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/courses", {
         method: "POST",
-        body: JSON.stringify(newCourse),
-      });
+        body: JSON.stringify(newCourse)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר חסרים שדות חובה", async () => {
       const request = new NextRequest("http://localhost:3000/api/courses", {
         method: "POST",
-        body: JSON.stringify({}),
-      });
+        body: JSON.stringify({})});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "חסרים שדות חובה",
-      });
+        error: "חסרים שדות חובה"});
     });
 
     it("מחזיר שגיאה כאשר יש בעיה ביצירת הקורס", async () => {
@@ -172,21 +156,18 @@ describe("Courses API", () => {
         .select()
         .single.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        });
+          error: { message: "שגיאת מסד נתונים" }});
 
       const request = new NextRequest("http://localhost:3000/api/courses", {
         method: "POST",
-        body: JSON.stringify(newCourse),
-      });
+        body: JSON.stringify(newCourse)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
   });
 });

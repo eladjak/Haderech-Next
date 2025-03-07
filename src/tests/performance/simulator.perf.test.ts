@@ -1,11 +1,23 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { processUserMessage, saveSimulationResults, startSimulation} from "@/components/ui/";\nimport type { SimulatorScenario, SimulatorSession } from "@/types/simulator";
 
+import { processUserMessage, saveSimulationResults, startSimulation} from "@/components/ui/";
 import {
+import type { SimulatorScenario, SimulatorSession } from "@/types/simulator";
+import {
+
+"use client";
+
+ processUserMessage, saveSimulationResults,
+export {}
+
+
+
+
   processUserMessage,
   saveSimulationResults,
-  startSimulation,
-} from "@/lib/services/simulator";
+  startSimulation} from "@/lib/services/simulator";
+
+
 
 
 const mockScenario: SimulatorScenario = {
@@ -21,11 +33,9 @@ const mockScenario: SimulatorScenario = {
     minScore: 70,
     requiredSkills: ["תקשורת", "אמפתיה"],
     minDuration: 300,
-    maxDuration: 900,
-  },
+    maxDuration: 900},
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 describe("Simulator Performance Tests", () => {
   let session: SimulatorSession;

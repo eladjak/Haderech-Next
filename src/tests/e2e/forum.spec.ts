@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Forum E2E Tests", () => {
+
+test.describe("Forum E2E Tests",  => {
   test.beforeEach(async ({ page }) => {
     // התחברות לפני כל טסט
     await page.goto("/auth/login");
@@ -20,13 +21,13 @@ test.describe("Forum E2E Tests", () => {
     // בדיקת הצגת רכיבי הפורום
     await expect(
       page.getByRole("searchbox", { name: "חיפוש בפורום" })
-    ).toBeVisible();
+    ).toBeVisible;
     await expect(
       page.getByRole("combobox", { name: "מיין תוצאות" })
-    ).toBeVisible();
+    ).toBeVisible;
     await expect(
       page.getByRole("combobox", { name: "סנן לפי סטטוס" })
-    ).toBeVisible();
+    ).toBeVisible;
     await expect(
       page.getByRole("button", { name: "אפס פילטרים" })
     ).toBeVisible();

@@ -1,8 +1,8 @@
+"use client";
+
 import { motion, useAnimation } from "framer-motion";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 interface ParticlesProps extends React.HTMLAttributes<HTMLDivElement> {
   count?: number;
@@ -64,7 +64,7 @@ const Particles = React.forwardRef<HTMLDivElement, ParticlesProps>(
           particle.x += particle.vx;
           particle.y += particle.vy;
 
-          // Bounce off walls
+          // Bounce on walls
           if (particle.x < 0 || particle.x > dimensions.width)
             particle.vx *= -1;
           if (particle.y < 0 || particle.y > dimensions.height)

@@ -1,7 +1,11 @@
+"use client";
+
 import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/supabase";
+
+export {};
 
 /**
  * @file middleware.ts
@@ -45,7 +49,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     connect-src 'self' *.supabase.co *.vercel-insights.com *.vercel.app;
     form-action 'self';
   `
-    .replace(/\s{2,}/g, " ")
+    .replace(/\s{2}/g, " ")
     .trim();
 
   response.headers.set("X-DNS-Prefetch-Control", "on");

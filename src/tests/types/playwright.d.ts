@@ -29,8 +29,8 @@ declare global {
 declare module "@playwright/test" {
   export interface Matchers<R> {
     // מאצ'רים מותאמים אישית
-    toBeAccessible(): R;
-    toHaveNoViolations(): R;
+    toBeAccessible: R;
+    toHaveNoViolations: R;
     toHaveScreenshot(options?: { maxDiffPixels?: number }): R;
     toMatchSnapshot(options?: { maxDiffPixels?: number }): R;
   }
@@ -47,7 +47,7 @@ declare module "playwright" {
   export interface Browser {
     // הרחבות מותאמות אישית לדפדפן
     newContext(options?: BrowserContextOptions): Promise<BrowserContext>;
-    close(): Promise<void>;
+    close: Promise<void>;
   }
 
   export interface ElementHandle {

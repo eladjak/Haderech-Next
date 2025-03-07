@@ -1,13 +1,13 @@
+"use client";
+
 import { UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { User } from "@/types/api";
-
-("use client");
+import type { UserProfile } from "@/types/models";
 
 interface SocialRecommendationsProps {
-  users: User[];
+  users: UserProfile[];
   onFollow?: (userId: string) => void;
 }
 
@@ -26,12 +26,15 @@ export function SocialRecommendations({
             <div className="flex items-center gap-3">
               <Avatar>
                 <AvatarImage src={user.avatar_url || undefined} />
-                <AvatarFallback>{user.name[0]}</AvatarFallback>
+                <AvatarFallback>{user.name?.[0] || "?"}</AvatarFallback>
               </Avatar>
               <div>
-                <div className="font-medium">{user.name}</div>
+                <div className="font-medium">
+                  {user.name || "משתמש אנונימי"}
+                </div>
                 <div className="text-sm text-muted-foreground">
-                  {user.bio?.slice(0, 50)}...
+                  {user.bio?.slice(0, 50) || ""}
+                  {user.bio && user.bio.length > 50 ? "..." : ""}
                 </div>
               </div>
             </div>

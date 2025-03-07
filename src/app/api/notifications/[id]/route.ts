@@ -1,7 +1,9 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase-server";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
+
+export {};
 
 /**
  * @file notifications/[id]/route.ts
@@ -37,8 +39,7 @@ interface NotificationWithUser extends Notification {
  */
 export async function PATCH(_: Request, { params }: RouteParams) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     // Verify authentication
     const {
@@ -116,8 +117,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
  */
 export async function DELETE(_: Request, { params }: RouteParams) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     // Verify authentication
     const {

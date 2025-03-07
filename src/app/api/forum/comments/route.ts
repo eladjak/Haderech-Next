@@ -1,8 +1,7 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { _NextRequest, NextResponse } from "next/server";
-import type { Database } from "@/types/database";
-import type { _ForumComment } from "@/types/forum";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase-server";
+import type { ForumComment } from "@/types/forum";
 
 /**
  * @file forum/comments/route.ts
@@ -19,7 +18,8 @@ import type { _ForumComment } from "@/types/forum";
  * @returns {Promise<NextResponse>} JSON response containing the comments or error message
  */
 export async function GET(request: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const postId = request.url.split("/").pop();
 
   try {
@@ -64,7 +64,8 @@ export async function GET(request: Request) {
  * @returns {Promise<NextResponse>} JSON response containing the created comment or error message
  */
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
 
   try {
     const json = await request.json();
@@ -107,7 +108,8 @@ export async function POST(request: Request) {
  * @returns {Promise<NextResponse>} JSON response containing the updated comment or error message
  */
 export async function PUT(request: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const id = request.url.split("/").pop();
 
   try {
@@ -152,7 +154,8 @@ export async function PUT(request: Request) {
  * @returns {Promise<NextResponse>} JSON response indicating success or error
  */
 export async function DELETE(request: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const id = request.url.split("/").pop();
 
   try {

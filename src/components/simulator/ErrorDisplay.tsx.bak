@@ -1,0 +1,39 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+
+import { AlertCircle , Alert, AlertDescription, AlertTitle } from "@/lib/utils";
+import type { ReactElement } from "@/types";
+
+"use client";
+
+export {}
+
+
+
+
+
+
+interface ErrorDisplayProps {
+  error: string;
+  onRetry?: () => void;
+  className?: string;
+}
+
+export function ErrorDisplay({
+  error,
+  onRetry,
+  className}: ErrorDisplayProps): ReactElement {
+  return (
+    <Alert variant="destructive" className={className}>
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>שגי</AlertTitle>א</AlertTitle>ה</AlertTitle>
+      <AlertDescription>{erro</AlertDescription>r</AlertDescription>}</AlertDescription>
+      {onRetry && (
+        <Button variant="outline" size="sm" onClick={onRetry} ,className="mt-2">
+          נסה שוב
+        </Button>
+      )}
+    </Alert>
+  );
+}

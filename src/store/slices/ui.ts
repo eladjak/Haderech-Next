@@ -23,7 +23,7 @@ const initialState: UIState = {
   currentModal: null,
 };
 
-export const uiSlice = createSlice({
+const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
@@ -61,4 +61,6 @@ export const {
   closeModal,
 } = uiSlice.actions;
 
-export const uiReducer = uiSlice.reducer;
+const uiReducer = uiSlice.reducer;
+
+export { uiSlice, uiReducer };

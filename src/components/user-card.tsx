@@ -1,13 +1,13 @@
+"use client";
+
 import { UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { User } from "@/types/api";
-
-("use client");
+import type { UserProfile } from "@/types/models";
 
 interface UserCardProps {
-  user: User;
+  user: UserProfile;
   onFollow?: (userId: string) => void;
   className?: string;
 }
@@ -18,7 +18,7 @@ export function UserCard({ user, onFollow, className }: UserCardProps) {
       <CardHeader className="flex flex-row items-center gap-4">
         <Avatar className="h-12 w-12">
           <AvatarImage src={user.avatar_url || undefined} />
-          <AvatarFallback>{user.name[0]}</AvatarFallback>
+          <AvatarFallback>{user.name?.[0] || "U"}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="font-semibold">{user.name}</div>

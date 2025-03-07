@@ -1,11 +1,12 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type {
-  ForumCategory} from "./forum";
+  ForumCategory,
   ForumFilters,
   ForumPost,
   ForumTag,
 } from "@/types/forum";
 
-interface ForumState {
+export interface ForumState {
   posts: ForumPost[];
   categories: ForumCategory[];
   tags: ForumTag[];
@@ -13,7 +14,6 @@ interface ForumState {
   isLoading: boolean;
   error: string | null;
 }
-
 const initialState: ForumState = {
   posts: [],
   categories: [],
@@ -30,7 +30,7 @@ const initialState: ForumState = {
   error: null,
 };
 
-export const forumSlice = createSlice({
+const forumSlice = createSlice({
   name: "forum",
   initialState,
   reducers: {
@@ -80,3 +80,5 @@ export const {
 } = forumSlice.actions;
 
 export default forumSlice.reducer;
+
+export { forumSlice };

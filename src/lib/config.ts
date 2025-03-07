@@ -1,3 +1,7 @@
+"use client";
+
+export {};
+
 /**
  * Configuration file that centralizes all environment variables
  * Provides default values for build and development environments

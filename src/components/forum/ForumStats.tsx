@@ -1,155 +1,125 @@
-import { _Award, _Eye, _MessageSquare, _ThumbsUp, _TrendingUp, _Users} from "@/components/ui/";\nimport React from "react";
-import { _Avatar, _AvatarFallback } from "@/components/ui/avatar";
-import { _Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { cn } from "@/lib/utils";
-import type { ForumStats as ForumStatsType } from "@/types/forum";
+"use client";
 
-import {
-  _Award,
-  _Eye,
-  _MessageSquare,
-  _ThumbsUp,
-  _TrendingUp,
-  _Users,
-} from "lucide-react";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-
-
-interface ForumStatsProps {
-  stats: ForumStatsType;
+export interface ForumStatsProps {
+  totalPosts: number;
+  totalComments: number;
+  activeUsers: number;
+  trendingTags?: { id: string; name: string; count: number }[];
   className?: string;
 }
 
-const defaultStats: ForumStatsType = {
-  active_users: 0,
-  posts_today: 0,
-  total_posts: 0,
-  total_comments: 0,
-  total_views: 0,
-  total_likes: 0,
-  total_users: 0,
-  total_solved: 0,
-  trending_tags: [],
-  popular_tags: [],
-  top_contributors: [],
-};
-
 export function ForumStats({
-  stats = defaultStats,
+  totalPosts,
+  totalComments,
+  activeUsers,
+  trendingTags = [],
   className,
 }: ForumStatsProps) {
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <CardTitle>סטטיסטיקות פורום</CardTitle>
-        <CardDescription>נתונים כלליים על הפעילות בפורום</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          <div className="space-y-1">
-            <p className="text-sm font-medium">סה&quot;כ פוסטים</p>
-            <p className="text-2xl font-bold">{stats.total_posts}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">סה&quot;כ תגובות</p>
-            <p className="text-2xl font-bold">{stats.total_comments}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">סה&quot;כ משתמשים</p>
-            <p className="text-2xl font-bold">{stats.total_users}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">פוסטים שנפתרו</p>
-            <p className="text-2xl font-bold">{stats.total_solved}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">סה&quot;כ צפיות</p>
-            <p className="text-2xl font-bold">{stats.total_views}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">סה&quot;כ לייקים</p>
-            <p className="text-2xl font-bold">{stats.total_likes}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">משתמשים פעילים</p>
-            <p className="text-2xl font-bold">{stats.active_users}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">פוסטים היום</p>
-            <p className="text-2xl font-bold">{stats.posts_today}</p>
-          </div>
-        </div>
+    <div className={cn("grid gap-4 md:grid-cols-2 lg:grid-cols-4", className)}>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">סך הכל פוסטים</CardTitle>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className="h-4 w-4 text-muted-foreground"
+          >
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{totalPosts}</div>
+        </CardContent>
+      </Card>
 
-        {/* Popular Tags */}
-        {stats.popular_tags && stats.popular_tags.length > 0 && (
-          <div className="mt-6">
-            <h3 className="mb-2 text-lg font-semibold">תגיות פופולריות</h3>
-            <div className="flex flex-wrap gap-2">
-              {stats.popular_tags.map(({ tag, count }) => (
-                <div
-                  key={tag.id}
-                  className="rounded-full bg-muted px-3 py-1 text-sm"
-                >
-                  {tag.name} ({count})
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">סך הכל תגובות</CardTitle>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className="h-4 w-4 text-muted-foreground"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{totalComments}</div>
+        </CardContent>
+      </Card>
 
-        {/* Trending Tags */}
-        {stats.trending_tags && stats.trending_tags.length > 0 && (
-          <div className="mt-6">
-            <h3 className="mb-2 text-lg font-semibold">תגיות במגמת עלייה</h3>
-            <div className="flex flex-wrap gap-2">
-              {stats.trending_tags.map(({ tag, count }) => (
-                <div
-                  key={tag.id}
-                  className="rounded-full bg-muted px-3 py-1 text-sm"
-                >
-                  {tag.name} ({count})
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">משתמשים פעילים</CardTitle>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className="h-4 w-4 text-muted-foreground"
+          >
+            <rect width="20" height="14" x="2" y="5" rx="2" />
+            <path d="M2 10h20" />
+          </svg>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{activeUsers}</div>
+        </CardContent>
+      </Card>
 
-        {/* Top Contributors */}
-        {stats.top_contributors && stats.top_contributors.length > 0 && (
-          <div className="mt-6">
-            <h3 className="mb-2 text-lg font-semibold">תורמים מובילים</h3>
-            <div className="space-y-2">
-              {stats.top_contributors.map((contributor) => (
-                <div
-                  key={contributor.id}
-                  className="flex items-center justify-between rounded-lg bg-muted p-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary" />
-                    <div>
-                      <p className="font-medium">{contributor.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {contributor.posts_count} פוסטים,{" "}
-                        {contributor.likes_received} לייקים
-                      </p>
-                    </div>
-                  </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">תגיות פופולריות</CardTitle>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className="h-4 w-4 text-muted-foreground"
+          >
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          </svg>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1.5">
+            {trendingTags.length > 0 ? (
+              trendingTags.slice(0, 3).map((tag) => (
+                <div key={tag.id} className="flex items-center justify-between">
+                  <span className="text-sm">{tag.name}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {tag.count}
+                  </span>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <span className="text-sm text-muted-foreground">אין תגיות</span>
+            )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

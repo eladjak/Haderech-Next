@@ -1,18 +1,9 @@
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
-import { ChevronDown, ChevronUp, Play } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { cn } from "@/lib/utils";
-import type { Course, CourseLesson, Section } from "@/types/api";
-
 "use client";
 
-
-
-
-
+import { ChevronDown, ChevronUp, Play } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -20,12 +11,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-
+import { cn } from "@/lib/utils";
 
 interface CourseContentProps {
-  course: Course;
+  course: any; // נשנה ל-any במקום Course שחסר
   className?: string;
+}
+
+interface Section {
+  id: string;
+  title: string;
+  description: string;
+  lessons: CourseLesson[];
+}
+
+interface CourseLesson {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  completed?: boolean;
 }
 
 export function CourseContent({ course, className }: CourseContentProps) {
@@ -94,7 +99,7 @@ export function CourseContent({ course, className }: CourseContentProps) {
                         {Math.floor(lesson.duration / 60)}:
                         {String(lesson.duration % 60).padStart(2, "0")}
                       </span>
-                      {lesson.isCompleted && (
+                      {lesson.completed && (
                         <span className="text-success text-sm">✓</span>
                       )}
                     </div>

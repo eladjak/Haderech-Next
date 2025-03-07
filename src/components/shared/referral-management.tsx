@@ -1,8 +1,7 @@
+"use client";
+
 import { Share } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { Input } from "@/components/ui/input";
-
 import {
   Card,
   CardContent,
@@ -10,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import { Input } from "@/components/ui/input";
 
 interface ReferralManagementProps {
   referralCode: string;

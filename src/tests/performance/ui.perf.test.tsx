@@ -1,11 +1,26 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatSimulator } from "@/components/simulator/ChatSimulator";
-import type { Message, SimulatorScenario, SimulatorState} from "@/components/ui/";\nimport type {
+import type { Message, SimulatorScenario, SimulatorState} from "@/components/ui/";
+import type {
+import type {
+
+"use client";
+
+ Message, SimulatorScenario,
+
+
+export {}
+
+
+
+
+
+
   Message,
   SimulatorScenario,
-  SimulatorState,} from "@/types/simulator";
+  SimulatorState} from "@/types/simulator";
 
 const mockScenario: SimulatorScenario = {
   id: "1",
@@ -20,11 +35,9 @@ const mockScenario: SimulatorScenario = {
     minScore: 70,
     requiredSkills: ["תקשורת", "אמפתיה"],
     minDuration: 300,
-    maxDuration: 900,
-  },
+    maxDuration: 900},
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockMessage: Message = {
   id: "1",
@@ -34,11 +47,9 @@ const mockMessage: Message = {
   sender: {
     id: "system",
     name: "המערכת",
-    role: "assistant",
-  },
+    role: "assistant"},
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockState: SimulatorState = {
   id: "1",
@@ -49,8 +60,7 @@ const mockState: SimulatorState = {
   state: "initial",
   messages: [mockMessage],
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const noop = vi.fn();
 
@@ -58,7 +68,7 @@ describe("UI Performance Tests", () => {
   let mockState: SimulatorState;
   const mockHandleMessage = async (message: string) => {
     console.log("Message sent:", message);
-  };
+  }
 
   beforeEach(() => {
     mockState = {
@@ -78,11 +88,9 @@ describe("UI Performance Tests", () => {
           minScore: 70,
           requiredSkills: ["ביצועים"],
           minDuration: 300,
-          maxDuration: 900,
-        },
+          maxDuration: 900},
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
+        updated_at: new Date().toISOString()},
       status: "running",
       state: "initial",
       messages: Array(50).fill({
@@ -95,12 +103,9 @@ describe("UI Performance Tests", () => {
         sender: {
           id: "test-user",
           role: "user",
-          name: "משתמש בדיקה",
-        },
-      }),
+          name: "משתמש בדיקה"}}),
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+      updated_at: new Date().toISOString()};
   });
 
   it("should render quickly with many messages", () => {
@@ -168,7 +173,7 @@ describe("UI Performance Tests", () => {
       const delta = now - lastTime;
       fps.push(1000 / delta);
       lastTime = now;
-    };
+    }
 
     render(
       <ChatSimulator
@@ -246,9 +251,7 @@ describe("UI Performance Tests", () => {
       sender: {
         id: "test-user",
         role: "user",
-        name: "משתמש בדיקה",
-      },
-    });
+        name: "משתמש בדיקה"}});
 
     const start = performance.now();
     render(
@@ -351,13 +354,11 @@ describe("UI Performance Tests", () => {
       .map((_, i) => ({
         ...mockMessage,
         id: `msg-${i}`,
-        content: `הודעה ${i}`,
-      }));
+        content: `הודעה ${i}`}));
 
     const stateWithManyMessages = {
       ...mockState,
-      messages: manyMessages,
-    };
+      messages: manyMessages};
 
     const start = performance.now();
     render(

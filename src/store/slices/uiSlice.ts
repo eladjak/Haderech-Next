@@ -22,7 +22,7 @@ const initialState: UIState = {
   toasts: [],
 };
 
-export const uiSlice = createSlice({
+const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
@@ -74,3 +74,5 @@ export const {
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
+
+export { uiSlice };

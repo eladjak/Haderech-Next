@@ -1,5 +1,20 @@
-import { CourseCard } from "@/components/course-card";
-import type { Course } from "@/types/api";
+"use client";
+
+import { CourseCard } from "@/components/courses/CourseCard";
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  instructor: string;
+  duration: string;
+  students: number;
+  rating: number;
+  progress?: number;
+  level: string;
+  tags: string[];
+  image?: string;
+}
 
 interface CourseListProps {
   courses: Course[];

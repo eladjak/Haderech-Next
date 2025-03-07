@@ -1,14 +1,14 @@
+"use client";
+
+import type { ChatMessage } from "types/models";
 import React from "react";
 import { ChatbotContainer } from "./ChatbotContainer";
-import type { ChatMessage } from "./ChatbotWindow";
-
-("use client");
 
 interface ChatbotProviderProps {
   /** פונקציה לשליחת הודעה ל-AI */
   onSendMessage: (message: string) => Promise<ChatMessage>;
   /** פונקציה לניווט לתוכן קשור */
-  onNavigateToContent: (content: ChatMessage["relatedContent"]) => void;
+  onNavigateToContent: (content: any) => void;
   /** תוכן הילדים */
   children: React.ReactNode;
 }

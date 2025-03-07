@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -48,19 +48,18 @@ const ACHIEVEMENTS_DATA = {
   },
 } as const;
 
+// הגדרת טיפוס מפורש למפתחות של ההישגים
+type AchievementKey = keyof typeof ACHIEVEMENTS_DATA;
+type AchievementId = (typeof ACHIEVEMENTS_DATA)[AchievementKey]["id"];
+
 // Get user achievements
 export async function GET() {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    const supabase = createRouteHandlerClient(
+      { cookies },
       {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       }
     );
 
@@ -117,16 +116,11 @@ export async function GET() {
 // Check achievements and award new ones
 export async function POST(req: Request) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    const supabase = createRouteHandlerClient(
+      { cookies },
       {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       }
     );
 
@@ -161,7 +155,7 @@ export async function POST(req: Request) {
 
     const existingAchievements =
       currentAchievements?.map((a) => a.achievement_id) || [];
-    const newAchievements = [];
+    const newAchievements: AchievementId[] = [];
 
     // Check each achievement condition
     if (

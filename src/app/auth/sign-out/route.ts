@@ -1,6 +1,7 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase-server";
+import type { Database } from "@/types/database";
 
 /**
  * @file route.ts
@@ -16,8 +17,7 @@ import { createServerClient } from "@/lib/supabase-server";
  * @returns {Promise<NextResponse>} Redirects to the home page after sign out
  */
 export async function POST(request: Request) {
-  const cookieStore = cookies();
-  const supabase = createServerClient(cookieStore);
+  const supabase = createRouteHandlerClient<Database>({ cookies });
 
   // Sign out user
   const { error } = await supabase.auth.signOut();

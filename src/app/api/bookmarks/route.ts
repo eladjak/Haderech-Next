@@ -1,7 +1,7 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { Database } from "@/types/supabase";
 
 /**
  * @file bookmarks/route.ts

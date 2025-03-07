@@ -2,12 +2,23 @@ import { render, screen } from "@testing-library/react";
 
 import { Forum } from "@/components/forum/Forum";
 import { ForumStats } from "@/components/forum/ForumStats";
-import type { Author, ForumCategory, ForumPost, ForumStats as ForumStatsType, ForumTag} from "@/components/ui/";\nimport type {
+import type { Author, ForumCategory, ForumPost, ForumStats as ForumStatsType, ForumTag} from "@/components/ui/";
+import type {
+import type {
+
+"use client";
+
+ Author, ForumCategory, ForumPost, ForumStats as ForumStatsType,
+
+
+
+
+
   Author,
   ForumCategory,
   ForumPost,
   ForumStats as ForumStatsType,
-  ForumTag,} from "@/types/forum";
+  ForumTag} from "@/types/forum";
 
 const mockAuthor: Author = {
   id: "1",
@@ -23,10 +34,9 @@ const mockAuthor: Author = {
   badges: [],
   achievements: [],
   full_name: "משתמש בדיקה מלא",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  last_seen: undefined,
-};
+  created_at: new Date.toISOString,
+  updated_at: new Date.toISOString,
+  last_seen: undefined};
 
 const mockCategory: ForumCategory = {
   id: "1",
@@ -38,8 +48,7 @@ const mockCategory: ForumCategory = {
   color: "blue",
   posts_count: 0,
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockTag: ForumTag = {
   id: "1",
@@ -49,8 +58,7 @@ const mockTag: ForumTag = {
   color: "blue",
   posts_count: 0,
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockPost: ForumPost = {
   id: "1",
@@ -69,8 +77,7 @@ const mockPost: ForumPost = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   author: mockAuthor,
-  comments: [],
-};
+  comments: []};
 
 const mockStats: ForumStatsType = {
   total_posts: 100,
@@ -83,8 +90,7 @@ const mockStats: ForumStatsType = {
   posts_today: 5,
   popular_tags: [{ tag: mockTag, count: 10 }],
   top_contributors: [mockAuthor],
-  trending_tags: [{ tag: mockTag, count: 10 }],
-};
+  trending_tags: [{ tag: mockTag, count: 10 }]};
 
 describe("Forum Accessibility Tests", () => {
   it("should have no accessibility violations in Forum component", async () => {

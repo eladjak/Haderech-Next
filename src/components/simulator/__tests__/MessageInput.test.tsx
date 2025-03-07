@@ -1,16 +1,18 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { vi } from "vitest";
-import { MessageInput } from "../MessageInput";
+"use client";
 
-describe("MessageInput", () => {
+import { fireEvent, render, screen } from "@/lib/utils";
+
+import { vi } from "@/lib/utils";
+import { MessageInput } from "@/lib/utils";
+
+describe("MessageInput",  => {
   const defaultProps = {
     message: "",
     isLoading: false,
-    onChange: vi.fn(),
-    onSubmit: vi.fn(),
-  };
+    onChange: vi.fn,
+    onSubmit: vi.fn};
 
-  beforeEach(() => {
+  beforeEach( => {
     vi.clearAllMocks();
   });
 

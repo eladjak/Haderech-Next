@@ -3,6 +3,10 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { ForumComment } from "@/components/forum/ForumComment";
 import type { Author, ExtendedForumComment } from "@/types/forum";
 
+("use client");
+
+export {};
+
 // מוסיף מוקים לפונקציות החסרות
 beforeAll(() => {
   Element.prototype.hasPointerCapture = () => false;

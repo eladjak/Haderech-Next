@@ -1,13 +1,17 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { DELETE, GET, POST } from "../forum/bookmarks/route";
+import { NextResponse } from "next/server";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { NextRequest } from "@/lib/utils"
+
+import { beforeEach, describe, expect, it, vi } from "@/lib/utils";
+import { NextRequest } from "@/lib/utils"
+import { DELETE, GET, POST } from "@/lib/utils";
+
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
-describe("Forum Bookmarks API", () => {
+describe("Forum Bookmarks API",  => {
   const mockUser = {
     id: "test-user-id",
     email: "test@example.com",
@@ -16,18 +20,16 @@ describe("Forum Bookmarks API", () => {
     full_name: "משתמש לדוגמה",
     avatar_url: "/avatar1.jpg",
     image: "/avatar1.jpg",
-    role: "user",
-  };
+    role: "user"};
 
   const mockBookmark = {
     id: "test-bookmark-id",
     post_id: "test-post-id",
     user_id: mockUser.id,
-    created_at: new Date().toISOString(),
-  };
+    created_at: new Date.toISOString};
 
   const mockSupabase = {
-    from: vi.fn(() => ({
+    from: vi.fn( => ({
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
@@ -35,22 +37,16 @@ describe("Forum Bookmarks API", () => {
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(async () => ({
         data: mockBookmark,
-        error: null,
-      })),
-    })),
+        error: null}))})),
     auth: {
       getSession: vi.fn().mockResolvedValue({
         data: { session: { user: mockUser } },
-        error: null,
-      }),
-    },
-  };
+        error: null})}};
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(cookies).mockReturnValue({
-      get: vi.fn().mockReturnValue({ value: "test-token" }),
-    } as any);
+      get: vi.fn().mockReturnValue({ value: "test-token" })} as any);
     vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
   });
 
@@ -62,8 +58,7 @@ describe("Forum Bookmarks API", () => {
         .order()
         .eq.mockResolvedValueOnce({
           data: [mockBookmark],
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks"
@@ -82,8 +77,7 @@ describe("Forum Bookmarks API", () => {
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks"
@@ -93,8 +87,7 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר יש בעיה בשליפת הסימניות", async () => {
@@ -104,8 +97,7 @@ describe("Forum Bookmarks API", () => {
         .order()
         .eq.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        });
+          error: { message: "שגיאת מסד נתונים" }});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks"
@@ -115,15 +107,13 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
   });
 
   describe("POST /api/forum/bookmarks", () => {
     const newBookmark = {
-      post_id: "test-post-id",
-    };
+      post_id: "test-post-id"};
 
     it("יוצר סימניה חדשה בהצלחה", async () => {
       mockSupabase.from().insert.mockReturnThis();
@@ -134,15 +124,13 @@ describe("Forum Bookmarks API", () => {
         .select()
         .single.mockResolvedValueOnce({
           data: { id: "new-bookmark-1", ...newBookmark },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "POST",
-          body: JSON.stringify(newBookmark),
-        }
+          body: JSON.stringify(newBookmark)}
       );
 
       const response = await POST(request);
@@ -156,15 +144,13 @@ describe("Forum Bookmarks API", () => {
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "POST",
-          body: JSON.stringify(newBookmark),
-        }
+          body: JSON.stringify(newBookmark)}
       );
 
       const response = await POST(request);
@@ -172,8 +158,7 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר הפוסט לא נמצא", async () => {
@@ -183,15 +168,13 @@ describe("Forum Bookmarks API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: null,
-          error: { message: "הפוסט לא נמצא" },
-        });
+          error: { message: "הפוסט לא נמצא" }});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "POST",
-          body: JSON.stringify(newBookmark),
-        }
+          body: JSON.stringify(newBookmark)}
       );
 
       const response = await POST(request);
@@ -199,8 +182,7 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "הפוסט לא נמצא",
-      });
+        error: "הפוסט לא נמצא"});
     });
 
     it("מחזיר שגיאה כאשר כבר קיימת סימניה", async () => {
@@ -210,19 +192,16 @@ describe("Forum Bookmarks API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "test-post-id" },
-          error: null,
-        })
+          error: null})
         .mockResolvedValueOnce({
           data: { id: "existing-bookmark" },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "POST",
-          body: JSON.stringify(newBookmark),
-        }
+          body: JSON.stringify(newBookmark)}
       );
 
       const response = await POST(request);
@@ -230,8 +209,7 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "כבר סימנת פוסט זה",
-      });
+        error: "כבר סימנת פוסט זה"});
     });
   });
 
@@ -239,17 +217,14 @@ describe("Forum Bookmarks API", () => {
     it("מוחק סימניה בהצלחה", async () => {
       mockSupabase.from().delete().eq.mockResolvedValueOnce({
         data: null,
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "DELETE",
           body: JSON.stringify({
-            post_id: "test-post-id",
-          }),
-        }
+            post_id: "test-post-id"})}
       );
 
       const response = await DELETE(request);
@@ -257,24 +232,20 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual({
-        message: "הסימניה הוסרה בהצלחה",
-      });
+        message: "הסימניה הוסרה בהצלחה"});
     });
 
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "DELETE",
           body: JSON.stringify({
-            post_id: "test-post-id",
-          }),
-        }
+            post_id: "test-post-id"})}
       );
 
       const response = await DELETE(request);
@@ -282,8 +253,7 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר חסר מזהה פוסט", async () => {
@@ -291,8 +261,7 @@ describe("Forum Bookmarks API", () => {
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "DELETE",
-          body: JSON.stringify({}),
-        }
+          body: JSON.stringify({})}
       );
 
       const response = await DELETE(request);
@@ -300,8 +269,7 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "נדרש מזהה פוסט",
-      });
+        error: "נדרש מזהה פוסט"});
     });
 
     it("מחזיר שגיאה כאשר הסימניה לא נמצאה", async () => {
@@ -310,17 +278,14 @@ describe("Forum Bookmarks API", () => {
         .delete()
         .eq.mockResolvedValueOnce({
           data: null,
-          error: { message: "הסימניה לא נמצאה" },
-        });
+          error: { message: "הסימניה לא נמצאה" }});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/bookmarks",
         {
           method: "DELETE",
           body: JSON.stringify({
-            post_id: "test-post-id",
-          }),
-        }
+            post_id: "test-post-id"})}
       );
 
       const response = await DELETE(request);
@@ -328,8 +293,7 @@ describe("Forum Bookmarks API", () => {
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "הסימניה לא נמצאה",
-      });
+        error: "הסימניה לא נמצאה"});
     });
   });
 });

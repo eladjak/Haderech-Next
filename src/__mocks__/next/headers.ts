@@ -1,8 +1,4 @@
 import { vi } from "vitest";
 
-export const cookies = () => ({
-  get: vi.fn().mockReturnValue({ value: "mock-cookie-value" }),
-  getAll: vi.fn().mockReturnValue([]),
-  set: vi.fn(),
-  delete: vi.fn(),
-});
+export const headers = vi.fn().mockReturnValue(new Map());
+export const cookies = vi.fn().mockReturnValue(new Map());

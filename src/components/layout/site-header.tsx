@@ -1,7 +1,9 @@
+"use client";
+
 import { LanguageSelector } from "@/components/language-selector";
 import { MainNav } from "@/components/layout/main-nav";
 import { UserNav } from "@/components/layout/user-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function SiteHeader() {
   return (

@@ -6,6 +6,10 @@ import { expect } from "vitest";
 import type { Mock } from "vitest";
 import React from "react";
 
+("use client");
+
+export {};
+
 // מוק סטור בסיסי לטסטים
 const mockStore = configureStore({
   reducer: {

@@ -1,9 +1,9 @@
+"use client";
+
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -69,7 +69,7 @@ const DropdownMenuContent = React.forwardRef<
         ref={ref}
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
         )}
         {...props}
@@ -110,7 +110,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
         "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
-      checked={checked || false}
+      checked={checked}
       {...props}
     >
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
@@ -213,45 +213,3 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
 };
-
-export type DropdownMenuProps = React.ComponentProps<typeof DropdownMenu>;
-export type DropdownMenuTriggerProps = React.ComponentProps<
-  typeof DropdownMenuTrigger
->;
-export type DropdownMenuContentProps = React.ComponentProps<
-  typeof DropdownMenuContent
->;
-export type DropdownMenuItemProps = React.ComponentProps<
-  typeof DropdownMenuItem
->;
-export type DropdownMenuCheckboxItemProps = React.ComponentProps<
-  typeof DropdownMenuCheckboxItem
->;
-export type DropdownMenuRadioItemProps = React.ComponentProps<
-  typeof DropdownMenuRadioItem
->;
-export type DropdownMenuLabelProps = React.ComponentProps<
-  typeof DropdownMenuLabel
->;
-export type DropdownMenuSeparatorProps = React.ComponentProps<
-  typeof DropdownMenuSeparator
->;
-export type DropdownMenuShortcutProps = React.ComponentProps<
-  typeof DropdownMenuShortcut
->;
-export type DropdownMenuGroupProps = React.ComponentProps<
-  typeof DropdownMenuGroup
->;
-export type DropdownMenuPortalProps = React.ComponentProps<
-  typeof DropdownMenuPortal
->;
-export type DropdownMenuSubProps = React.ComponentProps<typeof DropdownMenuSub>;
-export type DropdownMenuSubContentProps = React.ComponentProps<
-  typeof DropdownMenuSubContent
->;
-export type DropdownMenuSubTriggerProps = React.ComponentProps<
-  typeof DropdownMenuSubTrigger
->;
-export type DropdownMenuRadioGroupProps = React.ComponentProps<
-  typeof DropdownMenuRadioGroup
->;

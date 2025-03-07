@@ -1,12 +1,28 @@
-import type { User } from "./api";
+/**
+ * טיפוסים עבור מערכת הפורום
+ */
+
 import type { Database } from "./database";
 
-export type Tables<T extends keyof Database["public"]["Tables"]> =
+export type DbResult<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
 
-export interface Author extends User {
-  posts_count?: number;
-  likes_received?: number;
+export interface Author {
+  id: string;
+  name: string;
+  email?: string;
+  username?: string;
+  avatar_url?: string;
+  image?: string;
+  role?: string;
+  points?: number;
+  level?: number;
+  badges?: any[];
+  achievements?: any[];
+  full_name?: string;
+  bio?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface BaseForumPost {
@@ -25,7 +41,6 @@ export interface BaseForumPost {
   created_at: string;
   updated_at: string;
 }
-
 export interface ForumPost extends BaseForumPost {
   author: Author;
   comments?: ForumComment[];
@@ -42,17 +57,12 @@ export interface ExtendedForumPost extends BaseForumPost {
 export interface ForumComment {
   id: string;
   content: string;
-  post_id: string;
-  author_id: string;
-  parent_id?: string;
-  likes: number;
-  created_at: string;
-  updated_at: string;
   author: Author;
-  user: Author;
-  replies?: ForumComment[];
+  post_id?: string;
+  likes?: number;
+  created_at: string;
+  updated_at?: string;
 }
-
 export interface ExtendedForumComment extends ForumComment {
   post: ForumPost;
   liked_by_user?: boolean;
@@ -70,22 +80,19 @@ export interface ForumTag {
   created_at: string;
   updated_at: string;
 }
-
 export interface ForumCategory {
   id: string;
   name: string;
   description: string;
   slug: string;
-  color: string;
   order: number;
   icon: string;
+  color: string;
   posts_count: number;
-  last_post?: ForumPost;
   created_at: string;
   updated_at: string;
 }
-
-export type ForumPostTag = Tables<"forum_post_tags">;
+export type ForumPostTag = DbResult<"forum_post_tags">;
 
 export interface ForumStats {
   total_users: number;
@@ -135,11 +142,9 @@ export interface ForumProps {
   isLoading?: boolean;
   error?: string;
 }
-
 export interface ForumStatsProps {
   stats: ForumStats;
 }
-
 export type ForumStatsType = ForumStats;
 
 export interface ForumPostWithAuthor extends ForumPost {

@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -83,10 +85,3 @@ export {
   CardDescription,
   CardContent,
 };
-
-export type CardProps = React.ComponentProps<typeof Card>;
-export type CardHeaderProps = React.ComponentProps<typeof CardHeader>;
-export type CardFooterProps = React.ComponentProps<typeof CardFooter>;
-export type CardTitleProps = React.ComponentProps<typeof CardTitle>;
-export type CardDescriptionProps = React.ComponentProps<typeof CardDescription>;
-export type CardContentProps = React.ComponentProps<typeof CardContent>;

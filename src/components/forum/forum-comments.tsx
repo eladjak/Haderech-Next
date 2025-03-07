@@ -1,3 +1,5 @@
+"use client";
+
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

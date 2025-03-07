@@ -1,10 +1,13 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
-import { mockSupabaseClient } from "@/tests/utils/test-mocks";
-import { DELETE, GET as GET_ID, PATCH } from "../courses/[id]/route";
-import { GET, POST } from "../courses/route";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { NextRequest } from "@/lib/utils";
+
+import { beforeEach, describe, expect, it, vi } from "@/lib/utils";
+import { NextRequest } from "@/lib/utils";
+import { mockSupabaseClient } from "@/lib/utils";
+import { DELETE, GET as GET_ID, PATCH } from "@/lib/utils";
+import { GET, POST } from "@/lib/utils";
+
 
 /**
  * @file course.test.ts
@@ -14,10 +17,10 @@ import { GET, POST } from "../courses/route";
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
-describe("Course API", () => {
+describe("Course API",  => {
   const mockSupabase = {
-    from: vi.fn().mockImplementation(() => ({
-      select: vi.fn().mockReturnThis(),
+    from: vi.fn.mockImplementation( => ({
+      select: vi.fn.mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(() =>
         Promise.resolve({
@@ -26,22 +29,16 @@ describe("Course API", () => {
             title: "Test Course",
             description: "Test Description",
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        })
+            updated_at: new Date().toISOString()}})
       ),
       insert: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-    })),
+      order: vi.fn().mockReturnThis()})),
     auth: {
       getUser: vi.fn().mockResolvedValue({
         data: { user: { id: "test-user-id" } },
-        error: null,
-      }),
-    },
-  };
+        error: null})}};
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -51,8 +48,7 @@ describe("Course API", () => {
     vi.mocked(cookies).mockImplementation(
       () =>
         ({
-          get: vi.fn().mockImplementation(() => ({ value: "test-cookie" })),
-        }) as any
+          get: vi.fn().mockImplementation(() => ({ value: "test-cookie" }))}) as any
     );
   });
 
@@ -67,12 +63,9 @@ describe("Course API", () => {
               title: "Test Course",
               description: "Test Description",
               created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
+              updated_at: new Date().toISOString()},
           ],
-          error: null,
-        }),
-      });
+          error: null})});
 
       const response = await GET({} as NextRequest);
       const data = await response.json();
@@ -85,8 +78,7 @@ describe("Course API", () => {
   describe("GET specific course", () => {
     it("should return course data", async () => {
       const response = await GET_ID({} as NextRequest, {
-        params: { id: "test-id" },
-      });
+        params: { id: "test-id" }});
       const data = await response.json();
 
       expect(data).toHaveProperty("course");
@@ -94,22 +86,18 @@ describe("Course API", () => {
         expect.objectContaining({
           id: "test-id",
           title: "Test Course",
-          description: "Test Description",
-        })
-      );
+          description: "Test Description"}); );
     });
 
     it("should handle missing course", async () => {
       mockSupabase.from().single = vi.fn().mockImplementation(() =>
         Promise.resolve({
           data: null,
-          error: { message: "Not found", code: "PGRST116" },
-        })
+          error: { message: "Not found", code: "PGRST116" }})
       );
 
       const response = await GET_ID({} as NextRequest, {
-        params: { id: "missing-id" },
-      });
+        params: { id: "missing-id" }});
 
       expect(response.status).toBe(404);
     });
@@ -121,9 +109,7 @@ describe("Course API", () => {
         json: () =>
           Promise.resolve({
             title: "New Course",
-            description: "New Description",
-          }),
-      } as unknown as NextRequest;
+            description: "New Description"})} as unknown as NextRequest;
 
       const response = await POST(mockRequest);
       const data = await response.json();
@@ -132,9 +118,7 @@ describe("Course API", () => {
       expect(data.course).toEqual(
         expect.objectContaining({
           title: "Test Course",
-          description: "Test Description",
-        })
-      );
+          description: "Test Description"}); );
     });
   });
 
@@ -144,13 +128,10 @@ describe("Course API", () => {
         json: () =>
           Promise.resolve({
             title: "Updated Course",
-            description: "Updated Description",
-          }),
-      } as unknown as NextRequest;
+            description: "Updated Description"})} as unknown as NextRequest;
 
       const response = await PATCH(mockRequest, {
-        params: { id: "test-id" },
-      });
+        params: { id: "test-id" }});
       const data = await response.json();
 
       expect(data).toHaveProperty("course");
@@ -158,17 +139,14 @@ describe("Course API", () => {
         expect.objectContaining({
           id: "test-id",
           title: "Test Course",
-          description: "Test Description",
-        })
-      );
+          description: "Test Description"}); );
     });
   });
 
   describe("DELETE", () => {
     it("should delete a course", async () => {
       const response = await DELETE({} as NextRequest, {
-        params: { id: "test-id" },
-      });
+        params: { id: "test-id" }});
 
       expect(response.status).toBe(200);
       const data = await response.json();

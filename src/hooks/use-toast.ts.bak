@@ -1,0 +1,30 @@
+import { toast } from "@/lib/utils";
+
+("@/lib/utils");
+
+export {};
+
+interface ToastProps {
+  title: string;
+  description?: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+export function useToast() {
+  return {
+    toast: ({ title, description, action }: ToastProps) => {
+      toast(title, {
+        description,
+        action: action
+          ? {
+              label: action.label,
+              onClick: action.onClick,
+            }
+          : undefined,
+      });
+    },
+  };
+}

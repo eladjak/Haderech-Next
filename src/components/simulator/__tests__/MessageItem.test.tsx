@@ -1,19 +1,28 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import type { Message } from "@/types/simulator";
-import { MessageItem } from "../MessageItem";
+"use client";
+
+import {
+  describe,
+  expect,
+  fireEvent,
+  it,
+  MessageItem,
+  render,
+  screen,
+  vi,
+} from "@/lib/utils";
+import type { Message } from "@/types";
 
 const mockMessage: Message = {
   id: "1",
   role: "user",
   content: "הודעת בדיקה",
-  timestamp: new Date().toISOString(),
+  timestamp: new Date.toISOString(),
   sender: {
     id: "1",
     name: "משתמש",
     role: "user" as const,
   },
-  created_at: new Date().toISOString(),
+  created_at: new Date.toISOString(),
   updated_at: new Date().toISOString(),
 };
 

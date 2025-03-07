@@ -1,6 +1,10 @@
 import { vi } from "vitest";
 import React from "react";
 
+("use client");
+
+export {};
+
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

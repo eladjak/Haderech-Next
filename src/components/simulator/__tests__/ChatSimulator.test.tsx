@@ -1,14 +1,12 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+"use client";
 
-import { ChatSimulator } from "../ChatSimulator";
-import type { Message, SimulatorScenario, SimulatorState,
+import { render, screen } from "@/lib/utils";
 
-import type {
-  Message,
-  SimulatorScenario,
-  SimulatorState,
-} from "@/types/simulator";
+import { describe, expect, it, vi } from "@/lib/utils";
+import { ChatSimulator } from "@/lib/utils";
+import { Message, SimulatorScenario, SimulatorState, import {
+
+  Message, SimulatorScenario, SimulatorState } from "@/lib/utils";
 
 
 const mockScenario: SimulatorScenario = {
@@ -24,11 +22,9 @@ const mockScenario: SimulatorScenario = {
     minScore: 70,
     requiredSkills: ["תקשורת", "אמפתיה"],
     minDuration: 300,
-    maxDuration: 900,
-  },
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+    maxDuration: 900},
+  created_at: new Date.toISOString,
+  updated_at: new Date.toISOString};
 
 const mockMessage: Message = {
   id: "1",
@@ -38,11 +34,9 @@ const mockMessage: Message = {
   sender: {
     id: "1",
     name: "משתמש",
-    role: "user",
-  },
+    role: "user"},
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockState: SimulatorState = {
   id: "1",
@@ -53,8 +47,7 @@ const mockState: SimulatorState = {
   state: "initial",
   messages: [mockMessage],
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 describe("ChatSimulator", () => {
   const mockSendMessage = vi

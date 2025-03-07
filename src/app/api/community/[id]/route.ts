@@ -1,7 +1,7 @@
-import { createServerClient } from "@supabase/ssr";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { Database } from "@/types/supabase";
 
 /**
  * @file community/[id]/route.ts
@@ -41,18 +41,7 @@ interface RouteParams {
  */
 export async function GET(_: Request, { params }: RouteParams) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     const { data: post, error } = await supabase
       .from("posts")
@@ -117,18 +106,7 @@ export async function GET(_: Request, { params }: RouteParams) {
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     // Check authentication
     const {
@@ -205,18 +183,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
  */
 export async function DELETE(_: Request, { params }: RouteParams) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     // Check authentication
     const {

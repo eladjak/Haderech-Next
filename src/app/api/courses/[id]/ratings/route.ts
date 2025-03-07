@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase-server";
+import { createClient } from "@/lib/supabase-server";
 
 /**
  * @file courses/[id]/ratings/route.ts
@@ -43,9 +43,9 @@ interface RouteParams {
 export async function GET(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+    const supabase = createClient(cookieStore);
 
-    const { data: ratings, error } = await supabase
+    const { data: ratings } = await supabase
       .from("course_ratings")
       .select(
         `
@@ -56,19 +56,15 @@ export async function GET(_: Request, { params }: RouteParams) {
       .eq("course_id", params.id)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching ratings:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch ratings" },
-        { status: 500 }
-      );
+    if (!ratings || ratings.length === 0) {
+      return NextResponse.json({ ratings: [] }, { status: 200 });
     }
 
-    return NextResponse.json(ratings);
+    return NextResponse.json({ ratings }, { status: 200 });
   } catch (error) {
-    console.error("Error in GET /api/courses/[id]/ratings:", error);
+    console.error("Error in ratings GET:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to fetch ratings" },
       { status: 500 }
     );
   }
@@ -96,7 +92,7 @@ export async function GET(_: Request, { params }: RouteParams) {
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+    const supabase = createClient(cookieStore);
 
     // Verify authentication
     const {
@@ -198,7 +194,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(cookieStore);
+    const supabase = createClient(cookieStore);
 
     // Verify authentication
     const {

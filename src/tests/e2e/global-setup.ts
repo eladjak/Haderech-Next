@@ -2,6 +2,10 @@ import { chromium, FullConfig } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 
+("use client");
+
+export {};
+
 // טעינת משתני סביבה
 dotenv.config({ path: ".env.test" });
 

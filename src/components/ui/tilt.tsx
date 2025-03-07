@@ -1,17 +1,13 @@
-import { _motion, _useMotionValue, _useSpring, type _HTMLMotionProps} from "@/components/ui/";\nimport * as React from "react";
-
-import { cn } from "@/lib/utils";
-
 "use client";
 
 import {
-  _motion,
-  _useMotionValue,
-  _useSpring,
-  type _HTMLMotionProps,
+  motion,
+  useMotionValue,
+  useSpring,
+  type HTMLMotionProps,
 } from "framer-motion";
-
-
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface TiltProps extends React.HTMLAttributes<HTMLDivElement> {
   perspective?: number;

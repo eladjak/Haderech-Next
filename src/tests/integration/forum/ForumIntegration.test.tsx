@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
+
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-
 import { CreatePost } from "@/components/forum/CreatePost";
 import { Forum } from "@/components/forum/Forum";
 import { ForumComment } from "@/components/forum/ForumComment";
@@ -9,6 +9,19 @@ import { ForumFilters } from "@/components/forum/ForumFilters";
 import { ForumPost } from "@/components/forum/ForumPost";
 import { ForumStats } from "@/components/forum/ForumStats";
 import type { Author, ForumCategory, ForumPost as ForumPostType, ForumStats as ForumStatsType, ForumTag,
+import type {
+import type {
+
+ Author, ForumCategory, ForumPost as ForumPostType, ForumStats as ForumStatsType,
+
+
+
+
+
+
+
+
+
 
 /**
  * @file ForumIntegration.test.tsx
@@ -24,29 +37,24 @@ import type { Author, ForumCategory, ForumPost as ForumPostType, ForumStats as F
 
 
 
-import type {
   Author,
   ForumCategory,
   ForumPost as ForumPostType,
   ForumStats as ForumStatsType,
-  ForumTag,} from "@/types/forum";
+  ForumTag} from "@/types/forum";
 
 // Mock useToast
-const mockToast = vi.fn();
-vi.mock("@/components/ui/use-toast", () => ({
-  useToast: () => ({
-    toast: mockToast,
-  }),
-}));
+const mockToast = vi.fn;
+vi.mock("@/components/ui/use-toast",  => ({
+  useToast:  => ({
+    toast: mockToast})}));
 
 // Mock useRouter
 const mockRouter = {
-  refresh: vi.fn(),
-  push: vi.fn(),
-};
+  refresh: vi.fn,
+  push: vi.fn()};
 vi.mock("next/navigation", () => ({
-  useRouter: () => mockRouter,
-}));
+  useRouter: () => mockRouter}));
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -71,8 +79,7 @@ describe("Forum Integration Tests", () => {
     bio: undefined,
     last_seen: undefined,
     posts_count: 0,
-    likes_received: 0,
-  };
+    likes_received: 0};
 
   const mockCategory: ForumCategory = {
     id: "1",
@@ -84,8 +91,7 @@ describe("Forum Integration Tests", () => {
     color: "blue",
     posts_count: 0,
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+    updated_at: new Date().toISOString()};
 
   const mockTag: ForumTag = {
     id: "1",
@@ -95,8 +101,7 @@ describe("Forum Integration Tests", () => {
     color: "blue",
     posts_count: 0,
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+    updated_at: new Date().toISOString()};
 
   const mockPost: ForumPostType = {
     id: "1",
@@ -115,8 +120,7 @@ describe("Forum Integration Tests", () => {
     tags: [mockTag],
     comments: [],
     comments_count: 0,
-    last_activity: new Date().toISOString(),
-  };
+    last_activity: new Date().toISOString()};
 
   const mockStats: ForumStatsType = {
     total_posts: 100,
@@ -128,25 +132,21 @@ describe("Forum Integration Tests", () => {
     trending_tags: [
       {
         tag: mockTag,
-        count: 5,
-      },
+        count: 5},
     ],
     top_contributors: [
       {
         ...mockAuthor,
         posts_count: 10,
-        likes_received: 20,
-      },
+        likes_received: 20},
     ],
     total_users: 1,
     total_solved: 0,
     popular_tags: [
       {
         tag: mockTag,
-        count: 1,
-      },
-    ],
-  };
+        count: 1},
+    ]};
 
   it("מציג את כל רכיבי הפורום בצורה תקינה", () => {
     render(
@@ -184,18 +184,14 @@ describe("Forum Integration Tests", () => {
     await userEvent.type(searchInput, "javascript");
     expect(mockOnFilter).toHaveBeenCalledWith(
       expect.objectContaining({
-        search: "javascript",
-      })
-    );
+        search: "javascript"}); );
 
     // מיון
     const sortSelect = screen.getByRole("combobox", { name: "מיין תוצאות" });
     await userEvent.selectOptions(sortSelect, "popular");
     expect(mockOnFilter).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: "popular",
-      })
-    );
+        sort: "popular"}); );
   });
 
   it("מאפשר יצירת פוסט חדש", async () => {
@@ -213,9 +209,7 @@ describe("Forum Integration Tests", () => {
     // בדיקה שהטוסט הוצג
     expect(mockToast).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "הפוסט נוצר בהצלחה",
-      })
-    );
+        title: "הפוסט נוצר בהצלחה"}); );
   });
 
   it("מאפשר אינטראקציה עם פוסט", async () => {

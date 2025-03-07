@@ -1,18 +1,31 @@
-import { cleanup, fireEvent, render, screen, waitFor} from "@/components/ui/";\nimport { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { ThemeProvider, useTheme } from "next-themes";
-
-import { ThemeToggle } from "@/components/theme-toggle";
-
-import type { UseThemeProps } from "next-themes/dist/types";
-
 import {
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ThemeProvider, useTheme } from "next-themes";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { cleanup, fireEvent, render, screen, waitFor} from "@/components/ui/";
+import type { UseThemeProps } from "next-themes/dist/types";
+import {
+
+"use client";
+
+ cleanup, fireEvent, render, screen,
+export {}
+
   cleanup,
   fireEvent,
   render,
   screen,
-  waitFor,
-} from "@testing-library/react";
+  waitFor} from "@testing-library/react";
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -23,8 +36,7 @@ vi.mock("next-themes", () => ({
   useTheme: vi.fn(),
   ThemeProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
-  ),
-}));
+  )}));
 
 // Mock the theme hook implementation
 const mockSetTheme = vi.fn();
@@ -38,8 +50,7 @@ vi.mocked(useTheme).mockImplementation(
       themes: ["light", "dark", "system"],
       systemTheme: "light",
       resolvedTheme: mockTheme,
-      forcedTheme: mockTheme,
-    }) as UseThemeProps
+      forcedTheme: mockTheme}) as UseThemeProps
 );
 
 // Mock Radix UI components
@@ -49,15 +60,13 @@ vi.mock("@/components/ui/dropdown-menu", () => ({
   ),
   DropdownMenuTrigger: ({
     children,
-    asChild,
-  }: {
+    asChild}: {
     children: React.ReactNode;
     asChild?: boolean;
   }) => <div data-testid="theme-toggle-trigger">{children}</div>,
   DropdownMenuContent: ({
     children,
-    align,
-  }: {
+    align}: {
     children: React.ReactNode;
     align?: string;
   }) => (
@@ -71,8 +80,7 @@ vi.mock("@/components/ui/dropdown-menu", () => ({
   ),
   DropdownMenuItem: ({
     children,
-    onClick,
-  }: {
+    onClick}: {
     children: React.ReactNode;
     onClick?: () => void;
   }) => (
@@ -84,8 +92,7 @@ vi.mock("@/components/ui/dropdown-menu", () => ({
     >
       {children}
     </div>
-  ),
-}));
+  )}));
 
 // Mock Button component
 vi.mock("@/components/ui/button", () => ({
@@ -107,8 +114,7 @@ vi.mock("@/components/ui/button", () => ({
     >
       {children}
     </button>
-  ),
-}));
+  )}));
 
 describe("ThemeToggle", () => {
   beforeEach(() => {
@@ -126,7 +132,7 @@ describe("ThemeToggle", () => {
         <ThemeToggle />
       </ThemeProvider>
     );
-  };
+  }
 
   it("מציג את כפתור החלפת ערכת הנושא", () => {
     renderThemeToggle();

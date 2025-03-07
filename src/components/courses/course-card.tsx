@@ -1,7 +1,7 @@
+"use client";
+
 import { Clock, Users } from "lucide-react";
 import Image from "next/image";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/";\nimport type { CourseWithRelations } from "@/types/courses";
-
 import {
   Card,
   CardContent,
@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import type { CourseWithRelations } from "@/types/courses";
 
 interface CourseCardProps {
   course: CourseWithRelations;

@@ -1,9 +1,65 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { User, UserPreferences, UserProgress } from "@/types/models";
+import type { User, UserPreferences } from "@/types/models";
+
+// הגדרת טיפוס UserProgress מקומית כיוון שהוא לא קיים בקובץ models.ts
+interface UserProgress {
+  id: string;
+  user_id: string;
+  points: number;
+  level: number;
+  xp: number;
+  next_level_xp: number;
+  badges: string[];
+  achievements: string[];
+  created_at: string;
+  updated_at: string;
+  completedLessons: string[];
+  courseProgress: Record<string, number>;
+  courses: {
+    completed: string[];
+    in_progress: string[];
+    bookmarked: string[];
+  };
+  lessons: {
+    completed: string[];
+    in_progress: string[];
+  };
+  simulator: {
+    completed_scenarios: string[];
+    results: any[];
+    stats: {
+      total_sessions: number;
+      average_score: number;
+      time_spent: number;
+    };
+  };
+  forum: {
+    posts: string[];
+    comments: string[];
+    likes: string[];
+    bookmarks: string[];
+  };
+}
+
+// הרחבת טיפוס העדפות המשתמש
+interface ExtendedUserPreferences extends UserPreferences {
+  notifications: {
+    email: boolean;
+    push: boolean;
+    desktop: boolean;
+  };
+  simulator: {
+    difficulty: string;
+    language: string;
+    feedback_frequency: string;
+    auto_suggestions: boolean;
+    theme: string;
+  };
+}
 
 interface UserState {
   user: User | null;
-  preferences: UserPreferences;
+  preferences: ExtendedUserPreferences;
   progress: UserProgress;
   loading: boolean;
   error: string | null;
@@ -12,6 +68,7 @@ interface UserState {
 const initialState: UserState = {
   user: null,
   preferences: {
+    email_notifications: true,
     theme: "system",
     language: "he",
     notifications: {
@@ -69,7 +126,7 @@ const initialState: UserState = {
   error: null,
 };
 
-export const userSlice = createSlice({
+const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
@@ -78,7 +135,7 @@ export const userSlice = createSlice({
     },
     updatePreferences: (
       state,
-      action: PayloadAction<Partial<UserPreferences>>
+      action: PayloadAction<Partial<ExtendedUserPreferences>>
     ) => {
       state.preferences = { ...state.preferences, ...action.payload };
     },
@@ -98,18 +155,14 @@ export const userSlice = createSlice({
       state.progress.courseProgress[courseId] = progress;
     },
     updatePoints: (state, action: PayloadAction<number>) => {
-      if (state.user) {
-        state.user.points = action.payload;
-      }
+      state.progress.points = action.payload;
     },
     updateLevel: (state, action: PayloadAction<number>) => {
-      if (state.user) {
-        state.user.level = action.payload;
-      }
+      state.progress.level = action.payload;
     },
     addBadge: (state, action: PayloadAction<string>) => {
-      if (state.user && !state.user.badges.includes(action.payload)) {
-        state.user.badges.push(action.payload);
+      if (!state.progress.badges.includes(action.payload)) {
+        state.progress.badges.push(action.payload);
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -135,3 +188,5 @@ export const {
 } = userSlice.actions;
 
 export default userSlice.reducer;
+
+export { userSlice };

@@ -1,14 +1,17 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { ErrorDisplay } from "../ErrorDisplay";
+"use client";
 
-describe("ErrorDisplay", () => {
-  it("מציג את הודעת השגיאה", () => {
+import { fireEvent, render, screen } from "@/lib/utils";
+
+import { describe, expect, it, vi } from "@/lib/utils";
+import { ErrorDisplay } from "@/lib/utils";
+
+describe("ErrorDisplay",  => {
+  it("מציג את הודעת השגיאה",  => {
     render(<ErrorDisplay error="שגיאת בדיקה" />);
-    expect(screen.getByText("שגיאת בדיקה")).toBeInTheDocument();
+    expect(screen.getByText("שגיאת בדיקה")).toBeInTheDocument;
   });
 
-  it("מציג כפתור נסה שוב כשמועבר onRetry", () => {
+  it("מציג כפתור נסה שוב כשמועבר onRetry",  => {
     const mockRetry = vi.fn();
     render(<ErrorDisplay error="שגיאה" onRetry={mockRetry} />);
     expect(screen.getByText("נסה שוב")).toBeInTheDocument();

@@ -1,10 +1,20 @@
-import type { Author, ForumCategory, ForumComment, ForumPost, ForumStats, ForumTag} from "@/components/ui/";\nimport type {
+import type { User } from "types/api";
+import type {
   Author,
   ForumCategory,
   ForumComment,
   ForumPost,
   ForumStats,
-  ForumTag,} from "@/types/forum";
+  ForumTag,
+} from "@/types/forum";
+
+// הגדרת טיפוס עזר המשתמש בתכונות הנדרשות
+interface TestUser extends User {
+  full_name: string;
+  level: string;
+  posts_count?: number;
+  likes_received?: number;
+}
 
 // פיקסצ'רים למשתמשים
 export const users = {
@@ -17,16 +27,16 @@ export const users = {
     avatar_url: undefined,
     bio: undefined,
     username: "regular_user",
-    role: "user",
+    role: "user" as const,
     points: 100,
-    level: 1,
+    level: "1",
     badges: [],
     achievements: [],
     full_name: "משתמש רגיל",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     last_seen: undefined,
-  } as Author,
+  } as TestUser,
 
   // מנהל
   adminUser: {
@@ -37,16 +47,16 @@ export const users = {
     avatar_url: undefined,
     bio: undefined,
     username: "admin_user",
-    role: "admin",
+    role: "admin" as const,
     points: 500,
-    level: 5,
+    level: "5",
     badges: [],
     achievements: [],
     full_name: "מנהל מערכת",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     last_seen: undefined,
-  } as Author,
+  } as TestUser,
 
   // מדריך
   instructorUser: {
@@ -57,16 +67,16 @@ export const users = {
     avatar_url: undefined,
     bio: undefined,
     username: "instructor_user",
-    role: "instructor",
+    role: "instructor" as const,
     points: 300,
-    level: 3,
+    level: "3",
     badges: [],
     achievements: [],
     full_name: "מדריך",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     last_seen: undefined,
-  } as Author,
+  } as TestUser,
 };
 
 // פיקסצ'רים לקטגוריות

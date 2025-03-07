@@ -394,7 +394,7 @@ export interface Database {
           learning_objectives: string[];
           success_criteria: {
             type: string;
-            value: any;
+            value: unknown;
           }[];
           created_at: string;
           updated_at: string;
@@ -410,7 +410,7 @@ export interface Database {
           learning_objectives?: string[];
           success_criteria?: {
             type: string;
-            value: any;
+            value: unknown;
           }[];
           created_at?: string;
           updated_at?: string;
@@ -426,7 +426,7 @@ export interface Database {
           learning_objectives?: string[];
           success_criteria?: {
             type: string;
-            value: any;
+            value: unknown;
           }[];
           created_at?: string;
           updated_at?: string;

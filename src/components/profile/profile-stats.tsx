@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { Progress } from "@/components/ui/progress";
+"use client";
 
 import {
   Card,
@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import { Progress } from "@/components/ui/progress";
 
 interface ProfileStatsProps {
   stats: {

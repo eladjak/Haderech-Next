@@ -1,8 +1,7 @@
-import { _motion, _useAnimation } from "framer-motion";
-import * as React from "react";
-import { _cn } from "@/lib/utils";
+"use client";
 
-("use client");
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface TypewriterProps {
   text: string;

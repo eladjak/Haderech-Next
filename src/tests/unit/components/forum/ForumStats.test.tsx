@@ -1,10 +1,20 @@
 import { render, screen } from "@testing-library/react";
 
 import { ForumStats } from "@/components/forum/ForumStats";
-import type { Author, ForumStats as ForumStatsType, ForumTag} from "@/components/ui/";\nimport type {
+import type { Author, ForumStats as ForumStatsType, ForumTag} from "@/components/ui/";
+import type {
+import type {
+
+"use client";
+
+ Author, ForumStats as ForumStatsType,
+
+
+
+
   Author,
   ForumStats as ForumStatsType,
-  ForumTag,} from "@/types/forum";
+  ForumTag} from "@/types/forum";
 
 const mockAuthor: Author = {
   id: "1",
@@ -20,10 +30,9 @@ const mockAuthor: Author = {
   badges: [],
   achievements: [],
   full_name: "משתמש בדיקה מלא",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  last_seen: undefined,
-};
+  created_at: new Date.toISOString,
+  updated_at: new Date.toISOString,
+  last_seen: undefined};
 
 const mockTag: ForumTag = {
   id: "1",
@@ -33,8 +42,7 @@ const mockTag: ForumTag = {
   color: "blue",
   posts_count: 0,
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockStats: ForumStatsType = {
   total_posts: 100,
@@ -47,8 +55,7 @@ const mockStats: ForumStatsType = {
   posts_today: 5,
   popular_tags: [{ tag: mockTag, count: 20 }],
   top_contributors: [mockAuthor],
-  trending_tags: [{ tag: mockTag, count: 10 }],
-};
+  trending_tags: [{ tag: mockTag, count: 10 }]};
 
 describe("ForumStats Component", () => {
   it("renders all statistics correctly", () => {
@@ -95,8 +102,7 @@ describe("ForumStats Component", () => {
       posts_today: 0,
       popular_tags: [],
       top_contributors: [],
-      trending_tags: [],
-    };
+      trending_tags: []};
     render(<ForumStats stats={partialStats} />);
     expect(screen.getByText(/0/)).toBeInTheDocument();
   });

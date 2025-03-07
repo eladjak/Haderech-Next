@@ -1,8 +1,8 @@
+"use client";
+
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 interface SpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: number;
@@ -11,7 +11,7 @@ interface SpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Spotlight = React.forwardRef<HTMLDivElement, SpotlightProps>(
-  ({ className, size = 400, children, _fill = "white", ...props }, ref) => {
+  ({ className, size = 400, children, fill = "white", ...props }, ref) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 

@@ -1,6 +1,8 @@
 import { format, formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
 
+export {};
+
 export const formatDate = (date: string | Date) => {
   return format(new Date(date), "dd/MM/yyyy", { locale: he });
 };

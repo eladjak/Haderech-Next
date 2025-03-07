@@ -1,4 +1,6 @@
-import { Metadata } from "next";
+"use client";
+
+import type { Metadata } from "next";
 
 interface SEOProps {
   title: string;

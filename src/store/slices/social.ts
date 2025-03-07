@@ -53,7 +53,7 @@ const initialState: SocialState = {
   error: null,
 };
 
-export const socialSlice = createSlice({
+const socialSlice = createSlice({
   name: "social",
   initialState,
   reducers: {
@@ -148,4 +148,6 @@ export const {
   setError,
 } = socialSlice.actions;
 
-export const socialReducer = socialSlice.reducer;
+const socialReducer = socialSlice.reducer;
+
+export { socialSlice, socialReducer };

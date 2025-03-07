@@ -10,13 +10,11 @@ export interface SimulationState {
   currentSpeaker: "user" | "partner";
   emotionalState: EmotionalState;
 }
-
 export interface Message {
   speaker: "user" | "partner";
   content: string;
   timestamp: string;
 }
-
 export interface EmotionalState {
   mood: "positive" | "neutral" | "negative";
   interest: number; // 0-100
@@ -27,12 +25,10 @@ export interface EmotionalState {
 export interface StartSimulationRequest {
   context: string;
 }
-
 export interface ProcessMessageRequest {
   state: SimulationState;
   message: string;
 }
-
 export interface SaveSimulationRequest {
   state: SimulationState;
 }
@@ -43,7 +39,6 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-export interface StartSimulationResponse extends ApiResponse<SimulationState> {}
-export interface ProcessMessageResponse extends ApiResponse<SimulationState> {}
-export interface SaveSimulationResponse
-  extends ApiResponse<{ success: boolean }> {}
+export type StartSimulationResponse = ApiResponse<SimulationState>;
+export type ProcessMessageResponse = ApiResponse<SimulationState>;
+export type SaveSimulationResponse = ApiResponse<{ success: boolean }>;

@@ -6,5 +6,6 @@
       "config": { "installCommand": "pnpm install --no-frozen-lockfile" }
     }
   ],
-  "build": { "env": { "NPM_FLAGS": "--no-frozen-lockfile" } }
+  "build": { "env": { "NPM_FLAGS": "--no-frozen-lockfile" } },
+  "ignorePatterns": ["course-comments-temp.tsx"]
 }

@@ -1,6 +1,8 @@
+"use client";
+
 import { Achievement } from "@/components/achievement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Achievement as AchievementType } from "@/types/api";
+import type { Achievement as AchievementType } from "@/types/profile";
 
 interface AchievementsProps {
   achievements: AchievementType[];

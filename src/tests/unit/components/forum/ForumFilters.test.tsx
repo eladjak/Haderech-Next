@@ -1,20 +1,22 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+
 import { ForumFilters } from "@/components/forum/ForumFilters";
 import type { ForumFilters as ForumFiltersType } from "@/types/forum";
 
-const mockOnFilter = vi.fn();
+"use client";
+
+const mockOnFilter = vi.fn;
 
 const defaultFilters: ForumFiltersType = {
   search: "",
   sort: "latest",
   category: undefined,
   status: "all",
-  timeframe: "all",
-};
+  timeframe: "all"};
 
-describe("ForumFilters Component", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe("ForumFilters Component",  => {
+  beforeEach( => {
+    vi.clearAllMocks;
   });
 
   it("renders all filter options", () => {
@@ -41,8 +43,7 @@ describe("ForumFilters Component", () => {
 
     expect(mockOnFilter).toHaveBeenCalledWith({
       ...defaultFilters,
-      search: "test",
-    });
+      search: "test"});
   });
 
   it("calls onFilter when sort changes", () => {
@@ -53,8 +54,7 @@ describe("ForumFilters Component", () => {
 
     expect(mockOnFilter).toHaveBeenCalledWith({
       ...defaultFilters,
-      sort: "popular",
-    });
+      sort: "popular"});
   });
 
   it("calls onFilter when category changes", () => {
@@ -65,8 +65,7 @@ describe("ForumFilters Component", () => {
 
     expect(mockOnFilter).toHaveBeenCalledWith({
       ...defaultFilters,
-      category: "general",
-    });
+      category: "general"});
   });
 
   it("calls onFilter when status changes", () => {
@@ -77,8 +76,7 @@ describe("ForumFilters Component", () => {
 
     expect(mockOnFilter).toHaveBeenCalledWith({
       ...defaultFilters,
-      status: "solved",
-    });
+      status: "solved"});
   });
 
   it("calls onFilter when timeframe changes", () => {
@@ -89,8 +87,7 @@ describe("ForumFilters Component", () => {
 
     expect(mockOnFilter).toHaveBeenCalledWith({
       ...defaultFilters,
-      timeframe: "week",
-    });
+      timeframe: "week"});
   });
 
   it("resets all filters when reset button is clicked", () => {
@@ -99,8 +96,7 @@ describe("ForumFilters Component", () => {
       sort: "popular",
       category: "general",
       status: "solved",
-      timeframe: "week",
-    };
+      timeframe: "week"};
 
     render(<ForumFilters filters={currentFilters} onFilter={mockOnFilter} />);
 

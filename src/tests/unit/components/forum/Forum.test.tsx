@@ -2,6 +2,16 @@ import { render, screen } from "@testing-library/react";
 
 import { Forum } from "@/components/forum/Forum";
 import type { Author, ForumCategory, ForumPost, ForumStats as ForumStatsType, ForumTag,
+import type {
+import type {
+
+"use client";
+
+ Author, ForumCategory, ForumPost, ForumStats as ForumStatsType,
+
+
+
+
 
 /**
  * @file Forum.test.tsx
@@ -17,12 +27,11 @@ import type { Author, ForumCategory, ForumPost, ForumStats as ForumStatsType, Fo
 
 
 
-import type {
   Author,
   ForumCategory,
   ForumPost,
   ForumStats as ForumStatsType,
-  ForumTag,} from "@/types/forum";
+  ForumTag} from "@/types/forum";
 
 /**
  * Mock data for forum tests
@@ -43,10 +52,9 @@ const mockAuthor: Author = {
   badges: [],
   achievements: [],
   full_name: "Test User Full Name",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  last_seen: undefined,
-};
+  created_at: new Date.toISOString,
+  updated_at: new Date.toISOString,
+  last_seen: undefined};
 
 // Mock category for forum posts
 const mockCategory: ForumCategory = {
@@ -59,8 +67,7 @@ const mockCategory: ForumCategory = {
   color: "blue",
   posts_count: 0,
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 // Mock tag for categorizing posts
 const mockTag: ForumTag = {
@@ -71,8 +78,7 @@ const mockTag: ForumTag = {
   color: "blue",
   posts_count: 0,
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockPost: ForumPost = {
   id: "1",
@@ -91,8 +97,7 @@ const mockPost: ForumPost = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   author: mockAuthor,
-  comments: [],
-};
+  comments: []};
 
 const mockStats: ForumStatsType = {
   total_posts: 1,
@@ -105,8 +110,7 @@ const mockStats: ForumStatsType = {
   posts_today: 1,
   popular_tags: [{ tag: mockTag, count: 1 }],
   top_contributors: [mockAuthor],
-  trending_tags: [{ tag: mockTag, count: 1 }],
-};
+  trending_tags: [{ tag: mockTag, count: 1 }]};
 
 describe("Forum Component", () => {
   it("renders forum posts", () => {

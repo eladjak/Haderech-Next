@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
+
 import { processUserMessage, startSimulation } from "@/lib/services/simulator";
 import type { SimulatorScenario } from "@/types/simulator";
 
-describe("Simulator Security Tests", () => {
+describe("Simulator Security Tests",  => {
   const mockScenario: SimulatorScenario = {
     id: "security-test",
     title: "תרחיש בדיקת אבטחה",
@@ -16,11 +17,9 @@ describe("Simulator Security Tests", () => {
       minScore: 70,
       requiredSkills: ["אבטחה"],
       minDuration: 300,
-      maxDuration: 900,
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+      maxDuration: 900},
+    created_at: new Date.toISOString,
+    updated_at: new Date.toISOString()};
 
   it("should validate user input", async () => {
     const session = await startSimulation(mockScenario, "test-user");
@@ -101,7 +100,7 @@ describe("Simulator Security Tests", () => {
     const session = await startSimulation(mockScenario, "test-user");
 
     // שינוי ה-ID של הסשן
-    const invalidSession = { ...session, id: "fake-id" };
+    const invalidSession = { ...session, id: "fake-id" }
     await expect(
       processUserMessage(invalidSession, "test message")
     ).rejects.toThrow();
@@ -150,10 +149,8 @@ describe("Simulator Security Tests", () => {
       messages: [
         {
           ...session.messages[0],
-          content: "modified content",
-        },
-      ],
-    };
+          content: "modified content"},
+      ]};
 
     await expect(
       processUserMessage(modifiedSession, "test message")

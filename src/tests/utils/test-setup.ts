@@ -1,14 +1,18 @@
-import { TextDecoder, TextEncoder } from "util";
+import { _TextDecoder, _TextEncoder } from "util";
 import React from "react";
 import "@testing-library/jest-dom";
 import { afterEach, expect, vi } from "vitest";
 import "@testing-library/dom";
 import matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, configure } from "@testing-library/react";
+import { _configure, cleanup } from "@testing-library/react";
 import axe from "axe-core";
 import "./test-matchers";
-import type { Mock } from "vitest";
+import type { _Mock } from "vitest";
 import { mockSupabaseClient } from "./test-mocks";
+
+("use client");
+
+export {};
 
 // הגדרת axe-core
 global.axe = axe;

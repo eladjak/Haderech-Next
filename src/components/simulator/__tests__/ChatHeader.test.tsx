@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+"use client";
+
+import { ChatHeader, describe, expect, it, render, screen } from "@/lib/utils";
 import type { SimulatorScenario } from "@/types/simulator";
-import { ChatHeader } from "../ChatHeader";
 
 const mockScenario: SimulatorScenario = {
   id: "1",
@@ -18,8 +18,8 @@ const mockScenario: SimulatorScenario = {
     minDuration: 300,
     maxDuration: 900,
   },
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
+  created_at: new Date.toISOString(),
+  updated_at: new Date.toISOString(),
 };
 
 describe("ChatHeader", () => {

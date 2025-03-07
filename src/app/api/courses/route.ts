@@ -1,11 +1,12 @@
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { _Database } from "@/types/supabase";
+import { createClient } from "@/lib/supabase-server";
+import type { Database } from "@/types/supabase";
 
 /**
  * @file route.ts
- * @description API route handlers for courses collection operations
+ * @description API routes for courses. Provides endpoints for retrieving all courses,
+ * creating new courses. Includes authentication and authorization checks where needed.
  */
 
 interface _CreateCourseBody {
@@ -28,17 +29,7 @@ interface _CreateCourseBody {
 export async function GET(_request: Request) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createClient(cookieStore);
 
     const { data: courses, error } = await supabase
       .from("courses")
@@ -46,7 +37,11 @@ export async function GET(_request: Request) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Error fetching courses:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch courses" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ courses });
@@ -69,17 +64,7 @@ export async function GET(_request: Request) {
 export async function POST(request: Request) {
   try {
     const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createClient(cookieStore);
 
     // Check authentication
     const {
@@ -110,7 +95,11 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Error creating course:", error);
+      return NextResponse.json(
+        { error: "Failed to create course" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ course: data });

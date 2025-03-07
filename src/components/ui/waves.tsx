@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+"use client";
+
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -27,8 +29,6 @@ import { cn } from "@/lib/utils";
  * </div>
  * ```
  */
-
-("use client");
 
 /**
  * Props for the Waves component
@@ -61,9 +61,9 @@ export function Waves({
   speed = 0.5,
   height = 150,
 }: WavesProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 

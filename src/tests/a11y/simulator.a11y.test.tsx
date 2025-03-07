@@ -1,11 +1,19 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
 
+import { describe, expect, it, vi } from "vitest";
 import { ChatSimulator } from "@/components/simulator/ChatSimulator";
-import type { Message, SimulatorScenario, SimulatorState} from "@/components/ui/";\nimport type {
+import type { Message, SimulatorScenario, SimulatorState} from "@/components/ui/";
+import type {
+import type {
+
+ Message, SimulatorScenario,
+
+
+
+
   Message,
   SimulatorScenario,
-  SimulatorState,} from "@/types/simulator";
+  SimulatorState} from "@/types/simulator";
 
 const mockScenario: SimulatorScenario = {
   id: "1",
@@ -20,11 +28,9 @@ const mockScenario: SimulatorScenario = {
     minScore: 70,
     requiredSkills: ["תקשורת", "אמפתיה"],
     minDuration: 300,
-    maxDuration: 900,
-  },
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+    maxDuration: 900},
+  created_at: new Date.toISOString,
+  updated_at: new Date.toISOString};
 
 const mockMessage: Message = {
   id: "1",
@@ -34,11 +40,9 @@ const mockMessage: Message = {
   sender: {
     id: "system",
     name: "המערכת",
-    role: "assistant",
-  },
+    role: "assistant"},
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const mockState: SimulatorState = {
   id: "1",
@@ -49,8 +53,7 @@ const mockState: SimulatorState = {
   state: "initial",
   messages: [mockMessage],
   created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+  updated_at: new Date().toISOString()};
 
 const noop = vi.fn();
 
@@ -59,10 +62,10 @@ describe("ChatSimulator Accessibility Tests", () => {
     render(
       <ChatSimulator
         state={mockState}
-        onSendMessage={noop}
-        onReset={noop}
-        isLoading={false}
-        showFeedback={true}
+        ,onSendMessage={noop}
+        ,onReset={noop}
+        ,isLoading={false}
+        ,showFeedback={true}
       />
     );
     expect(screen.getByRole("main")).toBeInTheDocument();
@@ -72,10 +75,10 @@ describe("ChatSimulator Accessibility Tests", () => {
     render(
       <ChatSimulator
         state={mockState}
-        onSendMessage={noop}
-        onReset={noop}
-        isLoading={false}
-        showFeedback={true}
+        ,onSendMessage={noop}
+        ,onReset={noop}
+        ,isLoading={false}
+        ,showFeedback={true}
       />
     );
     expect(screen.getByRole("textbox")).toBeInTheDocument();
@@ -86,10 +89,10 @@ describe("ChatSimulator Accessibility Tests", () => {
     render(
       <ChatSimulator
         state={mockState}
-        onSendMessage={noop}
-        onReset={noop}
-        isLoading={false}
-        showFeedback={true}
+        ,onSendMessage={noop}
+        ,onReset={noop}
+        ,isLoading={false}
+        ,showFeedback={true}
       />
     );
     expect(screen.getByText(mockMessage.content)).toBeInTheDocument();
@@ -99,10 +102,10 @@ describe("ChatSimulator Accessibility Tests", () => {
     render(
       <ChatSimulator
         state={mockState}
-        onSendMessage={noop}
-        onReset={noop}
-        isLoading={true}
-        showFeedback={true}
+        ,onSendMessage={noop}
+        ,onReset={noop}
+        ,isLoading={true}
+        ,showFeedback={true}
       />
     );
     const input = screen.getByRole("textbox");

@@ -1,10 +1,12 @@
+"use client";
+
 import { Star } from "lucide-react";
 import { CourseRating } from "@/components/course-rating";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Course } from "@/types/api";
+import type { CourseWithRelations } from "@/types/courses";
 
 interface CourseRatingsProps {
-  course: Course;
+  course: CourseWithRelations;
   className?: string;
 }
 
@@ -29,15 +31,17 @@ export function CourseRatings({ course, className }: CourseRatingsProps) {
                 className={`h-5 w-5 ${
                   i < Math.round(averageRating)
                     ? "fill-primary text-primary"
-                    : "fill-muted text-muted-foreground"
+                    : "fill-muted text-muted"
                 }`}
               />
             ))}
           </div>
-          <div className="text-lg font-medium">{averageRating.toFixed(1)}</div>
-          <div className="text-sm text-muted-foreground">
+          <span className="text-lg font-semibold">
+            {averageRating.toFixed(1)}
+          </span>
+          <span className="text-muted-foreground">
             ({course.ratings.length} דירוגים)
-          </div>
+          </span>
         </div>
       </CardHeader>
       <CardContent className="grid gap-4">

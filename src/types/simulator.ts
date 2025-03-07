@@ -2,6 +2,10 @@ import type { OpenAI } from "openai";
 import type { Database } from "./database";
 import type { Author } from "./forum";
 
+("use client");
+
+export {};
+
 /**
  * טיפוסים עבור מערכת הסימולציה
  */
@@ -17,14 +21,12 @@ export interface BaseMessage {
   created_at: string;
   updated_at: string;
 }
-
 export interface MessageSender {
   id: string;
   role: "user" | "assistant";
   name: string;
   avatar_url?: string;
 }
-
 export interface Message extends BaseMessage {
   role: "user" | "assistant";
   sender: MessageSender;
@@ -39,7 +41,6 @@ export interface MessageFeedback {
   created_at: string;
   updated_at: string;
 }
-
 export interface FeedbackMetrics {
   empathy: number;
   clarity: number;
@@ -49,7 +50,6 @@ export interface FeedbackMetrics {
   problem_solving: number;
   overall: number;
 }
-
 export interface FeedbackDetails {
   metrics: FeedbackMetrics;
   strengths: string[];
@@ -77,12 +77,10 @@ export interface _SimulatorMessage {
   role: "user" | "assistant";
   content: string;
 }
-
 export interface FeedbackResponse {
   score: number;
   feedback: string;
 }
-
 export interface _FeedbackResponse {
   score: number;
   feedback: string;
@@ -141,7 +139,6 @@ export interface ChatSimulatorProps {
   isLoading?: boolean;
   showFeedback?: boolean;
 }
-
 export type SimulationState = SimulatorState;
 
 export async function completeSimulation(
@@ -159,7 +156,6 @@ export interface SimulatorStats {
   nextLevel: number;
   requiredScore: number;
 }
-
 export interface SimulatorUserSettings {
   difficulty: "beginner" | "intermediate" | "advanced" | "expert";
   language: "he" | "en";
@@ -167,7 +163,6 @@ export interface SimulatorUserSettings {
   auto_suggestions: boolean;
   theme: "light" | "dark" | "system";
 }
-
 export interface SimulatorResult {
   scenario_id: string;
   user_id: string;
@@ -179,7 +174,6 @@ export interface SimulatorResult {
   created_at: string;
   updated_at: string;
 }
-
 export type { SimulatorState as SimState };
 
 export interface SimulatorUserStats {
@@ -191,7 +185,6 @@ export interface SimulatorUserStats {
   strengths: string[];
   areas_for_improvement: string[];
 }
-
 export interface SimulatorSession {
   id: string;
   user_id: string;
@@ -204,15 +197,13 @@ export interface SimulatorSession {
   created_at: string;
   updated_at: string;
 }
-
 export interface SimulatorResponse {
   state: SimulatorState;
   feedback?: FeedbackDetails;
   message?: string;
   status?: number;
 }
-
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
@@ -240,10 +231,9 @@ export interface ChatCompletionMessage {
 
 export interface SimulatorEvent {
   type: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: string;
 }
-
 export interface SimulationConfig {
   maxMessages: number;
   rateLimit: number;
@@ -251,7 +241,6 @@ export interface SimulationConfig {
   defaultScenario: string;
   feedbackFrequency: number;
 }
-
 export interface SimulationSession {
   id: string;
   userId: string;

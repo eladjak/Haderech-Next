@@ -1,27 +1,28 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
-import { DELETE, POST } from "../forum/comments/route";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { NextRequest } from "@/lib/utils";
+
+import { beforeEach, describe, expect, it, vi } from "@/lib/utils";
+import { NextRequest } from "@/lib/utils";
+import { DELETE, POST } from "@/lib/utils";
+
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
-describe("Forum Comments API", () => {
+describe("Forum Comments API",  => {
   const mockUser = {
     id: "test-user-id",
-    email: "test@example.com",
-  };
+    email: "test@example.com"};
 
   const mockComment = {
     id: "test-comment-id",
     post_id: "test-post-id",
     content: "תוכן התגובה",
     author_id: mockUser.id,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    parent_id: null,
-  };
+    created_at: new Date.toISOString,
+    updated_at: new Date.toISOString(),
+    parent_id: null};
 
   const mockSupabase = {
     from: vi.fn(() => ({
@@ -31,22 +32,16 @@ describe("Forum Comments API", () => {
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(async () => ({
         data: mockComment,
-        error: null,
-      })),
-    })),
+        error: null}))})),
     auth: {
       getSession: vi.fn().mockResolvedValue({
         data: { session: { user: mockUser } },
-        error: null,
-      }),
-    },
-  };
+        error: null})}};
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(cookies).mockReturnValue({
-      get: vi.fn().mockReturnValue({ value: "test-token" }),
-    } as any);
+      get: vi.fn().mockReturnValue({ value: "test-token" })} as any);
     vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
   });
 
@@ -54,8 +49,7 @@ describe("Forum Comments API", () => {
     const newComment = {
       post_id: "test-post-id",
       content: "תוכן התגובה",
-      parent_id: null,
-    };
+      parent_id: null};
 
     it("יוצר תגובה חדשה בהצלחה", async () => {
       mockSupabase.from().insert.mockReturnThis();
@@ -66,15 +60,13 @@ describe("Forum Comments API", () => {
         .select()
         .single.mockResolvedValueOnce({
           data: { id: "new-comment-1", ...newComment },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "POST",
-          body: JSON.stringify(newComment),
-        }
+          body: JSON.stringify(newComment)}
       );
 
       const response = await POST(request);
@@ -88,15 +80,13 @@ describe("Forum Comments API", () => {
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "POST",
-          body: JSON.stringify(newComment),
-        }
+          body: JSON.stringify(newComment)}
       );
 
       const response = await POST(request);
@@ -104,8 +94,7 @@ describe("Forum Comments API", () => {
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר הפוסט לא נמצא", async () => {
@@ -115,15 +104,13 @@ describe("Forum Comments API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: null,
-          error: { message: "הפוסט לא נמצא" },
-        });
+          error: { message: "הפוסט לא נמצא" }});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "POST",
-          body: JSON.stringify(newComment),
-        }
+          body: JSON.stringify(newComment)}
       );
 
       const response = await POST(request);
@@ -131,15 +118,13 @@ describe("Forum Comments API", () => {
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "הפוסט לא נמצא",
-      });
+        error: "הפוסט לא נמצא"});
     });
 
     it("מחזיר שגיאה כאשר תגובת האב לא נמצאה", async () => {
       const commentWithParent = {
         ...newComment,
-        parent_id: "non-existent-id",
-      };
+        parent_id: "non-existent-id"};
 
       mockSupabase
         .from()
@@ -147,19 +132,16 @@ describe("Forum Comments API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "test-post-id" },
-          error: null,
-        })
+          error: null})
         .mockResolvedValueOnce({
           data: null,
-          error: { message: "תגובת האב לא נמצאה" },
-        });
+          error: { message: "תגובת האב לא נמצאה" }});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "POST",
-          body: JSON.stringify(commentWithParent),
-        }
+          body: JSON.stringify(commentWithParent)}
       );
 
       const response = await POST(request);
@@ -167,8 +149,7 @@ describe("Forum Comments API", () => {
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "תגובת האב לא נמצאה",
-      });
+        error: "תגובת האב לא נמצאה"});
     });
 
     it("מחזיר שגיאה כאשר חסרים שדות חובה", async () => {
@@ -176,8 +157,7 @@ describe("Forum Comments API", () => {
         "http://localhost:3000/api/forum/comments",
         {
           method: "POST",
-          body: JSON.stringify({}),
-        }
+          body: JSON.stringify({})}
       );
 
       const response = await POST(request);
@@ -196,20 +176,17 @@ describe("Forum Comments API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "test-comment-id", author_id: mockUser.id },
-          error: null,
-        });
+          error: null});
 
       mockSupabase.from().delete().eq.mockResolvedValueOnce({
         data: null,
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "DELETE",
-          body: JSON.stringify({ comment_id: "test-comment-id" }),
-        }
+          body: JSON.stringify({ comment_id: "test-comment-id" })}
       );
 
       const response = await DELETE(request);
@@ -217,22 +194,19 @@ describe("Forum Comments API", () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual({
-        message: "התגובה נמחקה בהצלחה",
-      });
+        message: "התגובה נמחקה בהצלחה"});
     });
 
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "DELETE",
-          body: JSON.stringify({ comment_id: "test-comment-id" }),
-        }
+          body: JSON.stringify({ comment_id: "test-comment-id" })}
       );
 
       const response = await DELETE(request);
@@ -240,8 +214,7 @@ describe("Forum Comments API", () => {
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאה כאשר התגובה לא נמצאה", async () => {
@@ -251,15 +224,13 @@ describe("Forum Comments API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: null,
-          error: { message: "התגובה לא נמצאה" },
-        });
+          error: { message: "התגובה לא נמצאה" }});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "DELETE",
-          body: JSON.stringify({ comment_id: "non-existent-id" }),
-        }
+          body: JSON.stringify({ comment_id: "non-existent-id" })}
       );
 
       const response = await DELETE(request);
@@ -267,8 +238,7 @@ describe("Forum Comments API", () => {
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "התגובה לא נמצאה",
-      });
+        error: "התגובה לא נמצאה"});
     });
 
     it("מחזיר שגיאת הרשאה כאשר המשתמש מנסה למחוק תגובה של משתמש אחר", async () => {
@@ -278,15 +248,13 @@ describe("Forum Comments API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "test-comment-id", author_id: "other-user-id" },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest(
         "http://localhost:3000/api/forum/comments",
         {
           method: "DELETE",
-          body: JSON.stringify({ comment_id: "test-comment-id" }),
-        }
+          body: JSON.stringify({ comment_id: "test-comment-id" })}
       );
 
       const response = await DELETE(request);
@@ -294,8 +262,7 @@ describe("Forum Comments API", () => {
 
       expect(response.status).toBe(403);
       expect(data).toEqual({
-        error: "אין לך הרשאה למחוק תגובה זו",
-      });
+        error: "אין לך הרשאה למחוק תגובה זו"});
     });
   });
 });

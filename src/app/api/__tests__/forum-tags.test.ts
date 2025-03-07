@@ -1,13 +1,17 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { DELETE, GET, POST } from "../forum/tags/route";
+import { NextResponse } from "next/server";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { NextRequest } from "@/lib/utils"
+
+import { beforeEach, describe, expect, it, vi } from "@/lib/utils";
+import { NextRequest } from "@/lib/utils"
+import { DELETE, GET, POST } from "@/lib/utils";
+
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
-describe("Forum Tags API", () => {
+describe("Forum Tags API",  => {
   const mockUser = {
     id: "test-user-id",
     email: "test@example.com",
@@ -17,19 +21,18 @@ describe("Forum Tags API", () => {
     avatar_url: "/avatar1.jpg",
     image: "/avatar1.jpg",
     role: "admin", // נדרשת הרשאת מנהל ליצירה ומחיקה של תגיות
-  };
+  }
 
   const mockTag = {
     id: "test-tag-id",
     name: "JavaScript",
     description: "שפת תכנות פופולרית",
     color: "#f7df1e",
-    created_at: new Date().toISOString(),
-    created_by: mockUser.id,
-  };
+    created_at: new Date.toISOString,
+    created_by: mockUser.id};
 
   const mockSupabase = {
-    from: vi.fn(() => ({
+    from: vi.fn( => ({
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
@@ -37,16 +40,11 @@ describe("Forum Tags API", () => {
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(async () => ({
         data: mockTag,
-        error: null,
-      })),
-    })),
+        error: null}))})),
     auth: {
       getUser: vi.fn().mockResolvedValue({
         data: { user: mockUser },
-        error: null,
-      }),
-    },
-  };
+        error: null})}};
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -54,14 +52,12 @@ describe("Forum Tags API", () => {
     // מוק לשליפת תגיות
     mockSupabase.from().select.mockResolvedValueOnce({
       data: [mockTag],
-      error: null,
-    });
+      error: null});
 
     // מוק למחיקת תגית
     mockSupabase.from().delete.mockResolvedValueOnce({
       data: null,
-      error: null,
-    });
+      error: null});
 
     // מוק ליצירת תגית
     mockSupabase.from().insert.mockReturnThis();
@@ -72,12 +68,10 @@ describe("Forum Tags API", () => {
       .select()
       .single.mockResolvedValueOnce({
         data: { ...mockTag, id: "new-tag-1" },
-        error: null,
-      });
+        error: null});
 
     vi.mocked(cookies).mockReturnValue({
-      get: vi.fn().mockReturnValue({ value: "test-token" }),
-    } as any);
+      get: vi.fn().mockReturnValue({ value: "test-token" })} as any);
     vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
   });
 
@@ -98,8 +92,7 @@ describe("Forum Tags API", () => {
         .order()
         .eq.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        });
+          error: { message: "שגיאת מסד נתונים" }});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags");
       const response = await GET(request);
@@ -107,8 +100,7 @@ describe("Forum Tags API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאה בטעינת התגיות",
-      });
+        error: "שגיאה בטעינת התגיות"});
     });
   });
 
@@ -116,15 +108,13 @@ describe("Forum Tags API", () => {
     const newTag = {
       name: "TypeScript",
       description: "שפת תכנות מבוססת JavaScript עם תמיכה בטיפוסים",
-      color: "#3178c6",
-    };
+      color: "#3178c6"};
 
     it("יוצר תגית חדשה בהצלחה", async () => {
       // מוק לבדיקה אם התגית קיימת
       mockSupabase.from().select().eq().single.mockResolvedValueOnce({
         data: null,
-        error: null,
-      });
+        error: null});
 
       // מוק ליצירת התגית
       mockSupabase
@@ -136,15 +126,12 @@ describe("Forum Tags API", () => {
             ...newTag,
             id: "new-tag-1",
             created_by: mockUser.id,
-            created_at: expect.any(String),
-          },
-          error: null,
-        });
+            created_at: expect.any(String)},
+          error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "POST",
-        body: JSON.stringify(newTag),
-      });
+        body: JSON.stringify(newTag)});
 
       const response = await POST(request);
       const data = await response.json();
@@ -157,58 +144,49 @@ describe("Forum Tags API", () => {
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getUser.mockResolvedValueOnce({
         data: { user: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "POST",
-        body: JSON.stringify(newTag),
-      });
+        body: JSON.stringify(newTag)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאת הרשאה כאשר המשתמש אינו מנהל", async () => {
       mockSupabase.auth.getUser.mockResolvedValueOnce({
         data: {
-          user: { ...mockUser, role: "user" },
-        },
-        error: null,
-      });
+          user: { ...mockUser, role: "user" }},
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "POST",
-        body: JSON.stringify(newTag),
-      });
+        body: JSON.stringify(newTag)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(403);
       expect(data).toEqual({
-        error: "אין לך הרשאה ליצור תגיות",
-      });
+        error: "אין לך הרשאה ליצור תגיות"});
     });
 
     it("מחזיר שגיאה כאשר חסרים שדות חובה", async () => {
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "POST",
-        body: JSON.stringify({}),
-      });
+        body: JSON.stringify({})});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "חסרים שדות חובה",
-      });
+        error: "חסרים שדות חובה"});
     });
 
     it("מחזיר שגיאה כאשר כבר קיימת תגית עם אותו שם", async () => {
@@ -218,21 +196,18 @@ describe("Forum Tags API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "existing-tag" },
-          error: null,
-        });
+          error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "POST",
-        body: JSON.stringify(newTag),
-      });
+        body: JSON.stringify(newTag)});
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "כבר קיימת תגית עם שם זה",
-      });
+        error: "כבר קיימת תגית עם שם זה"});
     });
   });
 
@@ -245,113 +220,93 @@ describe("Forum Tags API", () => {
         .eq()
         .single.mockResolvedValueOnce({
           data: { id: "test-tag-id" },
-          error: null,
-        });
+          error: null});
 
       // מוק למחיקת התגית
       mockSupabase.from().delete().eq.mockResolvedValueOnce({
         data: null,
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "DELETE",
         body: JSON.stringify({
-          tag_id: "test-tag-id",
-        }),
-      });
+          tag_id: "test-tag-id"})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data).toEqual({
-        message: "התגית נמחקה בהצלחה",
-      });
+        message: "התגית נמחקה בהצלחה"});
     });
 
     it("מחזיר שגיאת הזדהות כאשר אין משתמש מחובר", async () => {
       mockSupabase.auth.getUser.mockResolvedValueOnce({
         data: { user: null },
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "DELETE",
         body: JSON.stringify({
-          tag_id: "test-tag-id",
-        }),
-      });
+          tag_id: "test-tag-id"})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
       expect(data).toEqual({
-        error: "נדרשת הזדהות",
-      });
+        error: "נדרשת הזדהות"});
     });
 
     it("מחזיר שגיאת הרשאה כאשר המשתמש אינו מנהל", async () => {
       mockSupabase.auth.getUser.mockResolvedValueOnce({
         data: {
-          user: { ...mockUser, role: "user" },
-        },
-        error: null,
-      });
+          user: { ...mockUser, role: "user" }},
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "DELETE",
         body: JSON.stringify({
-          tag_id: "test-tag-id",
-        }),
-      });
+          tag_id: "test-tag-id"})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(403);
       expect(data).toEqual({
-        error: "אין לך הרשאה למחוק תגיות",
-      });
+        error: "אין לך הרשאה למחוק תגיות"});
     });
 
     it("מחזיר שגיאה כאשר חסר מזהה תגית", async () => {
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "DELETE",
-        body: JSON.stringify({}),
-      });
+        body: JSON.stringify({})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
       expect(data).toEqual({
-        error: "נדרש מזהה תגית",
-      });
+        error: "נדרש מזהה תגית"});
     });
 
     it("מחזיר שגיאה כאשר התגית לא נמצאה", async () => {
       // מוק לבדיקה אם התגית קיימת
       mockSupabase.from().select().eq().single.mockResolvedValueOnce({
         data: null,
-        error: null,
-      });
+        error: null});
 
       const request = new NextRequest("http://localhost:3000/api/forum/tags", {
         method: "DELETE",
         body: JSON.stringify({
-          tag_id: "non-existent-id",
-        }),
-      });
+          tag_id: "non-existent-id"})});
 
       const response = await DELETE(request);
       const data = await response.json();
 
       expect(response.status).toBe(404);
       expect(data).toEqual({
-        error: "התגית לא נמצאה",
-      });
+        error: "התגית לא נמצאה"});
     });
   });
 });

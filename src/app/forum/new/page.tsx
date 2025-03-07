@@ -7,18 +7,11 @@ export const metadata: Metadata = {
   description: "צור פוסט חדש בפורום הדרך",
 };
 
-export default function NewForumPostPage(): React.ReactElement {
+export default function NewPostPage() {
   return (
-    <div className="container py-8">
-      <div className="mx-auto max-w-2xl space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold">יצירת פוסט חדש</h1>
-          <p className="text-muted-foreground">
-            שתף את המחשבות והתובנות שלך עם קהילת הדרך
-          </p>
-        </div>
-        <CreatePost />
-      </div>
+    <div className="container mx-auto py-8">
+      <h1 className="mb-8 text-center text-3xl font-bold">יצירת פוסט חדש</h1>
+      <CreatePost />
     </div>
   );
 }

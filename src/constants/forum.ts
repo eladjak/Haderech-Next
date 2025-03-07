@@ -51,9 +51,9 @@ export const forumTags: ForumTag[] = [
 ];
 
 export const mockAuthor: Author = {
-  id: "1",
+  id: "0",
   name: "משתמש לדוגמה",
-  email: "example@test.com",
+  email: "user@example.com",
   username: "example_user",
   role: "user",
   points: 100,
@@ -64,11 +64,8 @@ export const mockAuthor: Author = {
   image: undefined,
   avatar_url: undefined,
   bio: undefined,
-  last_seen: undefined,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
-  posts_count: 0,
-  likes_received: 0,
 };
 
 export const mockCategory: ForumCategory = {

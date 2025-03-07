@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { _Database } from "@/types/supabase";
+import { Database } from "@/types/supabase";
 
 /**
  * @file courses/[id]/route.ts

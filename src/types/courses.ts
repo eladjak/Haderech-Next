@@ -9,7 +9,6 @@ export interface Course {
   created_at: string;
   updated_at: string;
 }
-
 export interface CourseLesson {
   id: string;
   course_id: string;
@@ -22,7 +21,6 @@ export interface CourseLesson {
   updated_at: string;
   is_free: boolean;
 }
-
 export interface CourseProgress {
   id: string;
   course_id: string;
@@ -32,7 +30,6 @@ export interface CourseProgress {
   created_at: string;
   updated_at: string;
 }
-
 export interface CourseRating {
   id: string;
   course_id: string;
@@ -89,7 +86,6 @@ export interface LessonProgress {
   lastAccessedAt: string;
   timeSpent: number;
 }
-
 export interface CourseFilters {
   search?: string;
   level?: string;

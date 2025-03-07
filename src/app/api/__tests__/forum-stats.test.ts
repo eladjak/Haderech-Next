@@ -1,13 +1,16 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
-import { GET } from "../forum/stats/route";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { NextRequest } from "@/lib/utils";
+
+import { beforeEach, describe, expect, it, vi } from "@/lib/utils";
+import { NextRequest } from "@/lib/utils";
+import { GET } from "@/lib/utils";
+
 
 vi.mock("next/headers");
 vi.mock("@supabase/auth-helpers-nextjs");
 
-describe("Forum Stats API", () => {
+describe("Forum Stats API",  => {
   const mockUser = {
     id: "test-user-id",
     email: "test@example.com",
@@ -16,8 +19,7 @@ describe("Forum Stats API", () => {
     full_name: "משתמש לדוגמה",
     avatar_url: "/avatar1.jpg",
     image: "/avatar1.jpg",
-    role: "user",
-  };
+    role: "user"};
 
   const mockStats = {
     total_posts: 100,
@@ -32,37 +34,30 @@ describe("Forum Stats API", () => {
           id: "1",
           name: "JavaScript",
           description: "שפת תכנות פופולרית",
-          color: "#f7df1e",
-        },
-        count: 15,
-      },
+          color: "#f7df1e"},
+        count: 15},
       {
         tag: {
           id: "2",
           name: "React",
           description: "ספריית UI פופולרית",
-          color: "#61dafb",
-        },
-        count: 10,
-      },
+          color: "#61dafb"},
+        count: 10},
     ],
     top_contributors: [
       {
         author: mockUser,
         posts_count: 25,
-        likes_received: 100,
-      },
+        likes_received: 100},
       {
         author: { ...mockUser, id: "2", name: "משתמש 2", username: "user2" },
         posts_count: 20,
-        likes_received: 80,
-      },
-    ],
-  };
+        likes_received: 80},
+    ]};
 
   const mockSupabase = {
-    from: vi.fn(() => ({
-      select: vi.fn().mockReturnThis(),
+    from: vi.fn( => ({
+      select: vi.fn.mockReturnThis,
       count: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -70,16 +65,12 @@ describe("Forum Stats API", () => {
       limit: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(async () => ({
         data: mockStats,
-        error: null,
-      })),
-    })),
-  };
+        error: null}))}))};
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(cookies).mockReturnValue({
-      get: vi.fn().mockReturnValue({ value: "test-token" }),
-    } as any);
+      get: vi.fn().mockReturnValue({ value: "test-token" })} as any);
     vi.mocked(createRouteHandlerClient).mockReturnValue(mockSupabase as any);
   });
 
@@ -91,32 +82,28 @@ describe("Forum Stats API", () => {
         .select()
         .count.mockResolvedValueOnce({
           data: [{ count: 100 }],
-          error: null,
-        }); // posts count
+          error: null}); // posts count
 
       mockSupabase
         .from()
         .select()
         .count.mockResolvedValueOnce({
           data: [{ count: 500 }],
-          error: null,
-        }); // comments count
+          error: null}); // comments count
 
       mockSupabase
         .from()
         .select()
         .count.mockResolvedValueOnce({
           data: [{ count: 1000 }],
-          error: null,
-        }); // views count
+          error: null}); // views count
 
       mockSupabase
         .from()
         .select()
         .count.mockResolvedValueOnce({
           data: [{ count: 750 }],
-          error: null,
-        }); // likes count
+          error: null}); // likes count
 
       mockSupabase
         .from()
@@ -124,8 +111,7 @@ describe("Forum Stats API", () => {
         .gte()
         .count.mockResolvedValueOnce({
           data: [{ count: 50 }],
-          error: null,
-        }); // active users
+          error: null}); // active users
 
       mockSupabase
         .from()
@@ -133,18 +119,15 @@ describe("Forum Stats API", () => {
         .gte()
         .count.mockResolvedValueOnce({
           data: [{ count: 10 }],
-          error: null,
-        }); // today posts
+          error: null}); // today posts
 
       mockSupabase.from().select().limit.mockResolvedValueOnce({
         data: mockStats.trending_tags,
-        error: null,
-      }); // trending tags
+        error: null}); // trending tags
 
       mockSupabase.from().select().limit.mockResolvedValueOnce({
         data: mockStats.top_contributors,
-        error: null,
-      }); // top contributors
+        error: null}); // top contributors
 
       const request = new NextRequest("http://localhost:3000/api/forum/stats");
       const response = await GET(request);
@@ -160,8 +143,7 @@ describe("Forum Stats API", () => {
         .select()
         .count.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        });
+          error: { message: "שגיאת מסד נתונים" }});
 
       const request = new NextRequest("http://localhost:3000/api/forum/stats");
       const response = await GET(request);
@@ -169,8 +151,7 @@ describe("Forum Stats API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
 
     it("מחזיר שגיאה כאשר יש בעיה בשליפת מספר התגובות", async () => {
@@ -179,16 +160,14 @@ describe("Forum Stats API", () => {
         .select()
         .count.mockResolvedValueOnce({
           data: [{ count: 100 }],
-          error: null,
-        }); // posts count
+          error: null}); // posts count
 
       mockSupabase
         .from()
         .select()
         .count.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        }); // comments count
+          error: { message: "שגיאת מסד נתונים" }}); // comments count
 
       const request = new NextRequest("http://localhost:3000/api/forum/stats");
       const response = await GET(request);
@@ -196,8 +175,7 @@ describe("Forum Stats API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
 
     it("מחזיר שגיאה כאשר יש בעיה בשליפת התגיות", async () => {
@@ -207,36 +185,29 @@ describe("Forum Stats API", () => {
         .select()
         .count.mockResolvedValueOnce({
           data: [{ count: 100 }],
-          error: null,
-        }) // posts count
+          error: null}) // posts count
         .mockResolvedValueOnce({
           data: [{ count: 500 }],
-          error: null,
-        }) // comments count
+          error: null}) // comments count
         .mockResolvedValueOnce({
           data: [{ count: 1000 }],
-          error: null,
-        }) // views count
+          error: null}) // views count
         .mockResolvedValueOnce({
           data: [{ count: 750 }],
-          error: null,
-        }) // likes count
+          error: null}) // likes count
         .mockResolvedValueOnce({
           data: [{ count: 50 }],
-          error: null,
-        }) // active users
+          error: null}) // active users
         .mockResolvedValueOnce({
           data: [{ count: 10 }],
-          error: null,
-        }); // today posts
+          error: null}); // today posts
 
       mockSupabase
         .from()
         .select()
         .limit.mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        }); // tags error
+          error: { message: "שגיאת מסד נתונים" }}); // tags error
 
       const request = new NextRequest("http://localhost:3000/api/forum/stats");
       const response = await GET(request);
@@ -244,8 +215,7 @@ describe("Forum Stats API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
 
     it("מחזיר שגיאה כאשר יש בעיה בשליפת התורמים", async () => {
@@ -255,40 +225,32 @@ describe("Forum Stats API", () => {
         .select()
         .count.mockResolvedValueOnce({
           data: [{ count: 100 }],
-          error: null,
-        }) // posts count
+          error: null}) // posts count
         .mockResolvedValueOnce({
           data: [{ count: 500 }],
-          error: null,
-        }) // comments count
+          error: null}) // comments count
         .mockResolvedValueOnce({
           data: [{ count: 1000 }],
-          error: null,
-        }) // views count
+          error: null}) // views count
         .mockResolvedValueOnce({
           data: [{ count: 750 }],
-          error: null,
-        }) // likes count
+          error: null}) // likes count
         .mockResolvedValueOnce({
           data: [{ count: 50 }],
-          error: null,
-        }) // active users
+          error: null}) // active users
         .mockResolvedValueOnce({
           data: [{ count: 10 }],
-          error: null,
-        }); // today posts
+          error: null}); // today posts
 
       mockSupabase
         .from()
         .select()
         .limit.mockResolvedValueOnce({
           data: mockStats.trending_tags,
-          error: null,
-        }) // tags
+          error: null}) // tags
         .mockResolvedValueOnce({
           data: null,
-          error: { message: "שגיאת מסד נתונים" },
-        }); // contributors error
+          error: { message: "שגיאת מסד נתונים" }}); // contributors error
 
       const request = new NextRequest("http://localhost:3000/api/forum/stats");
       const response = await GET(request);
@@ -296,8 +258,7 @@ describe("Forum Stats API", () => {
 
       expect(response.status).toBe(500);
       expect(data).toEqual({
-        error: "שגיאת מסד נתונים",
-      });
+        error: "שגיאת מסד נתונים"});
     });
   });
 });

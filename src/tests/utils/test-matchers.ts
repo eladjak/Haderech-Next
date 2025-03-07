@@ -1,5 +1,9 @@
 import { expect } from "vitest";
 
+("use client");
+
+export {};
+
 /**
  * Custom matcher for checking if a mock was called with matching arguments
  * This matcher checks if any call to the mock function was made with arguments

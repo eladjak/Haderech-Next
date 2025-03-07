@@ -1,6 +1,8 @@
+"use client";
+
 import { Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Achievement as AchievementType } from "@/types/api";
+import type { Achievement as AchievementType } from "@/types/profile";
 
 interface AchievementProps {
   achievement: AchievementType;
@@ -15,7 +17,7 @@ export function Achievement({ achievement, className }: AchievementProps) {
           <Trophy className="h-6 w-6 text-primary" />
         </div>
         <div className="flex-1">
-          <div className="font-medium">{achievement.title}</div>
+          <div className="font-medium">{achievement.name}</div>
           <div className="mt-1 text-sm text-muted-foreground">
             {achievement.description}
           </div>

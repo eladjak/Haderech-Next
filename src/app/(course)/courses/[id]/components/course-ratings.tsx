@@ -1,10 +1,28 @@
+"use client";
+
+import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Rating } from "@/components/ui/rating";
-import type { CourseWithRelations } from "@/types/courses";
+
+// יצירת קומפוננטת דירוג פשוטה במקום ייבוא מ-@/lib/utils
+const Rating = ({ value, readOnly }: { value: number; readOnly?: boolean }) => {
+  return (
+    <div className="flex">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={
+            star <= value ? "fill-yellow-500 text-yellow-500" : "text-gray-300"
+          }
+          size={16}
+        />
+      ))}
+    </div>
+  );
+};
 
 interface CourseRatingsProps {
-  course: CourseWithRelations;
+  course: any; // במקום CourseWithRelations
   showAll?: boolean;
 }
 
@@ -26,7 +44,7 @@ export function CourseRatings({ course, showAll = false }: CourseRatingsProps) {
             <span className="text-2xl font-bold">
               {averageRating.toFixed(1)}
             </span>
-            <Rating value={averageRating} readOnly />
+            <Rating value={averageRating} />
             <span className="text-muted-foreground">
               ({ratings.length} דירוגים)
             </span>
@@ -42,7 +60,7 @@ export function CourseRatings({ course, showAll = false }: CourseRatingsProps) {
                 <div>
                   <div className="font-medium">{rating.user.name}</div>
                   <div className="flex items-center gap-2">
-                    <Rating value={rating.rating} readOnly />
+                    <Rating value={rating.rating} />
                     <div className="text-sm text-muted-foreground">
                       {new Date(rating.created_at).toLocaleDateString("he-IL")}
                     </div>

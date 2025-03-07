@@ -1,5 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { processUserMessage, saveSimulationResults, SimulatorService, startSimulation} from "@/components/ui/";\nimport type { SimulationConfig, SimulationSession, SimulatorScenario, SimulatorSession, SimulatorState,
+
+import { processUserMessage, saveSimulationResults, SimulatorService, startSimulation} from "@/components/ui/";
+import {
+import type { SimulationConfig, SimulationSession, SimulatorScenario, SimulatorSession, SimulatorState,
+import type {
+import {
+import type {
+
+ processUserMessage, saveSimulationResults, SimulatorService,
+ SimulationConfig, SimulationSession, SimulatorScenario, SimulatorSession,
+
 
 /**
  * @file simulator.test.ts
@@ -14,17 +24,15 @@ import { processUserMessage, saveSimulationResults, SimulatorService, startSimul
  */
 
 
-import {
   processUserMessage,
   saveSimulationResults,
   SimulatorService,
-  startSimulation,} from "@/lib/services/simulator";
-import type {
+  startSimulation} from "@/lib/services/simulator";
   SimulationConfig,
   SimulationSession,
   SimulatorScenario,
   SimulatorSession,
-  SimulatorState,} from "@/types/simulator";
+  SimulatorState} from "@/types/simulator";
 
 /**
  * Mock test data for simulator tests
@@ -44,11 +52,9 @@ const mockScenario: SimulatorScenario = {
     minScore: 70,
     requiredSkills: ["communication", "empathy"],
     minDuration: 300,
-    maxDuration: 900,
-  },
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-};
+    maxDuration: 900},
+  created_at: new Date.toISOString,
+  updated_at: new Date.toISOString};
 
 // Test user identifier
 const mockUserId = "test-user";
@@ -59,8 +65,7 @@ const mockConfig: SimulationConfig = {
   rateLimit: 20,
   messageMaxLength: 1000,
   defaultScenario: "basic-communication",
-  feedbackFrequency: 3,
-};
+  feedbackFrequency: 3};
 
 // Mock session data
 const mockSession: SimulationSession = {
@@ -71,8 +76,7 @@ const mockSession: SimulationSession = {
   messages: [],
   startTime: new Date(),
   lastMessageTime: new Date(),
-  config: mockConfig,
-};
+  config: mockConfig};
 
 describe("Simulator Service", () => {
   let simulatorService: SimulatorService;
@@ -159,8 +163,7 @@ describe("Simulator Service", () => {
       vi.spyOn(global, "fetch").mockImplementation(() =>
         Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({ data: null, error: null }),
-        } as Response)
+          json: () => Promise.resolve({ data: null, error: null })} as Response)
       );
 
       await expect(saveSimulationResults(session)).resolves.not.toThrow();
@@ -173,8 +176,7 @@ describe("Simulator Service", () => {
       vi.spyOn(global, "fetch").mockImplementation(() =>
         Promise.resolve({
           ok: false,
-          json: () => Promise.resolve({ data: null, error: "Database error" }),
-        } as Response)
+          json: () => Promise.resolve({ data: null, error: "Database error" })} as Response)
       );
 
       await expect(saveSimulationResults(session)).rejects.toThrow();
@@ -226,8 +228,7 @@ describe("Simulator Service", () => {
     it("should validate user permissions", async () => {
       const blockedSession: SimulationSession = {
         ...mockSession,
-        status: "blocked" as const,
-      };
+        status: "blocked" as const};
       await expect(
         simulatorService.processMessage(blockedSession, "test")
       ).rejects.toThrow("User is blocked");
@@ -271,8 +272,7 @@ describe("Simulator Service", () => {
     it("should validate session tokens", async () => {
       const tamperedSession = {
         ...mockSession,
-        id: "tampered-token",
-      };
+        id: "tampered-token"};
       await expect(
         simulatorService.processMessage(tamperedSession, "test")
       ).rejects.toThrow("Invalid session");
@@ -292,8 +292,7 @@ describe("Simulator Service", () => {
     it("should validate file uploads", async () => {
       const maliciousFile = {
         name: "malicious.exe",
-        type: "application/x-msdownload",
-      };
+        type: "application/x-msdownload"};
       await expect(
         simulatorService.processFileUpload(mockSession, maliciousFile)
       ).rejects.toThrow("Invalid file type");
@@ -318,7 +317,7 @@ describe("Simulator Service", () => {
         mockSession,
         originalMessage
       );
-      const modifiedResponse = { ...response, content: "Modified" };
+      const modifiedResponse = { ...response, content: "Modified" }
 
       await expect(
         simulatorService.validateMessageIntegrity(modifiedResponse)

@@ -50,7 +50,6 @@ export interface ToastProps {
   variant?: "default" | "destructive";
   duration?: number;
 }
-
 export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
   name: string;
   label: string;
@@ -67,22 +66,18 @@ export interface CourseCardProps {
   course: Course;
   className?: string;
 }
-
 export interface LessonCardProps {
   lesson: Lesson;
   className?: string;
 }
-
 export interface ForumPostCardProps {
   post: ForumPost;
   className?: string;
 }
-
 export interface UserCardProps {
   user: User;
   className?: string;
 }
-
 export interface TabsProps extends HTMLAttributes<HTMLDivElement> {
   defaultValue?: string;
   value?: string;

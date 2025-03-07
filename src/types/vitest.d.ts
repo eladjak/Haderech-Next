@@ -5,54 +5,54 @@ import type { AxeResults } from "axe-core";
 /// <reference types="@testing-library/jest-dom" />
 
 // Define the shape of Mock objects
-export interface Mock<T = any> {
-  (...args: any[]): T;
+export interface Mock<T = unknown> {
+  (...args: unknown[]): T;
   mock: {
-    calls: any[][];
-    instances: any[];
+    calls: unknown[][];
+    instances: unknown[];
     invocationCallOrder: number[];
     results: { type: string; value: any }[];
-    lastCall: any[];
+    lastCall: unknown[];
   };
-  mockClear(): void;
-  mockReset(): void;
-  mockRestore(): void;
-  mockImplementation(fn: (...args: any[]) => any): Mock<T>;
-  mockImplementationOnce(fn: (...args: any[]) => any): Mock<T>;
+  mockClear: void;
+  mockReset: void;
+  mockRestore: void;
+  mockImplementation(fn: (...args: unknown[]) => any): Mock<T>;
+  mockImplementationOnce(fn: (...args: unknown[]) => any): Mock<T>;
   mockName(name: string): Mock<T>;
-  mockReturnThis(): Mock<T>;
+  mockReturnThis: Mock<T>;
   mockReturnValue(value: T): Mock<T>;
   mockReturnValueOnce(value: T): Mock<T>;
   mockResolvedValue(value: T): Mock<Promise<T>>;
   mockResolvedValueOnce(value: T): Mock<Promise<T>>;
-  mockRejectedValue(value: any): Mock<Promise<any>>;
-  mockRejectedValueOnce(value: any): Mock<Promise<any>>;
+  mockRejectedValue(value: unknown): Mock<Promise<unknown>>;
+  mockRejectedValueOnce(value: any): Mock<Promise<unknown>>;
 }
 
 // Extend vitest types
 declare module "vitest" {
-  export interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {
-    toHaveBeenCalledWithMatch: (...args: any[]) => void;
+  export interface Assertion<T = unknown>
+    extends TestingLibraryMatchers<T, void> {
+    toHaveBeenCalledWithMatch: (...args: unknown[]) => void;
     toHaveNoViolations: () => void;
   }
 
   export interface AsymmetricMatchersContaining {
     any: (constructor: any) => any;
     stringMatching: (expected: string | RegExp) => any;
-    objectContaining: <T = any>(expected: T) => any;
-    arrayContaining: <T = any>(expected: T[]) => any;
-    toHaveBeenCalledWithMatch: (...args: any[]) => void;
+    objectContaining: <T = unknown>(expected: T) => any;
+    arrayContaining: <T = unknown>(expected: T[]) => any;
+    toHaveBeenCalledWithMatch: (...args: unknown[]) => void;
   }
-
   export interface ExpectStatic {
     any: (constructor: any) => any;
     stringMatching: (expected: string | RegExp) => any;
-    objectContaining: <T = any>(expected: T) => any;
-    arrayContaining: <T = any>(expected: T[]) => any;
+    objectContaining: <T = unknown>(expected: T) => any;
+    arrayContaining: <T = unknown>(expected: T[]) => any;
     extend: (
       matchers: Record<
         string,
-        (...args: any[]) => { pass: boolean; message: () => string }
+        (...args: unknown[]) => { pass: boolean; message: () => string }
       >
     ) => void;
   }
@@ -60,9 +60,8 @@ declare module "vitest" {
   export interface MockOptions {
     name?: string;
   }
-
   export interface Vi {
-    fn: <T extends (...args: any[]) => any>(
+    fn: <T extends (...args: unknown[]) => any>(
       implementation?: T
     ) => Mock<ReturnType<T>>;
     mock: <T>(file: string, options?: MockOptions) => Mock<T>;
@@ -71,7 +70,7 @@ declare module "vitest" {
 
 // Add global WindowMock types
 declare global {
-  interface Window {
+  export interface Window {
     matchMedia: (query: string) => {
       matches: boolean;
       media: string;

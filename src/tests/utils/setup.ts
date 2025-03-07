@@ -1,7 +1,11 @@
 import { TextDecoder, TextEncoder } from "util";
-import { afterEach, beforeAll, expect, vi } from "vitest";
+import { _afterEach, _beforeAll, expect, vi } from "vitest";
 import "@testing-library/jest-dom";
-import { cleanup, configure } from "@testing-library/react";
+import { _cleanup, configure } from "@testing-library/react";
+
+("use client");
+
+export {};
 
 // Configure testing library
 configure({

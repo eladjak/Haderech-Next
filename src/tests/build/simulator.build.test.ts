@@ -1,12 +1,29 @@
 import fs from "fs";
+
 import path from "path";
 import { describe, expect, it } from "vitest";
-
 import * as simulator from "@/lib/services/simulator";
-import type { SimulatorScenario, SimulatorSession, SimulatorState} from "@/components/ui/";\nimport type {
+import type { SimulatorScenario, SimulatorSession, SimulatorState} from "@/components/ui/";
+import type {
+import type {
+
+"use client";
+
+ SimulatorScenario, SimulatorSession,
+
+
+export {}
+
+
+
+
+
+
+
+
   SimulatorScenario,
   SimulatorSession,
-  SimulatorState,} from "@/types/simulator";
+  SimulatorState} from "@/types/simulator";
 
 describe("Simulator Build Tests", () => {
   it("should export all required functions", () => {
@@ -19,16 +36,16 @@ describe("Simulator Build Tests", () => {
     const startSimulation = simulator.startSimulation as (
       scenario: SimulatorScenario,
       userId: string
-    ) => Promise<SimulatorSession>;
+    ) => Promise<SimulatorSession>
 
     const processUserMessage = simulator.processUserMessage as (
       session: SimulatorSession,
       content: string
-    ) => Promise<SimulatorState>;
+    ) => Promise<SimulatorState>
 
     const saveSimulationResults = simulator.saveSimulationResults as (
       state: SimulatorSession
-    ) => Promise<void>;
+    ) => Promise<void>
 
     expect(typeof startSimulation).toBe("function");
     expect(typeof processUserMessage).toBe("function");
@@ -65,25 +82,21 @@ describe("Simulator Build Tests", () => {
           minScore: 0,
           requiredSkills: [],
           minDuration: 0,
-          maxDuration: 0,
-        },
+          maxDuration: 0},
         created_at: "",
-        updated_at: "",
-      },
+        updated_at: ""},
       status: "running",
       state: "initial",
       messages: [],
       created_at: "",
-      updated_at: "",
-    };
+      updated_at: ""};
 
     expect(mockState).toMatchObject({
-      id: expect.any(String),
+      id: expect.any(String);,
       user_id: expect.any(String),
       scenario_id: expect.any(String),
       status: expect.stringMatching(/^(idle|running|completed|error)$/),
-      state: expect.stringMatching(/^(initial|in_progress|completed)$/),
-    });
+      state: expect.stringMatching(/^(initial|in_progress|completed)$/)});
   });
 
   it("should have correct default exports", () => {

@@ -1,8 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { Database } from "@/types/supabase";
+
+export {};
 
 /**
  * Simple tokenizer function that splits text into words
@@ -70,16 +72,11 @@ async function logChatInteraction(
  */
 export async function POST(request: Request) {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    const supabase = createRouteHandlerClient<Database>(
+      { cookies },
       {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       }
     );
 

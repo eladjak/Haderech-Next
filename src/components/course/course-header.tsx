@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +24,7 @@ export function CourseHeader({ course, isEnrolled }: CourseHeaderProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Badge variant="secondary">{course.level}</Badge>
-              {course.price === 0 && <Badge variant="success">חינם</Badge>}
+              {course.price === 0 && <Badge variant="outline">חינם</Badge>}
             </div>
             <CardTitle>{course.title}</CardTitle>
             <p className="text-sm text-muted-foreground">

@@ -1,20 +1,29 @@
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Message } from "@/types/simulator";
-import { MessageList } from "../MessageList";
+"use client";
+
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  MessageList,
+  render,
+  screen,
+  vi,
+} from "@/lib/utils";
+import type { Message } from "@/types";
 
 const mockMessages: Message[] = [
   {
     id: "1",
     role: "user",
     content: "שלום, אני צריך עזרה",
-    timestamp: new Date().toISOString(),
+    timestamp: new Date.toISOString(),
     sender: {
       id: "1",
       name: "משתמש",
       role: "user" as const,
     },
-    created_at: new Date().toISOString(),
+    created_at: new Date.toISOString(),
     updated_at: new Date().toISOString(),
   },
   {

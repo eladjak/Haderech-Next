@@ -1,10 +1,24 @@
 import "@testing-library/jest-dom";
+rary/jest-dom";
 import matchers from "@testing-library/jest-dom/matchers";
-import type { _TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
-import type { _AxeResults } from "axe-core";
 import { afterEach, expect, vi } from "vitest";
+import type { _TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
 import type { _Mock } from "vitest";
+
+import type { _AxeResults } from "axe-core";
+
+
+export {}
+
+
+
+
+
+
+
+
+
 
 // הרחבת הגדרות matchers עבור jest-dom
 expect.extend(matchers);
@@ -38,8 +52,7 @@ beforeAll(() => {
     removeListener: vi.fn(),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  });
+    dispatchEvent: vi.fn()});
   global.matchMedia = mockMatchMedia;
 
   // Mock ResizeObserver
@@ -86,11 +99,9 @@ const toHaveBeenCalledWithMatch = (received: any, ...expectedArgs: any[]) => {
     message: () =>
       pass
         ? `expected ${received} not to have been called with matching arguments ${expectedArgs}`
-        : `expected ${received} to have been called with matching arguments ${expectedArgs}`,
-  };
-};
+        : `expected ${received} to have been called with matching arguments ${expectedArgs}`};
+}
 
 // הוספת המאצ'ר המותאם אישית לאובייקט expect
 expect.extend({
-  toHaveBeenCalledWithMatch,
-});
+  toHaveBeenCalledWithMatch});

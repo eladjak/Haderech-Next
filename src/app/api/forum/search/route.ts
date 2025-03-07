@@ -1,8 +1,7 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import type { Database } from "@/types/database";
-import type { _ForumPost } from "@/types/forum";
+import { createClient } from "@/lib/supabase-server";
+import type { ForumPost } from "@/types/forum";
 
 /**
  * @file forum/search/route.ts
@@ -22,7 +21,8 @@ export const dynamic = "force-dynamic";
  * @returns {Promise<NextResponse>} JSON response containing the search results or error message
  */
 export async function GET(request: NextRequest) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
 
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
     const timeframe = searchParams.get("timeframe") || "all";
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
-    const offset = (page - 1) * limit;
 
     let dbQuery = supabase.from("forum_posts").select(
       `
@@ -47,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     // חיפוש לפי טקסט
     if (query) {
-      dbQuery = dbQuery.or(`title.ilike.%${query}%,content.ilike.%${query}%`);
+      dbQuery = dbQuery.match("title", query);
     }
 
     // סינון לפי קטגוריה
@@ -105,8 +104,11 @@ export async function GET(request: NextRequest) {
         break;
     }
 
-    // הוספת עמודים
-    dbQuery = dbQuery.range(offset, offset + limit - 1);
+    // אם צריך דפדוף, הפעלת הפונקציה range
+    if (page && limit) {
+      const offset = (page - 1) * limit;
+      dbQuery = dbQuery.range(offset, offset + limit - 1);
+    }
 
     const { data: posts, error, count } = await dbQuery;
 
