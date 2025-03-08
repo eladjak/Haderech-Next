@@ -77,3 +77,11 @@ backend/node_modules/
 
 # Broken files
 *.broken
+
+# Temporary and fixed files
+**/course-comments-temp.tsx
+**/fixed-*.tsx
+**/fixed-*.txt
+**/fixed-content.txt
+**/*.bak
+src/app/__fixed/

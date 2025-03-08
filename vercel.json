@@ -12,12 +12,5 @@
     "env": {
       "NPM_FLAGS": "--no-frozen-lockfile"
     }
-  },
-  "ignorePatterns": [
-    "**/course-comments-temp.tsx",
-    "**/fixed-*.tsx",
-    "**/fixed-*.txt",
-    "**/fixed-content.txt",
-    "**/*.bak"
-  ]
+  }
 }
