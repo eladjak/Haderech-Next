@@ -49,9 +49,10 @@
   ],
   "exclude": [
     "node_modules",
-    "src/tests/**/*",
-    "src/app/api/__tests__/**/*",
-    "src/components/**/__tests__/**/*",
-    "src/test/**/*"
+    "**/node_modules/*",
+    ".next",
+    "out",
+    "course-comments-temp.tsx",
+    "**/course-comments-temp.tsx"
   ]
 }
