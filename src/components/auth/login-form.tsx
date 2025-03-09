@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
 // Define the login form schema with zod
@@ -43,13 +45,14 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isGoogleLoading, setIsGoogleLoading] = React.useState<boolean>(false);
   const [isFacebookLoading, setIsFacebookLoading] =
     React.useState<boolean>(false);
   const [isMicrosoftLoading, setIsMicrosoftLoading] =
     React.useState<boolean>(false);
-  const [isGithubLoading, setIsGithubLoading] = React.useState<boolean>(false);
 
   // Define form with react-hook-form and zod validation
   const form = useForm<LoginFormValues>({
@@ -65,56 +68,61 @@ export function LoginForm({
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
 
-    // Check if the user is an admin
-    const isAdmin = adminEmails.includes(data.email.toLowerCase());
+    try {
+      // Check if the user is an admin
+      const isAdmin = adminEmails.includes(data.email.toLowerCase());
 
-    // Simulate API call with setTimeout
-    setTimeout(() => {
-      setIsLoading(false);
+      // Call the login function from AuthContext
+      await login(data.email, data.password);
+
       // Success message with toast
       toast.success("התחברת בהצלחה!", {
         description: isAdmin
           ? "ברוך הבא, מנהל מערכת!"
           : "ברוך הבא להדרך, מקום שבו הצמיחה האישית שלך מתחילה.",
       });
-    }, 1500);
+
+      // Navigate to dashboard or admin dashboard
+      router.push(isAdmin ? "/admin/dashboard" : "/dashboard");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error("התחברות נכשלה", {
+        description: error.message || "אנא בדוק את פרטיך ונסה שוב",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   // Social login handlers
-  const handleGoogleLogin = () => {
-    setIsGoogleLoading(true);
-    // Simulate Google login
-    setTimeout(() => {
+  const handleSocialLogin = async (provider: string) => {
+    // Set the loading state for the specific provider
+    switch (provider) {
+      case "google":
+        setIsGoogleLoading(true);
+        break;
+      case "facebook":
+        setIsFacebookLoading(true);
+        break;
+      case "microsoft":
+        setIsMicrosoftLoading(true);
+        break;
+    }
+
+    try {
+      // Simulate OAuth redirect - in real implementation would call an API endpoint
+      window.location.href = `/api/auth/${provider}`;
+      // Note: the following code won't execute due to the redirect
+      toast.success(`התחברת בהצלחה עם ${provider}`);
+    } catch (error) {
+      toast.error(`התחברות באמצעות ${provider} נכשלה`, {
+        description: "אנא נסה שוב מאוחר יותר",
+      });
+      // Reset loading state
       setIsGoogleLoading(false);
-      toast.success("התחברת בהצלחה עם Google");
-    }, 1500);
-  };
-
-  const handleFacebookLogin = () => {
-    setIsFacebookLoading(true);
-    // Simulate Facebook login
-    setTimeout(() => {
       setIsFacebookLoading(false);
-      toast.success("התחברת בהצלחה עם Facebook");
-    }, 1500);
-  };
-
-  const handleMicrosoftLogin = () => {
-    setIsMicrosoftLoading(true);
-    // Simulate Microsoft login
-    setTimeout(() => {
       setIsMicrosoftLoading(false);
-      toast.success("התחברת בהצלחה עם Microsoft");
-    }, 1500);
-  };
-
-  const handleGithubLogin = () => {
-    setIsGithubLoading(true);
-    // Simulate GitHub login
-    setTimeout(() => {
-      setIsGithubLoading(false);
-      toast.success("התחברת בהצלחה עם GitHub");
-    }, 1500);
+    }
   };
 
   return (
@@ -202,12 +210,12 @@ export function LoginForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <Button
           variant="outline"
           type="button"
           disabled={isGoogleLoading}
-          onClick={handleGoogleLogin}
+          onClick={() => handleSocialLogin("google")}
         >
           {isGoogleLoading ? (
             <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
@@ -220,7 +228,7 @@ export function LoginForm({
           variant="outline"
           type="button"
           disabled={isFacebookLoading}
-          onClick={handleFacebookLogin}
+          onClick={() => handleSocialLogin("facebook")}
         >
           {isFacebookLoading ? (
             <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
@@ -233,7 +241,7 @@ export function LoginForm({
           variant="outline"
           type="button"
           disabled={isMicrosoftLoading}
-          onClick={handleMicrosoftLogin}
+          onClick={() => handleSocialLogin("microsoft")}
         >
           {isMicrosoftLoading ? (
             <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
@@ -241,19 +249,6 @@ export function LoginForm({
             <Icons.microsoft className="ml-2 h-4 w-4" />
           )}
           Microsoft
-        </Button>
-        <Button
-          variant="outline"
-          type="button"
-          disabled={isGithubLoading}
-          onClick={handleGithubLogin}
-        >
-          {isGithubLoading ? (
-            <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.gitHub className="ml-2 h-4 w-4" />
-          )}
-          GitHub
         </Button>
       </div>
     </div>

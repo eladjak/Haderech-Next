@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
 // Define the register form schema with zod
@@ -44,13 +45,13 @@ export function RegisterForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const router = useRouter();
+  const { register } = useAuth();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isGoogleLoading, setIsGoogleLoading] = React.useState<boolean>(false);
   const [isFacebookLoading, setIsFacebookLoading] =
     React.useState<boolean>(false);
   const [isMicrosoftLoading, setIsMicrosoftLoading] =
     React.useState<boolean>(false);
-  const [isGithubLoading, setIsGithubLoading] = React.useState<boolean>(false);
 
   // Define form with react-hook-form and zod validation
   const form = useForm<RegisterFormValues>({
@@ -68,62 +69,55 @@ export function RegisterForm({
     setIsLoading(true);
 
     try {
-      // כאן יתבצע תהליך ההרשמה מול השרת
-      console.log("נרשם עם:", data);
+      // Call the register function from AuthContext
+      await register(data.email, data.password, data.name);
 
-      // דוגמה: מדמה הרשמה מוצלחת
-      setTimeout(() => {
-        toast.success("נרשמת בהצלחה!", {
-          description: "ברוך הבא להדרך, המסע האישי שלך מתחיל כעת.",
-        });
-        router.push("/dashboard");
-        setIsLoading(false);
-      }, 2000);
-    } catch (error) {
-      toast.error("שגיאה בהרשמה. אנא נסה שוב.");
+      // Success message with toast
+      toast.success("נרשמת בהצלחה!", {
+        description: "ברוך הבא להדרך, המסע האישי שלך מתחיל כעת.",
+      });
+
+      // Navigate to dashboard
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error("הרשמה נכשלה", {
+        description: error.message || "אנא בדוק את פרטיך ונסה שוב",
+      });
+    } finally {
       setIsLoading(false);
     }
   }
 
   // Social registration handlers
-  const handleGoogleRegister = () => {
-    setIsGoogleLoading(true);
-    // Simulate Google registration
-    setTimeout(() => {
+  const handleSocialRegister = async (provider: string) => {
+    // Set the loading state for the specific provider
+    switch (provider) {
+      case "google":
+        setIsGoogleLoading(true);
+        break;
+      case "facebook":
+        setIsFacebookLoading(true);
+        break;
+      case "microsoft":
+        setIsMicrosoftLoading(true);
+        break;
+    }
+
+    try {
+      // Simulate OAuth redirect - in real implementation would call an API endpoint
+      window.location.href = `/api/auth/${provider}`;
+      // Note: the following code won't execute due to the redirect
+      toast.success(`נרשמת בהצלחה עם ${provider}`);
+    } catch (error) {
+      toast.error(`הרשמה באמצעות ${provider} נכשלה`, {
+        description: "אנא נסה שוב מאוחר יותר",
+      });
+      // Reset loading state
       setIsGoogleLoading(false);
-      toast.success("נרשמת בהצלחה עם Google");
-      router.push("/dashboard");
-    }, 1500);
-  };
-
-  const handleFacebookRegister = () => {
-    setIsFacebookLoading(true);
-    // Simulate Facebook registration
-    setTimeout(() => {
       setIsFacebookLoading(false);
-      toast.success("נרשמת בהצלחה עם Facebook");
-      router.push("/dashboard");
-    }, 1500);
-  };
-
-  const handleMicrosoftRegister = () => {
-    setIsMicrosoftLoading(true);
-    // Simulate Microsoft registration
-    setTimeout(() => {
       setIsMicrosoftLoading(false);
-      toast.success("נרשמת בהצלחה עם Microsoft");
-      router.push("/dashboard");
-    }, 1500);
-  };
-
-  const handleGithubRegister = () => {
-    setIsGithubLoading(true);
-    // Simulate GitHub registration
-    setTimeout(() => {
-      setIsGithubLoading(false);
-      toast.success("נרשמת בהצלחה עם GitHub");
-      router.push("/dashboard");
-    }, 1500);
+    }
   };
 
   return (
@@ -192,7 +186,7 @@ export function RegisterForm({
                 <FormControl>
                   <Checkbox
                     checked={field.value}
-                    onCheckedChange={(checked) => field.onChange(checked)}
+                    onCheckedChange={(checked) => field.onChange(!!checked)}
                   />
                 </FormControl>
                 <FormLabel className="mr-2 font-normal">
@@ -232,12 +226,12 @@ export function RegisterForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <Button
           variant="outline"
           type="button"
           disabled={isGoogleLoading}
-          onClick={handleGoogleRegister}
+          onClick={() => handleSocialRegister("google")}
         >
           {isGoogleLoading ? (
             <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
@@ -250,7 +244,7 @@ export function RegisterForm({
           variant="outline"
           type="button"
           disabled={isFacebookLoading}
-          onClick={handleFacebookRegister}
+          onClick={() => handleSocialRegister("facebook")}
         >
           {isFacebookLoading ? (
             <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
@@ -263,7 +257,7 @@ export function RegisterForm({
           variant="outline"
           type="button"
           disabled={isMicrosoftLoading}
-          onClick={handleMicrosoftRegister}
+          onClick={() => handleSocialRegister("microsoft")}
         >
           {isMicrosoftLoading ? (
             <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
@@ -271,19 +265,6 @@ export function RegisterForm({
             <Icons.microsoft className="ml-2 h-4 w-4" />
           )}
           Microsoft
-        </Button>
-        <Button
-          variant="outline"
-          type="button"
-          disabled={isGithubLoading}
-          onClick={handleGithubRegister}
-        >
-          {isGithubLoading ? (
-            <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.gitHub className="ml-2 h-4 w-4" />
-          )}
-          GitHub
         </Button>
       </div>
     </div>
