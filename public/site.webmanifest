@@ -1,19 +1,17 @@
 {
-  "name": "הדרך - פלטפורמת למידה מתקדמת",
+  "name": "הדרך - אתר הקורסים והתוכן",
   "short_name": "הדרך",
-  "description": "פלטפורמת למידה מתקדמת לפיתוח תוכנה",
+  "description": "הדרך - מקום לצמיחה והתפתחות אישית",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/apple-touch-icon.png",
@@ -31,11 +29,10 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
-  "orientation": "portrait-primary",
   "start_url": "/",
-  "dir": "rtl",
-  "lang": "he"
+  "lang": "he-IL",
+  "dir": "rtl"
 }
