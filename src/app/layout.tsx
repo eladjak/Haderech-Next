@@ -65,7 +65,33 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
-      <head />
+      <head>
+        <link rel="manifest" href="/site.webmanifest" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/icons/icon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link
+          rel="mask-icon"
+          href="/icons/safari-pinned-tab.svg"
+          color="#000000"
+        />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="theme-color" content="#000000" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
