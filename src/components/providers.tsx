@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
+import { AuthProvider } from "@/providers/auth-provider";
 
 interface ProvidersProps {
   children: React.ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return <>{children}</>; // רכיב פשוט שמחזיר את ילדיו
+  return <AuthProvider>{children}</AuthProvider>;
 }
