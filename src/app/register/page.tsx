@@ -1,16 +1,10 @@
 "use client";
 
-import { Metadata } from "next";
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth/register-form";
 import { Icons } from "@/components/icons";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-export const metadata: Metadata = {
-  title: "הרשמה",
-  description: "הירשם לחשבון חדש",
-};
 
 export default function RegisterPage() {
   return (
