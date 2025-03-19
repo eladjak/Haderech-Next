@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -53,6 +54,7 @@ export function LoginForm({
     React.useState<boolean>(false);
   const [isMicrosoftLoading, setIsMicrosoftLoading] =
     React.useState<boolean>(false);
+  const supabase = createClientComponentClient();
 
   // Define form with react-hook-form and zod validation
   const form = useForm<LoginFormValues>({
@@ -110,18 +112,38 @@ export function LoginForm({
     }
 
     try {
-      // Simulate OAuth redirect - in real implementation would call an API endpoint
-      window.location.href = `/api/auth/${provider}`;
-      // Note: the following code won't execute due to the redirect
-      toast.success(`התחברת בהצלחה עם ${provider}`);
-    } catch (error) {
-      toast.error(`התחברות באמצעות ${provider} נכשלה`, {
-        description: "אנא נסה שוב מאוחר יותר",
+      // קריאה ישירה ל-Supabase OAuth API
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider as any,
+        options: {
+          redirectTo: redirectTo,
+        },
       });
+
+      if (error) {
+        throw error;
+      }
+
+      // בהצלחה - הדפדפן יועבר אוטומטית לעמוד ההפניה
+    } catch (error: any) {
+      console.error(`${provider} login error:`, error);
+      toast.error(`התחברות באמצעות ${provider} נכשלה`, {
+        description: error.message || "אנא נסה שוב מאוחר יותר",
+      });
+
       // Reset loading state
-      setIsGoogleLoading(false);
-      setIsFacebookLoading(false);
-      setIsMicrosoftLoading(false);
+      switch (provider) {
+        case "google":
+          setIsGoogleLoading(false);
+          break;
+        case "facebook":
+          setIsFacebookLoading(false);
+          break;
+        case "microsoft":
+          setIsMicrosoftLoading(false);
+          break;
+      }
     }
   };
 
