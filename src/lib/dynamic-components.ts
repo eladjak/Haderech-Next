@@ -1,10 +1,13 @@
 import dynamic from 'next/dynamic';
+import React from 'react';
 
 export const ChatbotWindow = dynamic(
   () => import('@/components/chatbot/ChatbotWindow'),
   {
     ssr: false,
-    loading: () => <div className="fixed bottom-4 end-4 w-12 h-12 rounded-full bg-primary animate-pulse" />
+    loading: () => React.createElement('div', {
+      className: "fixed bottom-4 end-4 w-12 h-12 rounded-full bg-primary animate-pulse"
+    })
   }
 );
 

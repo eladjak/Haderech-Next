@@ -1,24 +1,19 @@
-import { _useCallback, useEffect, useRef, useState } from "react";
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { _Avatar, _AvatarFallback, _AvatarImage } from "@/components/ui/avatar";
-import { _Button } from "@/components/ui/button";
-import { _Input } from "@/components/ui/input";
-import { _Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { processUserMessage } from "@/lib/services/simulator";
-import { _cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { ChatHeader } from "./ChatHeader";
 import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
-import type { _Message, _SimulatorResponse, _SimulatorScenario, SimulatorSession, SimulatorState,
-
-"use client";
-
-
-
-
 
 
 
@@ -27,11 +22,12 @@ import type { _Message, _SimulatorResponse, _SimulatorScenario, SimulatorSession
 
 
 import type {
-  _Message,
-  _SimulatorResponse,
-  _SimulatorScenario,
+  Message,
+  SimulatorResponse,
+  SimulatorScenario,
   SimulatorSession,
-  SimulatorState,} from "@/types/simulator";
+  SimulatorState,
+} from "@/types/simulator";
 
 
 
