@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import type { Course, Lesson } from "@/types/api";
 import { LessonContent } from "./components/lesson-content";
 import { LessonSidebar } from "./components/lesson-sidebar";
+import { logger } from "@/lib/utils/logger";
 
 export default function LessonPage({
   params,
@@ -35,7 +36,7 @@ export default function LessonPage({
         setCourse(courseData);
         setLesson(lessonData);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        logger.error("Error fetching data:", error);
         toast({
           title: "שגיאה",
           description: "אירעה שגיאה בטעינת השיעור",

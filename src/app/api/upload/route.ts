@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
       .upload(fileName, file);
 
     if (uploadError) {
-      console.error("Error uploading file:", uploadError);
+      logger.error("Error uploading file:", uploadError);
       return NextResponse.json(
         { error: "Failed to upload file" },
         { status: 500 }
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: publicUrl });
   } catch (error) {
-    console.error("Upload error:", error);
+    logger.error("Upload error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

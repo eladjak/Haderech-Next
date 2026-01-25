@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@/lib/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 interface AnalyticsEvent {
   id: string;
@@ -58,10 +59,10 @@ export async function trackEvent(
     const { error } = await supabase.from("analytics_events").insert(event);
 
     if (error) {
-      console.error("Error tracking event:", error);
+      logger.error("Error tracking event:", error);
     }
   } catch (error) {
-    console.error("Error in trackEvent:", error);
+    logger.error("Error in trackEvent:", error);
   }
 }
 
@@ -79,7 +80,7 @@ export async function getUserEngagement(
       .order("created_at", { ascending: true });
 
     if (error) {
-      console.error("Error fetching user events:", error);
+      logger.error("Error fetching user events:", error);
       return null;
     }
 
@@ -117,7 +118,7 @@ export async function getUserEngagement(
 
     return engagement;
   } catch (error) {
-    console.error("Error in getUserEngagement:", error);
+    logger.error("Error in getUserEngagement:", error);
     return null;
   }
 }
@@ -135,7 +136,7 @@ export async function getCourseMetrics(
       .eq("course_id", course_id);
 
     if (error) {
-      console.error("Error fetching course events:", error);
+      logger.error("Error fetching course events:", error);
       return null;
     }
 
@@ -182,7 +183,7 @@ export async function getCourseMetrics(
 
     return metrics;
   } catch (error) {
-    console.error("Error in getCourseMetrics:", error);
+    logger.error("Error in getCourseMetrics:", error);
     return null;
   }
 }
@@ -200,7 +201,7 @@ export async function getEffectivenessMetrics(): Promise<
       .order("created_at", { ascending: true });
 
     if (error) {
-      console.error("Error fetching events:", error);
+      logger.error("Error fetching events:", error);
       return [];
     }
 
@@ -240,7 +241,7 @@ export async function getEffectivenessMetrics(): Promise<
       };
     });
   } catch (error) {
-    console.error("Error in getEffectivenessMetrics:", error);
+    logger.error("Error in getEffectivenessMetrics:", error);
     return [];
   }
 }

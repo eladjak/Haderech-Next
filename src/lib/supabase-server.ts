@@ -2,6 +2,7 @@ import { createServerClient as createClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
   return createClient<Database>(
@@ -16,7 +17,7 @@ export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
           try {
             cookieStore.set(name, value, options);
           } catch (error) {
-            console.error("Error setting cookie:", error);
+            logger.error("Error setting cookie:", error);
           }
         },
         remove(name: string, options: CookieOptions) {
@@ -26,7 +27,7 @@ export function createServerClient(cookieStore: ReturnType<typeof cookies>) {
               maxAge: 0,
             });
           } catch (error) {
-            console.error("Error removing cookie:", error);
+            logger.error("Error removing cookie:", error);
           }
         },
       },

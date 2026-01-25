@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { updateLessonProgressSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (error && error.code !== "PGRST116") {
       // PGRST116 is "not found"
-      console.error("Error fetching progress:", error);
+      logger.error("Error fetching progress:", error);
       return NextResponse.json(
         { error: "Failed to fetch progress" },
         { status: 500 }
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       progress || { completed: false, last_position: 0 }
     );
   } catch (error) {
-    console.error("Progress GET error:", error);
+    logger.error("Progress GET error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -158,7 +159,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const validationResult = updateLessonProgressSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Lesson progress validation failed:", validationResult.error.flatten());
+      logger.warn("Lesson progress validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -185,7 +186,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error updating progress:", error);
+      logger.error("Error updating progress:", error);
       return NextResponse.json(
         { error: "Failed to update progress" },
         { status: 500 }
@@ -194,7 +195,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(progress);
   } catch (error) {
-    console.error("Progress PUT error:", error);
+    logger.error("Progress PUT error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

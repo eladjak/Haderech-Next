@@ -3,6 +3,7 @@ import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file route.ts
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest) {
         .range(offset, offset + limit - 1);
 
       if (coursesError) {
-        console.error("Error searching courses:", coursesError);
+        logger.error("Error searching courses:", coursesError);
         return NextResponse.json(
           { error: "Failed to search courses" },
           { status: 500 }
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest) {
         .range(offset, offset + limit - 1);
 
       if (instructorsError) {
-        console.error("Error searching instructors:", instructorsError);
+        logger.error("Error searching instructors:", instructorsError);
         return NextResponse.json(
           { error: "Failed to search instructors" },
           { status: 500 }
@@ -160,7 +161,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error) {
-    console.error("Error in GET /api/search:", error);
+    logger.error("Error in GET /api/search:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

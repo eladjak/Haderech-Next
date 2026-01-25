@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file courses/[id]/enroll/route.ts
@@ -89,7 +90,7 @@ export async function POST(_: Request, { params }: RouteParams) {
       });
 
     if (createError) {
-      console.error("Error creating enrollment:", createError);
+      logger.error("Error creating enrollment:", createError);
       return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
@@ -98,7 +99,7 @@ export async function POST(_: Request, { params }: RouteParams) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error in POST /api/courses/[id]/enroll:", error);
+    logger.error("Error in POST /api/courses/[id]/enroll:", error);
     return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }
@@ -145,7 +146,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       .eq("user_id", session.user.id);
 
     if (error) {
-      console.error("Error deleting enrollment:", error);
+      logger.error("Error deleting enrollment:", error);
       return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
@@ -154,7 +155,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Enrollment DELETE error:", error);
+    logger.error("Enrollment DELETE error:", error);
     return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }

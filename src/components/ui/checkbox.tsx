@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import * as React from "react";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Checkbox Component

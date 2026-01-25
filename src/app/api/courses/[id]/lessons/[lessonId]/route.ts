@@ -3,6 +3,7 @@ import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -28,7 +29,7 @@ export async function GET(
       .single();
 
     if (courseError) {
-      console.error("Course error:", courseError);
+      logger.error("Course error:", courseError);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: courseError.message },
         { status: 500 }
@@ -47,7 +48,7 @@ export async function GET(
       .single();
 
     if (error) {
-      console.error("Lesson error:", error);
+      logger.error("Lesson error:", error);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: error.message },
         { status: 500 }
@@ -60,7 +61,7 @@ export async function GET(
 
     return NextResponse.json(lesson, { status: 200 });
   } catch (error) {
-    console.error("Server error:", error);
+    logger.error("Server error:", error);
     return NextResponse.json(
       {
         error: "שגיאת שרת פנימית",
@@ -96,7 +97,7 @@ export async function PATCH(
       .single();
 
     if (courseError) {
-      console.error("Course error:", courseError);
+      logger.error("Course error:", courseError);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: courseError.message },
         { status: 500 }
@@ -123,7 +124,7 @@ export async function PATCH(
       .single();
 
     if (lessonError) {
-      console.error("Lesson error:", lessonError);
+      logger.error("Lesson error:", lessonError);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: lessonError.message },
         { status: 500 }
@@ -162,7 +163,7 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error("Update error:", error);
+      logger.error("Update error:", error);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: error.message },
         { status: 500 }
@@ -171,7 +172,7 @@ export async function PATCH(
 
     return NextResponse.json(lesson, { status: 200 });
   } catch (error) {
-    console.error("Server error:", error);
+    logger.error("Server error:", error);
     return NextResponse.json(
       {
         error: "שגיאת שרת פנימית",
@@ -207,7 +208,7 @@ export async function DELETE(
       .single();
 
     if (courseError) {
-      console.error("Course error:", courseError);
+      logger.error("Course error:", courseError);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: courseError.message },
         { status: 500 }
@@ -234,7 +235,7 @@ export async function DELETE(
       .single();
 
     if (lessonError) {
-      console.error("Lesson error:", lessonError);
+      logger.error("Lesson error:", lessonError);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: lessonError.message },
         { status: 500 }
@@ -252,7 +253,7 @@ export async function DELETE(
       .eq("course_id", params.id);
 
     if (error) {
-      console.error("Delete error:", error);
+      logger.error("Delete error:", error);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: error.message },
         { status: 500 }
@@ -264,7 +265,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error("Server error:", error);
+    logger.error("Server error:", error);
     return NextResponse.json(
       {
         error: "שגיאת שרת פנימית",

@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 // Update achievement progress
 export async function PATCH(
@@ -55,7 +56,7 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error("Error updating achievement:", error);
+      logger.error("Error updating achievement:", error);
       return NextResponse.json(
         { error: "שגיאה בעדכון התקדמות ההישג" },
         { status: 500 }
@@ -68,7 +69,7 @@ export async function PATCH(
 
     return NextResponse.json(achievement);
   } catch (error) {
-    console.error("Error in PATCH /api/achievements/[id]:", error);
+    logger.error("Error in PATCH /api/achievements/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

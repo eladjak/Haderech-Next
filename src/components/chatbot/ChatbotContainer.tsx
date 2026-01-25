@@ -3,6 +3,7 @@
 import { MessageCircle } from "lucide-react";
 import React from "react";
 import { ChatbotWindow, type ChatMessage } from "./ChatbotWindow";
+import { logger } from "@/lib/utils/logger";
 
 interface ChatbotContainerProps {
   /** פונקציה לשליחת הודעה ל-AI */
@@ -40,7 +41,7 @@ export function ChatbotContainer({
       const botResponse = await onSendMessage(content);
       setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
-      console.error("Error in chatbot:", error);
+      logger.error("Error in chatbot:", error);
       // כאן אפשר להוסיף הודעת שגיאה למשתמש
     } finally {
       setIsLoading(false);

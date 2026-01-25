@@ -21,7 +21,16 @@ const mockStats: ForumStats = {
 
 export const metadata: Metadata = {
   title: "פורום - הדרך",
-  description: "הצטרף לפורום הדרך ושתף את החוויות והתובנות שלך",
+  description: "הצטרף לפורום הדרך, שתף את החוויות והתובנות שלך, קבל תמיכה מהקהילה ולמד מחוויות של אחרים בתחום התקשורת ומערכות היחסים.",
+  openGraph: {
+    title: "פורום - הדרך",
+    description: "קהילה תומכת לשיתוף חוויות ותובנות בתחום התקשורת ומערכות היחסים",
+    url: "https://haderech.co.il/forum",
+    type: "website",
+  },
+  alternates: {
+    canonical: "https://haderech.co.il/forum",
+  },
 };
 
 export default function ForumPage(): React.ReactElement {

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { _Database } from "@/types/database";
 import { simulatorSubmissionSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 // Rate limiters
 const getSubmissionsLimiter = rateLimit(apiRateLimits.standard);
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
     const validationResult = simulatorSubmissionSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Simulator submission validation failed:", validationResult.error.flatten());
+      logger.warn("Simulator submission validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",

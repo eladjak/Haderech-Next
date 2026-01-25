@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 import {
+import { logger } from "@/lib/utils/logger";
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -18,7 +19,7 @@ export function ThemeToggle() {
     try {
       setTheme(theme);
     } catch (error) {
-      console.error("שגיאה בהחלפת ערכת נושא:", error);
+      logger.error("שגיאה בהחלפת ערכת נושא:", error);
     }
   };
 

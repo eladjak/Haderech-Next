@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import {
+import { logger } from "@/lib/utils/logger";
   updatePasswordSchema,
   type UpdatePasswordSchema,
 } from "@/lib/validations/auth";
@@ -46,7 +47,7 @@ export function UpdatePasswordForm(): React.ReactElement {
       });
       router.push("/login");
     } catch (error) {
-      console.error("Error updating password:", error);
+      logger.error("Error updating password:", error);
       toast({
         title: "שגיאה בעדכון הסיסמה",
         description:

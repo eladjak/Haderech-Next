@@ -1,11 +1,11 @@
 {
   "name": "הדרך - פלטפורמת למידה מתקדמת",
   "short_name": "הדרך",
-  "description": "פלטפורמת למידה מתקדמת לפיתוח תוכנה",
+  "description": "פלטפורמת למידה אינטראקטיבית לפיתוח כישורי תקשורת ויחסים אישיים",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "he",
@@ -14,31 +14,31 @@
       "src": "/icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-192x192.png",
@@ -50,7 +50,7 @@
       "src": "/icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
@@ -59,50 +59,36 @@
       "purpose": "any maskable"
     }
   ],
-  "shortcuts": [
-    {
-      "name": "פורום",
-      "short_name": "פורום",
-      "description": "עבור לפורום הקהילה",
-      "url": "/community",
-      "icons": [{ "src": "/icons/forum.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "קורסים",
-      "short_name": "קורסים",
-      "description": "עבור לרשימת הקורסים",
-      "url": "/courses",
-      "icons": [{ "src": "/icons/courses.png", "sizes": "192x192" }]
-    }
-  ],
   "screenshots": [
     {
       "src": "/screenshots/home.png",
-      "sizes": "1280x720",
+      "sizes": "540x720",
       "type": "image/png",
-      "platform": "wide",
-      "label": "דף הבית של הדרך"
+      "form_factor": "narrow"
     },
     {
       "src": "/screenshots/courses.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "platform": "wide",
-      "label": "רשימת הקורסים"
+      "form_factor": "wide"
     }
   ],
-  "categories": ["education", "development", "productivity"],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "features": ["Cross Platform", "Offline First", "Responsive", "Fast", "PWA"],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "share_target": {
-    "action": "/share",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
+  "shortcuts": [
+    {
+      "name": "קורסים",
+      "short_name": "קורסים",
+      "description": "עבור לדף הקורסים",
+      "url": "/courses",
+      "icons": [{ "src": "/icons/courses.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "פורום",
+      "short_name": "פורום",
+      "description": "עבור לפורום הקהילה",
+      "url": "/forum",
+      "icons": [{ "src": "/icons/forum.png", "sizes": "96x96" }]
     }
-  }
+  ],
+  "categories": ["education", "lifestyle"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7"
 }

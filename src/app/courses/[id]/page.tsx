@@ -8,6 +8,8 @@ import { CourseHeader } from "@/components/course/course-header";
 import { CourseProgress } from "@/components/course/course-progress";
 import { CourseRatings } from "@/components/course/course-ratings";
 import { CourseSidebar } from "@/components/course/course-sidebar";
+import { CourseStructuredData } from "@/components/CourseStructuredData";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { createServerClient } from "@/lib/supabase-server";
 import type { CourseWithRelations } from "@/types/courses";
 
@@ -30,7 +32,7 @@ export async function generateMetadata({
 
   const { data: course } = await supabase
     .from("courses")
-    .select("title, description")
+    .select("title, description, image_url")
     .eq("id", params.id)
     .single();
 
@@ -44,6 +46,29 @@ export async function generateMetadata({
   return {
     title: course.title,
     description: course.description,
+    openGraph: {
+      title: course.title,
+      description: course.description,
+      type: 'website',
+      url: `https://haderech.co.il/courses/${params.id}`,
+      images: course.image_url ? [
+        {
+          url: course.image_url,
+          width: 1200,
+          height: 630,
+          alt: course.title,
+        },
+      ] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: course.title,
+      description: course.description,
+      images: course.image_url ? [course.image_url] : [],
+    },
+    alternates: {
+      canonical: `https://haderech.co.il/courses/${params.id}`,
+    },
   };
 }
 
@@ -111,8 +136,16 @@ export default async function CoursePage({
     }
   }
 
+  const breadcrumbItems = [
+    { name: 'דף הבית', url: '/' },
+    { name: 'קורסים', url: '/courses' },
+    { name: typedCourse.title, url: `/courses/${params.id}` },
+  ];
+
   return (
     <div className="container py-8">
+      <CourseStructuredData course={typedCourse} />
+      <Breadcrumbs items={breadcrumbItems} />
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
           <CourseHeader course={typedCourse} isEnrolled={isEnrolled} />

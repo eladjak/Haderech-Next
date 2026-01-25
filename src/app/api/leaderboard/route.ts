@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
     const { data: users, error, _count } = await query;
 
     if (error) {
-      console.error("Error fetching leaderboard:", error);
+      logger.error("Error fetching leaderboard:", error);
       return NextResponse.json(
         { error: "Failed to fetch leaderboard" },
         { status: 500 }
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error in leaderboard API:", error);
+    logger.error("Error in leaderboard API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -186,7 +187,7 @@ export async function PATCH(req: Request) {
       .single();
 
     if (error) {
-      console.error("Error updating score:", error);
+      logger.error("Error updating score:", error);
       return NextResponse.json(
         { error: "שגיאה בעדכון הניקוד" },
         { status: 500 }
@@ -198,7 +199,7 @@ export async function PATCH(req: Request) {
       newScore: updatedProfile.score,
     });
   } catch (error) {
-    console.error("Error in PATCH /api/leaderboard:", error);
+    logger.error("Error in PATCH /api/leaderboard:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

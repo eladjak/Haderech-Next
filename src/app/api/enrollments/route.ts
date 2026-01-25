@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { enrollmentSchema, unenrollmentSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
     const validationResult = enrollmentSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Enrollment validation failed:", validationResult.error.flatten());
+      logger.warn("Enrollment validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -167,7 +168,7 @@ export async function DELETE(request: NextRequest) {
     const validationResult = unenrollmentSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Unenrollment validation failed:", validationResult.error.flatten());
+      logger.warn("Unenrollment validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -206,7 +207,7 @@ export async function DELETE(request: NextRequest) {
       .eq("course_id", course_id);
 
     if (error) {
-      console.error("Error in DELETE /api/enrollments:", error);
+      logger.error("Error in DELETE /api/enrollments:", error);
       return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
@@ -215,7 +216,7 @@ export async function DELETE(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error in DELETE /api/enrollments:", error);
+    logger.error("Error in DELETE /api/enrollments:", error);
     return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
   }
 }

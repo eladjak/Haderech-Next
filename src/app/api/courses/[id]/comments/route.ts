@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file courses/[id]/comments/route.ts
@@ -66,7 +67,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching comments:", error);
+      logger.error("Error fetching comments:", error);
       return NextResponse.json(
         { error: "Failed to fetch comments" },
         { status: 500 }
@@ -75,7 +76,7 @@ export async function GET(_: Request, { params }: RouteParams) {
 
     return NextResponse.json(comments);
   } catch (error) {
-    console.error("Error in GET /api/courses/[id]/comments:", error);
+    logger.error("Error in GET /api/courses/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -152,7 +153,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error creating comment:", error);
+      logger.error("Error creating comment:", error);
       return NextResponse.json(
         { error: "Failed to create comment" },
         { status: 500 }
@@ -161,7 +162,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(comment);
   } catch (error) {
-    console.error("Error in POST /api/courses/[id]/comments:", error);
+    logger.error("Error in POST /api/courses/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

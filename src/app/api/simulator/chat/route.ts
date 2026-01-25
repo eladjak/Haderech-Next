@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { z } from "zod";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 const messageSchema = z.object({
   message: z
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
       feedback: "משוב לדוגמה",
     });
   } catch (error) {
-    console.error("Error in chat route:", error);
+    logger.error("Error in chat route:", error);
     return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { logger } from "@/lib/utils/logger";
 
 interface CalendarEvent {
   summary: string;
@@ -54,7 +55,7 @@ export const addEventToCalendar = async (event: CalendarEvent) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error adding event to calendar:", error);
+    logger.error("Error adding event to calendar:", error);
     throw new Error("שגיאה בהוספת האירוע ללוח השנה");
   }
 };
@@ -71,7 +72,7 @@ export const getUpcomingEvents = async (maxResults = 10) => {
 
     return response.data.items;
   } catch (error) {
-    console.error("Error fetching upcoming events:", error);
+    logger.error("Error fetching upcoming events:", error);
     throw new Error("שגיאה בטעינת האירועים הקרובים");
   }
 };
@@ -89,7 +90,7 @@ export const updateEvent = async (
 
     return response.data;
   } catch (error) {
-    console.error("Error updating event:", error);
+    logger.error("Error updating event:", error);
     throw new Error("שגיאה בעדכון האירוע");
   }
 };
@@ -101,7 +102,7 @@ export const deleteEvent = async (eventId: string) => {
       eventId,
     });
   } catch (error) {
-    console.error("Error deleting event:", error);
+    logger.error("Error deleting event:", error);
     throw new Error("שגיאה במחיקת האירוע");
   }
 };

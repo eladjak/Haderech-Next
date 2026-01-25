@@ -4,6 +4,7 @@ import { AlertTriangle } from "lucide-react";
 import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/utils/logger";
 
 interface ErrorBoundaryProps {
   error: Error & { digest?: string };
@@ -12,7 +13,7 @@ interface ErrorBoundaryProps {
 
 export function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
   useEffect(() => {
-    console.error("Error:", error);
+    logger.error("Error:", error);
   }, [error]);
 
   return (

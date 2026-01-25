@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import {
+import { logger } from "@/lib/utils/logger";
   getScenarioById,
   processUserMessage,
   saveSimulationResults,
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
     const state = await startSimulation(scenario, userId);
     return NextResponse.json(state);
   } catch (error) {
-    console.error("Error starting simulation:", error);
+    logger.error("Error starting simulation:", error);
     return NextResponse.json(
       { error: "Failed to start simulation" },
       { status: 500 }
@@ -167,7 +168,7 @@ export async function PUT(req: Request) {
     const newState = await processUserMessage(session, message);
     return NextResponse.json(newState);
   } catch (error) {
-    console.error("Error processing message:", error);
+    logger.error("Error processing message:", error);
     return NextResponse.json(
       { error: "Failed to process message" },
       { status: 500 }
@@ -224,7 +225,7 @@ export async function PATCH(req: Request) {
     await saveSimulationResults(session);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error saving simulation:", error);
+    logger.error("Error saving simulation:", error);
     return NextResponse.json(
       { error: "Failed to save simulation" },
       { status: 500 }

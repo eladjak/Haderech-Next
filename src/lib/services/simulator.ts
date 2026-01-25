@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import type { getScenarioById } from "@/lib/data/scenarios";
 import type { BaseMessage } from "./forum";
 import type {
+import { logger } from "@/lib/utils/logger";
   ChatCompletionMessage,
   FeedbackDetails,
   FeedbackMetrics,
@@ -370,7 +371,7 @@ export async function processUserMessage(
     const data = await response.json();
     return data.state;
   } catch (error) {
-    console.error("Error processing message:", error);
+    logger.error("Error processing message:", error);
     throw error;
   }
 }
@@ -404,7 +405,7 @@ export async function saveSimulationResults(
     .eq("id", updatedState.id);
 
   if (sessionUpdate.error) {
-    console.error("Error updating session:", sessionUpdate.error);
+    logger.error("Error updating session:", sessionUpdate.error);
     throw new Error("Failed to update session");
   }
 
@@ -429,7 +430,7 @@ export async function saveSimulationResults(
     });
 
   if (resultsError) {
-    console.error("Error saving results:", resultsError);
+    logger.error("Error saving results:", resultsError);
     throw new Error("Failed to save results");
   }
 }
@@ -579,7 +580,7 @@ async function generateFinalFeedback(
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      console.error("No content in OpenAI response");
+      logger.error("No content in OpenAI response");
       return null;
     }
 
@@ -609,11 +610,11 @@ async function generateFinalFeedback(
         },
       };
     } catch (error) {
-      console.error("Error parsing feedback JSON:", error);
+      logger.error("Error parsing feedback JSON:", error);
       return null;
     }
   } catch (error) {
-    console.error("Error generating final feedback:", error);
+    logger.error("Error generating final feedback:", error);
     return null;
   }
 }
@@ -1007,7 +1008,7 @@ async function saveSimulationState(session: SimulatorSession): Promise<void> {
       throw new Error("Failed to save simulation state");
     }
   } catch (error) {
-    console.error("Error saving simulation state:", error);
+    logger.error("Error saving simulation state:", error);
     throw error;
   }
 }
@@ -1121,7 +1122,7 @@ const _parseFeedback = (content: string): FeedbackDetails => {
       },
     };
   } catch (error) {
-    console.error("Error parsing feedback:", error);
+    logger.error("Error parsing feedback:", error);
     return _generateDefaultFeedback();
   }
 };
@@ -1255,7 +1256,7 @@ export function validateSimulationStatus(status: string): boolean {
 // הרצה של הסימולציה עם הטיפול בתצורה
 export function processSimulationConfig(session: SimulatorSession): void {
   // טיפול בתצורה של הסימולציה
-  console.log(`Processing session: ${session.id}`);
+  logger.debug(`Processing session: ${session.id}`);
 
   // פותר את בעיית הטיפוסים עם ה-config
   const sessionConfig = session.state?.settings || {
@@ -1265,7 +1266,7 @@ export function processSimulationConfig(session: SimulatorSession): void {
     auto_suggestions: true,
   };
 
-  console.log(`Using configuration: ${JSON.stringify(sessionConfig)}`);
+  logger.debug(`Using configuration: ${JSON.stringify(sessionConfig)}`);
 }
 
 // בדיקה אם למשתמש יש הרשאות להמשיך בסימולציה

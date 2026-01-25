@@ -17,14 +17,30 @@ export default defineConfig({
     ],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
-      reporter: ["text", "json", "html"],
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "src/**/*.{test,spec}.{ts,tsx}",
         "src/test/**/*",
         "src/tests/**/*",
         "src/types/**/*",
+        "src/__tests__/**/*",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "**/mockData",
+        "**/.next/**",
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/build/**",
+        "**/*.stories.*",
       ],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+      },
     },
     deps: {
       inline: [

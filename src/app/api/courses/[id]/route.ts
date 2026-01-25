@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { _Database } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file courses/[id]/route.ts
@@ -162,7 +163,7 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error("Error in PATCH /api/courses/[id]:", error);
+      logger.error("Error in PATCH /api/courses/[id]:", error);
       return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
     }
 
@@ -172,7 +173,7 @@ export async function PATCH(
 
     return NextResponse.json(course || {}, { status: 200 });
   } catch (error) {
-    console.error("Error in PATCH /api/courses/[id]:", error);
+    logger.error("Error in PATCH /api/courses/[id]:", error);
     return NextResponse.json({ error: "שגיאת מסד נתונים" }, { status: 500 });
   }
 }

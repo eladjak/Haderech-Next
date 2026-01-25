@@ -5,7 +5,16 @@ import { courses } from "@/constants/courses";
 
 export const metadata: Metadata = {
   title: "קורסים",
-  description: "גלה את הקורסים שלנו",
+  description: "גלה את הקורסים שלנו לפיתוח כישורי תקשורת ויחסים אישיים. קורסים מקצועיים עם למידה אינטראקטיבית ומומחים מובילים בתחום.",
+  openGraph: {
+    title: "קורסים - הדרך",
+    description: "גלה את הקורסים שלנו לפיתוח כישורי תקשורת ויחסים אישיים",
+    url: "https://haderech.co.il/courses",
+    type: "website",
+  },
+  alternates: {
+    canonical: "https://haderech.co.il/courses",
+  },
 };
 
 export default function CoursesPage(): React.ReactElement {

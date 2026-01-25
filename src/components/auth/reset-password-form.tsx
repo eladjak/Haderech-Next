@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import {
+import { logger } from "@/lib/utils/logger";
   resetPasswordSchema,
   type ResetPasswordSchema,
 } from "@/lib/validations/auth";
@@ -32,7 +33,7 @@ export function ResetPasswordForm(): React.ReactElement {
     try {
       await resetPassword(data.email);
     } catch (error) {
-      console.error("Error in form submission:", error);
+      logger.error("Error in form submission:", error);
     } finally {
       setIsLoading(false);
     }

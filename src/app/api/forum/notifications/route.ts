@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file forum/notifications/route.ts
@@ -55,7 +56,7 @@ export async function GET(_request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error in GET /api/forum/notifications:", error);
+      logger.error("Error in GET /api/forum/notifications:", error);
       return NextResponse.json(
         { error: "שגיאה בטעינת ההתראות" },
         { status: 500 }
@@ -64,7 +65,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ notifications });
   } catch (_error) {
-    console.error("Error in GET /api/forum/notifications:", _error);
+    logger.error("Error in GET /api/forum/notifications:", _error);
     return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }
@@ -108,7 +109,7 @@ export async function PATCH(request: NextRequest) {
       .eq("user_id", user.id);
 
     if (error) {
-      console.error("Error in PATCH /api/forum/notifications:", error);
+      logger.error("Error in PATCH /api/forum/notifications:", error);
       return NextResponse.json(
         { error: "שגיאה בעדכון ההתראות" },
         { status: 500 }
@@ -117,7 +118,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (_error) {
-    console.error("Error in PATCH /api/forum/notifications:", _error);
+    logger.error("Error in PATCH /api/forum/notifications:", _error);
     return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }
@@ -161,7 +162,7 @@ export async function DELETE(request: NextRequest) {
       .eq("user_id", user.id);
 
     if (error) {
-      console.error("Error in DELETE /api/forum/notifications:", error);
+      logger.error("Error in DELETE /api/forum/notifications:", error);
       return NextResponse.json(
         { error: "שגיאה במחיקת ההתראות" },
         { status: 500 }
@@ -170,7 +171,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (_error) {
-    console.error("Error in DELETE /api/forum/notifications:", _error);
+    logger.error("Error in DELETE /api/forum/notifications:", _error);
     return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }

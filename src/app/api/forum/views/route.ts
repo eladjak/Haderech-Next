@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file forum/views/route.ts
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (postError || !post) {
-      console.error("Post error:", postError);
+      logger.error("Post error:", postError);
       return NextResponse.json({ error: "הפוסט לא נמצא" }, { status: 404 });
     }
 
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (viewError) {
-      console.error("View error:", viewError);
+      logger.error("View error:", viewError);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: viewError.message },
         { status: 500 }
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       .eq("id", post_id);
 
     if (updateError) {
-      console.error("Update error:", updateError);
+      logger.error("Update error:", updateError);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: updateError.message },
         { status: 500 }
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(view, { status: 201 });
   } catch (error) {
-    console.error("Server error:", error);
+    logger.error("Server error:", error);
     return NextResponse.json(
       {
         error: "שגיאת שרת פנימית",

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+import { logger } from "@/lib/utils/logger";
   Card,
   CardContent,
   CardDescription,
@@ -30,9 +31,9 @@ export default function AboutPage() {
 
     // טיפול בבעיות הידרציה פוטנציאליות
     try {
-      console.log("AboutPage client-side code executed");
+      logger.debug("AboutPage client-side code executed");
     } catch (error) {
-      console.error("Error in client-side initialization:", error);
+      logger.error("Error in client-side initialization:", error);
     }
   }, []);
 

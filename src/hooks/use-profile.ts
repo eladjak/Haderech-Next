@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/types/database";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file use-profile.ts
@@ -44,7 +45,7 @@ export function useProfile() {
 
         return data as Profile;
       } catch (error) {
-        console.error("Error fetching profile:", error);
+        logger.error("Error fetching profile", error);
         toast({
           title: "שגיאה בטעינת הפרופיל",
           description: "אנא נסה שוב מאוחר יותר",
@@ -74,7 +75,7 @@ export function useProfile() {
 
         return data as Profile;
       } catch (error) {
-        console.error("Error updating profile:", error);
+        logger.error("Error updating profile", error);
         toast({
           title: "שגיאה בעדכון הפרופיל",
           description: "אנא נסה שוב מאוחר יותר",
@@ -108,7 +109,7 @@ export function useProfile() {
 
         return publicUrl;
       } catch (error) {
-        console.error("Error uploading avatar:", error);
+        logger.error("Error uploading avatar", error);
         toast({
           title: "שגיאה בהעלאת התמונה",
           description: "אנא נסה שוב מאוחר יותר",
@@ -135,7 +136,7 @@ export function useProfile() {
 
         return true;
       } catch (error) {
-        console.error("Error deleting avatar:", error);
+        logger.error("Error deleting avatar", error);
         toast({
           title: "שגיאה במחיקת התמונה",
           description: "אנא נסה שוב מאוחר יותר",

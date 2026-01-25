@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file courses/[id]/ratings/route.ts
@@ -57,7 +58,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching ratings:", error);
+      logger.error("Error fetching ratings:", error);
       return NextResponse.json(
         { error: "Failed to fetch ratings" },
         { status: 500 }
@@ -66,7 +67,7 @@ export async function GET(_: Request, { params }: RouteParams) {
 
     return NextResponse.json(ratings);
   } catch (error) {
-    console.error("Error in GET /api/courses/[id]/ratings:", error);
+    logger.error("Error in GET /api/courses/[id]/ratings:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -167,7 +168,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error creating rating:", error);
+      logger.error("Error creating rating:", error);
       return NextResponse.json(
         { error: "Failed to create rating" },
         { status: 500 }
@@ -176,7 +177,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(newRating);
   } catch (error) {
-    console.error("Error in POST /api/courses/[id]/ratings:", error);
+    logger.error("Error in POST /api/courses/[id]/ratings:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -216,7 +217,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       .eq("user_id", session.user.id);
 
     if (error) {
-      console.error("Error deleting rating:", error);
+      logger.error("Error deleting rating:", error);
       return NextResponse.json(
         { error: "Failed to delete rating" },
         { status: 500 }
@@ -225,7 +226,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Rating deleted successfully" });
   } catch (error) {
-    console.error("Error in DELETE /api/courses/[id]/ratings:", error);
+    logger.error("Error in DELETE /api/courses/[id]/ratings:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

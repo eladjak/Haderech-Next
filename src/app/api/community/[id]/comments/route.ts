@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 // Get comments for a post
 export async function GET(_: Request, { params }: { params: { id: string } }) {
@@ -25,7 +26,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching comments:", error);
+      logger.error("Error fetching comments:", error);
       return NextResponse.json(
         { error: "Failed to fetch comments" },
         { status: 500 }
@@ -34,7 +35,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
     return NextResponse.json(comments);
   } catch (error) {
-    console.error("Error in GET /api/community/[id]/comments:", error);
+    logger.error("Error in GET /api/community/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -92,7 +93,7 @@ export async function POST(
       .single();
 
     if (error) {
-      console.error("Error adding comment:", error);
+      logger.error("Error adding comment:", error);
       return NextResponse.json(
         { error: "Failed to add comment" },
         { status: 500 }
@@ -101,7 +102,7 @@ export async function POST(
 
     return NextResponse.json(comment);
   } catch (error) {
-    console.error("Error in POST /api/community/[id]/comments:", error);
+    logger.error("Error in POST /api/community/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

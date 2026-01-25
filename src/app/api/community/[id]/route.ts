@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file community/[id]/route.ts
@@ -77,7 +78,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error fetching post:", error);
+      logger.error("Error fetching post:", error);
       return NextResponse.json(
         { error: "Failed to fetch post" },
         { status: 500 }
@@ -90,7 +91,7 @@ export async function GET(_: Request, { params }: RouteParams) {
 
     return NextResponse.json(post);
   } catch (error) {
-    console.error("Error in GET /api/community/[id]:", error);
+    logger.error("Error in GET /api/community/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -177,7 +178,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error updating post:", error);
+      logger.error("Error updating post:", error);
       return NextResponse.json(
         { error: "Failed to update post" },
         { status: 500 }
@@ -186,7 +187,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(updatedPost);
   } catch (error) {
-    console.error("Error in PATCH /api/community/[id]:", error);
+    logger.error("Error in PATCH /api/community/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -259,7 +260,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
     const { error } = await supabase.from("posts").delete().eq("id", params.id);
 
     if (error) {
-      console.error("Error deleting post:", error);
+      logger.error("Error deleting post:", error);
       return NextResponse.json(
         { error: "Failed to delete post" },
         { status: 500 }
@@ -268,7 +269,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in DELETE /api/community/[id]:", error);
+    logger.error("Error in DELETE /api/community/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

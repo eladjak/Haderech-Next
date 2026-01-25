@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
 import type { _ForumPost } from "@/types/forum";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file forum/search/route.ts
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest) {
     const { data: posts, error, count } = await dbQuery;
 
     if (error) {
-      console.error("Error in GET /api/forum/search:", error);
+      logger.error("Error in GET /api/forum/search:", error);
       return NextResponse.json(
         { error: "שגיאה בחיפוש פוסטים" },
         { status: 500 }
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (_error) {
-    console.error("Error in GET /api/forum/search:", _error);
+    logger.error("Error in GET /api/forum/search:", _error);
     return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
   }
 }

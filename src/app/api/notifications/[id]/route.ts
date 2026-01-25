@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import type { Database } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file notifications/[id]/route.ts
@@ -86,7 +87,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error updating notification:", error);
+      logger.error("Error updating notification:", error);
       return NextResponse.json(
         { error: "Failed to update notification" },
         { status: 500 }
@@ -95,7 +96,7 @@ export async function PATCH(_: Request, { params }: RouteParams) {
 
     return NextResponse.json(updatedNotification as NotificationWithUser);
   } catch (error) {
-    console.error("Error in PATCH /api/notifications/[id]:", error);
+    logger.error("Error in PATCH /api/notifications/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -156,7 +157,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       .eq("id", params.id);
 
     if (error) {
-      console.error("Error deleting notification:", error);
+      logger.error("Error deleting notification:", error);
       return NextResponse.json(
         { error: "Failed to delete notification" },
         { status: 500 }
@@ -165,7 +166,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Notification deleted successfully" });
   } catch (error) {
-    console.error("Error in DELETE /api/notifications/[id]:", error);
+    logger.error("Error in DELETE /api/notifications/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

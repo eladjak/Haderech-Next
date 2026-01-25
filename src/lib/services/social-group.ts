@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Activity } from "@/types/social";
 import type { Database, SocialGroup } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 if (
   !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -38,7 +39,7 @@ export const createSocialGroup = async (
 
     return group;
   } catch (error) {
-    console.error("Error creating social group:", error);
+    logger.error("Error creating social group:", error);
     throw new Error("שגיאה ביצירת קבוצה חברתית");
   }
 };
@@ -78,7 +79,7 @@ export const addMemberToGroup = async (
 
     return group;
   } catch (error) {
-    console.error("Error adding member to group:", error);
+    logger.error("Error adding member to group:", error);
     throw new Error("שגיאה בהוספת חבר לקבוצה");
   }
 };
@@ -120,7 +121,7 @@ export const addActivityToGroup = async (
 
     return updatedGroup;
   } catch (error) {
-    console.error("Error adding activity to group:", error);
+    logger.error("Error adding activity to group:", error);
     throw new Error("שגיאה בהוספת פעילות לקבוצה");
   }
 };
@@ -140,7 +141,7 @@ export const getGroupActivities = async (
 
     return group.activities ?? [];
   } catch (error) {
-    console.error("Error fetching group activities:", error);
+    logger.error("Error fetching group activities:", error);
     throw new Error("שגיאה בטעינת פעילויות הקבוצה");
   }
 };
@@ -203,7 +204,7 @@ export const joinActivity = async (
     if (updateError) throw updateError;
     return updatedActivity;
   } catch (error) {
-    console.error("Error joining activity:", error);
+    logger.error("Error joining activity:", error);
     throw new Error("שגיאה בהצטרפות לפעילות");
   }
 };

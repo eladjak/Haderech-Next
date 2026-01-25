@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { updateProfileSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error fetching user profile:", error);
+      logger.error("Error fetching user profile:", error);
       return NextResponse.json(
         { error: "Failed to fetch user profile" },
         { status: 500 }
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(profile);
   } catch (error) {
-    console.error("Error in GET /api/profile:", error);
+    logger.error("Error in GET /api/profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -106,7 +107,7 @@ export async function PUT(request: NextRequest) {
     const validationResult = updateProfileSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Profile update validation failed:", validationResult.error.flatten());
+      logger.warn("Profile update validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -129,7 +130,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error updating user profile:", error);
+      logger.error("Error updating user profile:", error);
       return NextResponse.json(
         { error: "Failed to update user profile" },
         { status: 500 }
@@ -138,7 +139,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(profile);
   } catch (error) {
-    console.error("Error in PUT /api/profile:", error);
+    logger.error("Error in PUT /api/profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import type { Database } from "@/types/supabase";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file forum/[id]/comments/route.ts
@@ -82,7 +83,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching comments:", error);
+      logger.error("Error fetching comments:", error);
       return NextResponse.json(
         { error: "Failed to fetch comments" },
         { status: 500 }
@@ -91,7 +92,7 @@ export async function GET(_: Request, { params }: RouteParams) {
 
     return NextResponse.json(comments as CommentWithRelations[]);
   } catch (error) {
-    console.error("Error in GET /api/forum/[id]/comments:", error);
+    logger.error("Error in GET /api/forum/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -189,7 +190,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error creating comment:", error);
+      logger.error("Error creating comment:", error);
       return NextResponse.json(
         { error: "Failed to create comment" },
         { status: 500 }
@@ -198,7 +199,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(comment as CommentWithRelations);
   } catch (error) {
-    console.error("Error in POST /api/forum/[id]/comments:", error);
+    logger.error("Error in POST /api/forum/[id]/comments:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

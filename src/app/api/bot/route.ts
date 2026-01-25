@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
 import { chatMessageSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 // Rate limiter for chat operations
 const chatLimiter = rateLimit(apiRateLimits.chat);
@@ -63,7 +64,7 @@ async function logChatInteraction(
   });
 
   if (error) {
-    console.error("Error logging chat interaction:", error);
+    logger.error("Error logging chat interaction:", error);
   }
 }
 
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
     const validationResult = chatMessageSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Chat message validation failed:", validationResult.error.flatten());
+      logger.warn("Chat message validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ response });
   } catch (error) {
-    console.error("Error in bot API:", error);
+    logger.error("Error in bot API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

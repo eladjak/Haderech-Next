@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database, DatabaseUser } from "@/types/database";
+import { logger } from "@/lib/utils/logger";
 
 interface Level {
   name: string;
@@ -316,7 +317,7 @@ export const awardPoints = async (
       updated_at: updatedUser.updated_at,
     };
   } catch (error) {
-    console.error("Error awarding points:", error);
+    logger.error("Error awarding points:", error);
     throw error;
   }
 };

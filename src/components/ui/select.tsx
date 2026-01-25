@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/utils/logger";
 
 const Select = SelectPrimitive.Root;
 

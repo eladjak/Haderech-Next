@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/utils/logger";
 
 interface Feedback {
   id: string;
@@ -50,7 +51,7 @@ export const createFeedback = async (
 
     return feedback;
   } catch (error) {
-    console.error("Error creating feedback:", error);
+    logger.error("Error creating feedback:", error);
     throw new Error("שגיאה ביצירת משוב");
   }
 };
@@ -77,7 +78,7 @@ export const getFeedbackForLesson = async (
     if (error) throw error;
     return feedbacks;
   } catch (error) {
-    console.error("Error fetching lesson feedback:", error);
+    logger.error("Error fetching lesson feedback:", error);
     throw new Error("שגיאה בטעינת משובים לשיעור");
   }
 };
@@ -104,7 +105,7 @@ export const getFeedbackForCourse = async (
     if (error) throw error;
     return feedbacks;
   } catch (error) {
-    console.error("Error fetching course feedback:", error);
+    logger.error("Error fetching course feedback:", error);
     throw new Error("שגיאה בטעינת משובים לקורס");
   }
 };
@@ -134,7 +135,7 @@ const updateCourseRating = async (courseId: string): Promise<void> => {
 
     if (error) throw error;
   } catch (error) {
-    console.error("Error updating course rating:", error);
+    logger.error("Error updating course rating:", error);
     throw new Error("שגיאה בעדכון דירוג הקורס");
   }
 };

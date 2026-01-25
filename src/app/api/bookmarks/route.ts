@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { Database } from "@/types/supabase";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file bookmarks/route.ts
@@ -36,13 +37,13 @@ export async function GET(request: NextRequest) {
       .eq("user_id", userId);
 
     if (error) {
-      console.error("Error fetching bookmarks:", error);
+      logger.error("Error fetching bookmarks:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error in bookmarks GET:", error);
+    logger.error("Error in bookmarks GET:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -75,13 +76,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating bookmark:", error);
+      logger.error("Error creating bookmark:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Error in bookmarks POST:", error);
+    logger.error("Error in bookmarks POST:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -122,7 +123,7 @@ export async function DELETE(request: NextRequest) {
       .eq("user_id", userId);
 
     if (error) {
-      console.error("Error deleting bookmark:", error);
+      logger.error("Error deleting bookmark:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -131,7 +132,7 @@ export async function DELETE(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error in bookmarks DELETE:", error);
+    logger.error("Error in bookmarks DELETE:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

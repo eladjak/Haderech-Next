@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import type {
+import { logger } from "@/lib/utils/logger";
   Author,
   ForumPost as ForumPostType,
   ForumTag,
@@ -168,7 +169,7 @@ export default function Page({ params }: { params: { id: string } }) {
         const data = await response.json();
         setPost(data);
       } catch (error) {
-        console.error("Error fetching post:", error);
+        logger.error("Error fetching post:", error);
         toast({
           title: "שגיאה",
           description: "אירעה שגיאה בטעינת הפוסט",

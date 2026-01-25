@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
 import type { ForumPost, ForumStats, ForumTag } from "@/types/forum";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file forum/stats/route.ts
@@ -167,7 +168,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error("Error fetching forum stats:", error);
+    logger.error("Error fetching forum stats:", error);
     return NextResponse.json(
       { error: "Failed to fetch forum stats" },
       { status: 500 }

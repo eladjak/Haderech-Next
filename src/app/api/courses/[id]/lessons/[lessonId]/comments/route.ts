@@ -3,6 +3,7 @@ import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -67,7 +68,7 @@ export async function GET(
       .order("created_at", { ascending: true });
 
     if (error) {
-      console.error("Error fetching lesson comments:", error);
+      logger.error("Error fetching lesson comments:", error);
       return NextResponse.json(
         { error: "Failed to fetch comments" },
         { status: 500 }
@@ -146,7 +147,7 @@ export async function POST(
       .single();
 
     if (error) {
-      console.error("Error creating lesson comment:", error);
+      logger.error("Error creating lesson comment:", error);
       return NextResponse.json(
         { error: "Failed to create comment" },
         { status: 500 }

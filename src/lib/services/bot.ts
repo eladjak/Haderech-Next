@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { env } from "@/env.mjs";
 import type { _Message } from "@/types/simulator";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * מיפוי של כישורים שהבוט יכול ללמד
@@ -119,7 +120,7 @@ export async function generateBotResponse(
 
     return { message };
   } catch (error) {
-    console.error("Error generating bot response:", error);
+    logger.error("Error generating bot response:", error);
     throw new Error("שגיאה בייצור תשובת הבוט");
   }
 }

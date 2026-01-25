@@ -3,6 +3,7 @@ import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 export {};
 
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (error) {
-      console.error("Error creating notification:", error);
+      logger.error("Error creating notification:", error);
       return NextResponse.json(
         { error: "Failed to create notification" },
         { status: 500 }
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: "Notification created successfully" });
   } catch (error) {
-    console.error("Notifications POST error:", error);
+    logger.error("Notifications POST error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

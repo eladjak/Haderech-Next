@@ -120,6 +120,256 @@ haderech-next/
 - [Component Library](docs/COMPONENTS.md)
 - [Testing Strategy](docs/TESTING.md)
 
+## 🏛️ Architecture Decision Records (ADR)
+
+### Why Redux for State Management?
+
+We chose Redux Toolkit for global state management due to:
+
+- **Predictable state updates**: Centralized state makes debugging easier
+- **DevTools integration**: Time-travel debugging and state inspection
+- **TypeScript support**: Excellent type inference with Redux Toolkit
+- **Middleware ecosystem**: Support for async operations, logging, and persistence
+- **Community adoption**: Large ecosystem of tools and patterns
+
+**Alternatives considered**: Zustand (simpler but less tooling), Recoil (less mature), React Context (not suitable for complex state).
+
+### Why Supabase over Firebase?
+
+Supabase was selected as our Backend-as-a-Service for:
+
+- **PostgreSQL foundation**: Full SQL capabilities vs. NoSQL limitations
+- **Open source**: Self-hostable and transparent codebase
+- **Real-time capabilities**: Built-in subscriptions for live updates
+- **Row Level Security**: Database-level authorization rules
+- **TypeScript support**: Auto-generated types from schema
+- **Cost efficiency**: More predictable pricing model
+
+**Alternatives considered**: Firebase (vendor lock-in concerns), AWS Amplify (complexity), PocketBase (less mature).
+
+### Why Next.js 14 App Router?
+
+The App Router provides significant advantages:
+
+- **Server Components**: Reduced JavaScript bundle size, improved performance
+- **Nested layouts**: Better code organization and data fetching
+- **Streaming SSR**: Progressive rendering for faster perceived load times
+- **Built-in optimization**: Automatic image optimization, font loading
+- **File-based routing**: Intuitive routing structure
+- **API routes**: Full-stack capabilities in one framework
+
+**Alternatives considered**: Remix (smaller ecosystem), Vite + React Router (more configuration needed), Pages Router (outdated pattern).
+
+### Why Logger over Console Statements?
+
+We implemented a centralized logger to:
+
+- **Environment awareness**: Different behavior in dev vs. production
+- **Error tracking integration**: Automatic reporting to Sentry/LogRocket
+- **Structured logging**: Consistent format for parsing and analysis
+- **Production safety**: No console.log cluttering production code
+- **Performance**: Conditional logging reduces overhead
+
+## 📖 API Documentation
+
+### Authentication
+
+All authenticated endpoints require a valid session token in cookies or Authorization header.
+
+#### Sign In
+```typescript
+POST /api/auth/signin
+Body: { email: string, password: string }
+Response: { user: User, session: Session }
+```
+
+#### Sign Up
+```typescript
+POST /api/auth/signup
+Body: { email: string, password: string, name: string }
+Response: { user: User, session: Session }
+```
+
+### Courses API
+
+#### Get All Courses
+```typescript
+GET /api/courses?page=1&limit=20&category=communication
+Response: { data: Course[], pagination: PaginationMeta }
+```
+
+#### Get Course Details
+```typescript
+GET /api/courses/[id]
+Response: { data: Course }
+```
+
+#### Enroll in Course
+```typescript
+POST /api/courses/[id]/enroll
+Response: { data: Enrollment }
+```
+
+### Forum API
+
+#### Get Forum Posts
+```typescript
+GET /api/forum?page=1&limit=20&category=general
+Response: { data: ForumPost[], pagination: PaginationMeta }
+```
+
+#### Create Post
+```typescript
+POST /api/forum
+Body: { title: string, content: string, category?: string }
+Response: { data: ForumPost }
+```
+
+### Simulator API
+
+#### Start Simulation Session
+```typescript
+POST /api/simulator
+Body: { scenarioId: string, difficulty: string }
+Response: { sessionId: string, scenario: Scenario }
+```
+
+#### Send Message
+```typescript
+POST /api/simulator/chat
+Body: { sessionId: string, message: string }
+Response: { response: string, feedback: Feedback }
+```
+
+## 🎨 Component Library
+
+### Core Components
+
+- **Button**: Primary, secondary, destructive, outline variants
+- **Card**: Container with header, body, footer sections
+- **Dialog**: Modal dialogs with accessibility support
+- **Form**: Form components with validation
+- **Input**: Text inputs with labels and error states
+- **Select**: Dropdown selects with search
+- **Toast**: Notification system
+- **Avatar**: User avatars with fallbacks
+
+### Feature Components
+
+- **CourseCard**: Display course information
+- **LessonList**: Interactive lesson navigation
+- **ForumPostCard**: Forum post preview
+- **CommentSection**: Threaded comments
+- **ProgressBar**: Visual progress indicator
+- **BadgeDisplay**: Achievement badges
+- **SimulatorChat**: Chat interface for simulator
+
+### Layout Components
+
+- **Header**: Main navigation header
+- **Sidebar**: Collapsible sidebar navigation
+- **Footer**: Site footer
+- **PageContainer**: Consistent page wrapper
+- **LoadingState**: Loading indicators
+- **ErrorBoundary**: Error handling wrapper
+
+## 🔄 Development Workflow
+
+### Branch Strategy
+
+- **main**: Production-ready code, protected branch
+- **develop**: Integration branch for features, staging environment
+- **feature/\***: New features (e.g., `feature/user-profiles`)
+- **fix/\***: Bug fixes (e.g., `fix/login-redirect`)
+- **hotfix/\***: Urgent production fixes
+- **refactor/\***: Code improvements without feature changes
+- **docs/\***: Documentation updates
+
+### Branch Naming Convention
+
+```bash
+feature/short-description    # New features
+fix/issue-number-description # Bug fixes
+hotfix/critical-issue        # Production hotfixes
+refactor/component-name      # Refactoring
+docs/section-name            # Documentation
+```
+
+### Commit Convention
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```bash
+feat: Add user profile page
+fix: Resolve authentication redirect loop
+docs: Update API documentation
+style: Format code with Prettier
+refactor: Simplify course fetching logic
+test: Add unit tests for auth hook
+chore: Update dependencies
+perf: Optimize image loading
+ci: Update GitHub Actions workflow
+```
+
+**Commit Message Structure:**
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Examples:**
+```bash
+feat(auth): Add password reset functionality
+
+Implement password reset flow with email verification
+and token-based reset. Includes rate limiting and
+security measures.
+
+Closes #123
+
+fix(simulator): Fix message history not persisting
+
+The chat history was being cleared on component
+re-render due to missing dependency in useEffect.
+
+Fixes #456
+
+perf(courses): Lazy load course thumbnails
+
+Use Next.js Image component with lazy loading to
+improve initial page load time by 40%.
+```
+
+### Pull Request Process
+
+1. **Create feature branch** from `develop`
+2. **Implement changes** with tests
+3. **Run quality checks**:
+   ```bash
+   pnpm lint
+   pnpm type-check
+   pnpm test
+   ```
+4. **Update documentation** if needed
+5. **Create PR** with descriptive title and description
+6. **Request review** from team members
+7. **Address feedback** and update PR
+8. **Merge** after approval and passing CI
+
+### Code Review Checklist
+
+- [ ] Code follows project style guide
+- [ ] All tests pass
+- [ ] No TypeScript errors
+- [ ] Documentation updated
+- [ ] No console.log statements
+- [ ] Accessibility considerations addressed
+- [ ] Performance implications considered
+- [ ] Security implications reviewed
+
 ## 🔍 Development
 
 ### Type Checking

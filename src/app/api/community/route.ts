@@ -5,6 +5,7 @@ import { Database } from "@/types/supabase";
 import { createCommunityPostSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 import {
+import { logger } from "@/lib/utils/logger";
   getPaginationParams,
   createPaginationResponse,
 } from "@/lib/utils/pagination";
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1);
 
     if (postsError) {
-      console.error("Error fetching forum posts:", postsError);
+      logger.error("Error fetching forum posts:", postsError);
       return NextResponse.json(
         { error: "Failed to fetch forum posts" },
         { status: 500 }
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
       .limit(5);
 
     if (contributorsError) {
-      console.error("Error fetching top contributors:", contributorsError);
+      logger.error("Error fetching top contributors:", contributorsError);
       return NextResponse.json(
         { error: "Failed to fetch top contributors" },
         { status: 500 }
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
       topContributors,
     });
   } catch (error) {
-    console.error("Error in GET /api/community:", error);
+    logger.error("Error in GET /api/community:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
     const validationResult = createCommunityPostSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Community post validation failed:", validationResult.error.flatten());
+      logger.warn("Community post validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -193,13 +194,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating post:", error);
+      logger.error("Error creating post:", error);
       return NextResponse.json({ error: "שגיאה ביצירת פוסט" }, { status: 500 });
     }
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {
-    console.error("Error in POST /api/community:", error);
+    logger.error("Error in POST /api/community:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPostSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 import {
+import { logger } from "@/lib/utils/logger";
   getPaginationParams,
   createPaginationResponse,
 } from "@/lib/utils/pagination";
@@ -116,7 +117,7 @@ export async function GET(request: NextRequest) {
     const { data: posts, error } = await query;
 
     if (error) {
-      console.error("Database error:", error);
+      logger.error("Database error:", error);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: error.message },
         { status: 500 }
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Server error:", error);
+    logger.error("Server error:", error);
     return NextResponse.json(
       {
         error: "שגיאת שרת פנימית",
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
     const validationResult = createPostSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Forum post validation failed:", validationResult.error.flatten());
+      logger.warn("Forum post validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -222,7 +223,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Database error:", error);
+      logger.error("Database error:", error);
       return NextResponse.json(
         { error: "שגיאת מסד נתונים", details: error.message },
         { status: 500 }
@@ -231,7 +232,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {
-    console.error("Server error:", error);
+    logger.error("Server error:", error);
     return NextResponse.json(
       {
         error: "שגיאת שרת פנימית",

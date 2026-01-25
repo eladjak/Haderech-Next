@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 // Achievement definitions
 const ACHIEVEMENTS_DATA = {
@@ -89,7 +90,7 @@ export async function GET() {
       .eq("user_id", session.user.id);
 
     if (error) {
-      console.error("Error fetching achievements:", error);
+      logger.error("Error fetching achievements:", error);
       return NextResponse.json(
         { error: "שגיאה בקבלת ההישגים" },
         { status: 500 }
@@ -106,7 +107,7 @@ export async function GET() {
 
     return NextResponse.json(achievementsWithDetails);
   } catch (error) {
-    console.error("Error in GET /api/achievements:", error);
+    logger.error("Error in GET /api/achievements:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -228,7 +229,7 @@ export async function POST(req: Request) {
         .insert(achievementsToInsert);
 
       if (error) {
-        console.error("Error adding achievements:", error);
+        logger.error("Error adding achievements:", error);
         return NextResponse.json(
           { error: "שגיאה בהוספת הישגים" },
           { status: 500 }
@@ -242,7 +243,7 @@ export async function POST(req: Request) {
       ),
     });
   } catch (error) {
-    console.error("Error in POST /api/achievements:", error);
+    logger.error("Error in POST /api/achievements:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

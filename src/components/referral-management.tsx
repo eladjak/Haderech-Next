@@ -3,6 +3,7 @@
 import { Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from "@/lib/utils/logger";
 
 interface ReferralManagementProps {
   referralCode: string;
@@ -10,7 +11,7 @@ interface ReferralManagementProps {
 
 export function ReferralManagement({ referralCode }: ReferralManagementProps) {
   const handleShare = () => {
-    console.log("Sharing code:", referralCode);
+    logger.debug("Sharing code:", referralCode);
   };
 
   return (

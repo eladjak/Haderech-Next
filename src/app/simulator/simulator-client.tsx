@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { EXAMPLE_SCENARIOS } from "@/constants/simulator";
 import type { SimulatorScenario, SimulatorState } from "@/types/simulator";
+import { logger } from "@/lib/utils/logger";
 
 interface SimulatorClientProps {
   initialScenario?: SimulatorScenario;
@@ -52,7 +53,7 @@ export default function SimulatorClient({
       const state = await response.json();
       setSimulationState(state);
     } catch (error) {
-      console.error("Error starting simulation:", error);
+      logger.error("Error starting simulation:", error);
       toast({
         title: "שגיאה",
         description: "אירעה שגיאה בהתחלת הסימולציה. אנא נסה שוב.",
@@ -86,7 +87,7 @@ export default function SimulatorClient({
       const newState = await response.json();
       setSimulationState(newState);
     } catch (error) {
-      console.error("Error processing message:", error);
+      logger.error("Error processing message:", error);
       toast({
         title: "שגיאה",
         description: "אירעה שגיאה בעיבוד ההודעה. אנא נסה שוב.",
@@ -123,7 +124,7 @@ export default function SimulatorClient({
         description: "הסימולציה הסתיימה ונשמרה בהצלחה.",
       });
     } catch (error) {
-      console.error("Error saving simulation:", error);
+      logger.error("Error saving simulation:", error);
       toast({
         title: "שגיאה",
         description: "אירעה שגיאה בשמירת הסימולציה. אנא נסה שוב.",

@@ -9,6 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import type { Course, ExtendedForumPost } from "@/types/api";
 import type { APIResponse } from "@/types/api";
+import { logger } from "@/lib/utils/logger";
 
 type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
@@ -140,6 +141,16 @@ export async function signInWithGithub() {
   }
 }
 
+/**
+ * Fetches a list of recommended courses sorted by rating
+ *
+ * @returns Promise<Course[]> Top 3 courses with highest average ratings
+ * @throws Error if the database query fails
+ *
+ * @example
+ * const courses = await getRecommendedCourses();
+ * // Returns: [{ id: '1', title: 'Course 1', averageRating: 4.8, ... }, ...]
+ */
 export async function getRecommendedCourses(): Promise<Course[]> {
   const { data, error } = await supabase
     .from("courses")
@@ -154,6 +165,15 @@ export async function getRecommendedCourses(): Promise<Course[]> {
   return data || [];
 }
 
+/**
+ * Fetches the latest forum posts with author information
+ *
+ * @returns Promise<ExtendedForumPost[]> Latest 5 forum posts with replies count
+ *
+ * @example
+ * const posts = await getLatestForumPosts();
+ * // Returns: [{ id: '1', title: 'Post 1', author: {...}, replies_count: 5, ... }, ...]
+ */
 export async function getLatestForumPosts(): Promise<ExtendedForumPost[]> {
   const { data: posts, error } = await supabase
     .from("forum_posts")
@@ -171,7 +191,7 @@ export async function getLatestForumPosts(): Promise<ExtendedForumPost[]> {
     .limit(5);
 
   if (error) {
-    console.error("Error fetching latest forum posts:", error);
+    logger.error("Error fetching latest forum posts:", error);
     return [];
   }
 
@@ -186,19 +206,39 @@ export async function getLatestForumPosts(): Promise<ExtendedForumPost[]> {
   }));
 }
 
-// Create a single supabase client for interacting with your database
+/**
+ * Creates a Supabase client instance for database interactions
+ *
+ * @returns Supabase client configured with environment variables
+ * @throws Error if required environment variables are missing
+ *
+ * @example
+ * const client = createSupabaseClient();
+ * const { data } = await client.from('users').select('*');
+ */
 export const createSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error("Missing Supabase environment variables");
+    logger.error("Missing Supabase environment variables");
     throw new Error("Missing Supabase environment variables");
   }
 
   return createClient<Database>(supabaseUrl, supabaseKey);
 };
 
+/**
+ * Fetches all available courses from the database
+ *
+ * @returns Promise<APIResponse<DatabaseCourse[]>> Response with courses array or error
+ *
+ * @example
+ * const response = await fetchCourses();
+ * if (response.success) {
+ *   console.log(response.data); // Array of courses
+ * }
+ */
 export const fetchCourses = async (): Promise<
   APIResponse<DatabaseCourse[]>
 > => {
@@ -299,6 +339,25 @@ export const fetchLesson = async (
   }
 };
 
+/**
+ * Searches for courses matching the query and optional filters
+ *
+ * @param query - Search term to match against title and description
+ * @param filters - Optional filters for type, category, level, and result limit
+ * @param filters.type - Course type filter
+ * @param filters.category - Course category filter
+ * @param filters.level - Difficulty level filter
+ * @param filters.limit - Maximum number of results to return
+ *
+ * @returns Promise<APIResponse<DatabaseCourse[]>> Response with matching courses
+ *
+ * @example
+ * const response = await searchContent('communication', {
+ *   category: 'social-skills',
+ *   level: 'beginner',
+ *   limit: 10
+ * });
+ */
 export const searchContent = async (
   query: string,
   filters?: {

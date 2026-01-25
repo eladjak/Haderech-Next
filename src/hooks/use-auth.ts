@@ -8,6 +8,7 @@ import { createSupabaseClient } from "@/lib/services/supabase";
 import { setError, setLoading, setUser } from "@/store/slices/userSlice";
 import { _useAppSelector, useAppDispatch } from "@/store/store";
 import { User } from "@/types/models";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file use-auth.ts
@@ -143,7 +144,7 @@ export const useAuth = (): UseAuth => {
         } = await supabase.auth.getUser();
 
         if (error) {
-          console.error("Error fetching user:", error.message);
+          logger.error("Error fetching user", error);
           setState((prev) => ({ ...prev, error, loading: false }));
           // Update Redux state only in browser environment
           if (isClient) {
@@ -160,7 +161,7 @@ export const useAuth = (): UseAuth => {
           dispatch(setLoading(false));
         }
       } catch (error) {
-        console.error("Unexpected error fetching user:", error);
+        logger.error("Unexpected error fetching user", error);
         setState((prev) => ({
           ...prev,
           error:
@@ -210,7 +211,7 @@ export const useAuth = (): UseAuth => {
         });
 
         if (error) {
-          console.error("Error signing in:", error.message);
+          logger.error("Error signing in", error);
           setState((prev) => ({ ...prev, error }));
           toast({
             title: "שגיאה בהתחברות",
@@ -225,7 +226,7 @@ export const useAuth = (): UseAuth => {
         });
         router.push("/dashboard");
       } catch (error) {
-        console.error("Unexpected error during sign in:", error);
+        logger.error("Unexpected error during sign in", error);
         const errorMessage =
           error instanceof Error
             ? error.message
@@ -255,7 +256,7 @@ export const useAuth = (): UseAuth => {
         });
 
         if (error) {
-          console.error("Error signing up:", error.message);
+          logger.error("Error signing up", error);
           setState((prev) => ({ ...prev, error }));
           toast({
             title: "שגיאה בהרשמה",
@@ -270,7 +271,7 @@ export const useAuth = (): UseAuth => {
         });
         router.push("/verify-email");
       } catch (error) {
-        console.error("Unexpected error during sign up:", error);
+        logger.error("Unexpected error during sign up", error);
         const errorMessage =
           error instanceof Error
             ? error.message
@@ -293,7 +294,7 @@ export const useAuth = (): UseAuth => {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        console.error("Error signing out:", error.message);
+        logger.error("Error signing out", error);
         setState((prev) => ({ ...prev, error }));
         toast({
           title: "שגיאה בהתנתקות",
@@ -308,7 +309,7 @@ export const useAuth = (): UseAuth => {
       });
       router.push("/");
     } catch (error) {
-      console.error("Unexpected error during sign out:", error);
+      logger.error("Unexpected error during sign out", error);
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
       setState((prev) => ({
@@ -328,7 +329,7 @@ export const useAuth = (): UseAuth => {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
 
         if (error) {
-          console.error("Error resetting password:", error.message);
+          logger.error("Error resetting password", error);
           setState((prev) => ({ ...prev, error }));
           toast({
             title: "שגיאה באיפוס סיסמה",
@@ -343,7 +344,7 @@ export const useAuth = (): UseAuth => {
         });
         router.push("/check-email");
       } catch (error) {
-        console.error("Unexpected error during password reset:", error);
+        logger.error("Unexpected error during password reset", error);
         const errorMessage =
           error instanceof Error
             ? error.message

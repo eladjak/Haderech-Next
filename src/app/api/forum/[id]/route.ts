@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file forum/[id]/route.ts
@@ -74,7 +75,7 @@ export async function GET(_: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error fetching post:", error);
+      logger.error("Error fetching post:", error);
       return NextResponse.json(
         { error: "Failed to fetch post" },
         { status: 500 }
@@ -87,7 +88,7 @@ export async function GET(_: Request, { params }: RouteParams) {
 
     return NextResponse.json(post);
   } catch (error) {
-    console.error("Error in GET /api/forum/[id]:", error);
+    logger.error("Error in GET /api/forum/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -174,7 +175,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error updating post:", error);
+      logger.error("Error updating post:", error);
       return NextResponse.json(
         { error: "Failed to update post" },
         { status: 500 }
@@ -183,7 +184,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(updatedPost);
   } catch (error) {
-    console.error("Error in PATCH /api/forum/[id]:", error);
+    logger.error("Error in PATCH /api/forum/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -241,7 +242,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
       .eq("id", params.id);
 
     if (error) {
-      console.error("Error deleting post:", error);
+      logger.error("Error deleting post:", error);
       return NextResponse.json(
         { error: "Failed to delete post" },
         { status: 500 }
@@ -250,7 +251,7 @@ export async function DELETE(_: Request, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Post deleted successfully" });
   } catch (error) {
-    console.error("Error in DELETE /api/forum/[id]:", error);
+    logger.error("Error in DELETE /api/forum/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

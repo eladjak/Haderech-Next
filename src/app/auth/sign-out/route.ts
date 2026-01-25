@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file route.ts
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    console.error("Error signing out:", error);
+    logger.error("Error signing out:", error);
     return NextResponse.json({ error: "Failed to sign out" }, { status: 500 });
   }
 

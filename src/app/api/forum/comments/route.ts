@@ -6,6 +6,7 @@ import type { _ForumComment } from "@/types/forum";
 import { createCommentSchema, updateCommentSchema } from "@/lib/validations/api-schemas";
 import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 import {
+import { logger } from "@/lib/utils/logger";
   getPaginationParams,
   createPaginationResponse,
 } from "@/lib/utils/pagination";
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
     const validationResult = createCommentSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Comment validation failed:", validationResult.error.flatten());
+      logger.warn("Comment validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",
@@ -223,7 +224,7 @@ export async function PUT(request: NextRequest) {
     const validationResult = updateCommentSchema.safeParse(json);
 
     if (!validationResult.success) {
-      console.warn("Comment update validation failed:", validationResult.error.flatten());
+      logger.warn("Comment update validation failed:", validationResult.error.flatten(););
       return NextResponse.json(
         {
           error: "קלט לא תקין",

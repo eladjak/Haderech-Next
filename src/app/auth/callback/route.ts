@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * @file route.ts
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
-        console.error("Error exchanging code for session:", error);
+        logger.error("Error exchanging code for session:", error);
         return NextResponse.redirect(new URL("/auth/error", request.url), {
           status: 302,
         });
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
       status: 302,
     });
   } catch (error) {
-    console.error("Error in GET /auth/callback:", error);
+    logger.error("Error in GET /auth/callback:", error);
     return NextResponse.redirect(new URL("/auth/error", request.url), {
       status: 302,
     });
