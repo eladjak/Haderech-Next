@@ -2,8 +2,18 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { _Database } from "@/types/database";
+import { simulatorSubmissionSchema } from "@/lib/validations/api-schemas";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+
+// Rate limiters
+const getSubmissionsLimiter = rateLimit(apiRateLimits.standard);
+const createSubmissionLimiter = rateLimit(apiRateLimits.strict);
 
 export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await getSubmissionsLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -56,6 +66,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await createSubmissionLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -79,15 +93,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Parse and validate input
     const json = await request.json();
-    const { scenario_id, code, test_results } = json;
+    const validationResult = simulatorSubmissionSchema.safeParse(json);
 
-    if (!scenario_id || !code || !test_results) {
+    if (!validationResult.success) {
+      console.warn("Simulator submission validation failed:", validationResult.error.flatten());
       return NextResponse.json(
-        { error: "Missing required fields" },
+        {
+          error: "קלט לא תקין",
+          message: "Invalid submission data",
+          details: validationResult.error.flatten().fieldErrors,
+        },
         { status: 400 }
       );
     }
+
+    const { scenario_id, code, test_results } = validationResult.data;
 
     // בדיקה שהתרחיש קיים
     const { data: scenario, error: scenarioError } = await supabase

@@ -8,6 +8,10 @@ import { _Database } from "@/types/database";
  * @description API routes for managing course lessons. Provides endpoints for retrieving and creating lessons.
  */
 
+// Cache configuration: Semi-static content - 5 minutes
+// Lessons update occasionally, balance between freshness and performance
+export const revalidate = 300; // 5 minutes in seconds
+
 interface CreateLessonBody {
   title: string;
   description: string;
@@ -72,7 +76,20 @@ export async function GET(
 
     const { data: lessons, error } = await supabase
       .from("lessons")
-      .select("*")
+      .select(
+        `
+        id,
+        title,
+        description,
+        content,
+        order,
+        duration,
+        status,
+        created_at,
+        updated_at,
+        course_id
+      `
+      )
       .eq("course_id", params.id)
       .order("order", { ascending: true });
 
@@ -291,21 +308,25 @@ export async function PATCH(
       }
     }
 
-    // עדכון סדר השיעורים
-    for (const update of updates) {
-      const { error: updateError } = await supabase
-        .from("lessons")
-        .update({ order: update.order })
-        .eq("id", update.id)
-        .eq("course_id", params.id);
+    // עדכון סדר השיעורים - Using batch upsert to fix N+1 query problem
+    // Instead of N queries (one per lesson), we use a single upsert operation
+    const { error: batchError } = await supabase
+      .from("lessons")
+      .upsert(
+        updates.map((update) => ({
+          id: update.id,
+          order: update.order,
+          course_id: params.id,
+        })),
+        { onConflict: "id" }
+      );
 
-      if (updateError) {
-        console.error("Update error:", updateError);
-        return NextResponse.json(
-          { error: "שגיאת מסד נתונים", details: updateError.message },
-          { status: 500 }
-        );
-      }
+    if (batchError) {
+      console.error("Batch update error:", batchError);
+      return NextResponse.json(
+        { error: "שגיאת מסד נתונים", details: batchError.message },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(

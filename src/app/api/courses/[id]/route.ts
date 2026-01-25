@@ -9,6 +9,10 @@ import { _Database } from "@/types/supabase";
  * updating, and deleting specific courses. Includes authentication and authorization checks.
  */
 
+// Cache configuration: Semi-static content - 5 minutes
+// Course details update occasionally, balance between freshness and performance
+export const revalidate = 300; // 5 minutes in seconds
+
 interface UpdateCourseBody {
   title?: string;
   description?: string;
@@ -48,7 +52,22 @@ export async function GET(
 
     const { data: course, error } = await supabase
       .from("courses")
-      .select("*")
+      .select(
+        `
+        id,
+        title,
+        description,
+        image_url,
+        status,
+        level,
+        duration,
+        price,
+        tags,
+        created_at,
+        updated_at,
+        instructor_id
+      `
+      )
       .eq("id", params.id)
       .single();
 
@@ -118,27 +137,28 @@ export async function PATCH(
 
     const updates: UpdateCourseBody = await request.json();
 
-    // בדיקה אם הקורס קיים
-    const { data: existingCourse, error: fetchError } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("id", params.id)
-      .eq("instructor_id", user.id)
-      .single();
-
-    if (fetchError || !existingCourse) {
-      return NextResponse.json({ error: "הקורס לא נמצא" }, { status: 404 });
-    }
-
+    // Direct update without pre-fetch - more efficient
     const { data: course, error } = await supabase
       .from("courses")
-      .update({
-        ...existingCourse,
-        ...updates,
-      })
+      .update(updates)
       .eq("id", params.id)
       .eq("instructor_id", user.id)
-      .select()
+      .select(
+        `
+        id,
+        title,
+        description,
+        image_url,
+        status,
+        level,
+        duration,
+        price,
+        tags,
+        created_at,
+        updated_at,
+        instructor_id
+      `
+      )
       .single();
 
     if (error) {

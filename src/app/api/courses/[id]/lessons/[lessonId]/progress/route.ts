@@ -1,9 +1,15 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { updateLessonProgressSchema } from "@/lib/validations/api-schemas";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 
 export {};
+
+// Rate limiters
+const getLessonProgressLimiter = rateLimit(apiRateLimits.standard);
+const updateLessonProgressLimiter = rateLimit(apiRateLimits.strict);
 
 /**
  * @file courses/[id]/lessons/[lessonId]/progress/route.ts
@@ -38,7 +44,11 @@ interface RouteParams {
  * }
  * ```
  */
-export async function GET(_: Request, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  // Apply rate limiting
+  const rateLimitResponse = await getLessonProgressLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient<Database>({ cookies });
@@ -99,7 +109,11 @@ export async function GET(_: Request, { params }: RouteParams) {
  * }
  * ```
  */
-export async function PUT(request: Request, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
+  // Apply rate limiting
+  const rateLimitResponse = await updateLessonProgressLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient<Database>({ cookies });
@@ -139,7 +153,23 @@ export async function PUT(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
 
-    const { completed, last_position } = await request.json();
+    // Parse and validate input
+    const json = await request.json();
+    const validationResult = updateLessonProgressSchema.safeParse(json);
+
+    if (!validationResult.success) {
+      console.warn("Lesson progress validation failed:", validationResult.error.flatten());
+      return NextResponse.json(
+        {
+          error: "קלט לא תקין",
+          message: "Invalid progress data",
+          details: validationResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { completed, last_position } = validationResult.data;
 
     // Update or create progress
     const { data: progress, error } = await supabase

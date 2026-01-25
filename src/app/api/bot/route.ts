@@ -1,8 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
+import { chatMessageSchema } from "@/lib/validations/api-schemas";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+
+// Rate limiter for chat operations
+const chatLimiter = rateLimit(apiRateLimits.chat);
 
 /**
  * Simple tokenizer function that splits text into words
@@ -68,7 +73,11 @@ async function logChatInteraction(
  * Endpoint for generating bot responses to user messages.
  * Validates the input and returns a response based on the bot's knowledge base.
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await chatLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -94,14 +103,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get input from request body
-    const { message } = await request.json();
-    if (!message) {
+    // Parse and validate input
+    const json = await request.json();
+    const validationResult = chatMessageSchema.safeParse(json);
+
+    if (!validationResult.success) {
+      console.warn("Chat message validation failed:", validationResult.error.flatten());
       return NextResponse.json(
-        { error: "Message is required" },
+        {
+          error: "קלט לא תקין",
+          message: "Invalid message format",
+          details: validationResult.error.flatten().fieldErrors,
+        },
         { status: 400 }
       );
     }
+
+    const { message } = validationResult.data;
 
     // Generate response using the knowledge base
     const response = findRelevantTopic(message);

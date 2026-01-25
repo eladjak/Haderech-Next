@@ -2,18 +2,33 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 
 export {};
 
 /**
  * @file route.ts
- * @description API route handlers for user notifications
+ * @description API route handlers for user notifications with rate limiting
  */
+
+// Cache configuration: Dynamic content - no cache
+// Notifications are user-specific and must always be fresh
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+// Rate limiters
+const getNotificationsLimiter = rateLimit(apiRateLimits.standard);
+const createNotificationLimiter = rateLimit(apiRateLimits.strict);
+const updateNotificationLimiter = rateLimit(apiRateLimits.strict);
+const deleteNotificationLimiter = rateLimit(apiRateLimits.strict);
 
 /**
  * GET handler for retrieving user notifications
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const rateLimitResponse = await getNotificationsLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 
@@ -48,7 +63,10 @@ export async function GET(_request: NextRequest) {
 /**
  * POST handler for creating a new notification
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const rateLimitResponse = await createNotificationLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 
@@ -91,6 +109,9 @@ export async function POST(request: Request) {
  * PATCH handler for updating notification status (e.g., marking as read)
  */
 export async function PATCH(request: NextRequest) {
+  const rateLimitResponse = await updateNotificationLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 
@@ -150,6 +171,9 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const rateLimitResponse = await deleteNotificationLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 

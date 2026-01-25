@@ -2,16 +2,25 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { Database } from "@/types/supabase";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 
 /**
  * @file bookmarks/route.ts
- * @description API endpoints for managing user bookmarks
+ * @description API endpoints for managing user bookmarks with rate limiting
  */
+
+// Rate limiters
+const getBookmarksLimiter = rateLimit(apiRateLimits.standard);
+const createBookmarkLimiter = rateLimit(apiRateLimits.strict);
+const deleteBookmarkLimiter = rateLimit(apiRateLimits.strict);
 
 /**
  * GET handler for retrieving user bookmarks
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const rateLimitResponse = await getBookmarksLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
     const { data: session } = await supabase.auth.getSession();
@@ -45,6 +54,9 @@ export async function GET(_request: NextRequest) {
  * POST handler for creating a new bookmark
  */
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = await createBookmarkLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
     const { data: session } = await supabase.auth.getSession();
@@ -81,6 +93,9 @@ export async function POST(request: NextRequest) {
  * DELETE handler for removing a bookmark
  */
 export async function DELETE(request: NextRequest) {
+  const rateLimitResponse = await deleteBookmarkLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
     const { data: session } = await supabase.auth.getSession();

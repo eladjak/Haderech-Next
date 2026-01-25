@@ -1,15 +1,29 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createPostSchema } from "@/lib/validations/api-schemas";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import {
+  getPaginationParams,
+  createPaginationResponse,
+} from "@/lib/utils/pagination";
 
 export {};
 
 /**
  * @file forum/route.ts
  * @description API routes for managing forum posts. Provides endpoints for listing all forum posts
- * and creating new posts. Includes authentication checks and post validation.
+ * and creating new posts. Includes authentication checks, input validation, and rate limiting.
  */
+
+// Cache configuration: Frequent update - 1 minute
+// Forum posts update frequently, balance between freshness and performance
+export const revalidate = 60; // 1 minute in seconds
+
+// Rate limiters
+const getForumLimiter = rateLimit(apiRateLimits.standard);
+const createForumPostLimiter = rateLimit(apiRateLimits.strict);
 
 /**
  * GET /api/forum
@@ -38,24 +52,58 @@ export {};
  * ]
  * ```
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await getForumLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
     const url = new URL(request.url);
     const category = url.searchParams.get("category");
     const tag = url.searchParams.get("tag");
 
+    // Get pagination parameters
+    const { page, limit, offset } = getPaginationParams(request);
+
+    // Build base query with filters
+    let baseQuery = supabase
+      .from("forum_posts")
+      .select("id", { count: "exact", head: true });
+
+    if (category) {
+      baseQuery = baseQuery.eq("category", category);
+    }
+
+    if (tag) {
+      baseQuery = baseQuery.contains("tags", [tag]);
+    }
+
+    // Get total count
+    const { count } = await baseQuery;
+
+    // Build data query with pagination
     let query = supabase
       .from("forum_posts")
       .select(
         `
-        *,
+        id,
+        title,
+        content,
+        created_at,
+        updated_at,
+        category,
+        tags,
+        author_id,
+        views,
+        likes,
         author:users(id, name, avatar_url),
         category:forum_categories(id, name),
         tags:forum_tags(id, name)
       `
       )
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (category) {
       query = query.eq("category", category);
@@ -75,7 +123,10 @@ export async function GET(request: Request) {
       );
     }
 
-    return NextResponse.json(posts || [], { status: 200 });
+    return NextResponse.json(
+      createPaginationResponse(posts || [], count || 0, { page, limit, offset }),
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(
@@ -106,7 +157,11 @@ export async function GET(request: Request) {
  * }
  * ```
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await createForumPostLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 
@@ -118,30 +173,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "נדרשת הזדהות" }, { status: 401 });
     }
 
+    // Parse and validate input
     const json = await request.json();
+    const validationResult = createPostSchema.safeParse(json);
 
-    if (!json.title?.trim()) {
-      return NextResponse.json({ error: "חסרה כותרת" }, { status: 400 });
+    if (!validationResult.success) {
+      console.warn("Forum post validation failed:", validationResult.error.flatten());
+      return NextResponse.json(
+        {
+          error: "קלט לא תקין",
+          message: "Invalid post data",
+          details: validationResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
     }
 
-    if (!json.content?.trim()) {
-      return NextResponse.json({ error: "חסר תוכן" }, { status: 400 });
-    }
+    const { title, content, category, tags } = validationResult.data;
 
     const { data: post, error } = await supabase
       .from("forum_posts")
       .insert({
-        title: json.title.trim(),
-        content: json.content.trim(),
+        title: title,
+        content: content,
         author_id: session.user.id,
-        category: json.category || "general",
-        tags: json.tags || [],
+        category: category || "general",
+        tags: tags || [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .select(
         `
-        *,
+        id,
+        title,
+        content,
+        created_at,
+        updated_at,
+        category,
+        tags,
+        author_id,
+        views,
+        likes,
         author:users(id, name, avatar_url),
         category:forum_categories(id, name),
         tags:forum_tags(id, name)

@@ -1,8 +1,11 @@
 import type { OpenAI } from "openai";
+import { OpenAI } from "openai";
+import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { v4 as uuidv4 } from "uuid";
 import type { getScenarioById } from "@/lib/data/scenarios";
+import type { BaseMessage } from "./forum";
 import type {
-  BaseMessage
-} from "./forum";
   ChatCompletionMessage,
   FeedbackDetails,
   FeedbackMetrics,
@@ -13,7 +16,8 @@ import type {
   SimulatorResponse,
   SimulatorScenario,
   SimulatorSession,
-  SimulatorState,} from "@/types/simulator";
+  SimulatorState,
+} from "@/types/simulator";
 
 /**
  * @file simulator.ts
@@ -620,28 +624,281 @@ const _calculateScore = (_content: string, _criteria: string[]): number => {
   return Math.floor(Math.random() * 100);
 };
 
+/**
+ * Calculates empathy score based on emotional awareness and understanding
+ * Looks for empathetic phrases, emotional words, and questions
+ */
 function _calculateEmpathyScore(content: string): number {
-  return Math.floor(Math.random() * 100);
+  let score = 50; // Base score
+
+  // Positive indicators - empathy phrases (+points)
+  const empathyPhrases = [
+    /אני מבין/i, /אני מרגיש/i, /זה נשמע/i, /אני שומע/i,
+    /I understand/i, /I feel/i, /that sounds/i, /I hear/i,
+    /איך אתה מרגיש/i, /מה את חושבת/i, /ספר לי/i,
+    /how do you feel/i, /what do you think/i, /tell me/i,
+    /אכפת לי/i, /I care/i, /חשוב לי/i, /matters to me/i,
+  ];
+
+  empathyPhrases.forEach(phrase => {
+    if (phrase.test(content)) score += 8;
+  });
+
+  // Check for emotional words
+  const emotionalWords = /\b(מרגיש|כואב|שמח|עצוב|מפחד|מודאג|feel|hurt|happy|sad|scared|worried|frustrated|מתוסכל|angry|כועס)\b/gi;
+  const emotionalMatches = content.match(emotionalWords);
+  if (emotionalMatches) {
+    score += Math.min(20, emotionalMatches.length * 5);
+  }
+
+  // Negative indicators - command/directive words (-points)
+  const commandWords = /\b(תעשה|עשה|צריך|חייב|must|should|have to|תפסיק|stop it)\b/gi;
+  const commandMatches = content.match(commandWords);
+  if (commandMatches) {
+    score -= Math.min(15, commandMatches.length * 5);
+  }
+
+  // Check for questions (good for empathy)
+  const questionMarks = (content.match(/\?/g) || []).length;
+  score += Math.min(15, questionMarks * 5);
+
+  // Check for validation phrases
+  const validationPhrases = /\b(valid|מובן|makes sense|הגיוני|understand|reasonable|סביר)\b/gi;
+  if (validationPhrases.test(content)) {
+    score += 10;
+  }
+
+  return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Calculates clarity score based on message structure and readability
+ * Checks length, sentence structure, filler words, and concrete language
+ */
 function _calculateClarityScore(content: string): number {
-  return Math.floor(Math.random() * 100);
+  let score = 50;
+
+  // Length check (too short or too long reduces clarity)
+  const wordCount = content.trim().split(/\s+/).length;
+  if (wordCount < 5) {
+    score -= 30; // Too short - unclear
+  } else if (wordCount > 150) {
+    score -= 20; // Too long - loses focus
+  } else if (wordCount >= 10 && wordCount <= 80) {
+    score += 20; // Good length
+  }
+
+  // Sentence structure - check average sentence length
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  if (sentences.length > 0) {
+    const avgSentenceLength = wordCount / sentences.length;
+    if (avgSentenceLength >= 5 && avgSentenceLength <= 25) {
+      score += 15; // Clear sentence structure
+    } else if (avgSentenceLength > 40) {
+      score -= 10; // Run-on sentences
+    }
+  }
+
+  // Check for filler words (reduces clarity)
+  const fillerWords = /\b(כאילו|אממ|אהה|like|umm|uhh|basically|אמממ|אה)\b/gi;
+  const fillerMatches = content.match(fillerWords);
+  if (fillerMatches) {
+    score -= Math.min(20, fillerMatches.length * 5);
+  }
+
+  // Check for specific/concrete language (increases clarity)
+  const concreteWords = /\b(specifically|בפרט|למשל|for example|exactly|בדיוק|כלומר|that is|namely)\b/gi;
+  const concreteMatches = content.match(concreteWords);
+  if (concreteMatches) {
+    score += Math.min(15, concreteMatches.length * 7);
+  }
+
+  // Check for numbered lists or structure (very clear)
+  const structuredList = /\b(ראשית|שנית|שלישית|first|second|third|1\.|2\.|3\.)/gi;
+  if (structuredList.test(content)) {
+    score += 10;
+  }
+
+  return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Calculates effectiveness score based on action-oriented and solution-focused language
+ * Looks for actionable suggestions and problem-solving approaches
+ */
 function _calculateEffectivenessScore(content: string): number {
-  return Math.floor(Math.random() * 100);
+  let score = 50;
+
+  // Action-oriented language
+  const actionWords = /\b(נעשה|נתחיל|אציע|בוא|let's|we can|I suggest|propose|נציע|נפעל|נטפל)\b/gi;
+  const actionMatches = content.match(actionWords);
+  if (actionMatches) {
+    score += Math.min(25, actionMatches.length * 8);
+  }
+
+  // Problem-solving indicators
+  const solutionWords = /\b(פתרון|דרך|אפשרות|solution|way|option|approach|תכנית|plan|strategy|אסטרטגיה)\b/gi;
+  const solutionMatches = content.match(solutionWords);
+  if (solutionMatches) {
+    score += Math.min(20, solutionMatches.length * 10);
+  }
+
+  // Concrete next steps
+  const nextSteps = /\b(הבא|next|אחר כך|then|לאחר מכן|afterwards)\b/gi;
+  if (nextSteps.test(content)) {
+    score += 10;
+  }
+
+  // Vague language (reduces effectiveness)
+  const vagueWords = /\b(אולי|might|maybe|perhaps|כנראה|probably|נראה לי|I guess)\b/gi;
+  const vagueMatches = content.match(vagueWords);
+  if (vagueMatches) {
+    score -= Math.min(15, vagueMatches.length * 5);
+  }
+
+  // Check if message is too passive (reduces effectiveness)
+  const passiveWords = /\b(נראה|seems|נדמה|appears|אפשרי|possible)\b/gi;
+  const passiveMatches = content.match(passiveWords);
+  if (passiveMatches && passiveMatches.length > 2) {
+    score -= 10;
+  }
+
+  return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Calculates appropriateness score based on tone and language suitability
+ * Checks for inappropriate language and professional tone
+ */
 function _calculateAppropriatenessScore(content: string): number {
-  return Math.floor(Math.random() * 100);
+  let score = 70; // Start higher (most responses are appropriate)
+
+  // Check for inappropriate/offensive language
+  const inappropriateWords = /\b(stupid|idiot|אידיוט|טיפש|shut up|תשתוק|מטומטם|dumb|fool)\b/gi;
+  if (inappropriateWords.test(content)) {
+    score -= 40;
+  }
+
+  // Check for overly casual language (context-dependent)
+  const casualWords = /\b(lol|wtf|omg|אחי|חחח|haha|יאללה|וואלה)\b/gi;
+  const casualMatches = content.match(casualWords);
+  if (casualMatches) {
+    score -= Math.min(20, casualMatches.length * 10);
+  }
+
+  // Check for professional tone markers
+  const professionalWords = /\b(appreciate|תודה|please|בבקשה|respect|מכבד|נעים|pleased)\b/gi;
+  const professionalMatches = content.match(professionalWords);
+  if (professionalMatches) {
+    score += Math.min(20, professionalMatches.length * 7);
+  }
+
+  // Check for respectful language
+  const respectfulWords = /\b(אשמח|נשמח|would appreciate|kindly|respectfully|בכבוד)\b/gi;
+  if (respectfulWords.test(content)) {
+    score += 10;
+  }
+
+  // Excessive exclamation marks (can be inappropriate in formal contexts)
+  const exclamationCount = (content.match(/!/g) || []).length;
+  if (exclamationCount > 3) {
+    score -= 10;
+  }
+
+  return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Calculates professionalism score based on formal language and tone
+ * Checks for professional markers, avoids personal attacks and informal language
+ */
 function _calculateProfessionalismScore(content: string): number {
-  return Math.floor(Math.random() * 100);
+  let score = 60;
+
+  // Formal/professional language
+  const formalWords = /\b(אשמח|נשמח|would appreciate|kindly|respectfully|מכבד רב|regards)\b/gi;
+  const formalMatches = content.match(formalWords);
+  if (formalMatches) {
+    score += Math.min(20, formalMatches.length * 10);
+  }
+
+  // Business/professional terminology
+  const businessWords = /\b(תהליך|process|procedure|נוהל|מדיניות|policy|guidelines|הנחיות)\b/gi;
+  if (businessWords.test(content)) {
+    score += 10;
+  }
+
+  // Personal attacks (very unprofessional)
+  const attackWords = /\b(your fault|באשמתך|blame you|אשם|fault|guilty|אחראי לבעיה)\b/gi;
+  if (attackWords.test(content)) {
+    score -= 30;
+  }
+
+  // Caps lock (unprofessional shouting)
+  const upperCaseLetters = content.match(/[A-Z]/g) || [];
+  const totalLetters = content.match(/[A-Za-z]/g) || [];
+  if (totalLetters.length > 0) {
+    const capsRatio = upperCaseLetters.length / totalLetters.length;
+    if (capsRatio > 0.3) {
+      score -= 25;
+    }
+  }
+
+  // Slang or informal language
+  const slangWords = /\b(gonna|wanna|gotta|dunno|yeah|nah|yep|nope)\b/gi;
+  const slangMatches = content.match(slangWords);
+  if (slangMatches) {
+    score -= Math.min(15, slangMatches.length * 7);
+  }
+
+  return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Calculates problem-solving score based on analytical and solution-oriented thinking
+ * Checks for problem identification, solution proposals, and clarifying questions
+ */
 function _calculateProblemSolvingScore(content: string): number {
-  return Math.floor(Math.random() * 100);
+  let score = 50;
+
+  // Identifies the problem
+  const problemWords = /\b(הבעיה|problem|issue|challenge|קושי|difficulty|מכשול|obstacle)\b/gi;
+  const problemMatches = content.match(problemWords);
+  if (problemMatches) {
+    score += Math.min(15, problemMatches.length * 7);
+  }
+
+  // Proposes solutions
+  const solutionWords = /\b(נסה|try|אפשר|could|solution|פתרון|suggestion|הצעה|recommend|ממליץ)\b/gi;
+  const solutionMatches = content.match(solutionWords);
+  if (solutionMatches) {
+    score += Math.min(25, solutionMatches.length * 10);
+  }
+
+  // Asks clarifying questions (important for problem-solving)
+  const questions = (content.match(/\?/g) || []).length;
+  score += Math.min(15, questions * 5);
+
+  // Analytical thinking
+  const analyticalWords = /\b(analyze|נתח|בחן|examine|consider|שקול|evaluate|הערך|assess)\b/gi;
+  if (analyticalWords.test(content)) {
+    score += 10;
+  }
+
+  // Root cause analysis
+  const rootCauseWords = /\b(why|למה|מדוע|cause|סיבה|reason|root|שורש)\b/gi;
+  if (rootCauseWords.test(content)) {
+    score += 10;
+  }
+
+  // Just complaining without solutions (reduces score)
+  const complaintWords = /\b(לא הוגן|not fair|terrible|נורא|awful|horrible|גרוע)\b/gi;
+  const complaintMatches = content.match(complaintWords);
+  if (complaintMatches && !solutionMatches) {
+    score -= 20; // Complaining without offering solutions
+  }
+
+  return Math.max(0, Math.min(100, score));
 }
 
 /**

@@ -1,12 +1,20 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import type { _Database } from "@/types/supabase";
+import {
+  getPaginationParams,
+  createPaginationResponse,
+} from "@/lib/utils/pagination";
 
 /**
  * @file route.ts
  * @description API route handlers for courses collection operations
  */
+
+// Cache configuration: Static content - 1 hour
+// Courses don't change frequently, so we can cache them for longer
+export const revalidate = 3600; // 1 hour in seconds
 
 interface _CreateCourseBody {
   title: string;
@@ -21,11 +29,12 @@ interface _CreateCourseBody {
 /**
  * GET /api/courses
  *
- * Returns all courses with their details.
+ * Returns paginated courses with their details.
  *
- * @returns {Promise<NextResponse>} JSON response containing the courses or error message
+ * @param {NextRequest} request - The request object with optional pagination params
+ * @returns {Promise<NextResponse>} JSON response containing paginated courses or error message
  */
-export async function GET(_request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -40,16 +49,43 @@ export async function GET(_request: Request) {
       }
     );
 
+    // Get pagination parameters
+    const { page, limit, offset } = getPaginationParams(request);
+
+    // Get total count
+    const { count } = await supabase
+      .from("courses")
+      .select("id", { count: "exact", head: true });
+
+    // Get paginated courses
     const { data: courses, error } = await supabase
       .from("courses")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select(
+        `
+        id,
+        title,
+        description,
+        image_url,
+        status,
+        level,
+        duration,
+        price,
+        tags,
+        created_at,
+        updated_at,
+        instructor_id
+      `
+      )
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ courses });
+    return NextResponse.json(
+      createPaginationResponse(courses || [], count || 0, { page, limit, offset })
+    );
   } catch (error) {
     return NextResponse.json(
       { error: "Internal Server Error" },

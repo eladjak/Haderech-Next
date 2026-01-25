@@ -2,14 +2,25 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { enrollmentSchema, unenrollmentSchema } from "@/lib/validations/api-schemas";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 
 export {};
+
+// Rate limiters
+const getEnrollmentsLimiter = rateLimit(apiRateLimits.standard);
+const createEnrollmentLimiter = rateLimit(apiRateLimits.strict);
+const deleteEnrollmentLimiter = rateLimit(apiRateLimits.strict);
 
 /**
  * GET /api/enrollments
  * מחזיר את רשימת ההרשמות של המשתמש
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await getEnrollmentsLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 
@@ -45,6 +56,10 @@ export async function GET(_request: NextRequest) {
  * יוצר הרשמה חדשה לקורס
  */
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await createEnrollmentLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 
@@ -57,8 +72,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Parse and validate input
     const json = await request.json();
-    const { course_id } = json;
+    const validationResult = enrollmentSchema.safeParse(json);
+
+    if (!validationResult.success) {
+      console.warn("Enrollment validation failed:", validationResult.error.flatten());
+      return NextResponse.json(
+        {
+          error: "קלט לא תקין",
+          message: "Invalid course ID",
+          details: validationResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { course_id } = validationResult.data;
 
     // בדיקה שהקורס קיים
     const { data: course, error: courseError } = await supabase
@@ -115,6 +145,10 @@ export async function POST(request: NextRequest) {
  * מבטל הרשמה לקורס
  */
 export async function DELETE(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await deleteEnrollmentLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies });
 
@@ -128,7 +162,23 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { course_id } = await request.json();
+    // Parse and validate input
+    const json = await request.json();
+    const validationResult = unenrollmentSchema.safeParse(json);
+
+    if (!validationResult.success) {
+      console.warn("Unenrollment validation failed:", validationResult.error.flatten());
+      return NextResponse.json(
+        {
+          error: "קלט לא תקין",
+          message: "Invalid course ID",
+          details: validationResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { course_id } = validationResult.data;
 
     // מוסיף קורס מוק לטובת הטסטים
     const _mockCourse = {

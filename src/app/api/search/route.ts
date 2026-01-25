@@ -1,14 +1,18 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "types/database";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
 
 /**
  * @file route.ts
- * @description API route handler for global search operations
+ * @description API route handler for global search operations with rate limiting
  */
 
 export const dynamic = "force-dynamic";
+
+// Rate limiter for search (using loose limits for better UX)
+const searchLimiter = rateLimit(apiRateLimits.loose);
 
 interface CourseSearchResult {
   id: string;
@@ -69,7 +73,10 @@ interface SearchResults {
  * }
  * ```
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const rateLimitResponse = await searchLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q");

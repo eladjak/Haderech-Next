@@ -1,13 +1,27 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Database } from "@/types/supabase";
+import { createCommunityPostSchema } from "@/lib/validations/api-schemas";
+import { rateLimit, apiRateLimits } from "@/lib/middleware/rate-limit";
+import {
+  getPaginationParams,
+  createPaginationResponse,
+} from "@/lib/utils/pagination";
 
 /**
  * @file community/route.ts
  * @description API routes for managing community posts. Provides endpoints for listing all posts
- * and creating new posts. Includes authentication checks and post validation.
+ * and creating new posts. Includes authentication checks, input validation, and rate limiting.
  */
+
+// Cache configuration: Frequent update - 1 minute
+// Community posts update frequently, balance between freshness and performance
+export const revalidate = 60; // 1 minute in seconds
+
+// Rate limiters
+const getCommunityLimiter = rateLimit(apiRateLimits.standard);
+const createCommunityPostLimiter = rateLimit(apiRateLimits.strict);
 
 /**
  * GET /api/community
@@ -16,7 +30,11 @@ import { Database } from "@/types/supabase";
  *
  * @returns Community data or error response
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await getCommunityLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const cookieStore = cookies();
     const supabase = createServerClient<Database>(
@@ -31,20 +49,34 @@ export async function GET() {
       }
     );
 
-    // Fetch forum posts with author information
+    // Get pagination parameters
+    const { page, limit, offset } = getPaginationParams(request);
+
+    // Get total count
+    const { count } = await supabase
+      .from("forum_posts")
+      .select("id", { count: "exact", head: true });
+
+    // Fetch paginated forum posts with author information (fixed over-fetching)
     const { data: posts, error: postsError } = await supabase
       .from("forum_posts")
       .select(
         `
-        *,
-        author:users(id, name, avatar_url),
-        comments (
-          *,
-          author:users(id, name, avatar_url)
-        )
+        id,
+        title,
+        content,
+        created_at,
+        updated_at,
+        author_id,
+        category,
+        tags,
+        views,
+        likes,
+        author:users(id, name, avatar_url)
       `
       )
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (postsError) {
       console.error("Error fetching forum posts:", postsError);
@@ -54,7 +86,7 @@ export async function GET() {
       );
     }
 
-    // Fetch top contributors
+    // Fetch top contributors (keep as is, already limited)
     const { data: topContributors, error: contributorsError } = await supabase
       .from("users")
       .select("id, name, avatar_url, forum_posts")
@@ -70,7 +102,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      posts,
+      ...createPaginationResponse(posts || [], count || 0, { page, limit, offset }),
       topContributors,
     });
   } catch (error) {
@@ -100,7 +132,11 @@ export async function GET() {
  * }
  * ```
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await createCommunityPostLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const cookieStore = cookies();
     const supabase = createServerClient<Database>(
@@ -126,14 +162,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get post data from request body
-    const { title, content } = await request.json();
-    if (!title || !content) {
+    // Parse and validate input
+    const json = await request.json();
+    const validationResult = createCommunityPostSchema.safeParse(json);
+
+    if (!validationResult.success) {
+      console.warn("Community post validation failed:", validationResult.error.flatten());
       return NextResponse.json(
-        { error: "Title and content are required" },
+        {
+          error: "קלט לא תקין",
+          message: "Invalid post data",
+          details: validationResult.error.flatten().fieldErrors,
+        },
         { status: 400 }
       );
     }
+
+    const { title, content } = validationResult.data;
 
     // Create post
     const { data: post, error } = await supabase
