@@ -1,9 +1,7 @@
-import { _CheckCircle2, AlertCircle, Briefcase, CheckCircle, ChevronDown, ChevronUp, Heart, Sun, Target, ThumbsUp, Wrench,} from "./forum";
 import React from "react";
 import type { ReactElement, ReactNode } from "react";
-
-import type {
-  _CheckCircle2} from "./forum";
+import {
+  CheckCircle2,
   AlertCircle,
   Briefcase,
   CheckCircle,

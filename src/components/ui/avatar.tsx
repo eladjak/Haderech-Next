@@ -1,3 +1,5 @@
+"use client";
+
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -16,8 +18,6 @@ import { cn } from "@/lib/utils";
  * </Avatar>
  * ```
  */
-
-("use client");
 
 // Avatar container component
 const Avatar = React.forwardRef<
@@ -55,8 +55,9 @@ const AvatarImage = React.forwardRef<
         ref={ref}
         className={cn("aspect-square h-full w-full", className)}
         src={src || ""}
-        alt={alt}
+        alt={alt || ""}
         role="img"
+        aria-label={alt}
         data-testid={dataTestId}
         {...props}
       />
@@ -68,9 +69,11 @@ AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 // Avatar fallback component (shown when image fails to load)
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & {
+    "aria-label"?: string;
+  }
 >(
-  ({ className, ...props }, ref): React.ReactElement => (
+  ({ className, "aria-label": ariaLabel, ...props }, ref): React.ReactElement => (
     <AvatarPrimitive.Fallback
       ref={ref}
       className={cn(
@@ -78,6 +81,7 @@ const AvatarFallback = React.forwardRef<
         className
       )}
       role="img"
+      aria-label={ariaLabel}
       {...props}
     />
   )

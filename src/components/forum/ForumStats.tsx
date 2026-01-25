@@ -1,29 +1,18 @@
-import { _Award, _Eye, _MessageSquare, _ThumbsUp, _TrendingUp, _Users} from "@/components/ui/";\nimport React from "react";
-import { _Avatar, _AvatarFallback } from "@/components/ui/avatar";
-import { _Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { cn } from "@/lib/utils";
-import type { ForumStats as ForumStatsType } from "@/types/forum";
-
+import React from "react";
 import {
-  _Award,
-  _Eye,
-  _MessageSquare,
-  _ThumbsUp,
-  _TrendingUp,
-  _Users,
+  Award,
+  Eye,
+  MessageSquare,
+  ThumbsUp,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 
-
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { ForumStats as ForumStatsType } from "@/types/forum";
 
 interface ForumStatsProps {
   stats: ForumStatsType;

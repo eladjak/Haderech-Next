@@ -1,3 +1,5 @@
+"use client";
+
 import { Maximize2, Minimize2, Send, X } from "lucide-react";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,8 +8,6 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 export interface ChatMessage {
   id: string;
@@ -55,14 +55,23 @@ export function ChatbotWindow({
 }: ChatbotWindowProps) {
   const [messageInput, setMessageInput] = React.useState("");
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const chatWindowRef = React.useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = React.useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   React.useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
+
+  // Focus management: focus the textarea when window opens and is not minimized
+  React.useEffect(() => {
+    if (isOpen && !isMinimized && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [isOpen, isMinimized]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +85,10 @@ export function ChatbotWindow({
 
   return (
     <Card
+      ref={chatWindowRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="chatbot-title"
       className={cn(
         "fixed bottom-4 left-4 w-[400px] transition-all duration-200",
         isMinimized && "h-[60px]",
@@ -85,21 +98,33 @@ export function ChatbotWindow({
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b p-4">
-        <CardTitle className="text-lg">צ'אט עם המערכת</CardTitle>
+        <CardTitle id="chatbot-title" className="text-lg">
+          צ'אט עם המערכת
+        </CardTitle>
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             className="h-8 w-8 p-0"
             onClick={onToggleMinimize}
+            aria-label={isMinimized ? "הגדל חלון צ'אט" : "מזער חלון צ'אט"}
           >
             {isMinimized ? (
-              <Maximize2 className="h-4 w-4" />
+              <Maximize2 className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <Minimize2 className="h-4 w-4" />
+              <Minimize2 className="h-4 w-4" aria-hidden="true" />
             )}
+            <span className="sr-only">
+              {isMinimized ? "הגדל" : "מזער"}
+            </span>
           </Button>
-          <Button variant="ghost" className="h-8 w-8 p-0" onClick={onClose}>
-            <X className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            className="h-8 w-8 p-0"
+            onClick={onClose}
+            aria-label="סגור חלון צ'אט"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">סגור</span>
           </Button>
         </div>
       </div>
@@ -107,7 +132,12 @@ export function ChatbotWindow({
       {!isMinimized && (
         <>
           {/* Messages */}
-          <CardContent className="h-[calc(100%-120px)] overflow-y-auto p-4">
+          <CardContent
+            className="h-[calc(100%-120px)] overflow-y-auto p-4"
+            role="log"
+            aria-live="polite"
+            aria-label="היסטוריית הודעות צ'אט"
+          >
             <div className="space-y-4">
               {messages.map((message) => (
                 <div
@@ -119,11 +149,17 @@ export function ChatbotWindow({
                 >
                   <Avatar>
                     {message.sender === "user" ? (
-                      <AvatarImage src="/avatars/user.png" />
+                      <AvatarImage
+                        src="/avatars/user.png"
+                        alt="תמונת משתמש"
+                      />
                     ) : (
-                      <AvatarImage src="/avatars/bot.png" />
+                      <AvatarImage
+                        src="/avatars/bot.png"
+                        alt="תמונת בוט"
+                      />
                     )}
-                    <AvatarFallback>
+                    <AvatarFallback aria-label={message.sender === "user" ? "משתמש" : "בוט"}>
                       {message.sender === "user" ? "U" : "B"}
                     </AvatarFallback>
                   </Avatar>
@@ -143,6 +179,7 @@ export function ChatbotWindow({
                         onClick={() =>
                           onNavigateToContent?.(message.relatedContent)
                         }
+                        aria-label={`צפה ב${message.relatedContent.type === "lesson" ? "שיעור" : message.relatedContent.type === "article" ? "מאמר" : "תרגיל"} ${message.relatedContent.title}`}
                       >
                         צפה ב
                         {message.relatedContent.type === "lesson"
@@ -165,22 +202,34 @@ export function ChatbotWindow({
             className="absolute bottom-0 left-0 right-0 border-t bg-background p-4"
           >
             <div className="flex gap-2">
-              <Textarea
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                placeholder="הקלד הודעה..."
-                className="min-h-[40px] resize-none"
-              />
+              <div className="flex-1">
+                <label htmlFor="chatbot-message-input" className="sr-only">
+                  הקלד הודעה לצ'אט
+                </label>
+                <Textarea
+                  ref={textareaRef}
+                  id="chatbot-message-input"
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  placeholder="הקלד הודעה..."
+                  className="min-h-[40px] resize-none"
+                  aria-label="הקלד הודעה לצ'אט"
+                />
+              </div>
               <Button
                 type="submit"
                 disabled={!messageInput.trim() || isLoading}
                 className="h-10 w-10 p-0"
+                aria-label={isLoading ? "שולח הודעה..." : "שלח הודעה"}
               >
                 {isLoading ? (
-                  <Spinner className="h-4 w-4" />
+                  <Spinner className="h-4 w-4" aria-hidden="true" />
                 ) : (
-                  <Send className="h-4 w-4" />
+                  <Send className="h-4 w-4" aria-hidden="true" />
                 )}
+                <span className="sr-only">
+                  {isLoading ? "שולח..." : "שלח"}
+                </span>
               </Button>
             </div>
           </form>

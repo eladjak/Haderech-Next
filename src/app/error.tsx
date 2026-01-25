@@ -1,7 +1,7 @@
+"use client";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
-
-("use client");
 
 export default function Error({
   _error,

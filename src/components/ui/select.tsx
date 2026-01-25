@@ -1,10 +1,10 @@
+"use client";
+
 import * as SelectPrimitive from "@radix-ui/react-select";
 import clsx from "clsx";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 const Select = SelectPrimitive.Root;
 
@@ -212,13 +212,13 @@ export const BaseSelect = React.forwardRef<HTMLSelectElement, BaseSelectProps>(
             "focus:outline-none focus:ring-2",
             "py-2 pl-3 pr-8 text-base",
             {
-              "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20":
+              "border focus:border-primary focus:ring-primary/20":
                 !error && !success,
-              "border-action-error focus:border-action-error focus:ring-action-error/20":
+              "border-destructive focus:border-destructive focus:ring-destructive/20":
                 error,
-              "border-action-success focus:border-action-success focus:ring-action-success/20":
+              "border-green-600 focus:border-green-600 focus:ring-green-600/20":
                 success,
-              "text-text-tertiary": !value,
+              "text-muted-foreground": !value,
             },
             className
           )}
@@ -241,7 +241,7 @@ export const BaseSelect = React.forwardRef<HTMLSelectElement, BaseSelectProps>(
         </select>
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-2">
           <svg
-            className="text-text-tertiary h-4 w-4"
+            className="text-muted-foreground h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"

@@ -1,10 +1,10 @@
+"use client";
+
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { CourseRating } from "@/types/api";
-
-("use client");
 
 interface CourseRatingProps {
   rating: CourseRating;

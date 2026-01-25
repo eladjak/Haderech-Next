@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -15,8 +17,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { _getForumPost, createForumComment } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { ForumComment, ForumPost } from "@/types/forum";
-
-("use client");
 
 const formSchema = z.object({
   content: z.string().min(1, {

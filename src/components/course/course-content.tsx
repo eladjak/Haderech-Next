@@ -1,6 +1,3 @@
-import type { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { CourseLesson, CourseProgress } from "@/types/models";
-
 /**
  * @file course-content.tsx
  * @description Content component for course pages showing lessons list and content.
@@ -9,13 +6,15 @@ import type { CourseLesson, CourseProgress } from "@/types/models";
  */
 
 import {
-  _ChevronLeft
-} from "./forum";
-  _ChevronRight,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle,
   Lock,
   Play,
 } from "lucide-react";
+
+import type { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { CourseLesson, CourseProgress } from "@/types/models";
 
 
 
@@ -104,7 +103,7 @@ export function CourseContent({
                   {/* Status indicators */}
                   {isLocked && <Lock className="h-4 w-4" />}
                   {isCompleted && (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                   )}
                 </CardTitle>
               </CardHeader>

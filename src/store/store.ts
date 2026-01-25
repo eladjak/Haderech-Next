@@ -3,20 +3,26 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import courseReducer from "./slices/courseSlice";
 import forumReducer from "./slices/forumSlice";
 import notificationReducer from "./slices/notificationSlice";
-import simulatorReducer from "./slices/simulatorSlice";
+import simulatorReducer from "./slices/simulator";
+import uiReducer from "./slices/uiSlice";
 import userReducer from "./slices/userSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
-    courses: courseReducer,
+    course: courseReducer,
     forum: forumReducer,
     simulator: simulatorReducer,
     notifications: notificationReducer,
+    ui: uiReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        // Ignore non-serializable values in specific paths
+        ignoredActionPaths: ["payload.timestamp", "meta.arg"],
+        ignoredPaths: ["ui.modalContent"],
+      },
     }),
 });
 

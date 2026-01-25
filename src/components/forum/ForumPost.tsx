@@ -1,3 +1,5 @@
+"use client";
+
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
 import { MessageSquare, ThumbsUp } from "lucide-react";
@@ -25,14 +27,12 @@ import type { ForumPost as ForumPostType } from "@/types/forum";
  * ```
  */
 
-("use client");
-
 export interface ForumPostProps {
   post: ForumPostType;
   className?: string;
 }
 
-export function ForumPost({
+export const ForumPost = React.memo(function ForumPost({
   post,
   className,
 }: ForumPostProps): React.ReactElement {
@@ -140,4 +140,4 @@ export function ForumPost({
       </div>
     </div>
   );
-}
+});

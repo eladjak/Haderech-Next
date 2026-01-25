@@ -1,6 +1,5 @@
 import type {
-  Author
-} from "./forum";
+  Author,
   ForumComment,
   ForumPost,
   ForumStats,

@@ -1,9 +1,9 @@
+"use client";
+
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CourseWithRelations } from "@/types/courses";
-
-("use client");
 
 /**
  * @file course-ratings.tsx

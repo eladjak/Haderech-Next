@@ -1,10 +1,10 @@
-import { useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CourseComment } from "@/types/api";
-
-("use client");
 
 /**
  * @file course-comments.tsx
@@ -18,7 +18,7 @@ interface CourseCommentsProps {
   onAddReply?: (commentId: string, content: string) => Promise<void>;
 }
 
-export function CourseComments({
+export const CourseComments = React.memo(function CourseComments({
   comments,
   _courseId,
   _onAddComment,
@@ -57,6 +57,9 @@ export function CourseComments({
                     alt={comment.user.name}
                     fill
                     className="rounded-full object-cover"
+                    quality={75}
+                    priority={false}
+                    sizes="40px"
                   />
                 </div>
                 <div className="flex-1 space-y-1">
@@ -82,6 +85,9 @@ export function CourseComments({
                               alt={reply.user.name}
                               fill
                               className="rounded-full object-cover"
+                              quality={75}
+                              priority={false}
+                              sizes="40px"
                             />
                           </div>
                           <div className="flex-1 space-y-1">
@@ -118,4 +124,4 @@ export function CourseComments({
       </CardContent>
     </Card>
   );
-}
+});

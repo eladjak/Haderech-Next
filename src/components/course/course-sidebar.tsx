@@ -1,21 +1,18 @@
-import type { Progress } from "@/components/ui/progress";
-import type { CourseWithRelations } from "@/types/courses";
-
 /**
  * @file course-sidebar.tsx
  * @description Sidebar component for course pages showing course details and enrollment options
  */
 
-
-
 import {
-  Card
-} from "./forum";
+  Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import type { Progress } from "@/components/ui/progress";
+import type { CourseWithRelations } from "@/types/courses";
 
 
 

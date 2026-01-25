@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { FeedbackDetails, Message, SimulatorScenario, SimulatorState} from "@/components/ui/";\nimport type {
+import type {
   FeedbackDetails,
   Message,
   SimulatorScenario,
-  SimulatorState,} from "@/types/simulator";
+  SimulatorState,
+} from "@/types/simulator";
 
 // State model interface
 interface SimulatorStateModel {

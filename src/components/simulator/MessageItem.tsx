@@ -11,7 +11,7 @@ interface MessageItemProps {
   onToggleFeedback?: (messageId: string) => void;
 }
 
-export function MessageItem({
+export const MessageItem = React.memo(function MessageItem({
   message,
   _isLast = false,
   isExpanded = false,
@@ -66,4 +66,4 @@ export function MessageItem({
       </div>
     </div>
   );
-}
+});

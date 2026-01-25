@@ -1,8 +1,8 @@
+"use client";
+
 import React from "react";
 import { ChatbotContainer } from "./ChatbotContainer";
 import type { ChatMessage } from "./ChatbotWindow";
-
-("use client");
 
 interface ChatbotProviderProps {
   /** פונקציה לשליחת הודעה ל-AI */

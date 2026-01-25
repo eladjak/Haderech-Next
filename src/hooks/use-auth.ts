@@ -1,3 +1,5 @@
+"use client";
+
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,8 +13,6 @@ import { User } from "@/types/models";
  * @file use-auth.ts
  * @description Custom hook for managing authentication state and user session
  */
-
-("use client");
 
 interface AuthState {
   user: SupabaseUser | null;

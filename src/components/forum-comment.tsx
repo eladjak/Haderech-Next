@@ -1,21 +1,17 @@
+"use client";
+
+import React from "react";
 import { MessageSquare, ThumbsUp, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader} from "@/components/ui/";\nimport type { ForumComment } from "@/types/api";
-
-"use client";
-
-
-
-
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
+import type { ForumComment } from "@/types/api";
 
 interface ForumCommentProps {
   comment: ForumComment;
@@ -24,7 +20,7 @@ interface ForumCommentProps {
   className?: string;
 }
 
-export function ForumComment({
+export const ForumComment = React.memo(function ForumComment({
   comment,
   onLike,
   onReply,
@@ -45,7 +41,13 @@ export function ForumComment({
               {comment.author?.name ?? "משתמש אנונימי"}
             </div>
             <div className="text-sm text-muted-foreground">
-              {new Date("2024-01-01T00:00:00.000Z").toLocaleDateString("he-IL")}
+              {new Date(comment.created_at).toLocaleDateString("he-IL", {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
             </div>
           </div>
         </div>
@@ -85,4 +87,4 @@ export function ForumComment({
       </CardFooter>
     </Card>
   );
-}
+});

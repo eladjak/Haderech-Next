@@ -1,6 +1,5 @@
+import type { Database } from "./database";
 import type {
-  User as _ApiUser
-} from "./forum";
   Lesson as ApiLesson,
   Author,
   Course,
@@ -10,10 +9,10 @@ import type {
   ForumComment,
   ForumPost,
   ForumStats,
-  ForumTag,} from "./api";
+  ForumTag,
+} from "./api";
 import type {
-  FeedbackDetails
-} from "./forum";
+  FeedbackDetails,
   Message,
   SimulatorAction,
   SimulatorMessage,
@@ -22,7 +21,8 @@ import type {
   SimulatorSession,
   SimulatorState,
   SimulatorUserSettings,
-  SimulatorUserStats,} from "./simulator";
+  SimulatorUserStats,
+} from "./simulator";
 
 // ForumCategory מוגדר מקומית כי חסר בקובץ api.ts
 export interface ForumCategory {

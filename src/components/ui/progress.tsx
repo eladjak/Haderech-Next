@@ -1,8 +1,8 @@
+"use client";
+
 import * as ProgressPrimitive from "@radix-ui/react-progress";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 export interface ProgressProps extends ProgressPrimitive.ProgressProps {
   value?: number;

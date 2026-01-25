@@ -1,7 +1,7 @@
+"use client";
+
 import clsx from "clsx";
 import * as React from "react";
-
-("use client");
 
 /**
  * Checkbox Component
@@ -50,11 +50,11 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
               "peer h-4 w-4 appearance-none rounded border transition-colors",
               "focus:outline-none focus:ring-2 focus:ring-offset-2",
               {
-                "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20":
+                "border focus:border-primary focus:ring-primary/20":
                   !error && !success,
-                "border-action-error focus:border-action-error focus:ring-action-error/20":
+                "border-destructive focus:border-destructive focus:ring-destructive/20":
                   error,
-                "border-action-success focus:border-action-success focus:ring-action-success/20":
+                "border-green-600 focus:border-green-600 focus:ring-green-600/20":
                   success,
               },
               className
@@ -67,9 +67,9 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
               "pointer-events-none absolute inset-0 h-4 w-4 opacity-0 transition-opacity",
               "peer-checked:opacity-100",
               {
-                "text-brand-primary": !error && !success,
-                "text-action-error": error,
-                "text-action-success": success,
+                "text-primary": !error && !success,
+                "text-destructive": error,
+                "text-green-600": success,
               }
             )}
             xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +84,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           </svg>
         </div>
         {label && (
-          <span className="text-text-primary select-none text-sm">{label}</span>
+          <span className="text-foreground select-none text-sm">{label}</span>
         )}
       </label>
     );

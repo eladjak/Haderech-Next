@@ -1,10 +1,9 @@
 import { mockAuthor, mockCategory, mockTag } from "./forum";
-import { _MOCK_USERS } from "./users";
-import type { _ForumCategory, _ForumTag, ExtendedForumPost, ForumPost} from "@/components/ui/";\nimport type {
-  _ForumCategory,
-  _ForumTag,
+import { MOCK_USERS } from "./users";
+import type {
   ExtendedForumPost,
-  ForumPost,} from "@/types/forum";
+  ForumPost,
+} from "@/types/forum";
 
 
 

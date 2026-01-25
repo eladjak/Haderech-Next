@@ -1,10 +1,10 @@
+"use client";
+
 import React from "react";
 import { _Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { SimulatorScenario } from "@/types/simulator";
-
-("use client");
 
 interface ScenarioSelectorProps {
   scenarios: SimulatorScenario[];

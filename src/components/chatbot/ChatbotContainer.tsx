@@ -1,8 +1,8 @@
+"use client";
+
 import { MessageCircle } from "lucide-react";
 import React from "react";
 import { ChatbotWindow, type ChatMessage } from "./ChatbotWindow";
-
-("use client");
 
 interface ChatbotContainerProps {
   /** פונקציה לשליחת הודעה ל-AI */

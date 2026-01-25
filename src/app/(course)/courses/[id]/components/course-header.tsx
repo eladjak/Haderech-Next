@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { format } from "date-fns";
@@ -8,20 +10,6 @@ import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/";\nimport { useToast } from "@/components/ui/use-toast";
-import { cn } from "@/lib/utils";
-import type { Course } from "@/types/api";
-
-"use client";
-
-
-
-
-
-
-
-
-
 import {
   Card,
   CardContent,
@@ -30,9 +18,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-
-
+import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
+import type { Course } from "@/types/api";
 
 interface CourseHeaderProps {
   course: Course;
@@ -40,7 +28,7 @@ interface CourseHeaderProps {
   className?: string;
 }
 
-export function CourseHeader({
+export const CourseHeader = React.memo(function CourseHeader({
   course,
   isEnrolled,
   className,
@@ -91,7 +79,9 @@ export function CourseHeader({
           alt={course.title}
           fill
           className="object-cover"
-          priority
+          quality={85}
+          priority={true}
+          sizes="100vw"
         />
       </div>
       <Card className="mt-8">
@@ -160,4 +150,4 @@ export function CourseHeader({
       </Card>
     </div>
   );
-}
+});

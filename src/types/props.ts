@@ -2,12 +2,8 @@ import { Tables } from "@/types/supabase";
 import { UserStats } from "./profile";
 import type { CourseLesson } from "./api";
 import type { ForumComment, ForumStats } from "./forum";
-import type { _CourseComment, _CourseProgress, _Lesson, Course, CourseRating, ForumPost, Notification, SimulatorResult, SimulatorScenario, SimulatorSession, SimulatorUserSettings, SimulatorUserStats, User} from "@/components/ui/";\nimport type { SimulatorState } from "./simulator";
-
+import type { SimulatorState } from "./simulator";
 import type {
-  _CourseComment,
-  _CourseProgress,
-  _Lesson,
   Course,
   CourseRating,
   ForumPost,
@@ -17,7 +13,8 @@ import type {
   SimulatorSession,
   SimulatorUserSettings,
   SimulatorUserStats,
-  User,} from "./models";
+  User,
+} from "./models";
 
 
 

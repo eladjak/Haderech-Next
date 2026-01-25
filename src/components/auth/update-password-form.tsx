@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -7,31 +9,10 @@ import { useForm } from "react-hook-form";
 
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/";\nimport { Input } from "@/components/ui/input";
-import { _useAuth } from "@/hooks/use-auth";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { updatePasswordSchema, type UpdatePasswordSchema,
-
-"use client";
-
-
-
-
-
-
-
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-
-
-
 import {
   updatePasswordSchema,
   type UpdatePasswordSchema,

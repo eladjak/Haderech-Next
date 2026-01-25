@@ -1,8 +1,8 @@
+"use client";
+
 import { ForumPost } from "@/components/forum-post";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ForumPost as ForumPostType } from "@/types/api";
-
-("use client");
 
 interface LatestForumPostsProps {
   posts: ForumPostType[];

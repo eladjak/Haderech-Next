@@ -1,18 +1,15 @@
+"use client";
+
 import { Globe } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/";\nimport { useTranslations } from "@/hooks/use-translations";
-
-"use client";
-
-
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "@/hooks/use-translations";
 
 
 export function LanguageSelector() {

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -9,40 +11,15 @@ import { z } from "zod";
 import { ForumComment } from "@/components/forum-comment";
 import { ForumPost } from "@/components/forum-post";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/";\nimport { Form, FormControl, FormField, FormItem, FormMessage} from "@/components/ui/";\nimport { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import type { Author, ForumPost as ForumPostType, ForumTag,
-
-"use client";
-
-
-
-
-
-
-
-
-
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-
-
 import type {
   Author,
   ForumPost as ForumPostType,
-  ForumTag,} from "@/types/forum";
+  ForumTag,
+} from "@/types/forum";
 
 const formSchema = z.object({
   content: z

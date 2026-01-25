@@ -1,21 +1,14 @@
-import type { Database } from "@/types/database";
-import type { _ExtendedForumComment, _ForumPost, Course, ExtendedForumPost} from "./forum";
 /**
  * @file api.ts
  * @description Client-side API utilities for interacting with the Supabase backend.
  * Provides a singleton instance of the Supabase client and helper functions for common operations.
- */} from "./forum";
+ */
 
-
-
-
-
-import type {
-  _ExtendedForumComment} from "./forum";
-  _ForumPost,
-  Course,
-  ExtendedForumPost,
-} from "@/types/supabase";
+import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/database";
+import type { Course, ExtendedForumPost } from "@/types/api";
+import type { APIResponse } from "@/types/api";
 
 type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];

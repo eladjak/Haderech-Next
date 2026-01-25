@@ -1,6 +1,6 @@
-import RegisterForm from "@/components/auth/register-form";
+"use client";
 
-("use client");
+import RegisterForm from "@/components/auth/register-form";
 
 export function RegisterContent() {
   return (

@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +28,6 @@ import { cn } from "@/lib/utils";
  * </div>
  * ```
  */
-
-("use client");
 
 interface NoiseProps extends React.HTMLAttributes<HTMLDivElement> {
   /** עוצמת הרעש */

@@ -1,7 +1,6 @@
+import React from "react";
 import { Clock, Users } from "lucide-react";
 import Image from "next/image";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/";\nimport type { CourseWithRelations } from "@/types/courses";
-
 import {
   Card,
   CardContent,
@@ -9,13 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import type { CourseWithRelations } from "@/types/courses";
 
 interface CourseCardProps {
   course: CourseWithRelations;
 }
 
-export function CourseCard({ course }: CourseCardProps) {
+export const CourseCard = React.memo(function CourseCard({ course }: CourseCardProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-0">
@@ -25,6 +24,9 @@ export function CourseCard({ course }: CourseCardProps) {
             alt={course.title}
             fill
             className="object-cover"
+            quality={75}
+            priority={false}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </div>
       </CardHeader>
@@ -48,4 +50,4 @@ export function CourseCard({ course }: CourseCardProps) {
       </CardFooter>
     </Card>
   );
-}
+});

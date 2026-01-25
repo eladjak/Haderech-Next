@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -23,8 +25,6 @@ import { cn } from "@/lib/utils";
  * />
  * ```
  */
-
-("use client");
 
 const formSchema = z.object({
   title: z
@@ -120,20 +120,23 @@ export function CreatePost({
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-4"
-          role="form"
           aria-label="טופס יצירת פוסט חדש"
           noValidate
         >
           <div className="space-y-2">
             <div className="w-full">
+              <label htmlFor="post-title" className="sr-only">
+                כותרת הפוסט
+              </label>
               <input
                 {...form.register("title")}
+                id="post-title"
                 aria-invalid={!!form.formState.errors.title}
-                aria-label="כותרת"
                 aria-required="true"
+                aria-describedby={form.formState.errors.title ? "title-error" : undefined}
                 className={cn(
                   "w-full rounded-md border px-3 py-2 text-base transition-colors focus:outline-none focus:ring-2",
-                  "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20",
+                  "border focus:border-primary focus:ring-primary/20",
                   form.formState.errors.title &&
                     "border-destructive focus:border-destructive focus:ring-destructive/20"
                 )}
@@ -144,6 +147,7 @@ export function CreatePost({
               />
               {form.formState.errors.title && (
                 <p
+                  id="title-error"
                   className="mt-1 text-sm text-destructive"
                   data-testid="error-message"
                   role="alert"
@@ -155,14 +159,18 @@ export function CreatePost({
             </div>
           </div>
           <div className="space-y-2">
+            <label htmlFor="post-content" className="sr-only">
+              תוכן הפוסט
+            </label>
             <textarea
               {...form.register("content")}
+              id="post-content"
               aria-invalid={!!form.formState.errors.content}
-              aria-label="תוכן"
               aria-required="true"
+              aria-describedby={form.formState.errors.content ? "content-error" : undefined}
               className={cn(
                 "min-h-[80px] w-full rounded-md border p-3 text-base transition-colors focus:outline-none focus:ring-2",
-                "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20",
+                "border focus:border-primary focus:ring-primary/20",
                 form.formState.errors.content &&
                   "border-destructive focus:border-destructive focus:ring-destructive/20"
               )}
@@ -173,6 +181,7 @@ export function CreatePost({
             />
             {form.formState.errors.content && (
               <p
+                id="content-error"
                 className="mt-1 text-sm text-destructive"
                 data-testid="error-message"
                 role="alert"
@@ -188,11 +197,7 @@ export function CreatePost({
               className={cn(buttonVariants(), "w-full")}
               disabled={isLoading}
               aria-busy={isLoading}
-              aria-disabled={isLoading}
-              aria-label={isLoading ? "יוצר פוסט..." : "פרסם פוסט"}
               data-testid="submit-button"
-              role="button"
-              tabIndex={0}
             >
               {isLoading ? "יוצר פוסט..." : "פרסם פוסט"}
             </button>

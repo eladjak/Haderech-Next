@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Message } from "@/types/simulator";
 import { FeedbackDisplay } from "./FeedbackDisplay";
 import { MessageItem } from "./MessageItem";
@@ -10,7 +10,7 @@ interface MessageListProps {
   className?: string;
 }
 
-export function MessageList({
+export const MessageList = React.memo(function MessageList({
   messages,
   expandedFeedback,
   onToggleFeedback,
@@ -18,15 +18,13 @@ export function MessageList({
 }: MessageListProps): React.ReactElement {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   return (
     <div className={`flex-1 overflow-y-auto p-4 ${className}`}>
@@ -59,4 +57,4 @@ export function MessageList({
       </div>
     </div>
   );
-}
+});

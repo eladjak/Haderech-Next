@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/";\nimport {
+import {
   Select,
   SelectContent,
   SelectItem,

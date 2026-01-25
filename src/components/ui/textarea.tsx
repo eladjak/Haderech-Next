@@ -58,11 +58,11 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           "focus:outline-none focus:ring-2",
           "min-h-[80px] p-3 text-base",
           {
-            "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20":
+            "border focus:border-primary focus:ring-primary/20":
               !error && !success,
-            "border-action-error focus:border-action-error focus:ring-action-error/20":
+            "border-destructive focus:border-destructive focus:ring-destructive/20":
               error,
-            "border-action-success focus:border-action-success focus:ring-action-success/20":
+            "border-green-600 focus:border-green-600 focus:ring-green-600/20":
               success,
             "resize-none": autoResize,
           },

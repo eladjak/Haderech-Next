@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { createServerClient } from "@supabase/ssr";
-import { DELETE, GET as GET_LESSON, PATCH as PATCH_LESSON} from "@/components/ui/";\nimport { GET, PATCH, POST } from "../courses/[id]/lessons/route";
+import { DELETE, GET as GET_LESSON, PATCH as PATCH_LESSON } from "../[id]/lessons/route";
+import { GET, PATCH, POST } from "../courses/[id]/lessons/route";
 
 /**
  * @file lessons.test.ts

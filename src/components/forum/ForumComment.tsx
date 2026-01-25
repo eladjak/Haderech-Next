@@ -1,3 +1,5 @@
+"use client";
+
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
 import { MessageSquare } from "lucide-react";
@@ -22,14 +24,12 @@ import type { ForumComment as ForumCommentType } from "@/types/forum";
  * ```
  */
 
-("use client");
-
 export interface ForumCommentProps {
   comment: ForumCommentType;
   className?: string;
 }
 
-export function ForumComment({
+export const ForumComment = React.memo(function ForumComment({
   comment,
   className,
 }: ForumCommentProps): React.ReactElement {
@@ -84,4 +84,4 @@ export function ForumComment({
       )}
     </div>
   );
-}
+});

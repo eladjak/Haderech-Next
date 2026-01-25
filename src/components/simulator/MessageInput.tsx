@@ -26,24 +26,33 @@ export function MessageInput({
   };
 
   return (
-    <form onSubmit={onSubmit} className="border-t p-4" role="form">
+    <form onSubmit={onSubmit} className="border-t p-4">
       <div className="flex gap-2">
         <div className="relative flex-1">
+          <label htmlFor="message-input" className="sr-only">
+            הקלד הודעה
+          </label>
           <Input
+            id="message-input"
             value={actualMessage}
             onChange={handleChange}
             placeholder="הקלד הודעה..."
             disabled={isLoading}
             maxLength={1000}
+            aria-describedby="message-counter"
           />
-          <div className="absolute bottom-0 right-2 text-xs text-muted-foreground">
+          <div
+            id="message-counter"
+            className="absolute bottom-0 right-2 text-xs text-muted-foreground"
+            aria-live="polite"
+          >
             {actualMessage.length}/1000
           </div>
         </div>
         <Button
           type="submit"
           disabled={isLoading || !actualMessage.trim()}
-          aria-label="שלח"
+          aria-label="שלח הודעה"
         >
           <Send className="h-4 w-4" />
           <span className="sr-only">שלח</span>

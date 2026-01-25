@@ -1,8 +1,8 @@
+"use client";
+
 import { motion, useAnimation } from "framer-motion";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
-("use client");
 
 interface ParticlesProps extends React.HTMLAttributes<HTMLDivElement> {
   count?: number;

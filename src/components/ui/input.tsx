@@ -70,16 +70,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const stateStyles = {
       default:
-        "border-border-medium focus:border-brand-primary focus:ring-brand-primary/20",
+        "border focus:border-primary focus:ring-primary/20",
       error:
-        "border-action-error focus:border-action-error focus:ring-action-error/20",
+        "border-destructive focus:border-destructive focus:ring-destructive/20",
       success:
-        "border-action-success focus:border-action-success focus:ring-action-success/20",
+        "border-green-600 focus:border-green-600 focus:ring-green-600/20",
     };
 
     const messageStyles = {
-      error: "text-action-error",
-      success: "text-action-success",
+      error: "text-destructive",
+      success: "text-green-600",
     };
 
     return (
@@ -88,12 +88,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={inputId}
             className={clsx("mb-1 block text-sm font-medium", {
-              "text-action-error": state === "error",
-              "text-action-success": state === "success",
+              "text-destructive": state === "error",
+              "text-green-600": state === "success",
             })}
           >
             {label}
-            {required && <span className="text-action-error mr-1">*</span>}
+            {required && <span className="text-destructive mr-1">*</span>}
           </label>
         )}
         <input
