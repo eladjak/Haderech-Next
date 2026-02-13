@@ -4,7 +4,7 @@
 ## עדכון אחרון: 2026-02-13
 
 ## מצב נוכחי
-מערכת הלימודים בפיתוח פעיל. התשתית הבסיסית הושלמה: דפי נחיתה, קורסים, דשבורד, אימות משתמשים, וכעת גם דף פרטי קורס ודף לימוד שיעור. TypeScript מתקמפל ללא שגיאות. נדרש לחבר Convex ו-Clerk עם environment variables.
+מערכת הלימודים בפיתוח פעיל. התשתית הבסיסית הושלמה: דפי נחיתה, קורסים, דשבורד, אימות משתמשים, דף פרטי קורס ודף לימוד שיעור. Convex + Clerk integration תוקן - Provider משתמש ב-ConvexProviderWithClerk לאימות משתמשים. TypeScript מתקמפל ללא שגיאות. נדרש לחבר Convex ו-Clerk עם environment variables.
 
 ## מה בוצע
 - [x] Landing page (דף נחיתה עם Hero, features, footer)
@@ -23,6 +23,9 @@
 - [x] Fixed lint warnings (unused imports)
 - [x] TypeScript compiles with zero errors
 - [x] ESLint passes (2 non-critical img warnings only)
+- [x] Convex + Clerk auth integration (ConvexProviderWithClerk)
+- [x] convex.json configuration file
+- [x] .env.local.example with after-auth redirect URLs
 
 ## צעדים הבאים
 1. **הגדרת Environment Variables** - Clerk keys + Convex URL ב-.env.local
@@ -41,7 +44,13 @@
 - RTL + Hebrew (Heebo font) מוגדר ב-layout.tsx
 - Clerk localization to Hebrew via heIL
 
-## קבצים שנערכו (סשן 2026-02-13)
+## קבצים שנערכו (סשן אחרון 2026-02-13)
+- `src/components/providers/convex-provider.tsx` - switched from ConvexProvider to ConvexProviderWithClerk for authenticated Convex queries
+- `convex.json` - NEW: Convex CLI configuration
+- `.env.local.example` - added after-auth redirect URLs and comments
+- `PROGRESS.md` - updated with current status
+
+## קבצים שנערכו (סשן קודם 2026-02-13)
 - `convex/_generated/dataModel.d.ts` - NEW: stub types for data model
 - `convex/_generated/server.d.ts` - NEW: typed query/mutation/action stubs
 - `convex/_generated/server.js` - NEW: generic query/mutation/action exports
@@ -61,3 +70,10 @@
 - נדרש לחבר Clerk ו-Convex (ראה .env.local.example)
 - Next.js 16 מזהיר על middleware deprecation - לשקול מיגרציה ל-proxy
 - _generated files הם stubs - `npx convex dev` יחליף אותם באמיתיים
+
+## Git History
+- `ef57d26` - feat: add complete learning platform foundation with courses, lessons, auth, and dashboard (27 files, +2543/-80)
+- `34694ea` - Initial commit from Create Next App
+
+## Remote
+- No remote configured yet. To push: create a GitHub repo and run `git remote add origin <url> && git push -u origin master`
