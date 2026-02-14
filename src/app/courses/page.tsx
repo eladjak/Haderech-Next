@@ -40,13 +40,19 @@ export default function CoursesPage() {
                 href={`/courses/${course._id}`}
                 className="group rounded-2xl bg-zinc-50 p-6 transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
               >
-                {course.imageUrl && (
+                {course.imageUrl ? (
                   <div className="mb-4 aspect-video overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800">
                     <img
                       src={course.imageUrl}
                       alt={course.title}
                       className="h-full w-full object-cover"
                     />
+                  </div>
+                ) : (
+                  <div className="mb-4 flex aspect-video items-center justify-center rounded-xl bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800">
+                    <span className="text-3xl text-zinc-400 dark:text-zinc-500">
+                      &#128218;
+                    </span>
                   </div>
                 )}
                 <h2 className="mb-2 text-xl font-semibold text-zinc-900 group-hover:text-zinc-700 dark:text-white dark:group-hover:text-zinc-200">

@@ -19,6 +19,7 @@ import type * as courses from "../courses.js";
 import type * as enrollments from "../enrollments.js";
 import type * as lessons from "../lessons.js";
 import type * as progress from "../progress.js";
+import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
 /**
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   enrollments: typeof enrollments;
   lessons: typeof lessons;
   progress: typeof progress;
+  seed: typeof seed;
   users: typeof users;
 }>;
 
