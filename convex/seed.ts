@@ -177,21 +177,162 @@ export const seedCourses = mutation({
       }
 
       createdCourses.push(courseData.title);
+
+      // Create a quiz for the first lesson of each course
+      const firstLessonId = await ctx.db
+        .query("lessons")
+        .withIndex("by_course_order", (q) => q.eq("courseId", courseId))
+        .first();
+
+      if (firstLessonId) {
+        const quizId = await ctx.db.insert("quizzes", {
+          lessonId: firstLessonId._id,
+          courseId,
+          title: `בוחן - ${courseData.lessons[0].title}`,
+          passingScore: 60,
+          createdAt: now,
+        });
+
+        // Create quiz questions based on course topic
+        const quizQuestions = getQuizQuestionsForCourse(i);
+        for (let q = 0; q < quizQuestions.length; q++) {
+          await ctx.db.insert("quizQuestions", {
+            quizId,
+            question: quizQuestions[q].question,
+            options: quizQuestions[q].options,
+            correctIndex: quizQuestions[q].correctIndex,
+            explanation: quizQuestions[q].explanation,
+            order: q,
+          });
+        }
+      }
     }
 
     return {
       success: true,
-      message: `Created ${createdCourses.length} courses with lessons.`,
+      message: `Created ${createdCourses.length} courses with lessons and quizzes.`,
       courses: createdCourses,
     };
   },
 });
 
+function getQuizQuestionsForCourse(courseIndex: number) {
+  const allQuizzes = [
+    // Course 0: אומנות ההקשבה
+    [
+      {
+        question: "מהו ההבדל המרכזי בין שמיעה להקשבה פעילה?",
+        options: [
+          "שמיעה היא תהליך פיזי, הקשבה פעילה כוללת נוכחות והבנה",
+          "אין הבדל - שניהם אותו דבר",
+          "שמיעה טובה יותר כי היא מהירה",
+          "הקשבה פעילה מתאימה רק למומחים",
+        ],
+        correctIndex: 0,
+        explanation:
+          "שמיעה היא תהליך פיזי אוטומטי, בעוד הקשבה פעילה כוללת נוכחות מלאה, קשב מכוון והבנה עמוקה של מה שנאמר.",
+      },
+      {
+        question: "כמה מרכיבים יש להקשבה איכותית לפי השיעור?",
+        options: ["שלושה", "ארבעה", "חמישה", "שבעה"],
+        correctIndex: 2,
+        explanation: "לפי השיעור, ישנם חמישה מרכיבים של הקשבה איכותית.",
+      },
+      {
+        question: "מהי הטכניקה המומלצת כשמרגישים שמפסיקים להקשיב?",
+        options: [
+          "לעזוב את השיחה",
+          "להעמיד פנים שמקשיבים",
+          "לחזור לנוכחות דרך קשב מכוון",
+          "לשנות נושא",
+        ],
+        correctIndex: 2,
+        explanation:
+          "כשמזהים שהקשב נדד, הטכניקה המומלצת היא לחזור בעדינות לנוכחות מלאה בשיחה.",
+      },
+    ],
+    // Course 1: תקשורת זוגית מתקדמת
+    [
+      {
+        question: "מה אחוז השיחות שנגמרות כפי שהתחילו?",
+        options: ["50%", "75%", "88%", "96%"],
+        correctIndex: 3,
+        explanation:
+          "לפי מחקרים, 96% מהשיחות נגמרות כפי שהתחילו - לכן הפתיחה הרכה כל כך חשובה.",
+      },
+      {
+        question: "כמה אחוז מהקונפליקטים הזוגיים הם 'בעיות נצחיות'?",
+        options: ["23%", "45%", "69%", "85%"],
+        correctIndex: 2,
+        explanation:
+          "לפי מחקר גוטמן, 69% מהקונפליקטים הזוגיים הם בעיות נצחיות שדורשות ניהול ולא פתרון.",
+      },
+      {
+        question: 'מהי "פתיחה רכה" בשיחה קשה?',
+        options: [
+          "לדבר בשקט",
+          "להשתמש בנוסחת XYZ - לתאר מצב, רגש ובקשה",
+          "לפתוח בבדיחה",
+          "לחכות שהצד השני ידבר קודם",
+        ],
+        correctIndex: 1,
+        explanation:
+          "פתיחה רכה משתמשת בנוסחת XYZ: תיאור המצב, הרגש שהוא מעורר, ובקשה ספציפית.",
+      },
+    ],
+    // Course 2: מפתחות לאינטימיות
+    [
+      {
+        question: "כמה סוגי אינטימיות קיימים לפי השיעור?",
+        options: ["שניים", "שלושה", "חמישה", "שבעה"],
+        correctIndex: 2,
+        explanation:
+          "ישנם חמישה סוגי אינטימיות: רגשית, אינטלקטואלית, חווייתית, רוחנית ופיזית.",
+      },
+      {
+        question: 'מהו הבסיס ל"ביטחון רגשי" בזוגיות?',
+        options: [
+          "הסכם כלכלי משותף",
+          "תקשורת פתוחה ותיקוף רגשי",
+          "ביחד כל הזמן",
+          "הסכמה על הכל",
+        ],
+        correctIndex: 1,
+        explanation:
+          "ביטחון רגשי נבנה דרך תקשורת פתוחה, תיקוף רגשי, ויצירת מרחב בטוח לפגיעות.",
+      },
+      {
+        question: 'מהי "הפנייה רגשית" לפי מחקר גוטמן?',
+        options: [
+          "לשנות נושא כשמרגישים רגש",
+          "ניסיון ליצור קשר רגשי עם בן/בת הזוג",
+          "להסתובב פיזית לכיוון בן/בת הזוג",
+          "לפנות למטפל זוגי",
+        ],
+        correctIndex: 1,
+        explanation:
+          "הפנייה רגשית היא כל ניסיון - גדול או קטן - ליצור קשר, תשומת לב או חיבור עם בן/בת הזוג.",
+      },
+    ],
+  ];
+
+  return allQuizzes[courseIndex] ?? allQuizzes[0];
+}
+
 // Clear all seed data (for development - use carefully)
 export const clearAll = internalMutation({
   args: {},
   handler: async (ctx) => {
-    const tables = ["progress", "enrollments", "lessons", "courses"] as const;
+    const tables = [
+      "quizAttempts",
+      "quizQuestions",
+      "quizzes",
+      "certificates",
+      "progress",
+      "enrollments",
+      "lessons",
+      "courses",
+    ] as const;
 
     for (const table of tables) {
       const docs = await ctx.db.query(table).collect();

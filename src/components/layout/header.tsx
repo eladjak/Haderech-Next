@@ -27,7 +27,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-6 md:flex" aria-label="ניווט ראשי">
           <Link
             href="/courses"
             className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
@@ -40,6 +40,12 @@ export function Header() {
               className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
             >
               האזור שלי
+            </Link>
+            <Link
+              href="/certificates"
+              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+            >
+              תעודות
             </Link>
           </SignedIn>
         </nav>
@@ -128,6 +134,13 @@ export function Header() {
                 className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
               >
                 האזור שלי
+              </Link>
+              <Link
+                href="/certificates"
+                onClick={closeMobileMenu}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
+              >
+                תעודות
               </Link>
             </SignedIn>
             <SignedOut>

@@ -1,45 +1,68 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
 ## סטטוס: in_progress
-## עדכון אחרון: 2026-02-14
+## עדכון אחרון: 2026-02-15
 
 ## מצב נוכחי
-מערכת הלימודים בפיתוח פעיל. התשתית הבסיסית הושלמה: דפי נחיתה, קורסים, דשבורד, אימות משתמשים, דף פרטי קורס ודף לימוד שיעור. Convex + Clerk integration תוקן - Provider משתמש ב-ConvexProviderWithClerk לאימות משתמשים. TypeScript מתקמפל ללא שגיאות. נוסף מודול seed עם 3 קורסי דוגמה (16 שיעורים סך הכל) בנושאי תקשורת זוגית. הדשבורד שודרג להציג קורסים מ-Convex עם כלי seed לפיתוח. נדרש לחבר Convex ו-Clerk עם environment variables.
+מערכת הלימודים בפיתוח מתקדם. Phase 1 הושלם: כל התשתית הבסיסית + Phase 2 פיצ'רים: מעקב התקדמות, הרשמה לקורסים, סימון שיעורים כהושלמו, מערכת בחנים (quizzes), תעודות סיום, UI משופר עם חיפוש קורסים, דף תעודות, sidebar ניידת בדף הלימוד. TypeScript מתקמפל ללא שגיאות. ESLint עובר (2 אזהרות img בלבד).
 
-## מה בוצע
-- [x] Landing page (דף נחיתה עם Hero, features, footer)
+## מה בוצע - Phase 1 Core (הושלם)
+- [x] Landing page (דף נחיתה עם Hero, features, stats, steps, CTA, footer)
 - [x] Auth pages - Clerk sign-in / sign-up
-- [x] Courses list page - רשימת קורסים מ-Convex
-- [x] Dashboard - אזור אישי עם כרטיסי סטטיסטיקות + תצוגת קורסים
-- [x] Header component עם ניווט desktop + mobile
-- [x] Middleware - הגנה על נתיבים פרטיים
-- [x] Convex schema (courses, lessons, users, enrollments, progress)
-- [x] Convex functions: courses, lessons, users, progress, enrollments
+- [x] Courses list page - רשימת קורסים מ-Convex + חיפוש
+- [x] Dashboard - אזור אישי עם סטטיסטיקות, קורסים רשומים, תעודות
+- [x] Header component עם ניווט desktop + mobile + תעודות
+- [x] Middleware - הגנה על נתיבים פרטיים (כולל /certificates)
+- [x] Convex schema (courses, lessons, users, enrollments, progress, quizzes, quizQuestions, quizAttempts, certificates)
+- [x] Convex functions: courses, lessons, users, progress, enrollments, quizzes, certificates
 - [x] Convex _generated stubs (לאפשר compilation ללא Convex backend)
-- [x] Course detail page (`/courses/[courseId]`) - עם breadcrumb, רשימת שיעורים, סטטיסטיקות
-- [x] Lesson learning page (`/courses/[courseId]/learn`) - sidebar עם רשימת שיעורים, ניווט בין שיעורים, video placeholder
+- [x] Course detail page (`/courses/[courseId]`) - עם enrollment, progress tracking, certificates
+- [x] Lesson learning page (`/courses/[courseId]/learn`) - sidebar עם progress, mark complete, quiz integration
 - [x] Enrollments module (convex/enrollments.ts) - הרשמה/ביטול הרשמה לקורסים
 - [x] Mobile responsive header עם hamburger menu
-- [x] Fixed lint warnings (unused imports)
 - [x] TypeScript compiles with zero errors
-- [x] ESLint passes (3 non-critical img warnings only)
+- [x] ESLint passes (2 non-critical img warnings)
 - [x] Convex + Clerk auth integration (ConvexProviderWithClerk)
-- [x] convex.json configuration file
-- [x] .env.local.example with after-auth redirect URLs
-- [x] **Seed data module** (convex/seed.ts) - 3 קורסי דוגמה עם 16 שיעורים
-- [x] **Dashboard upgraded** - תצוגת קורסים מ-Convex, כלי seed לפיתוח, placeholder images
-- [x] **Courses page improved** - placeholder image עבור קורסים ללא תמונה
+- [x] Seed data module - 3 קורסי דוגמה עם 16 שיעורים + בחנים
+
+## מה בוצע - Phase 2 Features (סשן 2026-02-15)
+- [x] **הרשמה לקורסים (Enrollment)** - כפתור הרשמה/ביטול בדף הקורס
+- [x] **מעקב התקדמות** - סימון שיעורים כהושלמו + progress bar בסיידבר ובדף הקורס
+- [x] **מערכת בחנים (Quizzes)** - Schema + Convex functions + QuizPlayer UI component
+  - בוחן עם שאלות רב-ברירה
+  - מעבר בין שאלות, ניווט חופשי
+  - תצוגת תוצאות עם הסברים
+  - ניסיונות חוזרים
+  - seed data עם 3 בחנים (אחד לכל קורס)
+- [x] **תעודות סיום (Certificates)** - Schema + Convex functions + CertificateCard UI
+  - הנפקת תעודה אוטומטית ב-80%+ השלמה
+  - מספר תעודה ייחודי
+  - דף תעודות (/certificates) עם רשימת כל התעודות
+  - תצוגת תעודה בדשבורד
+  - אימות תעודה לפי מספר
+- [x] **UI Components חדשים:**
+  - `ProgressBar` - סרגל התקדמות עם sizes ו-labels
+  - `Badge` - תגיות סטטוס (default, success, warning, info)
+  - `CourseCard` - כרטיס קורס משופר עם metadata ו-progress
+  - `EnrollButton` - כפתור הרשמה עם אישור ביטול
+  - `LessonCompleteButton` - כפתור סימון שיעור כהושלם
+  - `QuizPlayer` - נגן בחנים מלא (intro, playing, review)
+  - `CertificateCard` - תצוגת תעודה מעוצבת
+- [x] **דף קורסים משופר** - חיפוש, תוצאות ריקות, CourseCard component
+- [x] **דשבורד משופר** - קורסים רשומים, תעודות, קישורים
+- [x] **דף נחיתה משופר** - Stats section, How it works, CTA section, footer עם ניווט
+- [x] **Mobile UX** - sidebar ניידת (drawer) בדף הלימוד, נגישות משופרת
+- [x] **נגישות** - aria-labels, roles, aria-current, aria-expanded, navigation landmarks
 
 ## צעדים הבאים
 1. **הגדרת Environment Variables** - Clerk keys + Convex URL ב-.env.local
 2. **הפעלת `npx convex dev`** - ליצור _generated types אמיתיים ולסנכרן schema
 3. **הרצת seed** - לאחר חיבור Convex, ללחוץ על כפתור "צור נתוני דוגמה" בדשבורד
-4. **אינטגרציית Progress tracking** - חיבור דף הלימוד למעקב התקדמות ב-Convex
-5. **דשבורד דינמי** - הצגת קורסים רשומים וסטטיסטיקות אמיתיות מ-Convex
-6. **Phase 2: Video player** - נגן וידאו עם מעקב זמן צפייה
-7. **Phase 2: Continue where left off** - המשך מהנקודה שנעצרת
-8. **Phase 3: Admin panel** - ניהול קורסים ותוכן
-9. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
+4. **Phase 2 Remaining:** Video player עם מעקב זמן צפייה
+5. **Phase 2 Remaining:** Continue where left off - מעבר אוטומטי לשיעור האחרון
+6. **Phase 3: Admin panel** - ניהול קורסים, שיעורים, ובחנים
+7. **Phase 3: User management** - ניהול משתמשים ותפקידים
+8. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
 
 ## החלטות שהתקבלו
 - npm (לא bun) - כמתועד ב-CLAUDE.md, bun לא עובד במערכת זו
@@ -49,58 +72,57 @@
 - Clerk localization to Hebrew via heIL
 - Seed data כ-public mutation (לא internalMutation) כדי שיהיה ניתן להפעיל מהדשבורד
 - clearAll כ-internalMutation (בטיחות - רק מקוד שרת)
+- Quiz passing score: 60% (ניתן לשינוי per-quiz)
+- Certificate threshold: 80% השלמת קורס
+- Certificate number format: HD-{timestamp_base36}-{random_4chars}
+- SVG icons inline (ללא תלות חיצונית ב-icon library)
 
-## קורסי דוגמה שנוצרו (Seed Data)
-### קורס 1: אומנות ההקשבה (6 שיעורים)
-- מהי הקשבה פעילה? (12 דקות)
-- שפת הגוף בהקשבה (14 דקות)
-- להקשיב מעבר למילים (15 דקות)
-- חסמים להקשבה ואיך להתגבר עליהם (13 דקות)
-- שיקוף ותיקוף - כלים מעשיים (16 דקות)
-- תרגול מסכם: שיחה מקשיבה (18 דקות)
+## קבצים שנערכו/נוצרו (סשן 2026-02-15)
 
-### קורס 2: תקשורת זוגית מתקדמת (5 שיעורים)
-- יסודות התקשורת הזוגית (14 דקות)
-- שיחות קשות - איך לפתוח נכון (15 דקות)
-- ניהול קונפליקטים בזוגיות (17 דקות)
-- תקשורת רגשית - לדבר מהלב (13 דקות)
-- הקשבה אמפתית בזוגיות (15 דקות)
+### Convex Backend (חדש):
+- `convex/schema.ts` - UPDATED: added quizzes, quizQuestions, quizAttempts, certificates tables
+- `convex/quizzes.ts` - NEW: getByLesson, getQuestions, getLastAttempt, submitAttempt, create
+- `convex/certificates.ts` - NEW: getByUserAndCourse, listByUser, verifyByCertificateNumber, issue
+- `convex/seed.ts` - UPDATED: added quiz seed data (3 quizzes with 9 questions), updated clearAll
+- `convex/_generated/api.d.ts` - UPDATED: added quizzes and certificates modules
 
-### קורס 3: מפתחות לאינטימיות (6 שיעורים)
-- מהי אינטימיות אמיתית? (12 דקות)
-- בניית ביטחון רגשי (16 דקות)
-- פגיעות ככוח - לפתוח את הלב (14 דקות)
-- ריטואלים של חיבור (15 דקות)
-- התמודדות עם ריחוק רגשי (13 דקות)
-- לשמור על הניצוץ לאורך זמן (17 דקות)
+### UI Components (חדש):
+- `src/components/ui/progress-bar.tsx` - NEW: accessible progress bar component
+- `src/components/ui/badge.tsx` - NEW: status badge component
+- `src/components/course/course-card.tsx` - NEW: reusable course card with metadata
+- `src/components/course/enroll-button.tsx` - NEW: enrollment button with confirm
+- `src/components/course/lesson-complete-button.tsx` - NEW: mark lesson complete
+- `src/components/quiz/quiz-player.tsx` - NEW: full quiz player (intro, playing, review)
+- `src/components/certificate/certificate-card.tsx` - NEW: certificate display card
 
-## קבצים שנערכו (סשן 2026-02-14)
-- `convex/seed.ts` - NEW: seed module with 3 courses and 16 lessons
-- `convex/_generated/api.d.ts` - updated to include seed module
-- `src/app/dashboard/page.tsx` - upgraded with Convex courses query, seed tool, placeholder images
-- `src/app/courses/page.tsx` - added placeholder image for courses without imageUrl
-- `PROGRESS.md` - updated with current status
+### Pages (עדכון):
+- `src/app/page.tsx` - UPDATED: added stats, how-it-works, CTA sections, improved footer
+- `src/app/courses/page.tsx` - UPDATED: search, CourseCard component, improved empty states
+- `src/app/courses/[courseId]/page.tsx` - REWRITTEN: enrollment, progress, certificates, badges
+- `src/app/courses/[courseId]/learn/page.tsx` - REWRITTEN: progress tracking, mark complete, quiz, mobile sidebar
+- `src/app/dashboard/page.tsx` - REWRITTEN: enrolled courses, certificates, improved stats
+- `src/app/certificates/page.tsx` - NEW: user certificates page
 
-## קבצים שנערכו (סשן 2026-02-13)
-- `src/components/providers/convex-provider.tsx` - switched from ConvexProvider to ConvexProviderWithClerk for authenticated Convex queries
-- `convex.json` - NEW: Convex CLI configuration
-- `.env.local.example` - added after-auth redirect URLs and comments
-- `PROGRESS.md` - updated with current status
+### Other:
+- `src/components/layout/header.tsx` - UPDATED: added certificates link, aria-label
+- `src/middleware.ts` - UPDATED: added /certificates to protected routes
+- `PROGRESS.md` - UPDATED
 
-## קבצים שנערכו (סשן קודם 2026-02-13)
-- `convex/_generated/dataModel.d.ts` - NEW: stub types for data model
-- `convex/_generated/server.d.ts` - NEW: typed query/mutation/action stubs
-- `convex/_generated/server.js` - NEW: generic query/mutation/action exports
-- `convex/_generated/api.d.ts` - NEW: typed API with all modules
-- `convex/_generated/api.js` - NEW: anyApi export
-- `convex/enrollments.ts` - NEW: enrollment functions (enroll, unenroll, isEnrolled, listByUser)
-- `convex/users.ts` - removed unused `mutation` import
-- `src/app/courses/page.tsx` - fixed import path to use @/ alias
-- `src/app/courses/[courseId]/page.tsx` - NEW: course detail page
-- `src/app/courses/[courseId]/learn/page.tsx` - NEW: lesson learning page with sidebar
-- `src/app/dashboard/page.tsx` - enhanced with CTA link to courses, achievements section
-- `src/components/layout/header.tsx` - added mobile hamburger menu
-- `src/middleware.ts` - removed unused isPublicRoute variable
+## קורסי דוגמה (Seed Data)
+### קורס 1: אומנות ההקשבה (6 שיעורים + בוחן)
+### קורס 2: תקשורת זוגית מתקדמת (5 שיעורים + בוחן)
+### קורס 3: מפתחות לאינטימיות (6 שיעורים + בוחן)
+
+כל בוחן מכיל 3 שאלות רב-ברירה עם הסברים, ציון מעבר 60%.
+
+## Git History
+- `1bfdf14` - feat: add seed data with 3 Hebrew courses and improve dashboard UI
+- `3136da2` - fix: configure Convex + Clerk auth integration and project setup
+- `ef57d26` - feat: add complete learning platform foundation with courses, lessons, auth, and dashboard
+- `34694ea` - Initial commit from Create Next App
+
+## Remote
+- No remote configured yet. To push: create a GitHub repo and run `git remote add origin <url> && git push -u origin master`
 
 ## הערות לסשן הבא
 - קרא CLAUDE.md לפני התחלה
@@ -108,12 +130,6 @@
 - Next.js 16 מזהיר על middleware deprecation - לשקול מיגרציה ל-proxy
 - _generated files הם stubs - `npx convex dev` יחליף אותם באמיתיים
 - כלי ה-seed זמין בדשבורד רק במצב פיתוח (NODE_ENV=development)
-- לאחר `npx convex dev` - ניתן להפעיל seed מהדשבורד או מה-Convex dashboard
-
-## Git History
-- `3136da2` - fix: configure Convex + Clerk auth integration and project setup
-- `ef57d26` - feat: add complete learning platform foundation with courses, lessons, auth, and dashboard
-- `34694ea` - Initial commit from Create Next App
-
-## Remote
-- No remote configured yet. To push: create a GitHub repo and run `git remote add origin <url> && git push -u origin master`
+- לאחר `npx convex dev` - ניתן להפעיל seed מהדשבורד
+- בחנים נוצרים רק לשיעור הראשון של כל קורס (ניתן להוסיף עוד דרך admin panel)
+- Phase 3 (Admin) עדיין לא התחיל - דורש UI לניהול קורסים, שיעורים ובחנים
