@@ -1,10 +1,10 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
 ## סטטוס: in_progress
-## עדכון אחרון: 2026-02-17
+## עדכון אחרון: 2026-02-18
 
 ## מצב נוכחי
-מערכת הלימודים בפיתוח מתקדם. Phase 1 הושלם: כל התשתית הבסיסית + Phase 2 פיצ'רים: מעקב התקדמות, הרשמה לקורסים, סימון שיעורים כהושלמו, מערכת בחנים (quizzes), תעודות סיום, UI משופר עם חיפוש קורסים, דף תעודות, sidebar ניידת בדף הלימוד. Phase 3 Admin Panel הושלם: דשבורד ניהול, ניהול קורסים (CRUD), ניהול סטודנטים, sidebar layout. TypeScript מתקמפל ללא שגיאות. ESLint עובר ללא שגיאות.
+מערכת הלימודים בפיתוח מתקדם. Phase 1-3 הושלמו. Phase 4 הושלם: מערכת בחנים משופרת עם טיימר, פידבק מיידי, סיכום תוצאות; דשבורד אנליטיקס לסטודנט עם גרפים SVG, מעקב streak, הישגים; צפייה בתוכן שיעור עם עיבוד Markdown, תמיכה ב-YouTube, ניווט בין שיעורים. TypeScript מתקמפל ללא שגיאות. ESLint עובר ללא שגיאות.
 
 ## מה בוצע - Phase 1 Core (הושלם)
 - [x] Landing page (דף נחיתה עם Hero, features, stats, steps, CTA, footer)
@@ -90,6 +90,52 @@
   - `deleteCourse` - מחיקת קורס + כל הנתונים הקשורים (cascading delete)
 - [x] **Updated `_generated/api.d.ts`** - הוספת admin module ל-API types
 
+## מה בוצע - Phase 4 Quiz Enhancement + Analytics (סשן 2026-02-18)
+- [x] **Enhanced Quiz System** (`app/quiz/[id]/page.tsx`) - חוויית בוחן משופרת
+  - טיימר לכל שאלה (60 שניות ברירת מחדל) עם שעון ויזואלי
+  - סרגל התקדמות (progress bar) עם מספר שאלה
+  - פידבק מיידי אחרי כל תשובה (נכון/שגוי + הסבר)
+  - מעבר אוטומטי כשנגמר הזמן
+  - דף תוצאות מסכם עם:
+    - עיגול ציון SVG מונפש
+    - תשובות נכונות/שגויות
+    - זמן כולל שנדרש
+    - מספר ניסיון
+    - סקירת כל השאלות עם הסברים
+  - תמיכה בניסיון חוזר
+  - תמיכה בציון הכי טוב / ציון אחרון
+- [x] **Convex quizResults Module** (`convex/quizResults.ts`) - Backend מורחב לבחנים
+  - `getAttemptsByUserAndQuiz` - כל הניסיונות של משתמש בבוחן
+  - `getAttemptsByUserAndCourse` - ניסיונות לפי קורס
+  - `getAllAttemptsByUser` - כל הניסיונות של משתמש
+  - `getBestScore` - ציון הכי טוב בבוחן
+  - `submitEnhancedAttempt` - הגשה עם מדידת זמן
+  - `getUserQuizSummary` - סיכום ביצועי בחנים
+- [x] **Student Analytics Dashboard** (`app/student/analytics/page.tsx`) - דשבורד אנליטיקס
+  - 4 כרטיסי סטטיסטיקות: קורסים, שיעורים, תעודות, ציון ממוצע
+  - מעקב Streak (ימים רצופים) - נוכחי, שיא, סך ימים
+  - התקדמות בקורסים - progress bar + mini bar chart לכל קורס
+  - היסטוריית ציוני בחנים - SVG bar chart + רשימת ניסיונות אחרונים
+  - מערכת הישגים (8 תגים): צעד ראשון, תלמיד חרוץ, מצטיין, בוגר, מתמיד, מעמיק, כל הכבוד, חובב למידה
+  - כל הגרפים ב-SVG/CSS בלבד (ללא ספריות חיצוניות)
+- [x] **Convex Analytics Module** (`convex/analytics.ts`) - Backend לאנליטיקס
+  - `getStudentOverview` - סטטיסטיקות כלליות
+  - `getCourseProgress` - התקדמות מפורטת בכל קורס
+  - `getQuizScoreHistory` - היסטוריית ציונים עם שמות בחנים/קורסים
+  - `getLearningStreak` - חישוב streak (ימים רצופים, שיא, סך ימים)
+  - `getAchievements` - חישוב הישגים/תגים (8 סוגים)
+- [x] **Course Content Viewer** (`app/course/[id]/lesson/[lessonId]/page.tsx`) - צפייה בתוכן שיעור
+  - Markdown renderer מובנה (כותרות, bold, italic, code, blockquotes, lists, links)
+  - תמיכה ב-YouTube iframe embed (זיהוי אוטומטי של URL)
+  - תמיכה בוידאו ישיר (video tag)
+  - ניווט prev/next lesson עם שמות
+  - כפתור "סימון כהושלם"
+  - progress bar של הקורס
+  - רשימת שיעורים מתקפלת (collapsible)
+  - Breadcrumb ניווט
+- [x] **Updated middleware** - הגנה על נתיבים חדשים (/quiz, /student, /course)
+- [x] **Updated `_generated/api.d.ts`** - הוספת analytics + quizResults modules
+
 ## צעדים הבאים
 1. **הגדרת Environment Variables** - Clerk keys + Convex URL ב-.env.local
 2. **הפעלת `npx convex dev`** - ליצור _generated types אמיתיים ולסנכרן schema
@@ -99,8 +145,10 @@
 6. **Phase 3 Remaining:** ניהול שיעורים (CRUD) בתוך כל קורס
 7. **Phase 3 Remaining:** ניהול בחנים (CRUD) - יצירת/עריכת בחנים ושאלות
 8. **Phase 3 Remaining:** Role-based access - בדיקת role=admin לפני גישה לפאנל
-9. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
-10. **`next build` requires valid Clerk keys** - Build fails without real `.env.local`
+9. **Phase 5:** Gamification - points system, leaderboard, daily challenges
+10. **Phase 5:** Social features - comments on lessons, study groups
+11. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
+12. **`next build` requires valid Clerk keys** - Build fails without real `.env.local`
 
 ## החלטות שהתקבלו
 - npm (לא bun) - כמתועד ב-CLAUDE.md, bun לא עובד במערכת זו
@@ -117,6 +165,28 @@
 - Admin pages use mock data with Convex fallback (no env vars required for development)
 - Admin sidebar: fixed on desktop, drawer with overlay on mobile
 - deleteCourse performs cascading delete (enrollments, progress, quizzes, questions, attempts, lessons, certificates)
+- Enhanced quiz: טיימר 60 שניות ברירת מחדל, פידבק מיידי, auto-advance on timeout
+- Analytics charts: SVG/CSS only, no external chart libraries
+- Markdown renderer: built-in, supports headings, bold, italic, code, blockquotes, lists, links
+- YouTube detection: automatic from URL patterns (youtube.com, youtu.be)
+- Achievements: 8 types with earned/locked states
+- Streak: counts both lesson progress and quiz attempts as activity
+
+## קבצים שנערכו/נוצרו (סשן 2026-02-18 - Phase 4)
+
+### Convex Backend (חדש):
+- `convex/quizResults.ts` - NEW: enhanced quiz results module (6 functions)
+- `convex/analytics.ts` - NEW: student analytics module (5 functions)
+- `convex/_generated/api.d.ts` - UPDATED: added analytics + quizResults modules
+
+### Pages (חדש):
+- `src/app/quiz/[id]/page.tsx` - NEW: enhanced quiz taking experience
+- `src/app/student/analytics/page.tsx` - NEW: student analytics dashboard
+- `src/app/course/[id]/lesson/[lessonId]/page.tsx` - NEW: course content viewer
+
+### Other:
+- `src/middleware.ts` - UPDATED: added /quiz, /student, /course to protected routes
+- `PROGRESS.md` - UPDATED
 
 ## קבצים שנערכו/נוצרו (סשן 2026-02-15)
 
