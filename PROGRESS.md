@@ -1,10 +1,10 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
 ## סטטוס: in_progress
-## עדכון אחרון: 2026-02-15
+## עדכון אחרון: 2026-02-17
 
 ## מצב נוכחי
-מערכת הלימודים בפיתוח מתקדם. Phase 1 הושלם: כל התשתית הבסיסית + Phase 2 פיצ'רים: מעקב התקדמות, הרשמה לקורסים, סימון שיעורים כהושלמו, מערכת בחנים (quizzes), תעודות סיום, UI משופר עם חיפוש קורסים, דף תעודות, sidebar ניידת בדף הלימוד. TypeScript מתקמפל ללא שגיאות. ESLint עובר (2 אזהרות img בלבד).
+מערכת הלימודים בפיתוח מתקדם. Phase 1 הושלם: כל התשתית הבסיסית + Phase 2 פיצ'רים: מעקב התקדמות, הרשמה לקורסים, סימון שיעורים כהושלמו, מערכת בחנים (quizzes), תעודות סיום, UI משופר עם חיפוש קורסים, דף תעודות, sidebar ניידת בדף הלימוד. Phase 3 Admin Panel הושלם: דשבורד ניהול, ניהול קורסים (CRUD), ניהול סטודנטים, sidebar layout. TypeScript מתקמפל ללא שגיאות. ESLint עובר ללא שגיאות.
 
 ## מה בוצע - Phase 1 Core (הושלם)
 - [x] Landing page (דף נחיתה עם Hero, features, stats, steps, CTA, footer)
@@ -12,7 +12,7 @@
 - [x] Courses list page - רשימת קורסים מ-Convex + חיפוש
 - [x] Dashboard - אזור אישי עם סטטיסטיקות, קורסים רשומים, תעודות
 - [x] Header component עם ניווט desktop + mobile + תעודות
-- [x] Middleware - הגנה על נתיבים פרטיים (כולל /certificates)
+- [x] Middleware - הגנה על נתיבים פרטיים (כולל /certificates, /admin)
 - [x] Convex schema (courses, lessons, users, enrollments, progress, quizzes, quizQuestions, quizAttempts, certificates)
 - [x] Convex functions: courses, lessons, users, progress, enrollments, quizzes, certificates
 - [x] Convex _generated stubs (לאפשר compilation ללא Convex backend)
@@ -54,15 +54,53 @@
 - [x] **Mobile UX** - sidebar ניידת (drawer) בדף הלימוד, נגישות משופרת
 - [x] **נגישות** - aria-labels, roles, aria-current, aria-expanded, navigation landmarks
 
+## מה בוצע - Phase 3 Admin Panel (סשן 2026-02-17)
+- [x] **Admin Layout** (`app/admin/layout.tsx`) - Sidebar navigation עם 3 עמודים
+  - Sidebar קבועה (desktop) / drawer (mobile) עם hamburger menu
+  - ניווט: דשבורד, קורסים, סטודנטים
+  - Top bar עם UserButton של Clerk
+  - קישור "חזרה לאתר" בתחתית ה-sidebar
+  - Active state מודגש בניווט
+- [x] **Admin Dashboard** (`app/admin/page.tsx`) - סקירה כללית
+  - 4 כרטיסי סטטיסטיקות: סטודנטים, קורסים, ציון ממוצע, אחוז השלמה
+  - 2 כרטיסי משנה: סך הרשמות, תעודות שהונפקו
+  - רשימת פעילות אחרונה (10 אירועים) - הרשמות ותעודות
+  - Mock data + fallback מנתוני Convex אמיתיים
+- [x] **Admin Courses** (`app/admin/courses/page.tsx`) - ניהול קורסים
+  - טבלת קורסים: שם, תיאור, סטודנטים, ציון ממוצע, סטטוס (מפורסם/טיוטה)
+  - כפתור "הוסף קורס" → מודאל יצירה
+  - כפתור עריכה → מודאל עריכה (pre-filled)
+  - כפתור מחיקה → דיאלוג אישור עם אזהרה
+  - טפסים עם: שם, תיאור, URL תמונה, checkbox פרסום
+  - Badge component לסטטוס
+- [x] **Admin Students** (`app/admin/students/page.tsx`) - ניהול סטודנטים
+  - טבלת סטודנטים: שם, אימייל, קורסים רשומים, התקדמות, פעילות אחרונה
+  - חיפוש לפי שם או אימייל
+  - לחיצה על שורה → פאנל פרטים בצד (detail panel)
+  - פאנל פרטים: אווטאר, סטטיסטיקות, תאריך הצטרפות, קורסים עם progress
+  - ProgressBar ו-Badge components
+- [x] **Convex Admin Module** (`convex/admin.ts`) - Backend functions
+  - `listAllCourses` - כל הקורסים (כולל לא מפורסמים)
+  - `getEnrollmentCount` - ספירת רשומים לקורס
+  - `getStats` - סטטיסטיקות כלליות (סטודנטים, קורסים, הרשמות, תעודות, ממוצעים)
+  - `getRecentActivity` - 10 פעילויות אחרונות (הרשמות + תעודות)
+  - `listStudents` - סטודנטים עם נתוני הרשמות והתקדמות
+  - `createCourse` - יצירת קורס חדש
+  - `updateCourse` - עדכון קורס קיים
+  - `deleteCourse` - מחיקת קורס + כל הנתונים הקשורים (cascading delete)
+- [x] **Updated `_generated/api.d.ts`** - הוספת admin module ל-API types
+
 ## צעדים הבאים
 1. **הגדרת Environment Variables** - Clerk keys + Convex URL ב-.env.local
 2. **הפעלת `npx convex dev`** - ליצור _generated types אמיתיים ולסנכרן schema
 3. **הרצת seed** - לאחר חיבור Convex, ללחוץ על כפתור "צור נתוני דוגמה" בדשבורד
 4. **Phase 2 Remaining:** Video player עם מעקב זמן צפייה
 5. **Phase 2 Remaining:** Continue where left off - מעבר אוטומטי לשיעור האחרון
-6. **Phase 3: Admin panel** - ניהול קורסים, שיעורים, ובחנים
-7. **Phase 3: User management** - ניהול משתמשים ותפקידים
-8. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
+6. **Phase 3 Remaining:** ניהול שיעורים (CRUD) בתוך כל קורס
+7. **Phase 3 Remaining:** ניהול בחנים (CRUD) - יצירת/עריכת בחנים ושאלות
+8. **Phase 3 Remaining:** Role-based access - בדיקת role=admin לפני גישה לפאנל
+9. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
+10. **`next build` requires valid Clerk keys** - Build fails without real `.env.local`
 
 ## החלטות שהתקבלו
 - npm (לא bun) - כמתועד ב-CLAUDE.md, bun לא עובד במערכת זו
@@ -76,6 +114,9 @@
 - Certificate threshold: 80% השלמת קורס
 - Certificate number format: HD-{timestamp_base36}-{random_4chars}
 - SVG icons inline (ללא תלות חיצונית ב-icon library)
+- Admin pages use mock data with Convex fallback (no env vars required for development)
+- Admin sidebar: fixed on desktop, drawer with overlay on mobile
+- deleteCourse performs cascading delete (enrollments, progress, quizzes, questions, attempts, lessons, certificates)
 
 ## קבצים שנערכו/נוצרו (סשן 2026-02-15)
 
@@ -108,6 +149,21 @@
 - `src/middleware.ts` - UPDATED: added /certificates to protected routes
 - `PROGRESS.md` - UPDATED
 
+## קבצים שנערכו/נוצרו (סשן 2026-02-17 - Phase 3 Admin)
+
+### Convex Backend:
+- `convex/admin.ts` - NEW: Admin queries + mutations (listAllCourses, getStats, getRecentActivity, listStudents, createCourse, updateCourse, deleteCourse)
+- `convex/_generated/api.d.ts` - UPDATED: added admin module import + type
+
+### Admin Pages (חדש):
+- `src/app/admin/layout.tsx` - NEW: Admin layout with sidebar navigation (desktop fixed + mobile drawer)
+- `src/app/admin/page.tsx` - NEW: Admin dashboard with stats cards + recent activity list
+- `src/app/admin/courses/page.tsx` - NEW: Courses table with create/edit modal + delete confirmation
+- `src/app/admin/students/page.tsx` - NEW: Students table with search + detail panel
+
+### Other:
+- `PROGRESS.md` - UPDATED
+
 ## קורסי דוגמה (Seed Data)
 ### קורס 1: אומנות ההקשבה (6 שיעורים + בוחן)
 ### קורס 2: תקשורת זוגית מתקדמת (5 שיעורים + בוחן)
@@ -116,6 +172,7 @@
 כל בוחן מכיל 3 שאלות רב-ברירה עם הסברים, ציון מעבר 60%.
 
 ## Git History
+- `b6f1404` - feat: add quizzes, certificates, progress tracking, and enrollment system
 - `1bfdf14` - feat: add seed data with 3 Hebrew courses and improve dashboard UI
 - `3136da2` - fix: configure Convex + Clerk auth integration and project setup
 - `ef57d26` - feat: add complete learning platform foundation with courses, lessons, auth, and dashboard
@@ -132,4 +189,7 @@
 - כלי ה-seed זמין בדשבורד רק במצב פיתוח (NODE_ENV=development)
 - לאחר `npx convex dev` - ניתן להפעיל seed מהדשבורד
 - בחנים נוצרים רק לשיעור הראשון של כל קורס (ניתן להוסיף עוד דרך admin panel)
-- Phase 3 (Admin) עדיין לא התחיל - דורש UI לניהול קורסים, שיעורים ובחנים
+- `next build` דורש .env.local עם Clerk keys תקינים (pre-existing issue)
+- Admin pages עובדים עם mock data כשאין Convex backend
+- Admin panel נגיש רק למשתמשים מחוברים (middleware)
+- בעתיד: יש להוסיף בדיקת role=admin בכל עמודי ה-admin

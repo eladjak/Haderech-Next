@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type { Id } from "./dataModel.js";
 
+import type * as admin from "../admin.js";
 import type * as certificates from "../certificates.js";
 import type * as courses from "../courses.js";
 import type * as enrollments from "../enrollments.js";
@@ -33,6 +34,7 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
   certificates: typeof certificates;
   courses: typeof courses;
   enrollments: typeof enrollments;
