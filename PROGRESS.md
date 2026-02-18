@@ -4,7 +4,45 @@
 ## עדכון אחרון: 2026-02-18
 
 ## מצב נוכחי
-Phase 1-7 הושלמו. Convex + Clerk מחוברים. **Phase 7:** Student Progress Dashboard - דשבורד התקדמות מקיף עם Continue Learning (שיעור הבא ספציפי), הישגים/תגים, תעודות, ציוני בחנים. TypeScript עובר, 32 בדיקות עוברות.
+Phase 1-8 הושלמו. Convex + Clerk מחוברים. **Phase 8:** Admin Panel Enhancement - AdminSidebar component extracted, admin utility functions module, admin analytics page, 36 new admin tests. TypeScript עובר, 68 בדיקות עוברות, 20 עמודים.
+
+## מה בוצע - Phase 8 Admin Panel Enhancement (סשן 2026-02-18)
+- [x] **AdminSidebar Component** (`src/components/admin/AdminSidebar.tsx`) - NEW: Extracted sidebar navigation
+  - Reusable component with isOpen/onClose props
+  - 4 navigation items: דשבורד, קורסים, סטודנטים, אנליטיקס (new)
+  - Mobile drawer with overlay + desktop fixed sidebar
+  - Active state highlighting based on pathname
+  - "חזרה לאתר" link in footer
+- [x] **Admin Layout Refactored** (`src/app/admin/layout.tsx`) - UPDATED: Uses extracted AdminSidebar
+  - Replaced inline 200+ line sidebar with AdminSidebar component import
+  - Same functionality, cleaner architecture
+- [x] **Admin Analytics Page** (`src/app/admin/analytics/page.tsx`) - NEW: Analytics dashboard
+  - 4 KPI cards: enrollment ratio, certificate rate, average score, completion rate
+  - Weekly activity bar chart (SVG/CSS, no external libraries)
+  - Course breakdown with progress bars and stats
+  - Top students table with ranking, progress bars, last active times
+  - Uses admin-utils functions (enrollmentRatio, certificateRate, formatRelativeTime)
+  - Mock data with Convex fallback
+- [x] **Admin Utils Module** (`src/lib/admin-utils.ts`) - NEW: Pure testable utility functions
+  - Time formatting: formatRelativeTime, formatShortRelativeTime, formatDate
+  - Student operations: filterStudents, sortStudentsByProgress, findAtRiskStudents
+  - Stats calculations: enrollmentRatio, certificateRate, countCoursesByStatus, countActivitiesByType
+  - Display helpers: getStudentInitial
+  - TypeScript interfaces: AdminStats, StudentRecord, CourseRecord, ActivityRecord
+- [x] **Admin Tests** (`src/__tests__/admin-utils.test.ts`) - NEW: 36 tests across 11 test suites
+  - formatRelativeTime: 5 tests (now, minutes, hours, days, exact)
+  - formatShortRelativeTime: 5 tests (short notation, week fallback)
+  - filterStudents: 6 tests (empty, name, email, case-insensitive, no match, null name)
+  - sortStudentsByProgress: 3 tests (order, immutability, empty)
+  - findAtRiskStudents: 3 tests (below threshold, none, all)
+  - enrollmentRatio: 3 tests (normal, zero students, equal)
+  - certificateRate: 3 tests (normal, zero enrollments, 100%)
+  - countCoursesByStatus: 3 tests (mixed, empty, all published)
+  - countActivitiesByType: 2 tests (mixed, empty)
+  - getStudentInitial: 3 tests (Hebrew name, null name fallback, latin uppercase)
+- [x] **TypeScript** - עובר ללא שגיאות
+- [x] **Build** - `next build` עובר בהצלחה (20 עמודים)
+- [x] **Tests** - 68 בדיקות עוברות (32 existing + 36 new)
 
 ## מה בוצע - Phase 7 Student Progress Dashboard (סשן 2026-02-18)
 - [x] **Student Progress Dashboard** (`src/app/student/dashboard/page.tsx`) - דף מעקב התקדמות מקיף
