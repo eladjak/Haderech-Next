@@ -247,6 +247,164 @@ export const getLearningStreak = query({
   },
 });
 
+// Get next uncompleted lesson for a user in a specific course
+export const getNextLesson = query({
+  args: {
+    userId: v.id("users"),
+    courseId: v.id("courses"),
+  },
+  handler: async (ctx, args) => {
+    // Get all published lessons for this course, ordered by their order field
+    const lessons = await ctx.db
+      .query("lessons")
+      .withIndex("by_course_order", (q) => q.eq("courseId", args.courseId))
+      .order("asc")
+      .collect();
+
+    const publishedLessons = lessons.filter((l) => l.published);
+    if (publishedLessons.length === 0) return null;
+
+    // Get user progress for this course
+    const progress = await ctx.db
+      .query("progress")
+      .withIndex("by_user_course", (q) =>
+        q.eq("userId", args.userId).eq("courseId", args.courseId)
+      )
+      .collect();
+
+    const completedLessonIds = new Set(
+      progress.filter((p) => p.completed).map((p) => p.lessonId)
+    );
+
+    // Find the first uncompleted lesson
+    const nextLesson = publishedLessons.find(
+      (l) => !completedLessonIds.has(l._id)
+    );
+
+    if (!nextLesson) return null;
+
+    // Find the lesson number (1-based index among published lessons)
+    const lessonNumber =
+      publishedLessons.findIndex((l) => l._id === nextLesson._id) + 1;
+
+    return {
+      lessonId: nextLesson._id,
+      lessonTitle: nextLesson.title,
+      lessonNumber,
+      totalLessons: publishedLessons.length,
+    };
+  },
+});
+
+// Get the "continue learning" data for all enrolled courses
+// Returns the best course to continue + next lesson info
+export const getContinueLearningData = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const enrollments = await ctx.db
+      .query("enrollments")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    if (enrollments.length === 0) return null;
+
+    const coursesWithNextLesson = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const course = await ctx.db.get(enrollment.courseId);
+        if (!course) return null;
+
+        const lessons = await ctx.db
+          .query("lessons")
+          .withIndex("by_course_order", (q) =>
+            q.eq("courseId", enrollment.courseId)
+          )
+          .order("asc")
+          .collect();
+
+        const publishedLessons = lessons.filter((l) => l.published);
+        if (publishedLessons.length === 0) return null;
+
+        const progress = await ctx.db
+          .query("progress")
+          .withIndex("by_user_course", (q) =>
+            q.eq("userId", args.userId).eq("courseId", enrollment.courseId)
+          )
+          .collect();
+
+        const completedLessonIds = new Set(
+          progress.filter((p) => p.completed).map((p) => p.lessonId)
+        );
+
+        const completedCount = completedLessonIds.size;
+        const completionPercent =
+          publishedLessons.length > 0
+            ? Math.round((completedCount / publishedLessons.length) * 100)
+            : 0;
+
+        // All done? skip
+        if (completionPercent === 100) return null;
+
+        // Find next lesson
+        const nextLesson = publishedLessons.find(
+          (l) => !completedLessonIds.has(l._id)
+        );
+
+        if (!nextLesson) return null;
+
+        const lessonNumber =
+          publishedLessons.findIndex((l) => l._id === nextLesson._id) + 1;
+
+        // Find last activity time for sorting
+        const lastActivity =
+          progress.length > 0
+            ? Math.max(...progress.map((p) => p.lastWatchedAt))
+            : enrollment.enrolledAt;
+
+        return {
+          courseId: enrollment.courseId,
+          courseTitle: course.title,
+          courseImage: course.imageUrl ?? null,
+          completedLessons: completedCount,
+          totalLessons: publishedLessons.length,
+          completionPercent,
+          nextLessonId: nextLesson._id,
+          nextLessonTitle: nextLesson.title,
+          nextLessonNumber: lessonNumber,
+          lastActivity,
+          enrolledAt: enrollment.enrolledAt,
+        };
+      })
+    );
+
+    const validCourses = coursesWithNextLesson.filter(
+      (c): c is NonNullable<typeof c> => c !== null
+    );
+
+    if (validCourses.length === 0) return null;
+
+    // Prefer in-progress over not-started, sorted by last activity
+    const inProgress = validCourses
+      .filter((c) => c.completedLessons > 0)
+      .sort((a, b) => b.lastActivity - a.lastActivity);
+
+    const notStarted = validCourses
+      .filter((c) => c.completedLessons === 0)
+      .sort((a, b) => b.enrolledAt - a.enrolledAt);
+
+    const primaryCourse =
+      inProgress.length > 0 ? inProgress[0] : notStarted[0];
+
+    return {
+      primary: primaryCourse,
+      otherCourses: validCourses
+        .filter((c) => c.courseId !== primaryCourse.courseId)
+        .slice(0, 3),
+    };
+  },
+});
+
 // הישגים / תגים
 export const getAchievements = query({
   args: {

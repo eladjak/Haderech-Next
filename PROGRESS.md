@@ -4,7 +4,43 @@
 ## עדכון אחרון: 2026-02-18
 
 ## מצב נוכחי
-Phase 1-6 הושלמו. Convex + Clerk מחוברים. **Phase 6:** Course Progress Tracker, Enhanced Dashboard, Unit Tests (Vitest). TypeScript עובר, 21 בדיקות עוברות.
+Phase 1-7 הושלמו. Convex + Clerk מחוברים. **Phase 7:** Student Progress Dashboard - דשבורד התקדמות מקיף עם Continue Learning (שיעור הבא ספציפי), הישגים/תגים, תעודות, ציוני בחנים. TypeScript עובר, 32 בדיקות עוברות.
+
+## מה בוצע - Phase 7 Student Progress Dashboard (סשן 2026-02-18)
+- [x] **Student Progress Dashboard** (`src/app/student/dashboard/page.tsx`) - דף מעקב התקדמות מקיף
+  - 4 כרטיסי סטטיסטיקות: קורסים רשומים, שיעורים הושלמו, ציון ממוצע, תעודות
+  - Continue Learning section - מציג את השיעור הבא הספציפי שלא הושלם
+  - Progress bars לכל קורס עם ציוני בוחן (מיטבי וממוצע)
+  - Achievements section - כל 12 ההישגים (earned/locked) עם progress bar כולל
+  - Certificates section - תצוגת כל התעודות עם תאריך ומספר
+  - StreakDisplay - רצף למידה יומי עם ויזואליזציה שבועית
+  - Quiz scores table - 5 ציונים אחרונים עם עיצוב passed/failed
+  - Quick nav links - אנליטיקס, לוח מובילים, פרופיל, קטלוג קורסים
+  - Empty state + Loading skeleton
+  - Breadcrumb navigation
+  - XP level badge בכותרת
+- [x] **Convex Analytics - New Queries** (`convex/analytics.ts`)
+  - `getNextLesson` - מציאת השיעור הבא שלא הושלם בקורס ספציפי
+  - `getContinueLearningData` - נתוני "המשך ללמוד" לכל הקורסים הרשומים עם זיהוי שיעור הבא
+    - מחזיר primary course (in-progress > not-started, sorted by last activity) + other courses
+    - כולל: nextLessonId, nextLessonTitle, nextLessonNumber
+- [x] **Enhanced Main Dashboard** (`src/app/dashboard/page.tsx`)
+  - ContinueLearningCardEnhanced - כרטיס "המשך מאיפה שעצרת" עם שם השיעור הבא הספציפי
+  - לינק ישיר לשיעור הבא (לא רק לקורס)
+  - כפתור prominent "מעקב התקדמות מלא" שמקשר לדשבורד החדש
+  - Fallback ל-ContinueLearningCard הישן אם אין נתונים מורחבים
+- [x] **Header Navigation** (`src/components/layout/header.tsx`)
+  - הוספת לינק "מעקב התקדמות" בניווט desktop ו-mobile
+- [x] **Progress Utils - New Functions** (`src/lib/progress-utils.ts`)
+  - `sortByCompletion` - מיון קורסים לפי אחוז השלמה (ascending)
+  - `averageScore` - חישוב ממוצע ציונים מעוגל
+  - `computeLevel` - חישוב רמה מ-XP עם progress percent
+- [x] **New Tests** (`src/__tests__/progress-utils.test.ts`)
+  - 11 בדיקות חדשות (סה"כ 32): sortByCompletion, averageScore, computeLevel
+  - כיסוי מלא של כל הפונקציות החדשות
+- [x] **TypeScript** - עובר ללא שגיאות
+- [x] **Build** - `next build` עובר בהצלחה (19 עמודים)
+- [x] **Tests** - 32 בדיקות עוברות
 
 ## מה בוצע - Phase 6 Progress Tracker + Dashboard (סשן 2026-02-18)
 - [x] **CourseProgressTracker component** (`src/components/course/course-progress-tracker.tsx`)

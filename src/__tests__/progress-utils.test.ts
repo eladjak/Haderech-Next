@@ -6,6 +6,9 @@ import {
   pickContinueCourse,
   clampPercent,
   totalCompletedLessons,
+  sortByCompletion,
+  averageScore,
+  computeLevel,
   type SectionProgressInput,
 } from "@/lib/progress-utils";
 
@@ -200,5 +203,83 @@ describe("totalCompletedLessons", () => {
       makeCourse({ courseId: "c3", completedLessons: 0 }),
     ];
     expect(totalCompletedLessons(sections)).toBe(10);
+  });
+});
+
+// ─── sortByCompletion ────────────────────────────────────────────────────────
+
+describe("sortByCompletion", () => {
+  it("returns empty array for empty input", () => {
+    expect(sortByCompletion([])).toEqual([]);
+  });
+
+  it("sorts sections ascending by completionPercent", () => {
+    const a = makeCourse({ courseId: "a", completionPercent: 80 });
+    const b = makeCourse({ courseId: "b", completionPercent: 20 });
+    const c = makeCourse({ courseId: "c", completionPercent: 50 });
+    const result = sortByCompletion([a, b, c]);
+    expect(result.map((s) => s.courseId)).toEqual(["b", "c", "a"]);
+  });
+
+  it("does not mutate the original array", () => {
+    const original = [
+      makeCourse({ courseId: "x", completionPercent: 90 }),
+      makeCourse({ courseId: "y", completionPercent: 10 }),
+    ];
+    const originalCopy = [...original];
+    sortByCompletion(original);
+    expect(original).toEqual(originalCopy);
+  });
+});
+
+// ─── averageScore ────────────────────────────────────────────────────────────
+
+describe("averageScore", () => {
+  it("returns 0 for empty array", () => {
+    expect(averageScore([])).toBe(0);
+  });
+
+  it("returns the score for a single element", () => {
+    expect(averageScore([75])).toBe(75);
+  });
+
+  it("returns the rounded average for multiple scores", () => {
+    expect(averageScore([80, 90, 70])).toBe(80);
+    expect(averageScore([33, 67])).toBe(50);
+  });
+
+  it("rounds to nearest integer", () => {
+    expect(averageScore([33, 34])).toBe(34); // 33.5 rounds to 34
+  });
+});
+
+// ─── computeLevel ────────────────────────────────────────────────────────────
+
+describe("computeLevel", () => {
+  it("returns level 1 for 0 XP", () => {
+    const result = computeLevel(0);
+    expect(result.level).toBe(1);
+    expect(result.progressPercent).toBe(0);
+  });
+
+  it("returns correct level for small XP", () => {
+    // 25 XP → sqrt(1) = 1 → level 2
+    const result = computeLevel(25);
+    expect(result.level).toBe(2);
+  });
+
+  it("returns correct level for 100 XP", () => {
+    // 100 XP → sqrt(4) = 2 → level 3
+    const result = computeLevel(100);
+    expect(result.level).toBe(3);
+  });
+
+  it("returns progress toward next level", () => {
+    // At level 1: need 0-25 XP. With 12 XP → 12/25 = 48%
+    const result = computeLevel(12);
+    expect(result.level).toBe(1);
+    expect(result.xpInCurrentLevel).toBe(12);
+    expect(result.xpNeededForNextLevel).toBe(25);
+    expect(result.progressPercent).toBe(48);
   });
 });

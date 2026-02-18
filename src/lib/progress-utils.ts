@@ -77,3 +77,51 @@ export function totalCompletedLessons(
 ): number {
   return sections.reduce((sum, s) => sum + s.completedLessons, 0);
 }
+
+/**
+ * Returns sections sorted by completion percent (ascending), so the
+ * most "behind" courses come first. Useful for showing priority courses.
+ */
+export function sortByCompletion(
+  sections: SectionProgressInput[]
+): SectionProgressInput[] {
+  return [...sections].sort(
+    (a, b) => a.completionPercent - b.completionPercent
+  );
+}
+
+/**
+ * Computes the average quiz score from an array of scores.
+ * Returns 0 for empty input.
+ */
+export function averageScore(scores: number[]): number {
+  if (scores.length === 0) return 0;
+  return Math.round(scores.reduce((sum, s) => sum + s, 0) / scores.length);
+}
+
+/**
+ * Computes XP level from total XP using the formula: floor(sqrt(XP/25)) + 1.
+ * Returns { level, progressPercent } for display.
+ */
+export function computeLevel(totalXP: number): {
+  level: number;
+  progressPercent: number;
+  xpInCurrentLevel: number;
+  xpNeededForNextLevel: number;
+} {
+  const level = Math.floor(Math.sqrt(totalXP / 25)) + 1;
+  const xpForCurrentLevel = Math.pow(level - 1, 2) * 25;
+  const xpForNextLevel = Math.pow(level, 2) * 25;
+  const xpInCurrentLevel = totalXP - xpForCurrentLevel;
+  const xpNeededForNextLevel = xpForNextLevel - xpForCurrentLevel;
+
+  return {
+    level,
+    progressPercent:
+      xpNeededForNextLevel > 0
+        ? Math.round((xpInCurrentLevel / xpNeededForNextLevel) * 100)
+        : 100,
+    xpInCurrentLevel,
+    xpNeededForNextLevel,
+  };
+}

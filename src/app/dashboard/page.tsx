@@ -62,6 +62,12 @@ export default function DashboardPage() {
   const currentStreak = streak?.currentStreak ?? 0;
   const earnedAchievements = achievements?.filter((a) => a.earned) ?? [];
 
+  // Continue learning with next-lesson resolution
+  const continueData = useQuery(
+    api.analytics.getContinueLearningData,
+    convexUser?._id ? { userId: convexUser._id } : "skip"
+  );
+
   // "Continue where you left off" - find the most recently active enrolled course
   const lastActiveCourse =
     courseProgress && courseProgress.length > 0
@@ -127,12 +133,72 @@ export default function DashboardPage() {
           />
         </div>
 
+        {/* Progress Dashboard Link */}
+        {enrolledCount > 0 && (
+          <div className="mt-8">
+            <Link
+              href="/student/dashboard"
+              className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50 p-4 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50"
+            >
+              <div className="flex items-center gap-3">
+                <svg
+                  className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
+                  />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                    מעקב התקדמות מלא
+                  </p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    קורסים, הישגים, תעודות וציוני בחנים במקום אחד
+                  </p>
+                </div>
+              </div>
+              <svg
+                className="h-5 w-5 text-zinc-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                />
+              </svg>
+            </Link>
+          </div>
+        )}
+
         {/* "Continue where you left off" + Streak + Achievements row */}
         {enrolledCount > 0 && (
           <div className="mt-8 grid gap-6 lg:grid-cols-3">
             {/* Continue card */}
             <div className="lg:col-span-2">
-              {continueCourse ? (
+              {continueData?.primary ? (
+                <ContinueLearningCardEnhanced
+                  courseId={continueData.primary.courseId}
+                  courseTitle={continueData.primary.courseTitle}
+                  completionPercent={continueData.primary.completionPercent}
+                  completedLessons={continueData.primary.completedLessons}
+                  totalLessons={continueData.primary.totalLessons}
+                  nextLessonId={continueData.primary.nextLessonId}
+                  nextLessonTitle={continueData.primary.nextLessonTitle}
+                  nextLessonNumber={continueData.primary.nextLessonNumber}
+                />
+              ) : continueCourse ? (
                 <ContinueLearningCard
                   courseId={continueCourse.courseId}
                   courseTitle={continueCourse.courseTitle}
@@ -371,6 +437,109 @@ function DashboardCard({
   }
 
   return content;
+}
+
+function ContinueLearningCardEnhanced({
+  courseId,
+  courseTitle,
+  completionPercent,
+  completedLessons,
+  totalLessons,
+  nextLessonId,
+  nextLessonTitle,
+  nextLessonNumber,
+}: {
+  courseId: string;
+  courseTitle: string;
+  completionPercent: number;
+  completedLessons: number;
+  totalLessons: number;
+  nextLessonId: string;
+  nextLessonTitle: string;
+  nextLessonNumber: number;
+}) {
+  return (
+    <div className="rounded-2xl bg-emerald-50 p-6 dark:bg-emerald-950/30">
+      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+        המשך מאיפה שעצרת
+      </p>
+      <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">
+        {courseTitle}
+      </h3>
+
+      {/* Next lesson highlight */}
+      <div className="mb-3 flex items-center gap-2 rounded-xl bg-white/60 px-3 py-2 dark:bg-zinc-800/40">
+        <svg
+          className="h-4 w-4 shrink-0 text-emerald-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+          />
+        </svg>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            שיעור הבא ({nextLessonNumber} מתוך {totalLessons})
+          </p>
+          <p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+            {nextLessonTitle}
+          </p>
+        </div>
+      </div>
+
+      {/* Mini progress bar */}
+      <div className="mb-2">
+        <div className="mb-1 flex justify-between text-sm">
+          <span className="text-zinc-600 dark:text-zinc-400">
+            {completedLessons} מתוך {totalLessons} שיעורים
+          </span>
+          <span className="font-medium text-zinc-900 dark:text-white">
+            {completionPercent}%
+          </span>
+        </div>
+        <div
+          className="h-2 w-full overflow-hidden rounded-full bg-emerald-200 dark:bg-emerald-900"
+          role="progressbar"
+          aria-valuenow={completionPercent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`התקדמות: ${completionPercent}%`}
+        >
+          <div
+            className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
+            style={{ width: `${completionPercent}%` }}
+          />
+        </div>
+      </div>
+
+      <Link
+        href={`/course/${courseId}/lesson/${nextLessonId}`}
+        className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600"
+      >
+        <svg
+          className="h-3.5 w-3.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
+          />
+        </svg>
+        המשך ללמוד
+      </Link>
+    </div>
+  );
 }
 
 function ContinueLearningCard({
