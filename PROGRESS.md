@@ -4,7 +4,30 @@
 ## עדכון אחרון: 2026-02-18
 
 ## מצב נוכחי
-מערכת הלימודים בפיתוח מתקדם. Phase 1-4 הושלמו. Phase 5 הושלם: מערכת Gamification עם לוח מובילים (XP-based), 12 סוגי תגי הישגים עם SVG icons, מערכת streak יומי עם ויזואליזציה שבועית, שיתוף תעודות ברשתות חברתיות (WhatsApp/Twitter/LinkedIn) עם OG image generation, ודף פרופיל סטודנט מלא עם כל הנתונים. TypeScript מתקמפל ללא שגיאות.
+Phase 1-6 הושלמו. Convex + Clerk מחוברים. **Phase 6:** Course Progress Tracker, Enhanced Dashboard, Unit Tests (Vitest). TypeScript עובר, 21 בדיקות עוברות.
+
+## מה בוצע - Phase 6 Progress Tracker + Dashboard (סשן 2026-02-18)
+- [x] **CourseProgressTracker component** (`src/components/course/course-progress-tracker.tsx`)
+  - SVG progress ring לאחוז השלמה כולל
+  - פירוט שיעורים per-section עם progress bars אופקיים
+  - כוכב זהב לקורסים עם תעודה
+  - קישור לכל קורס
+  - תמיכה במצב ריק (אין קורסים)
+- [x] **Enhanced Student Dashboard** (`src/app/dashboard/page.tsx`)
+  - 4 כרטיסי Quick Stats: קורסים רשומים, שיעורים הושלמו, ציון ממוצע, תעודות
+  - "המשך מאיפה שעצרת" - ContinueLearningCard עם progress bar וכפתור המשך
+  - StreakCard - מונה streak יומי עם הודעת מוטיבציה ולינק לאנליטיקס
+  - AchievementsSummaryCard - תצוגת אימוג'י של הישגים שהושגו
+  - CourseProgressTracker מוטמע ישירות בדשבורד
+  - CourseCards מוצגים עם progressPercent מעודכן
+- [x] **Progress Utils** (`src/lib/progress-utils.ts`)
+  - פונקציות לוגיקה טהורות: calcOverallPercent, countCertificates, streakMessage, pickContinueCourse, clampPercent, totalCompletedLessons
+- [x] **Vitest Test Suite** (`src/__tests__/progress-utils.test.ts`)
+  - 21 בדיקות יחידה ב-6 test suites
+  - כיסוי מלא של כל פונקציות ה-utils
+  - TypeScript + jsdom environment
+- [x] **Vitest Configuration** (`vitest.config.ts`) - הגדרת Vitest עם React plugin
+- [x] **package.json** - הוספת scripts: test, test:watch + devDependencies: vitest, @testing-library/react, @testing-library/jest-dom, @vitejs/plugin-react, jsdom
 
 ## מה בוצע - Phase 1 Core (הושלם)
 - [x] Landing page (דף נחיתה עם Hero, features, stats, steps, CTA, footer)
@@ -186,10 +209,29 @@
   - Progress bar לרמה הבאה
 - [x] **Updated `_generated/api.d.ts`** - הוספת gamification module
 
+## מה בוצע - Convex + Clerk Integration (סשן 2026-02-18)
+- [x] **Clerk project created** - `becoming-skunk-9` (pk_test_YmVjb21pbmctc2t1bmstOS5jbGVyay5hY2NvdW50cy5kZXYk)
+- [x] **Convex project created** - `haderech-next` (colorless-guanaco-894.convex.cloud)
+- [x] **convex/auth.config.ts** - NEW: Clerk JWT auth provider configuration
+- [x] **.env.local** - NEW: All keys configured (Clerk + Convex)
+- [x] **CLERK_JWT_ISSUER_DOMAIN** - Set in Convex environment variables
+- [x] **Schema deployed** - 9 tables + 21 indexes pushed to Convex
+- [x] **_generated types** - Real types generated (replaced stubs)
+- [x] **TypeScript** - Compiles with zero errors
+- [x] **Build** - `next build` passes successfully (17 pages)
+- [x] **Dev server** - Starts in 3.5s on port 3000
+
+### Convex Dashboard:
+- URL: https://dashboard.convex.dev/d/colorless-guanaco-894
+- Project: https://dashboard.convex.dev/t/elad-ya-akobovitch/haderech-next
+
+### Clerk Dashboard:
+- Issuer: https://becoming-skunk-9.clerk.accounts.dev
+
 ## צעדים הבאים
-1. **הגדרת Environment Variables** - Clerk keys + Convex URL ב-.env.local
-2. **הפעלת `npx convex dev`** - ליצור _generated types אמיתיים ולסנכרן schema
-3. **הרצת seed** - לאחר חיבור Convex, ללחוץ על כפתור "צור נתוני דוגמה" בדשבורד
+1. ~~**הגדרת Environment Variables**~~ ✅ הושלם
+2. ~~**הפעלת `npx convex dev`**~~ ✅ הושלם
+3. **הרצת seed** - להפעיל seed data דרך הדשבורד או `npx convex run seed:seedAll`
 4. **Phase 2 Remaining:** Video player עם מעקב זמן צפייה
 5. **Phase 2 Remaining:** Continue where left off - מעבר אוטומטי לשיעור האחרון
 6. **Phase 3 Remaining:** ניהול שיעורים (CRUD) בתוך כל קורס
@@ -198,7 +240,6 @@
 9. **Phase 6:** Discussion forum / comments on lessons
 10. **Phase 6:** Study groups
 11. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
-12. **`next build` requires valid Clerk keys** - Build fails without real `.env.local`
 
 ## החלטות שהתקבלו
 - npm (לא bun) - כמתועד ב-CLAUDE.md, bun לא עובד במערכת זו
