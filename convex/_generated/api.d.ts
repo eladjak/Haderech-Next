@@ -20,6 +20,7 @@ import type * as analytics from "../analytics.js";
 import type * as certificates from "../certificates.js";
 import type * as courses from "../courses.js";
 import type * as enrollments from "../enrollments.js";
+import type * as gamification from "../gamification.js";
 import type * as lessons from "../lessons.js";
 import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   certificates: typeof certificates;
   courses: typeof courses;
   enrollments: typeof enrollments;
+  gamification: typeof gamification;
   lessons: typeof lessons;
   progress: typeof progress;
   quizResults: typeof quizResults;
