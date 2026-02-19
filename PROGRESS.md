@@ -1,10 +1,25 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
 ## סטטוס: in_progress
-## עדכון אחרון: 2026-02-18
+## עדכון אחרון: 2026-02-19
 
 ## מצב נוכחי
-Phase 1-9 הושלמו. Convex + Clerk מחוברים. **Phase 9:** Admin Lesson & Quiz Management - Full CRUD for lessons and quizzes per course, reorder lessons, quiz creation with questions editor. TypeScript עובר, 81 בדיקות עוברות, 22 עמודים.
+Phase 1-12 הושלמו. Convex + Clerk מחוברים. **Phase 12:** Platform Completeness - קטגוריות ורמות לקורסים, סינון מתקדם, דפי אודות/עזרה/יצירת קשר/הגדרות, פוטר משופר. TypeScript עובר, 124 בדיקות עוברות, 28 עמודים.
+
+## מה בוצע - Phase 12 Platform Completeness (סשן 2026-02-19)
+- [x] **Schema Update** (`convex/schema.ts`) - Added `category`, `level`, `estimatedHours` fields to courses table + `by_category` index
+- [x] **Courses Backend** (`convex/courses.ts`) - Added `listCategories` query, updated `create` + `update` mutations with new fields
+- [x] **Seed Data** (`convex/seed.ts`) - Added category/level/estimatedHours to all 3 courses (תקשורת/זוגיות, beginner/intermediate/advanced)
+- [x] **Courses Page Filters** (`src/app/courses/page.tsx`) - Added category dropdown, level dropdown, "clear filters" button, active filter count
+- [x] **CourseCard Enhanced** (`src/components/course/course-card.tsx`) - Added category tag, colored level badge (green/amber/red), estimated hours display
+- [x] **About Page** (`src/app/about/page.tsx`) - NEW: Mission, values (4 cards), stats, CTA
+- [x] **Help/FAQ Page** (`src/app/help/page.tsx`) - NEW: 15 FAQ items, 5 categories, search, accordion UI
+- [x] **Contact Page** (`src/app/contact/page.tsx`) - NEW: Contact form with name/email/subject/message + success state
+- [x] **Settings Page** (`src/app/settings/page.tsx`) - NEW: Profile info, notification toggles (4), learning preferences (reminder/goal)
+- [x] **Footer Redesigned** (`src/components/layout/footer.tsx`) - 3-column grid: brand, navigation links, info links (about/help/contact)
+- [x] **TypeScript** - עובר ללא שגיאות
+- [x] **Build** - `next build` עובר בהצלחה (28 עמודים, +6 חדשים)
+- [x] **Tests** - 124 בדיקות עוברות
 
 ## מה בוצע - Phase 9 Admin Lesson & Quiz Management (סשן 2026-02-18)
 - [x] **Admin Lessons Page** (`src/app/admin/courses/[courseId]/lessons/page.tsx`) - NEW: Full lesson management
