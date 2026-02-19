@@ -2,6 +2,21 @@
 
 import Link from "next/link";
 
+const LEVEL_LABELS: Record<string, string> = {
+  beginner: "מתחילים",
+  intermediate: "מתקדמים",
+  advanced: "מומחים",
+};
+
+const LEVEL_COLORS: Record<string, string> = {
+  beginner:
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  intermediate:
+    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  advanced:
+    "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+};
+
 interface CourseCardProps {
   id: string;
   title: string;
@@ -11,6 +26,9 @@ interface CourseCardProps {
   totalDuration?: number;
   progressPercent?: number;
   enrolled?: boolean;
+  category?: string;
+  level?: string;
+  estimatedHours?: number;
 }
 
 export function CourseCard({
@@ -22,6 +40,9 @@ export function CourseCard({
   totalDuration,
   progressPercent,
   enrolled,
+  category,
+  level,
+  estimatedHours,
 }: CourseCardProps) {
   return (
     <Link
@@ -57,6 +78,24 @@ export function CourseCard({
       )}
 
       <div className="flex flex-1 flex-col p-5">
+        {/* Tags */}
+        {(category || level) && (
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {category && (
+              <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                {category}
+              </span>
+            )}
+            {level && (
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL_COLORS[level] ?? "bg-zinc-200 text-zinc-600"}`}
+              >
+                {LEVEL_LABELS[level] ?? level}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Title */}
         <h3 className="mb-2 text-lg font-semibold text-zinc-900 group-hover:text-zinc-700 dark:text-white dark:group-hover:text-zinc-200">
           {title}
@@ -105,6 +144,25 @@ export function CourseCard({
                 />
               </svg>
               {formatDuration(totalDuration)}
+            </span>
+          )}
+          {estimatedHours !== undefined && estimatedHours > 0 && (
+            <span className="flex items-center gap-1">
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342"
+                />
+              </svg>
+              {estimatedHours} שעות
             </span>
           )}
           {enrolled && (
