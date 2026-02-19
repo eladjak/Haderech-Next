@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 
 export default function Home() {
   return (
@@ -165,36 +166,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-200 py-8 dark:border-zinc-800">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              &copy; {new Date().getFullYear()} הדרך. כל הזכויות שמורות.
-            </p>
-            <nav className="flex gap-6 text-sm" aria-label="קישורים נוספים">
-              <Link
-                href="/courses"
-                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-              >
-                קורסים
-              </Link>
-              <Link
-                href="/sign-in"
-                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-              >
-                התחברות
-              </Link>
-              <Link
-                href="/sign-up"
-                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-              >
-                הרשמה
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

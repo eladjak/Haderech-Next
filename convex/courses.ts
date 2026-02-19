@@ -13,6 +13,25 @@ export const listPublished = query({
   },
 });
 
+// שליפת כל הקטגוריות הקיימות
+export const listCategories = query({
+  args: {},
+  handler: async (ctx) => {
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_published", (q) => q.eq("published", true))
+      .collect();
+
+    const categories = new Set<string>();
+    for (const course of courses) {
+      if (course.category) {
+        categories.add(course.category);
+      }
+    }
+    return Array.from(categories).sort();
+  },
+});
+
 // שליפת קורס לפי ID
 export const getById = query({
   args: { id: v.id("courses") },
@@ -44,6 +63,15 @@ export const create = mutation({
     title: v.string(),
     description: v.string(),
     imageUrl: v.optional(v.string()),
+    category: v.optional(v.string()),
+    level: v.optional(
+      v.union(
+        v.literal("beginner"),
+        v.literal("intermediate"),
+        v.literal("advanced")
+      )
+    ),
+    estimatedHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
@@ -75,6 +103,15 @@ export const update = mutation({
     description: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     published: v.optional(v.boolean()),
+    category: v.optional(v.string()),
+    level: v.optional(
+      v.union(
+        v.literal("beginner"),
+        v.literal("intermediate"),
+        v.literal("advanced")
+      )
+    ),
+    estimatedHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;

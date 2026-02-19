@@ -4,7 +4,37 @@
 ## עדכון אחרון: 2026-02-18
 
 ## מצב נוכחי
-Phase 1-8 הושלמו. Convex + Clerk מחוברים. **Phase 8:** Admin Panel Enhancement - AdminSidebar component extracted, admin utility functions module, admin analytics page, 36 new admin tests. TypeScript עובר, 68 בדיקות עוברות, 20 עמודים.
+Phase 1-9 הושלמו. Convex + Clerk מחוברים. **Phase 9:** Admin Lesson & Quiz Management - Full CRUD for lessons and quizzes per course, reorder lessons, quiz creation with questions editor. TypeScript עובר, 81 בדיקות עוברות, 22 עמודים.
+
+## מה בוצע - Phase 9 Admin Lesson & Quiz Management (סשן 2026-02-18)
+- [x] **Admin Lessons Page** (`src/app/admin/courses/[courseId]/lessons/page.tsx`) - NEW: Full lesson management
+  - Table with: order number, title, content preview, video indicator, duration, status, reorder, actions
+  - Create modal: title, content (Markdown textarea), video URL, duration (seconds with preview), published checkbox
+  - Edit modal: pre-filled with existing lesson data
+  - Delete confirmation dialog with cascading delete warning
+  - Reorder via up/down arrow buttons (calls adminLessons.reorder)
+  - Mock data fallback when Convex is not connected
+  - Breadcrumb navigation back to courses list
+- [x] **Admin Quizzes Page** (`src/app/admin/courses/[courseId]/quizzes/page.tsx`) - NEW: Full quiz management
+  - Table with: quiz title, associated lesson, question count, passing score, actions
+  - Create modal: title, lesson selector (dropdown), passing score, multi-question editor
+  - Question editor: question text, 4 radio options with correct answer selector, explanation field
+  - Add/remove questions dynamically
+  - Edit modal: update title and passing score
+  - Delete confirmation dialog
+  - Mock data fallback
+- [x] **Courses Table Enhanced** (`src/app/admin/courses/page.tsx`) - UPDATED
+  - Added "שיעורים" icon link to lesson management per course
+  - Added "בחנים" icon link to quiz management per course
+  - Now has 4 action buttons: lessons, quizzes, edit, delete
+- [x] **Convex adminLessons Module** (`convex/adminLessons.ts`) - FIXED: Bug in remove function (duplicate quizAttempts query)
+- [x] **Convex adminQuizzes Module** (`convex/adminQuizzes.ts`) - Already existed, registered in api.d.ts
+- [x] **API Types** (`convex/_generated/api.d.ts`) - UPDATED: Added adminLessons + adminQuizzes modules
+- [x] **Admin Utils** (`src/lib/admin-utils.ts`) - UPDATED: Added formatDuration, truncateText, countLessonsByStatus, LessonRecord type
+- [x] **Admin Tests** (`src/__tests__/admin-utils.test.ts`) - UPDATED: Added 13 new tests (formatDuration: 6, truncateText: 4, countLessonsByStatus: 3)
+- [x] **TypeScript** - עובר ללא שגיאות
+- [x] **Build** - `next build` עובר בהצלחה (22 עמודים)
+- [x] **Tests** - 81 בדיקות עוברות (49 admin + 32 progress)
 
 ## מה בוצע - Phase 8 Admin Panel Enhancement (סשן 2026-02-18)
 - [x] **AdminSidebar Component** (`src/components/admin/AdminSidebar.tsx`) - NEW: Extracted sidebar navigation
@@ -307,13 +337,12 @@ Phase 1-8 הושלמו. Convex + Clerk מחוברים. **Phase 8:** Admin Panel 
 2. ~~**הפעלת `npx convex dev`**~~ ✅ הושלם
 3. **הרצת seed** - להפעיל seed data דרך הדשבורד או `npx convex run seed:seedAll`
 4. **Phase 2 Remaining:** Video player עם מעקב זמן צפייה
-5. **Phase 2 Remaining:** Continue where left off - מעבר אוטומטי לשיעור האחרון
-6. **Phase 3 Remaining:** ניהול שיעורים (CRUD) בתוך כל קורס
-7. **Phase 3 Remaining:** ניהול בחנים (CRUD) - יצירת/עריכת בחנים ושאלות
-8. **Phase 3 Remaining:** Role-based access - בדיקת role=admin לפני גישה לפאנל
-9. **Phase 6:** Discussion forum / comments on lessons
-10. **Phase 6:** Study groups
-11. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
+5. ~~**Phase 3 Remaining:** ניהול שיעורים (CRUD) בתוך כל קורס~~ ✅ Phase 9
+6. ~~**Phase 3 Remaining:** ניהול בחנים (CRUD) - יצירת/עריכת בחנים ושאלות~~ ✅ Phase 9
+7. **Phase 3 Remaining:** Role-based access - בדיקת role=admin לפני גישה לפאנל
+8. **Phase Next:** Discussion forum / comments on lessons
+9. **Phase Next:** Study groups
+10. **Next.js 16 middleware deprecation** - מיגרציה מ-middleware.ts ל-proxy.ts
 
 ## החלטות שהתקבלו
 - npm (לא bun) - כמתועד ב-CLAUDE.md, bun לא עובד במערכת זו

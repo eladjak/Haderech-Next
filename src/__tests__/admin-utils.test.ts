@@ -10,10 +10,14 @@ import {
   countCoursesByStatus,
   countActivitiesByType,
   getStudentInitial,
+  formatDuration,
+  truncateText,
+  countLessonsByStatus,
   type AdminStats,
   type StudentRecord,
   type CourseRecord,
   type ActivityRecord,
+  type LessonRecord,
 } from "@/lib/admin-utils";
 
 // ─── Fixtures ──────────────────────────────────────────────────────────────────
@@ -319,5 +323,103 @@ describe("getStudentInitial", () => {
 
   it("uppercases latin characters", () => {
     expect(getStudentInitial({ name: "alice", email: "a@x.com" })).toBe("A");
+  });
+});
+
+// ─── formatDuration ──────────────────────────────────────────────────────────
+
+describe("formatDuration", () => {
+  it("formats 0 seconds as 0:00", () => {
+    expect(formatDuration(0)).toBe("0:00");
+  });
+
+  it("formats undefined as 0:00", () => {
+    expect(formatDuration(undefined)).toBe("0:00");
+  });
+
+  it("formats 90 seconds as 1:30", () => {
+    expect(formatDuration(90)).toBe("1:30");
+  });
+
+  it("formats 480 seconds as 8:00", () => {
+    expect(formatDuration(480)).toBe("8:00");
+  });
+
+  it("formats 3661 seconds as 61:01", () => {
+    expect(formatDuration(3661)).toBe("61:01");
+  });
+
+  it("formats 5 seconds as 0:05", () => {
+    expect(formatDuration(5)).toBe("0:05");
+  });
+});
+
+// ─── truncateText ────────────────────────────────────────────────────────────
+
+describe("truncateText", () => {
+  it("returns empty string for undefined", () => {
+    expect(truncateText(undefined, 10)).toBe("");
+  });
+
+  it("returns full text when shorter than max", () => {
+    expect(truncateText("שלום", 10)).toBe("שלום");
+  });
+
+  it("truncates text and adds ellipsis", () => {
+    const long = "הקשבה אמיתית היא לא רק לשמוע מילים";
+    const result = truncateText(long, 10);
+    expect(result.length).toBe(13); // 10 chars + "..."
+    expect(result.endsWith("...")).toBe(true);
+  });
+
+  it("returns exact text when equal to max length", () => {
+    expect(truncateText("12345", 5)).toBe("12345");
+  });
+});
+
+// ─── countLessonsByStatus ────────────────────────────────────────────────────
+
+const makeLesson = (
+  overrides: Partial<LessonRecord> = {}
+): LessonRecord => ({
+  _id: "l1",
+  courseId: "c1",
+  title: "שיעור",
+  order: 0,
+  published: true,
+  createdAt: NOW,
+  updatedAt: NOW,
+  ...overrides,
+});
+
+describe("countLessonsByStatus", () => {
+  it("counts published and draft lessons", () => {
+    const lessons = [
+      makeLesson({ _id: "l1", published: true }),
+      makeLesson({ _id: "l2", published: true }),
+      makeLesson({ _id: "l3", published: false }),
+    ];
+    expect(countLessonsByStatus(lessons)).toEqual({
+      published: 2,
+      draft: 1,
+    });
+  });
+
+  it("returns zeros for empty array", () => {
+    expect(countLessonsByStatus([])).toEqual({
+      published: 0,
+      draft: 0,
+    });
+  });
+
+  it("handles all published", () => {
+    const lessons = [
+      makeLesson({ _id: "l1", published: true }),
+      makeLesson({ _id: "l2", published: true }),
+    ];
+    expect(countLessonsByStatus(lessons)).toEqual({
+      published: 2,
+      draft: 0,
+    });
   });
 });

@@ -9,6 +9,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,6 +49,12 @@ export function Header() {
               מעקב התקדמות
             </Link>
             <Link
+              href="/student/notes"
+              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+            >
+              הערות
+            </Link>
+            <Link
               href="/certificates"
               className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
             >
@@ -70,6 +77,7 @@ export function Header() {
             </SignUpButton>
           </SignedOut>
           <SignedIn>
+            <NotificationBell />
             <UserButton
               afterSignOutUrl="/"
               appearance={{
@@ -147,6 +155,13 @@ export function Header() {
                 className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
               >
                 מעקב התקדמות
+              </Link>
+              <Link
+                href="/student/notes"
+                onClick={closeMobileMenu}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
+              >
+                הערות
               </Link>
               <Link
                 href="/certificates"

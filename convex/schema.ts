@@ -9,11 +9,21 @@ export default defineSchema({
     imageUrl: v.optional(v.string()),
     published: v.boolean(),
     order: v.number(),
+    category: v.optional(v.string()),
+    level: v.optional(
+      v.union(
+        v.literal("beginner"),
+        v.literal("intermediate"),
+        v.literal("advanced")
+      )
+    ),
+    estimatedHours: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_published", ["published"])
-    .index("by_order", ["order"]),
+    .index("by_order", ["order"])
+    .index("by_category", ["category"]),
 
   // שיעורים
   lessons: defineTable({
@@ -102,6 +112,52 @@ export default defineSchema({
   })
     .index("by_user_quiz", ["userId", "quizId"])
     .index("by_user_course", ["userId", "courseId"]),
+
+  // התראות למשתמשים
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.union(
+      v.literal("achievement"),
+      v.literal("comment_reply"),
+      v.literal("course_update"),
+      v.literal("certificate"),
+      v.literal("quiz_result")
+    ),
+    title: v.string(),
+    message: v.string(),
+    link: v.optional(v.string()), // URL לניווט
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_read", ["userId", "read"]),
+
+  // הערות פרטיות של סטודנטים בשיעורים
+  notes: defineTable({
+    userId: v.id("users"),
+    lessonId: v.id("lessons"),
+    courseId: v.id("courses"),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user_lesson", ["userId", "lessonId"])
+    .index("by_user_course", ["userId", "courseId"])
+    .index("by_user", ["userId"]),
+
+  // תגובות / דיונים בשיעורים
+  comments: defineTable({
+    userId: v.id("users"),
+    lessonId: v.id("lessons"),
+    courseId: v.id("courses"),
+    content: v.string(),
+    parentId: v.optional(v.id("comments")), // לתגובות תשובה (thread)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_lesson", ["lessonId"])
+    .index("by_user", ["userId"])
+    .index("by_parent", ["parentId"]),
 
   // תעודות סיום
   certificates: defineTable({

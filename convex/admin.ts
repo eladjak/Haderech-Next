@@ -1,10 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // שליפת כל הקורסים (כולל לא מפורסמים) - לשימוש admin
 export const listAllCourses = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.db
       .query("courses")
       .withIndex("by_order")
@@ -17,6 +19,7 @@ export const listAllCourses = query({
 export const getEnrollmentCount = query({
   args: { courseId: v.id("courses") },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const enrollments = await ctx.db
       .query("enrollments")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
@@ -29,6 +32,7 @@ export const getEnrollmentCount = query({
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const users = await ctx.db.query("users").collect();
     const courses = await ctx.db.query("courses").collect();
     const enrollments = await ctx.db.query("enrollments").collect();
@@ -67,6 +71,7 @@ export const getStats = query({
 export const getRecentActivity = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const enrollments = await ctx.db.query("enrollments").order("desc").take(10);
     const certificates = await ctx.db
       .query("certificates")
@@ -109,6 +114,7 @@ export const getRecentActivity = query({
 export const listStudents = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const users = await ctx.db.query("users").collect();
     const students = users.filter((u) => u.role === "student");
 
@@ -159,6 +165,7 @@ export const createCourse = mutation({
     published: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const now = Date.now();
 
     const lastCourse = await ctx.db
@@ -191,6 +198,7 @@ export const updateCourse = mutation({
     published: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
 
     const existing = await ctx.db.get(id);
@@ -207,6 +215,7 @@ export const updateCourse = mutation({
 export const deleteCourse = mutation({
   args: { id: v.id("courses") },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const course = await ctx.db.get(args.id);
     if (!course) throw new Error("Course not found");
 
@@ -268,6 +277,15 @@ export const deleteCourse = mutation({
       .collect();
     for (const cert of certificates) {
       await ctx.db.delete(cert._id);
+    }
+
+    // מחיקת תגובות
+    const comments = await ctx.db
+      .query("comments")
+      .filter((q) => q.eq(q.field("courseId"), args.id))
+      .collect();
+    for (const comment of comments) {
+      await ctx.db.delete(comment._id);
     }
 
     // מחיקת הקורס עצמו

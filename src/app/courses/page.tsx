@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { CourseCard } from "@/components/course/course-card";
 
 export default function CoursesPage() {
@@ -135,6 +136,8 @@ export default function CoursesPage() {
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

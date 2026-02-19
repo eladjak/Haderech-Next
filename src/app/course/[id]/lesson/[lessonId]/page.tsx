@@ -9,6 +9,9 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
+import { YouTubePlayer } from "@/components/video/youtube-player";
+import { CommentsSection } from "@/components/lesson/comments-section";
+import { LessonNotes } from "@/components/lesson/lesson-notes";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 // Simple markdown renderer - handles common markdown syntax
@@ -77,22 +80,6 @@ function renderMarkdown(content: string): string {
   html = html.replace(/\n\n/g, "\n");
 
   return html;
-}
-
-// YouTube URL parser
-function extractYouTubeId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
-    /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
-    /(?:youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
-  ];
-
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
 }
 
 export default function LessonPage() {
@@ -215,14 +202,6 @@ export default function LessonPage() {
     );
   }
 
-  // Parse video
-  const youtubeId = lesson.videoUrl
-    ? extractYouTubeId(lesson.videoUrl)
-    : null;
-  const isYouTube = youtubeId !== null;
-  const isDirectVideo =
-    lesson.videoUrl && !isYouTube;
-
   // Render markdown content
   const renderedContent = lesson.content
     ? renderMarkdown(lesson.content)
@@ -282,30 +261,17 @@ export default function LessonPage() {
             {lesson.title}
           </h1>
 
-          {/* Video player */}
-          {isYouTube && (
-            <div className="mb-8 aspect-video overflow-hidden rounded-2xl bg-zinc-900">
-              <iframe
-                src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
-                title={lesson.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="h-full w-full"
+          {/* Video player - with progress tracking */}
+          {lesson.videoUrl && (
+            <div className="mb-8">
+              <YouTubePlayer
+                videoUrl={lesson.videoUrl}
+                lessonTitle={lesson.title}
+                userId={convexUser?._id ?? null}
+                lessonId={lessonId}
+                courseId={courseId}
+                onComplete={handleMarkComplete}
               />
-            </div>
-          )}
-
-          {isDirectVideo && (
-            <div className="mb-8 aspect-video overflow-hidden rounded-2xl bg-zinc-900">
-              <video
-                src={lesson.videoUrl}
-                controls
-                className="h-full w-full"
-                playsInline
-              >
-                <track kind="captions" />
-                הדפדפן שלך לא תומך בוידאו.
-              </video>
             </div>
           )}
 
@@ -362,6 +328,13 @@ export default function LessonPage() {
               </p>
             </div>
           )}
+
+          {/* Student notes */}
+          <LessonNotes
+            lessonId={lessonId}
+            courseId={courseId}
+            userId={convexUser?._id ?? null}
+          />
 
           {/* Lesson duration */}
           {lesson.duration && lesson.duration > 0 && (
@@ -449,6 +422,14 @@ export default function LessonPage() {
               </Link>
             )}
           </nav>
+
+          {/* Discussion / Comments */}
+          <CommentsSection
+            lessonId={lessonId}
+            courseId={courseId}
+            userId={convexUser?._id ?? null}
+            userRole={convexUser?.role}
+          />
 
           {/* Lesson list (collapsible) */}
           <LessonList

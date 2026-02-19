@@ -90,6 +90,51 @@ export function formatDate(timestamp: number): string {
   }).format(new Date(timestamp));
 }
 
+// ─── Lesson Helpers ──────────────────────────────────────────────────────────
+
+export interface LessonRecord {
+  _id: string;
+  courseId: string;
+  title: string;
+  content?: string;
+  videoUrl?: string;
+  duration?: number;
+  order: number;
+  published: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * Formats a duration in seconds to a human-readable Hebrew string.
+ * E.g., 90 -> "1:30", 3600 -> "60:00", 0 -> "0:00".
+ */
+export function formatDuration(seconds: number | undefined): string {
+  if (seconds === undefined || seconds <= 0) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Truncates text to a max length, adding "..." if truncated.
+ */
+export function truncateText(text: string | undefined, maxLength: number): string {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + "...";
+}
+
+/**
+ * Returns the count of published and draft lessons from a list.
+ */
+export function countLessonsByStatus(
+  lessons: LessonRecord[]
+): { published: number; draft: number } {
+  const published = lessons.filter((l) => l.published).length;
+  return { published, draft: lessons.length - published };
+}
+
 // ─── Student Filtering & Sorting ───────────────────────────────────────────────
 
 /**

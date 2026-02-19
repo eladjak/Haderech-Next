@@ -7,6 +7,9 @@ const SEED_COURSES = [
     description:
       "למדו כיצד להקשיב באמת לבן/בת הזוג שלכם. קורס מעשי שיעזור לכם לפתח הקשבה פעילה, להבין את מה שלא נאמר, וליצור תחושת ביטחון וקרבה דרך נוכחות אמיתית בשיחה.",
     imageUrl: undefined,
+    category: "תקשורת",
+    level: "beginner" as const,
+    estimatedHours: 5,
     lessons: [
       {
         title: "מהי הקשבה פעילה?",
@@ -51,6 +54,9 @@ const SEED_COURSES = [
     description:
       "העמיקו את יכולות התקשורת הזוגית שלכם. קורס מקיף שמלמד כלים מתקדמים לניהול שיחות קשות, פתרון קונפליקטים, והעמקת הקשר הרגשי דרך תקשורת פתוחה וכנה.",
     imageUrl: undefined,
+    category: "תקשורת",
+    level: "intermediate" as const,
+    estimatedHours: 6,
     lessons: [
       {
         title: "יסודות התקשורת הזוגית",
@@ -89,6 +95,9 @@ const SEED_COURSES = [
     description:
       "גלו כיצד לבנות ולחזק אינטימיות אמיתית בזוגיות. קורס שמלמד את הסודות של זוגות מאושרים - כיצד לשמור על חיבור רגשי עמוק, ליצור מרחב בטוח, ולטפח קרבה שנמשכת לאורך זמן.",
     imageUrl: undefined,
+    category: "זוגיות",
+    level: "advanced" as const,
+    estimatedHours: 7,
     lessons: [
       {
         title: "מהי אינטימיות אמיתית?",
@@ -154,6 +163,9 @@ export const seedCourses = mutation({
         title: courseData.title,
         description: courseData.description,
         imageUrl: courseData.imageUrl,
+        category: courseData.category,
+        level: courseData.level,
+        estimatedHours: courseData.estimatedHours,
         published: true,
         order: i,
         createdAt: now,
@@ -324,6 +336,9 @@ export const clearAll = internalMutation({
   args: {},
   handler: async (ctx) => {
     const tables = [
+      "notifications",
+      "notes",
+      "comments",
       "quizAttempts",
       "quizQuestions",
       "quizzes",

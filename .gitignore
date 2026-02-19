@@ -35,9 +35,18 @@ yarn-error.log*
 !.env.example
 !.env.local.example
 
+# claude code local config
+.claude/
+
+# screenshots
+screenshot-*.png
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
