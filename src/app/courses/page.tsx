@@ -82,7 +82,7 @@ export default function CoursesPage() {
               placeholder="חפש קורס..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-11 w-full rounded-xl border border-zinc-200 bg-white pr-10 pl-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-600"
+              className="h-11 w-full rounded-xl border border-zinc-200 bg-white pr-10 pl-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-indigo-700 dark:focus:ring-indigo-900/30"
               aria-label="חיפוש קורסים"
             />
           </div>

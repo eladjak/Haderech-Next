@@ -19,60 +19,40 @@ export function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/80">
+    <header className="sticky top-0 z-50 w-full border-b border-indigo-100/60 bg-white/80 glass dark:border-zinc-800 dark:bg-zinc-950/80">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
+            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+          </div>
+          <span className="text-xl font-bold bg-gradient-to-l from-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-violet-400">
             הדרך
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-6 md:flex" aria-label="ניווט ראשי">
-          <Link
-            href="/courses"
-            className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-          >
-            קורסים
-          </Link>
+        <nav className="hidden items-center gap-1 md:flex" aria-label="ניווט ראשי">
+          <NavLink href="/courses">קורסים</NavLink>
           <SignedIn>
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-            >
-              האזור שלי
-            </Link>
-            <Link
-              href="/student/dashboard"
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-            >
-              מעקב התקדמות
-            </Link>
-            <Link
-              href="/student/notes"
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-            >
-              הערות
-            </Link>
-            <Link
-              href="/certificates"
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-            >
-              תעודות
-            </Link>
+            <NavLink href="/dashboard">האזור שלי</NavLink>
+            <NavLink href="/student/dashboard">מעקב התקדמות</NavLink>
+            <NavLink href="/student/notes">הערות</NavLink>
+            <NavLink href="/certificates">תעודות</NavLink>
           </SignedIn>
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="hidden text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 md:inline-flex dark:text-zinc-400 dark:hover:text-white">
+              <button className="hidden rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 hover:bg-zinc-50 md:inline-flex dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800">
                 התחברות
               </button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <button className="hidden rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 md:inline-flex dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100">
-                הרשמה
+              <button className="hidden rounded-lg bg-gradient-to-l from-indigo-600 to-violet-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 md:inline-flex">
+                הרשמה חינמית
               </button>
             </SignUpButton>
           </SignedOut>
@@ -82,7 +62,7 @@ export function Header() {
               afterSignOutUrl="/"
               appearance={{
                 elements: {
-                  avatarBox: "h-9 w-9",
+                  avatarBox: "h-9 w-9 ring-2 ring-indigo-100 dark:ring-zinc-700",
                 },
               }}
             />
@@ -97,30 +77,12 @@ export function Header() {
             aria-label={mobileMenuOpen ? "סגור תפריט" : "פתח תפריט"}
           >
             {mobileMenuOpen ? (
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             ) : (
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="18" x2="21" y2="18" />
@@ -132,54 +94,24 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="border-t border-zinc-200 bg-white px-4 py-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950">
-          <nav className="flex flex-col gap-3">
-            <Link
-              href="/courses"
-              onClick={closeMobileMenu}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-            >
-              קורסים
-            </Link>
+        <div className="border-t border-zinc-100 bg-white px-4 py-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950">
+          <nav className="flex flex-col gap-1">
+            <MobileNavLink href="/courses" onClick={closeMobileMenu}>קורסים</MobileNavLink>
             <SignedIn>
-              <Link
-                href="/dashboard"
-                onClick={closeMobileMenu}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-              >
-                האזור שלי
-              </Link>
-              <Link
-                href="/student/dashboard"
-                onClick={closeMobileMenu}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-              >
-                מעקב התקדמות
-              </Link>
-              <Link
-                href="/student/notes"
-                onClick={closeMobileMenu}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-              >
-                הערות
-              </Link>
-              <Link
-                href="/certificates"
-                onClick={closeMobileMenu}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-              >
-                תעודות
-              </Link>
+              <MobileNavLink href="/dashboard" onClick={closeMobileMenu}>האזור שלי</MobileNavLink>
+              <MobileNavLink href="/student/dashboard" onClick={closeMobileMenu}>מעקב התקדמות</MobileNavLink>
+              <MobileNavLink href="/student/notes" onClick={closeMobileMenu}>הערות</MobileNavLink>
+              <MobileNavLink href="/certificates" onClick={closeMobileMenu}>תעודות</MobileNavLink>
             </SignedIn>
             <SignedOut>
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-3">
                 <SignInButton mode="modal">
-                  <button className="flex-1 rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900">
+                  <button className="flex-1 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900">
                     התחברות
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button className="flex-1 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100">
+                  <button className="flex-1 rounded-lg bg-gradient-to-l from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md">
                     הרשמה
                   </button>
                 </SignUpButton>
@@ -189,5 +121,28 @@ export function Header() {
         </div>
       )}
     </header>
+  );
+}
+
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+    >
+      {children}
+    </Link>
+  );
+}
+
+function MobileNavLink({ href, onClick, children }: { href: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-indigo-50 hover:text-indigo-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+    >
+      {children}
+    </Link>
   );
 }

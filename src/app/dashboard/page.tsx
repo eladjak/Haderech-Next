@@ -138,11 +138,11 @@ export default function DashboardPage() {
           <div className="mt-8">
             <Link
               href="/student/dashboard"
-              className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50 p-4 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50"
+              className="card-hover flex items-center justify-between rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-950/30"
             >
               <div className="flex items-center gap-3">
                 <svg
-                  className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+                  className="h-5 w-5 text-indigo-600 dark:text-indigo-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -350,7 +350,7 @@ export default function DashboardPage() {
               </p>
               <Link
                 href="/courses"
-                className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-6 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+                className="inline-flex h-10 items-center rounded-xl bg-gradient-to-l from-indigo-600 to-violet-600 px-6 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
               >
                 גלה קורסים
               </Link>
@@ -421,14 +421,14 @@ function DashboardCard({
   href?: string;
 }) {
   const content = (
-    <div className="rounded-2xl bg-zinc-50 p-6 transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800">
+    <div className="card-hover rounded-2xl border border-zinc-100 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
       <p className="mb-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">
         {title}
       </p>
-      <p className="mb-1 text-3xl font-bold text-zinc-900 dark:text-white">
+      <p className="mb-1 text-3xl font-bold bg-gradient-to-l from-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-violet-400">
         {value}
       </p>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
     </div>
   );
 
