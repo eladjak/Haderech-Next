@@ -4,7 +4,23 @@
 ## עדכון אחרון: 2026-02-19
 
 ## מצב נוכחי
-Phase 1-12 הושלמו. Convex + Clerk מחוברים. **Phase 12:** Platform Completeness - קטגוריות ורמות לקורסים, סינון מתקדם, דפי אודות/עזרה/יצירת קשר/הגדרות, פוטר משופר. TypeScript עובר, 124 בדיקות עוברות, 28 עמודים.
+Phase 1-13 הושלמו. Convex + Clerk מחוברים. **Phase 13:** Watch Time Tracking, Admin First-Setup, Deploy Config. TypeScript עובר, 131 בדיקות עוברות, 29 עמודים.
+
+## מה בוצע - Phase 13 Watch Time, Admin Setup, Deploy (סשן 2026-02-19)
+- [x] **Schema Update** (`convex/schema.ts`) - Added `watchTimeSeconds` optional field to progress table
+- [x] **Progress Tracking** (`convex/progress.ts`) - `updateProgress` now accepts `watchTimeSeconds` and accumulates it
+- [x] **YouTube Player Enhanced** (`src/components/video/youtube-player.tsx`) - Tracks actual seconds watched using timestamp-based counting, sends accumulated time with each progress update, restores seconds on failed saves
+- [x] **Analytics Backend** (`convex/analytics.ts`) - `getStudentOverview` returns `totalWatchTimeSeconds` aggregated from all progress entries
+- [x] **Analytics UI** (`src/app/student/analytics/page.tsx`) - New watch time card showing total watch time in hours/minutes format
+- [x] **Admin Setup Page** (`src/app/admin/setup/page.tsx`) - NEW: First admin setup flow - allows first logged-in user to become admin when no admins exist, shows "admin exists" page otherwise
+- [x] **User Functions** (`convex/users.ts`) - Added `hasAnyAdmin` query and `promoteSelfToAdmin` mutation for admin setup flow
+- [x] **Deploy Config** (`next.config.ts`) - Added image remotePatterns (Clerk, Convex), security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+- [x] **Build Scripts** (`package.json`) - Updated build to `npx convex deploy --cmd 'next build'` (official Convex pattern), added `build:local` for local-only builds
+- [x] **Shared Utils** (`src/lib/progress-utils.ts`) - Added `formatWatchTime()` function for Hebrew watch time formatting
+- [x] **Tests** (`src/__tests__/progress-utils.test.ts`) - 7 new tests for formatWatchTime (total: 39 in file, 131 overall)
+- [x] **TypeScript** - עובר ללא שגיאות
+- [x] **Build** - `next build` עובר בהצלחה (29 עמודים, +1 admin/setup)
+- [x] **Tests** - 131 בדיקות עוברות
 
 ## מה בוצע - Phase 12 Platform Completeness (סשן 2026-02-19)
 - [x] **Schema Update** (`convex/schema.ts`) - Added `category`, `level`, `estimatedHours` fields to courses table + `by_category` index

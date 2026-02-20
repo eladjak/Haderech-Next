@@ -84,6 +84,8 @@ export function YouTubePlayer({
   const [isReady, setIsReady] = useState(false);
   const [hasResumed, setHasResumed] = useState(false);
   const completedRef = useRef(false);
+  const watchedSecondsRef = useRef(0); // שניות צפייה מאז העדכון האחרון
+  const lastTickRef = useRef<number | null>(null); // timestamp של הטיק האחרון
 
   const updateProgress = useMutation(api.progress.updateProgress);
 
@@ -171,15 +173,29 @@ export function YouTubePlayer({
     (event: YTPlayerEvent) => {
       // PLAYING = 1
       if (event.data === 1) {
+        lastTickRef.current = Date.now();
         // Start tracking progress every 10 seconds
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = setInterval(() => {
+          // חישוב שניות צפייה אמיתיות
+          const now = Date.now();
+          if (lastTickRef.current) {
+            const elapsed = Math.round((now - lastTickRef.current) / 1000);
+            watchedSecondsRef.current += elapsed;
+          }
+          lastTickRef.current = now;
           trackProgress();
         }, 10000);
       }
 
       // PAUSED = 2 or ENDED = 0
       if (event.data === 2 || event.data === 0) {
+        // חישוב שניות אחרונות לפני עצירה
+        if (lastTickRef.current) {
+          const elapsed = Math.round((Date.now() - lastTickRef.current) / 1000);
+          watchedSecondsRef.current += elapsed;
+          lastTickRef.current = null;
+        }
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
@@ -209,12 +225,17 @@ export function YouTubePlayer({
         ? 100
         : Math.min(Math.round((currentTime / duration) * 100), 100);
 
+      // שליחת זמן צפייה מצטבר ואיפוס המונה
+      const secondsToSend = watchedSecondsRef.current;
+      watchedSecondsRef.current = 0;
+
       try {
         await updateProgress({
           userId,
           lessonId,
           courseId,
           progressPercent: percent,
+          watchTimeSeconds: secondsToSend > 0 ? secondsToSend : undefined,
         });
 
         // Mark as complete when >80% watched
@@ -223,7 +244,8 @@ export function YouTubePlayer({
           onComplete?.();
         }
       } catch {
-        // Silent fail for progress tracking
+        // Silent fail - restore seconds for next attempt
+        watchedSecondsRef.current += secondsToSend;
       }
     },
     [userId, lessonId, courseId, updateProgress, onComplete]

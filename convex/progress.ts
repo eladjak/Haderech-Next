@@ -66,6 +66,7 @@ export const updateProgress = mutation({
     lessonId: v.id("lessons"),
     courseId: v.id("courses"),
     progressPercent: v.number(),
+    watchTimeSeconds: v.optional(v.number()), // זמן צפייה שנוסף מאז העדכון האחרון
   },
   handler: async (ctx, args) => {
     const now = Date.now();
@@ -79,11 +80,15 @@ export const updateProgress = mutation({
       .unique();
 
     if (existing) {
+      const accumulatedWatchTime =
+        (existing.watchTimeSeconds ?? 0) + (args.watchTimeSeconds ?? 0);
+
       return await ctx.db.patch(existing._id, {
         progressPercent: Math.max(existing.progressPercent, args.progressPercent),
         completed: existing.completed || completed,
         lastWatchedAt: now,
         completedAt: completed && !existing.completedAt ? now : existing.completedAt,
+        watchTimeSeconds: accumulatedWatchTime,
       });
     }
 
@@ -95,6 +100,7 @@ export const updateProgress = mutation({
       completed,
       lastWatchedAt: now,
       completedAt: completed ? now : undefined,
+      watchTimeSeconds: args.watchTimeSeconds ?? 0,
     });
   },
 });

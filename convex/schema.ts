@@ -72,6 +72,7 @@ export default defineSchema({
     progressPercent: v.number(), // 0-100
     lastWatchedAt: v.number(),
     completedAt: v.optional(v.number()),
+    watchTimeSeconds: v.optional(v.number()), // סך זמן צפייה בשניות
   })
     .index("by_user", ["userId"])
     .index("by_lesson", ["lessonId"])

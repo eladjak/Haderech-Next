@@ -100,6 +100,20 @@ export function averageScore(scores: number[]): number {
 }
 
 /**
+ * Formats watch time in seconds to a human-readable Hebrew string.
+ */
+export function formatWatchTime(totalSeconds: number): string {
+  if (totalSeconds <= 0) return "0 דקות";
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (hours > 0) {
+    return minutes > 0 ? `${hours} שעות ו-${minutes} דקות` : `${hours} שעות`;
+  }
+  if (minutes > 0) return `${minutes} דקות`;
+  return `${totalSeconds} שניות`;
+}
+
+/**
  * Computes XP level from total XP using the formula: floor(sqrt(XP/25)) + 1.
  * Returns { level, progressPercent } for display.
  */

@@ -9,6 +9,7 @@ import {
   sortByCompletion,
   averageScore,
   computeLevel,
+  formatWatchTime,
   type SectionProgressInput,
 } from "@/lib/progress-utils";
 
@@ -281,5 +282,39 @@ describe("computeLevel", () => {
     expect(result.xpInCurrentLevel).toBe(12);
     expect(result.xpNeededForNextLevel).toBe(25);
     expect(result.progressPercent).toBe(48);
+  });
+});
+
+// ─── formatWatchTime ────────────────────────────────────────────────────────
+
+describe("formatWatchTime", () => {
+  it('returns "0 דקות" for 0 seconds', () => {
+    expect(formatWatchTime(0)).toBe("0 דקות");
+  });
+
+  it('returns "0 דקות" for negative input', () => {
+    expect(formatWatchTime(-5)).toBe("0 דקות");
+  });
+
+  it("returns seconds for less than a minute", () => {
+    expect(formatWatchTime(45)).toBe("45 שניות");
+  });
+
+  it("returns minutes for less than an hour", () => {
+    expect(formatWatchTime(300)).toBe("5 דקות");
+    expect(formatWatchTime(60)).toBe("1 דקות");
+  });
+
+  it("returns hours for 60+ minutes", () => {
+    expect(formatWatchTime(3600)).toBe("1 שעות");
+  });
+
+  it("returns hours and minutes combined", () => {
+    expect(formatWatchTime(5400)).toBe("1 שעות ו-30 דקות");
+    expect(formatWatchTime(7320)).toBe("2 שעות ו-2 דקות");
+  });
+
+  it("returns only hours when minutes are 0", () => {
+    expect(formatWatchTime(7200)).toBe("2 שעות");
   });
 });

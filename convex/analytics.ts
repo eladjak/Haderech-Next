@@ -42,6 +42,12 @@ export const getStudentOverview = query({
           )
         : 0;
 
+    // סך זמן צפייה (שניות)
+    const totalWatchTimeSeconds = allProgress.reduce(
+      (sum, p) => sum + (p.watchTimeSeconds ?? 0),
+      0
+    );
+
     return {
       enrolledCourses: enrollments.length,
       completedLessons,
@@ -49,6 +55,7 @@ export const getStudentOverview = query({
       certificatesEarned: certificates.length,
       quizAttempts: userAttempts.length,
       averageQuizScore,
+      totalWatchTimeSeconds,
     };
   },
 });

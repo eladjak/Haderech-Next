@@ -6,6 +6,7 @@ import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { formatWatchTime } from "@/lib/progress-utils";
 
 export default function StudentAnalyticsPage() {
   const { user: clerkUser } = useUser();
@@ -107,6 +108,24 @@ export default function StudentAnalyticsPage() {
                   icon="star"
                 />
               </div>
+              {/* זמן צפייה כולל */}
+              {(overview?.totalWatchTimeSeconds ?? 0) > 0 && (
+                <div className="mt-4 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                      <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">סך זמן צפייה</p>
+                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                        {formatWatchTime(overview?.totalWatchTimeSeconds ?? 0)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* Streak section */}

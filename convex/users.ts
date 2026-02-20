@@ -115,6 +115,52 @@ export const ensureUser = mutation({
   },
 });
 
+// בדיקה אם יש admin כלשהו במערכת
+export const hasAnyAdmin = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    return users.some((u) => u.role === "admin");
+  },
+});
+
+// קידום עצמי ל-admin (רק כשאין admins במערכת)
+export const promoteSelfToAdmin = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const allUsers = await ctx.db.query("users").collect();
+    const hasAdmin = allUsers.some((u) => u.role === "admin");
+    if (hasAdmin) {
+      throw new Error("Admin already exists. Contact existing admin for access.");
+    }
+
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) {
+      const now = Date.now();
+      await ctx.db.insert("users", {
+        clerkId: identity.subject,
+        email: identity.email ?? "",
+        name: identity.name,
+        imageUrl: identity.pictureUrl,
+        role: "admin",
+        createdAt: now,
+        updatedAt: now,
+      });
+      return { success: true };
+    }
+
+    await ctx.db.patch(user._id, { role: "admin", updatedAt: Date.now() });
+    return { success: true };
+  },
+});
+
 // קידום ראשוני ל-admin מה-CLI (ללא auth - רק כשאין admins)
 export const seedAdmin = internalMutation({
   args: { email: v.string() },
