@@ -173,4 +173,91 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_course", ["userId", "courseId"])
     .index("by_certificate_number", ["certificateNumber"]),
+
+  // סשנים של צ'אט עם המאמן AI
+  chatSessions: defineTable({
+    userId: v.string(), // Clerk user ID
+    title: v.optional(v.string()),
+    mode: v.union(
+      v.literal("coach"),
+      v.literal("practice"),
+      v.literal("analysis")
+    ),
+    messageCount: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_updated", ["userId", "updatedAt"]),
+
+  // הודעות בצ'אט
+  chatMessages: defineTable({
+    sessionId: v.id("chatSessions"),
+    role: v.union(
+      v.literal("user"),
+      v.literal("assistant"),
+      v.literal("system")
+    ),
+    content: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_session", ["sessionId"])
+    .index("by_session_created", ["sessionId", "createdAt"]),
+
+  // סימולטור דייטינג - תרחישים
+  simulatorScenarios: defineTable({
+    title: v.string(),
+    description: v.string(),
+    personaName: v.string(),
+    personaAge: v.number(),
+    personaGender: v.union(v.literal("male"), v.literal("female")),
+    personaBackground: v.string(),
+    personaPersonality: v.string(),
+    difficulty: v.union(
+      v.literal("easy"),
+      v.literal("medium"),
+      v.literal("hard")
+    ),
+    category: v.string(),
+    scenarioContext: v.string(),
+    published: v.boolean(),
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_published", ["published"])
+    .index("by_order", ["order"])
+    .index("by_difficulty", ["difficulty"]),
+
+  // סימולטור דייטינג - סשנים
+  simulatorSessions: defineTable({
+    userId: v.string(),
+    scenarioId: v.id("simulatorScenarios"),
+    status: v.union(
+      v.literal("active"),
+      v.literal("completed"),
+      v.literal("abandoned")
+    ),
+    messageCount: v.number(),
+    score: v.optional(v.number()),
+    feedback: v.optional(v.string()),
+    strengths: v.optional(v.array(v.string())),
+    improvements: v.optional(v.array(v.string())),
+    createdAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_scenario", ["scenarioId"])
+    .index("by_user_status", ["userId", "status"]),
+
+  // סימולטור דייטינג - הודעות
+  simulatorMessages: defineTable({
+    sessionId: v.id("simulatorSessions"),
+    role: v.union(
+      v.literal("user"),
+      v.literal("persona"),
+      v.literal("narrator")
+    ),
+    content: v.string(),
+    createdAt: v.number(),
+  }).index("by_session", ["sessionId"]),
 });

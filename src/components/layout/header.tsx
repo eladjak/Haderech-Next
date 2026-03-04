@@ -37,9 +37,8 @@ export function Header() {
           <NavLink href="/courses">קורסים</NavLink>
           <SignedIn>
             <NavLink href="/dashboard">האזור שלי</NavLink>
-            <NavLink href="/student/dashboard">מעקב התקדמות</NavLink>
-            <NavLink href="/student/notes">הערות</NavLink>
-            <NavLink href="/certificates">תעודות</NavLink>
+            <NavLink href="/chat">צ&apos;אט AI</NavLink>
+            <NavLink href="/simulator">סימולטור</NavLink>
           </SignedIn>
         </nav>
 
@@ -99,8 +98,9 @@ export function Header() {
             <MobileNavLink href="/courses" onClick={closeMobileMenu}>קורסים</MobileNavLink>
             <SignedIn>
               <MobileNavLink href="/dashboard" onClick={closeMobileMenu}>האזור שלי</MobileNavLink>
+              <MobileNavLink href="/chat" onClick={closeMobileMenu}>צ&apos;אט AI</MobileNavLink>
+              <MobileNavLink href="/simulator" onClick={closeMobileMenu}>סימולטור דייטים</MobileNavLink>
               <MobileNavLink href="/student/dashboard" onClick={closeMobileMenu}>מעקב התקדמות</MobileNavLink>
-              <MobileNavLink href="/student/notes" onClick={closeMobileMenu}>הערות</MobileNavLink>
               <MobileNavLink href="/certificates" onClick={closeMobileMenu}>תעודות</MobileNavLink>
             </SignedIn>
             <SignedOut>

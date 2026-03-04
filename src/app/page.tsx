@@ -306,14 +306,14 @@ export default function Home() {
             variants={fadeIn}
           >
             <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
-              5 פאזות למסע
+              6 שלבים למסע
             </span>
             <h2 className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               איך תוכנית "הדרך" עובדת?
             </h2>
           </motion.div>
           <motion.div
-            className="mx-auto grid max-w-4xl gap-6 md:grid-cols-5"
+            className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -322,9 +322,81 @@ export default function Home() {
             <PhaseCard step="1" color="from-brand-500 to-brand-600" title="גישה" weeks="שבועות 1-3" description="עבודה פנימית, סיפורים, גבולות" />
             <PhaseCard step="2" color="from-blue-500 to-blue-600" title="תקשורת" weeks="שבועות 4-5" description="היכרות עצמית, רגשות, צרכים" />
             <PhaseCard step="3" color="from-accent-400 to-accent-500" title="משיכה" weeks="שבועות 6-9" description="אומץ, היכרויות, דייטים" />
-            <PhaseCard step="4" color="from-brand-400 to-blue-500" title="חיבור" weeks="שבועות 10-11" description="כימיה, אינטימיות, פגיעות" />
-            <PhaseCard step="5" color="from-blue-500 to-brand-500" title="החלטה" weeks="שבוע 12" description="מחויבות, בניית זוגיות" />
+            <PhaseCard step="4" color="from-brand-400 to-blue-500" title="חיבור" weeks="שבוע 10" description="כימיה, הקשבה, יצירת הזדמנויות" />
+            <PhaseCard step="5" color="from-blue-400 to-brand-400" title="אינטימיות" weeks="שבוע 11" description="פגיעות, קרבה, 36 שאלות להתאהבות" />
+            <PhaseCard step="6" color="from-blue-500 to-brand-500" title="מחויבות" weeks="שבוע 12" description="החלטה, זוגיות רשמית, בניית עתיד" />
           </motion.div>
+        </div>
+      </section>
+
+      {/* Pricing Preview Section */}
+      <section className="border-t border-brand-100/30 bg-gradient-to-b from-[var(--background)] to-brand-50/20 py-20 dark:border-blue-100/10 dark:to-blue-50/5">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="mx-auto mb-12 max-w-xl text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
+              תוכניות ומחירים
+            </span>
+            <h2 className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+              בחר את המסלול שלך
+            </h2>
+            <p className="text-blue-500/60 dark:text-zinc-400">
+              התחל בחינם, שדרג כשתרגיש מוכן
+            </p>
+          </motion.div>
+          <motion.div
+            className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
+            <PricingCard
+              name="טעימה"
+              price="חינם"
+              period=""
+              description="5 שיעורים, 10 הודעות AI בחודש, 2 תרחישי סימולטור"
+              features={["5 שיעורים ראשונים", "מאמן AI - 10 הודעות", "2 תרחישי סימולטור", "ספריית מאמרים"]}
+              cta="התחל בחינם"
+              ctaHref="/sign-up"
+              highlighted={false}
+            />
+            <PricingCard
+              name="משנה"
+              price="₪149"
+              period="/חודש"
+              description="שינוי אמיתי: AI ללא הגבלה, סימולטור קולי, קהילה פעילה"
+              features={["כל 73 השיעורים", "מאמן AI ללא הגבלה", "סימולטור קולי + וידאו", "קהילה + לוח מובילים", "תעודת סיום"]}
+              badge="הכי פופולרי"
+              cta="התחל תקופת ניסיון"
+              ctaHref="/sign-up"
+              highlighted={true}
+            />
+            <PricingCard
+              name="מוביל"
+              price="₪299"
+              period="/חודש"
+              description="VIP: קואצ׳ינג קבוצתי חי, מאסטרקלאסים בלעדיים, גישה מוקדמת"
+              features={["הכל במשנה +", "קואצ׳ינג קבוצתי עם אלעד", "מאסטרקלאסים בלעדיים", "דוחות AI מעמיקים", "תמיכה בעדיפות"]}
+              cta="הצטרף ל-VIP"
+              ctaHref="/sign-up"
+              highlighted={false}
+            />
+          </motion.div>
+          <motion.p
+            className="mx-auto mt-8 max-w-lg text-center text-sm text-blue-500/50 dark:text-zinc-500"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            חיסכון של עד 37% בתוכנית שנתית. ביטול בכל עת.
+          </motion.p>
         </div>
       </section>
 
@@ -577,6 +649,71 @@ function PhaseCard({
       <p className="text-xs leading-relaxed text-blue-500/50 dark:text-zinc-400">
         {description}
       </p>
+    </motion.div>
+  );
+}
+
+function PricingCard({
+  name,
+  price,
+  period,
+  description,
+  features,
+  badge,
+  cta,
+  ctaHref,
+  highlighted,
+}: {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  badge?: string;
+  cta: string;
+  ctaHref: string;
+  highlighted: boolean;
+}) {
+  return (
+    <motion.div
+      variants={fadeIn}
+      className={`relative flex flex-col rounded-2xl border p-6 ${
+        highlighted
+          ? "border-brand-300 bg-gradient-to-b from-brand-50/60 to-white shadow-lg shadow-brand-500/10 dark:border-brand-500/40 dark:from-brand-50/10 dark:to-blue-50/5"
+          : "border-brand-100/30 bg-white dark:border-blue-100/10 dark:bg-blue-50/5"
+      }`}
+    >
+      {badge && (
+        <span className="absolute -top-3 right-6 rounded-full bg-brand-500 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+          {badge}
+        </span>
+      )}
+      <h3 className="mb-1 text-lg font-bold text-blue-500 dark:text-white">{name}</h3>
+      <div className="mb-3 flex items-baseline gap-1">
+        <span className="text-3xl font-bold text-blue-500 dark:text-white">{price}</span>
+        {period && <span className="text-sm text-blue-500/50 dark:text-zinc-400">{period}</span>}
+      </div>
+      <p className="mb-5 text-sm text-blue-500/60 dark:text-zinc-400">{description}</p>
+      <ul className="mb-6 flex-1 space-y-2.5">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-2 text-sm text-blue-500/80 dark:text-zinc-300">
+            <svg className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            {f}
+          </li>
+        ))}
+      </ul>
+      <Link
+        href={ctaHref}
+        className={`inline-flex h-11 items-center justify-center rounded-xl text-sm font-semibold transition-all ${
+          highlighted
+            ? "bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-md hover:shadow-lg hover:brightness-110"
+            : "border border-brand-200 text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-zinc-900"
+        }`}
+      >
+        {cta}
+      </Link>
     </motion.div>
   );
 }

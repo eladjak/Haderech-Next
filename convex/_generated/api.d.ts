@@ -12,8 +12,10 @@ import type * as admin from "../admin.js";
 import type * as adminComments from "../adminComments.js";
 import type * as adminLessons from "../adminLessons.js";
 import type * as adminQuizzes from "../adminQuizzes.js";
+import type * as aiSimulator from "../aiSimulator.js";
 import type * as analytics from "../analytics.js";
 import type * as certificates from "../certificates.js";
+import type * as chat from "../chat.js";
 import type * as comments from "../comments.js";
 import type * as courses from "../courses.js";
 import type * as enrollments from "../enrollments.js";
@@ -26,6 +28,9 @@ import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
 import type * as quizzes from "../quizzes.js";
 import type * as seed from "../seed.js";
+import type * as seedCourseData from "../seedCourseData.js";
+import type * as seedSimulatorData from "../seedSimulatorData.js";
+import type * as simulator from "../simulator.js";
 import type * as users from "../users.js";
 
 import type {
@@ -39,8 +44,10 @@ declare const fullApi: ApiFromModules<{
   adminComments: typeof adminComments;
   adminLessons: typeof adminLessons;
   adminQuizzes: typeof adminQuizzes;
+  aiSimulator: typeof aiSimulator;
   analytics: typeof analytics;
   certificates: typeof certificates;
+  chat: typeof chat;
   comments: typeof comments;
   courses: typeof courses;
   enrollments: typeof enrollments;
@@ -53,6 +60,9 @@ declare const fullApi: ApiFromModules<{
   quizResults: typeof quizResults;
   quizzes: typeof quizzes;
   seed: typeof seed;
+  seedCourseData: typeof seedCourseData;
+  seedSimulatorData: typeof seedSimulatorData;
+  simulator: typeof simulator;
   users: typeof users;
 }>;
 

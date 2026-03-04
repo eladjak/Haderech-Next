@@ -2,7 +2,7 @@
  * Seed Course Data - HaDerech Learning Platform
  *
  * Contains the REAL content from "Omanut HaKesher" course scripts.
- * 73 video lessons organized into 12 weeks across 5 phases.
+ * 73 video lessons organized into 12 weeks across 6 phases.
  * Plus 3 stub courses for future expansion.
  *
  * Source: /OneDrive/עסקים/אומנות הקשר כאן ועכשיו/מסמכי קורס דרך חדשה/תסריטים/
@@ -21,7 +21,7 @@ export interface SeedLesson {
   order: number;
   /** Week number (1-12) */
   weekNumber: number;
-  /** Phase number (1-5) */
+  /** Phase number (1-6) */
   phaseNumber: number;
   /** Hebrew phase name */
   phaseName: string;
@@ -38,7 +38,7 @@ export interface SeedModule {
   subtitle: string;
   /** Week number (1-12) */
   weekNumber: number;
-  /** Phase number (1-5) */
+  /** Phase number (1-6) */
   phaseNumber: number;
   /** Hebrew phase name */
   phaseName: string;
@@ -74,7 +74,8 @@ const PHASES = {
   2: { name: "תקשורת", nameEn: "Communication" },
   3: { name: "מעבר ומשיכה", nameEn: "Transition & Attraction" },
   4: { name: "חיבור וכימיה", nameEn: "Connection & Chemistry" },
-  5: { name: "מחויבות", nameEn: "Commitment" },
+  5: { name: "אינטימיות", nameEn: "Intimacy" },
+  6: { name: "מחויבות", nameEn: "Commitment" },
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -854,12 +855,15 @@ const HADERECH_MODULES: SeedModule[] = [
     ],
   },
 
+  // =========================================================================
+  // PHASE 5: אינטימיות (Intimacy) - שבוע 11
+  // =========================================================================
   {
     title: "שבוע 11: אינטימיות ופגיעות",
     subtitle: "בניית קרבה אמיתית ועמוקה",
     weekNumber: 11,
-    phaseNumber: 4,
-    phaseName: PHASES[4].name,
+    phaseNumber: 5,
+    phaseName: PHASES[5].name,
     lessons: [
       {
         title: "אינטימיות כתהליך מדורג",
@@ -867,8 +871,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "הבנת שלבי האינטימיות וחשיבות ההדרגתיות. אינטימיות אמיתית נבנית בשלבים - לא קופצים לסוף. הבנת התהליך המדורג ואיך לנוע בו בקצב שנכון לשני הצדדים.",
         order: 0,
         weekNumber: 11,
-        phaseNumber: 4,
-        phaseName: PHASES[4].name,
+        phaseNumber: 5,
+        phaseName: PHASES[5].name,
         duration: 150,
         scriptIndex: "11.1.1",
       },
@@ -878,8 +882,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "השאלות בסיכון נמוך - פתיחת השיחה. סט ראשון מתוך 36 השאלות של ד\"ר ארתור ארון שהוכחו מחקרית כמקרבות בין אנשים. שאלות נגישות שפותחות שיחה אמיתית.",
         order: 1,
         weekNumber: 11,
-        phaseNumber: 4,
-        phaseName: PHASES[4].name,
+        phaseNumber: 5,
+        phaseName: PHASES[5].name,
         duration: 180,
         scriptIndex: "11.1.2",
       },
@@ -889,8 +893,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "השאלות בסיכון בינוני וגבוה - העמקת הקשר. הסטים המתקדמים שדורשים יותר אומץ ופגיעות, אבל גם יוצרים חיבור עמוק יותר. איך להשתמש בשאלות בצורה טבעית.",
         order: 2,
         weekNumber: 11,
-        phaseNumber: 4,
-        phaseName: PHASES[4].name,
+        phaseNumber: 5,
+        phaseName: PHASES[5].name,
         duration: 180,
         scriptIndex: "11.2.1",
       },
@@ -900,8 +904,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "הסיום העוצמתי של 36 השאלות. 4 דקות של מבט עיניים - התרגיל שמשלים את 36 השאלות ויוצר חיבור עמוק ומפתיע. תרגיל פשוט שמפיל מחסומים ופותח את הלב.",
         order: 3,
         weekNumber: 11,
-        phaseNumber: 4,
-        phaseName: PHASES[4].name,
+        phaseNumber: 5,
+        phaseName: PHASES[5].name,
         duration: 150,
         scriptIndex: "11.2.2",
       },
@@ -911,8 +915,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "למה לחשוף חולשות הוא המפתח לחיבור אמיתי. פגיעות היא לא חולשה - היא הגשר שמחבר בין שני אנשים. כשנותנים למישהו לראות אותנו באמת, עם כל הפגמים, נוצר חיבור שלא ניתן ליצור בדרך אחרת.",
         order: 4,
         weekNumber: 11,
-        phaseNumber: 4,
-        phaseName: PHASES[4].name,
+        phaseNumber: 5,
+        phaseName: PHASES[5].name,
         duration: 180,
         scriptIndex: "11.3.1",
       },
@@ -922,8 +926,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "לזהות ולטפח את מה שמיוחד רק לכם. כל קשר הוא ייחודי - יש לו את הבדיחות הפנימיות שלו, את הרגעים המשותפים, את השפה המשותפת. איך לזהות ולטפח את מה שהופך את הקשר שלכם למיוחד.",
         order: 5,
         weekNumber: 11,
-        phaseNumber: 4,
-        phaseName: PHASES[4].name,
+        phaseNumber: 5,
+        phaseName: PHASES[5].name,
         duration: 150,
         scriptIndex: "11.3.2",
       },
@@ -933,8 +937,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "איך להיפרד בצורה נכונה ומכבדת. לא כל קשר מיועד להתפתח. לדעת מתי ואיך לסיים - בכבוד, בהגינות ובלי לפגוע מיותר - זה חלק חשוב מהדרך למציאת הזוגיות הנכונה.",
         order: 6,
         weekNumber: 11,
-        phaseNumber: 4,
-        phaseName: PHASES[4].name,
+        phaseNumber: 5,
+        phaseName: PHASES[5].name,
         duration: 180,
         scriptIndex: "11.4.1",
       },
@@ -942,14 +946,14 @@ const HADERECH_MODULES: SeedModule[] = [
   },
 
   // =========================================================================
-  // PHASE 5: מחויבות (Commitment) - שבוע 12
+  // PHASE 6: מחויבות (Commitment) - שבוע 12
   // =========================================================================
   {
     title: "שבוע 12: ההחלטה",
     subtitle: "מחויבות, זוגיות רשמית וסיום המסע",
     weekNumber: 12,
-    phaseNumber: 5,
-    phaseName: PHASES[5].name,
+    phaseNumber: 6,
+    phaseName: PHASES[6].name,
     lessons: [
       {
         title: "מוכנות להתחייבות - איך יודעים",
@@ -957,8 +961,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "סימנים שאתם מוכנים לקחת את הצעד הבא. איך יודעים שהגיע הזמן להתחייב? מה הסימנים שאומרים שאתם ושהקשר מוכנים? כלים להערכת מוכנות אמיתית להתחייבות.",
         order: 0,
         weekNumber: 12,
-        phaseNumber: 5,
-        phaseName: PHASES[5].name,
+        phaseNumber: 6,
+        phaseName: PHASES[6].name,
         duration: 180,
         scriptIndex: "12.1.1",
       },
@@ -968,8 +972,8 @@ const HADERECH_MODULES: SeedModule[] = [
           'השאלות החשובות לפני שאומרים "כן". 20 שאלות שחייבים לשאול - את עצמכם ואת הפרטנר - לפני שמחליטים להתחייב. שאלות שחושפות תאימות אמיתית ומונעות הפתעות בהמשך.',
         order: 1,
         weekNumber: 12,
-        phaseNumber: 5,
-        phaseName: PHASES[5].name,
+        phaseNumber: 6,
+        phaseName: PHASES[6].name,
         duration: 180,
         scriptIndex: "12.1.2",
       },
@@ -979,8 +983,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "איך להתנהל מול הפחדים שמלווים את המחויבות. פחד מהתחייבות הוא נורמלי - כמעט כולם חווים אותו. איך מזהים אם זה פחד בריא שכדאי להקשיב לו, או פחד שמעכב אתכם.",
         order: 2,
         weekNumber: 12,
-        phaseNumber: 5,
-        phaseName: PHASES[5].name,
+        phaseNumber: 6,
+        phaseName: PHASES[6].name,
         duration: 180,
         scriptIndex: "12.2.1",
       },
@@ -990,8 +994,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "הצעדים המעשיים לתחילת זוגיות. מהדייטים הראשונים לקשר רשמי - מה הצעדים, מתי מגדירים את הקשר, ואיך עושים את המעבר בצורה בריאה וטבעית.",
         order: 3,
         weekNumber: 12,
-        phaseNumber: 5,
-        phaseName: PHASES[5].name,
+        phaseNumber: 6,
+        phaseName: PHASES[6].name,
         duration: 180,
         scriptIndex: "12.2.2",
       },
@@ -1001,8 +1005,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "עקרונות יסוד לשמירה על זוגיות בריאה. למצוא את הזוגיות זה רק ההתחלה - עכשיו צריך גם לשמור עליה. עקרונות יסוד מחקריים לבניית זוגיות בריאה, מאושרת ויציבה לאורך זמן.",
         order: 4,
         weekNumber: 12,
-        phaseNumber: 5,
-        phaseName: PHASES[5].name,
+        phaseNumber: 6,
+        phaseName: PHASES[6].name,
         duration: 180,
         scriptIndex: "12.3.1",
       },
@@ -1012,8 +1016,8 @@ const HADERECH_MODULES: SeedModule[] = [
           "דברי סיכום, השראה והמשך הדרך. 12 שבועות של עבודה, למידה וצמיחה - אבל המסע עוד לא נגמר. הוא רק מתחיל. סיכום של הדרך שעברנו יחד, עם מבט קדימה למה שמחכה.",
         order: 5,
         weekNumber: 12,
-        phaseNumber: 5,
-        phaseName: PHASES[5].name,
+        phaseNumber: 6,
+        phaseName: PHASES[6].name,
         duration: 180,
         scriptIndex: "12.4.1",
       },
