@@ -450,4 +450,65 @@ export default defineSchema({
   })
     .index("by_review", ["reviewId"])
     .index("by_user_review", ["userId", "reviewId"]),
+
+  // מנטורים / מאמנים
+  mentors: defineTable({
+    userId: v.id("users"),
+    displayName: v.string(),
+    bio: v.string(),
+    specialties: v.array(v.string()),
+    imageUrl: v.optional(v.string()),
+    pricePerSession: v.number(), // price in ILS
+    sessionDuration: v.number(), // minutes (30, 45, 60)
+    available: v.boolean(),
+    rating: v.optional(v.number()),
+    totalSessions: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_available", ["available"]),
+
+  // הזמנות ליעוץ
+  mentoringSessions: defineTable({
+    mentorId: v.id("mentors"),
+    studentId: v.id("users"),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("confirmed"),
+      v.literal("completed"),
+      v.literal("cancelled")
+    ),
+    scheduledAt: v.number(), // timestamp of scheduled session
+    duration: v.number(), // minutes
+    notes: v.optional(v.string()), // student notes for mentor
+    mentorNotes: v.optional(v.string()), // mentor's session notes
+    rating: v.optional(v.number()), // student rating after session
+    createdAt: v.number(),
+  })
+    .index("by_mentor", ["mentorId"])
+    .index("by_student", ["studentId"])
+    .index("by_status", ["status"])
+    .index("by_scheduled", ["scheduledAt"]),
+
+  // סיפורי הצלחה / עדויות
+  successStories: defineTable({
+    userId: v.optional(v.id("users")),
+    name: v.string(), // can be anonymous
+    story: v.string(),
+    imageUrl: v.optional(v.string()),
+    rating: v.number(), // 1-5 satisfaction
+    isAnonymous: v.boolean(),
+    approved: v.boolean(), // admin must approve
+    featured: v.boolean(), // shown on landing page
+    category: v.union(
+      v.literal("dating"),
+      v.literal("relationship"),
+      v.literal("self-growth"),
+      v.literal("marriage")
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_approved", ["approved"])
+    .index("by_featured", ["featured"])
+    .index("by_category", ["category"]),
 });

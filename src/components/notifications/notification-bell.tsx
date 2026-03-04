@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/../convex/_generated/api";
@@ -192,6 +193,17 @@ export function NotificationBell() {
                 </button>
               ))
             )}
+          </div>
+
+          {/* View all link */}
+          <div className="border-t border-zinc-200 dark:border-zinc-700">
+            <Link
+              href="/notifications"
+              onClick={() => setIsOpen(false)}
+              className="block px-4 py-2.5 text-center text-xs font-medium text-brand-600 transition-colors hover:bg-zinc-50 dark:text-brand-400 dark:hover:bg-zinc-800"
+            >
+              צפה בכל ההתראות
+            </Link>
           </div>
         </div>
       )}

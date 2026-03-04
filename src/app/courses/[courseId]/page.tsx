@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Badge } from "@/components/ui/badge";
 import { EnrollButton } from "@/components/course/enroll-button";
 import { CourseReviews } from "@/components/reviews/course-reviews";
+import { SocialShare } from "@/components/social-share";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 export default function CourseDetailPage() {
@@ -184,6 +185,15 @@ export default function CourseDetailPage() {
             )}
             {isEnrolled && <Badge variant="success">רשום לקורס</Badge>}
             {certificate && <Badge variant="info">תעודה הונפקה</Badge>}
+          </div>
+
+          {/* Social Share */}
+          <div className="mb-6">
+            <SocialShare
+              url={`https://haderech.co.il/courses/${courseId}`}
+              title={`${course.title} - הדרך: אומנות הקשר`}
+              description={course.description}
+            />
           </div>
 
           {/* Enrollment + Progress Section */}

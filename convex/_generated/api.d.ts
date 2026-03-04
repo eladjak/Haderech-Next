@@ -27,7 +27,9 @@ import type * as enrollments from "../enrollments.js";
 import type * as gamification from "../gamification.js";
 import type * as lessons from "../lessons.js";
 import type * as lib_authGuard from "../lib/authGuard.js";
+import type * as mentoring from "../mentoring.js";
 import type * as notes from "../notes.js";
+import type * as notificationHelpers from "../notificationHelpers.js";
 import type * as notifications from "../notifications.js";
 import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
@@ -37,6 +39,7 @@ import type * as seed from "../seed.js";
 import type * as seedCourseData from "../seedCourseData.js";
 import type * as seedSimulatorData from "../seedSimulatorData.js";
 import type * as simulator from "../simulator.js";
+import type * as stories from "../stories.js";
 import type * as tools from "../tools.js";
 import type * as users from "../users.js";
 
@@ -66,7 +69,9 @@ declare const fullApi: ApiFromModules<{
   gamification: typeof gamification;
   lessons: typeof lessons;
   "lib/authGuard": typeof lib_authGuard;
+  mentoring: typeof mentoring;
   notes: typeof notes;
+  notificationHelpers: typeof notificationHelpers;
   notifications: typeof notifications;
   progress: typeof progress;
   quizResults: typeof quizResults;
@@ -76,6 +81,7 @@ declare const fullApi: ApiFromModules<{
   seedCourseData: typeof seedCourseData;
   seedSimulatorData: typeof seedSimulatorData;
   simulator: typeof simulator;
+  stories: typeof stories;
   tools: typeof tools;
   users: typeof users;
 }>;
