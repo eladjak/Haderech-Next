@@ -51,6 +51,48 @@ export default defineSchema({
       v.object({
         interests: v.optional(v.array(v.string())),
         onboardingCompleted: v.optional(v.boolean()),
+        notifications: v.optional(
+          v.object({
+            email: v.optional(v.boolean()),
+            dailyReminder: v.optional(v.boolean()),
+            community: v.optional(v.boolean()),
+            dailyTip: v.optional(v.boolean()),
+            courseUpdates: v.optional(v.boolean()),
+            promotions: v.optional(v.boolean()),
+          })
+        ),
+        display: v.optional(
+          v.object({
+            theme: v.optional(
+              v.union(
+                v.literal("light"),
+                v.literal("dark"),
+                v.literal("system")
+              )
+            ),
+            fontSize: v.optional(
+              v.union(
+                v.literal("small"),
+                v.literal("normal"),
+                v.literal("large")
+              )
+            ),
+          })
+        ),
+        learning: v.optional(
+          v.object({
+            weeklyGoal: v.optional(v.number()),
+            preferredTime: v.optional(
+              v.union(
+                v.literal("morning"),
+                v.literal("afternoon"),
+                v.literal("evening")
+              )
+            ),
+          })
+        ),
+        deletionRequested: v.optional(v.boolean()),
+        deletionRequestedAt: v.optional(v.number()),
       })
     ),
     createdAt: v.number(),
@@ -328,4 +370,21 @@ export default defineSchema({
     dayOfYear: v.number(), // 1-365, מתחלף מדי שנה
     createdAt: v.number(),
   }).index("by_day", ["dayOfYear"]),
+
+  // פניות יצירת קשר מהאתר
+  contactMessages: defineTable({
+    name: v.string(),
+    email: v.string(),
+    subject: v.string(),
+    message: v.string(),
+    status: v.union(
+      v.literal("new"),
+      v.literal("read"),
+      v.literal("replied")
+    ),
+    userId: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_created", ["createdAt"]),
 });

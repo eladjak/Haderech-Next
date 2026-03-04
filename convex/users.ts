@@ -275,3 +275,242 @@ export const promoteToAdmin = mutation({
     return { success: true, email: args.email };
   },
 });
+
+// עדכון העדפות התראות
+export const updateNotificationPreferences = mutation({
+  args: {
+    email: v.optional(v.boolean()),
+    dailyReminder: v.optional(v.boolean()),
+    community: v.optional(v.boolean()),
+    dailyTip: v.optional(v.boolean()),
+    courseUpdates: v.optional(v.boolean()),
+    promotions: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    const currentPrefs = user.preferences ?? {};
+    const currentNotifications = currentPrefs.notifications ?? {};
+
+    await ctx.db.patch(user._id, {
+      preferences: {
+        ...currentPrefs,
+        notifications: {
+          ...currentNotifications,
+          ...(args.email !== undefined ? { email: args.email } : {}),
+          ...(args.dailyReminder !== undefined
+            ? { dailyReminder: args.dailyReminder }
+            : {}),
+          ...(args.community !== undefined
+            ? { community: args.community }
+            : {}),
+          ...(args.dailyTip !== undefined ? { dailyTip: args.dailyTip } : {}),
+          ...(args.courseUpdates !== undefined
+            ? { courseUpdates: args.courseUpdates }
+            : {}),
+          ...(args.promotions !== undefined
+            ? { promotions: args.promotions }
+            : {}),
+        },
+      },
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+// עדכון העדפות תצוגה
+export const updateDisplayPreferences = mutation({
+  args: {
+    theme: v.optional(
+      v.union(v.literal("light"), v.literal("dark"), v.literal("system"))
+    ),
+    fontSize: v.optional(
+      v.union(v.literal("small"), v.literal("normal"), v.literal("large"))
+    ),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    const currentPrefs = user.preferences ?? {};
+    const currentDisplay = currentPrefs.display ?? {};
+
+    await ctx.db.patch(user._id, {
+      preferences: {
+        ...currentPrefs,
+        display: {
+          ...currentDisplay,
+          ...(args.theme !== undefined ? { theme: args.theme } : {}),
+          ...(args.fontSize !== undefined ? { fontSize: args.fontSize } : {}),
+        },
+      },
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+// עדכון העדפות למידה
+export const updateLearningPreferences = mutation({
+  args: {
+    weeklyGoal: v.optional(v.number()),
+    preferredTime: v.optional(
+      v.union(
+        v.literal("morning"),
+        v.literal("afternoon"),
+        v.literal("evening")
+      )
+    ),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    const currentPrefs = user.preferences ?? {};
+    const currentLearning = currentPrefs.learning ?? {};
+
+    await ctx.db.patch(user._id, {
+      preferences: {
+        ...currentPrefs,
+        learning: {
+          ...currentLearning,
+          ...(args.weeklyGoal !== undefined
+            ? { weeklyGoal: args.weeklyGoal }
+            : {}),
+          ...(args.preferredTime !== undefined
+            ? { preferredTime: args.preferredTime }
+            : {}),
+        },
+      },
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+// ייצוא נתוני משתמש
+export const exportUserData = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) return null;
+
+    const enrollments = await ctx.db
+      .query("enrollments")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    const progress = await ctx.db
+      .query("progress")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    const certificates = await ctx.db
+      .query("certificates")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    return {
+      profile: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        preferences: user.preferences,
+      },
+      enrollments: enrollments.map((e) => ({
+        courseId: e.courseId,
+        enrolledAt: e.enrolledAt,
+      })),
+      progress: progress.map((p) => ({
+        lessonId: p.lessonId,
+        courseId: p.courseId,
+        completed: p.completed,
+        progressPercent: p.progressPercent,
+        lastWatchedAt: p.lastWatchedAt,
+        completedAt: p.completedAt,
+      })),
+      notes: notes.map((n) => ({
+        lessonId: n.lessonId,
+        courseId: n.courseId,
+        content: n.content,
+        createdAt: n.createdAt,
+        updatedAt: n.updatedAt,
+      })),
+      certificates: certificates.map((c) => ({
+        courseId: c.courseId,
+        courseName: c.courseName,
+        completionPercent: c.completionPercent,
+        issuedAt: c.issuedAt,
+        certificateNumber: c.certificateNumber,
+      })),
+      exportedAt: Date.now(),
+    };
+  },
+});
+
+// בקשת מחיקת חשבון
+export const requestAccountDeletion = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    const currentPrefs = user.preferences ?? {};
+    await ctx.db.patch(user._id, {
+      preferences: {
+        ...currentPrefs,
+        deletionRequested: true,
+        deletionRequestedAt: Date.now(),
+      },
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});

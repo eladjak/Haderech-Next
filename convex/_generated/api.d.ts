@@ -19,6 +19,7 @@ import type * as certificates from "../certificates.js";
 import type * as chat from "../chat.js";
 import type * as comments from "../comments.js";
 import type * as community from "../community.js";
+import type * as contact from "../contact.js";
 import type * as courses from "../courses.js";
 import type * as dailyContent from "../dailyContent.js";
 import type * as enrollments from "../enrollments.js";
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   comments: typeof comments;
   community: typeof community;
+  contact: typeof contact;
   courses: typeof courses;
   dailyContent: typeof dailyContent;
   enrollments: typeof enrollments;
