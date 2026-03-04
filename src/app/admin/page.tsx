@@ -311,7 +311,7 @@ function StatCard({
     amber:
       "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
     violet:
-      "bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400",
+      "bg-brand-50 text-brand-500 dark:bg-brand-700/20 dark:text-brand-300",
   };
 
   return (

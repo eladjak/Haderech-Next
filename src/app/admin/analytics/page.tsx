@@ -289,7 +289,7 @@ function KpiCard({
     blue: "border-t-blue-500",
     emerald: "border-t-emerald-500",
     amber: "border-t-amber-500",
-    violet: "border-t-violet-500",
+    violet: "border-t-brand-400",
   };
 
   return (

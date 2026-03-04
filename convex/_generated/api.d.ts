@@ -19,6 +19,7 @@ import type * as courses from "../courses.js";
 import type * as enrollments from "../enrollments.js";
 import type * as gamification from "../gamification.js";
 import type * as lessons from "../lessons.js";
+import type * as lib_authGuard from "../lib/authGuard.js";
 import type * as notes from "../notes.js";
 import type * as notifications from "../notifications.js";
 import type * as progress from "../progress.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   enrollments: typeof enrollments;
   gamification: typeof gamification;
   lessons: typeof lessons;
+  "lib/authGuard": typeof lib_authGuard;
   notes: typeof notes;
   notifications: typeof notifications;
   progress: typeof progress;

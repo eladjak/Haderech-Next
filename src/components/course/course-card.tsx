@@ -59,10 +59,10 @@ export function CourseCard({
           />
         </div>
       ) : (
-        <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-indigo-100 via-violet-50 to-purple-100 dark:from-indigo-900/40 dark:via-violet-900/30 dark:to-purple-900/40">
+        <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-brand-100 via-brand-50 to-brand-100 dark:from-blue-500/40 dark:via-brand-700/30 dark:to-brand-700/40">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/80 shadow-sm dark:bg-zinc-800/80">
             <svg
-              className="h-7 w-7 text-indigo-500 dark:text-indigo-400"
+              className="h-7 w-7 text-brand-500 dark:text-brand-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -84,7 +84,7 @@ export function CourseCard({
         {(category || level) && (
           <div className="mb-2.5 flex flex-wrap gap-1.5">
             {category && (
-              <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+              <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-600 dark:bg-blue-500/30 dark:text-brand-400">
                 {category}
               </span>
             )}
@@ -99,7 +99,7 @@ export function CourseCard({
         )}
 
         {/* Title */}
-        <h3 className="mb-2 text-lg font-semibold text-zinc-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
+        <h3 className="mb-2 text-lg font-semibold text-zinc-900 transition-colors group-hover:text-brand-600 dark:text-white dark:group-hover:text-brand-400">
           {title}
         </h3>
 
@@ -149,17 +149,17 @@ export function CourseCard({
           <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <div className="mb-1.5 flex justify-between text-xs">
               <span className="text-zinc-400 dark:text-zinc-500">התקדמות</span>
-              <span className="font-medium text-indigo-600 dark:text-indigo-400">{progressPercent}%</span>
+              <span className="font-medium text-brand-600 dark:text-brand-400">{progressPercent}%</span>
             </div>
             <div
-              className="h-1.5 w-full overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-900/30"
+              className="h-1.5 w-full overflow-hidden rounded-full bg-brand-100 dark:bg-blue-500/30"
               role="progressbar"
               aria-valuenow={progressPercent}
               aria-valuemin={0}
               aria-valuemax={100}
             >
               <div
-                className="h-1.5 rounded-full bg-gradient-to-l from-indigo-500 to-violet-500 transition-all duration-300"
+                className="h-1.5 rounded-full bg-gradient-to-l from-brand-500 to-brand-500 transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>

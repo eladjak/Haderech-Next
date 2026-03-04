@@ -6,7 +6,7 @@ const SEED_COURSES = [
     title: "אומנות ההקשבה",
     description:
       "למדו כיצד להקשיב באמת לבן/בת הזוג שלכם. קורס מעשי שיעזור לכם לפתח הקשבה פעילה, להבין את מה שלא נאמר, וליצור תחושת ביטחון וקרבה דרך נוכחות אמיתית בשיחה.",
-    imageUrl: undefined,
+    imageUrl: "/images/course-communication.jpg",
     category: "תקשורת",
     level: "beginner" as const,
     estimatedHours: 5,
@@ -53,7 +53,7 @@ const SEED_COURSES = [
     title: "תקשורת זוגית מתקדמת",
     description:
       "העמיקו את יכולות התקשורת הזוגית שלכם. קורס מקיף שמלמד כלים מתקדמים לניהול שיחות קשות, פתרון קונפליקטים, והעמקת הקשר הרגשי דרך תקשורת פתוחה וכנה.",
-    imageUrl: undefined,
+    imageUrl: "/images/course-communication.jpg",
     category: "תקשורת",
     level: "intermediate" as const,
     estimatedHours: 6,
@@ -94,7 +94,7 @@ const SEED_COURSES = [
     title: "מפתחות לאינטימיות",
     description:
       "גלו כיצד לבנות ולחזק אינטימיות אמיתית בזוגיות. קורס שמלמד את הסודות של זוגות מאושרים - כיצד לשמור על חיבור רגשי עמוק, ליצור מרחב בטוח, ולטפח קרבה שנמשכת לאורך זמן.",
-    imageUrl: undefined,
+    imageUrl: "/images/course-haderech.jpg",
     category: "זוגיות",
     level: "advanced" as const,
     estimatedHours: 7,

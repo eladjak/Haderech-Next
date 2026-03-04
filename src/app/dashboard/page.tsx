@@ -138,11 +138,11 @@ export default function DashboardPage() {
           <div className="mt-8">
             <Link
               href="/student/dashboard"
-              className="card-hover flex items-center justify-between rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-950/30"
+              className="card-hover flex items-center justify-between rounded-2xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-700 dark:bg-blue-600/30"
             >
               <div className="flex items-center gap-3">
                 <svg
-                  className="h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                  className="h-5 w-5 text-brand-600 dark:text-brand-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -350,7 +350,7 @@ export default function DashboardPage() {
               </p>
               <Link
                 href="/courses"
-                className="inline-flex h-10 items-center rounded-xl bg-gradient-to-l from-indigo-600 to-violet-600 px-6 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
+                className="inline-flex h-10 items-center rounded-xl bg-gradient-to-l from-brand-600 to-brand-500 px-6 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
               >
                 גלה קורסים
               </Link>
@@ -425,7 +425,7 @@ function DashboardCard({
       <p className="mb-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">
         {title}
       </p>
-      <p className="mb-1 text-3xl font-bold bg-gradient-to-l from-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-violet-400">
+      <p className="mb-1 text-3xl font-bold bg-gradient-to-l from-brand-600 to-brand-500 bg-clip-text text-transparent dark:from-brand-400 dark:to-brand-300">
         {value}
       </p>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">{description}</p>

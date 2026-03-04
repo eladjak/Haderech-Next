@@ -1,15 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --brand-50: #eef2ff;
-  --brand-100: #e0e7ff;
-  --brand-500: #6366f1;
-  --brand-600: #4f46e5;
-  --brand-700: #4338ca;
-  --accent-400: #fbbf24;
-  --accent-500: #f59e0b;
+  --background: #FFFAF7;
+  --foreground: #1a1a2e;
+  /* Omanut HaKesher brand colors */
+  --brand-50: #fef2f4;
+  --brand-100: #fde6ea;
+  --brand-200: #f8c4cc;
+  --brand-300: #F08C9E;
+  --brand-400: #E85D75;
+  --brand-500: #E85D75;
+  --brand-600: #C94A62;
+  --brand-700: #a83a50;
+  /* Deep Blue */
+  --blue-50: #e8eef5;
+  --blue-100: #c5d4e6;
+  --blue-500: #1E3A5F;
+  --blue-600: #152B47;
+  --blue-700: #0f1f33;
+  /* Warm Gold accent */
+  --accent-300: #E8C97D;
+  --accent-400: #D4A853;
+  --accent-500: #B08A3A;
 }
 
 @theme inline {
@@ -17,9 +29,18 @@
   --color-foreground: var(--foreground);
   --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
   --color-brand-500: var(--brand-500);
   --color-brand-600: var(--brand-600);
   --color-brand-700: var(--brand-700);
+  --color-blue-50: var(--blue-50);
+  --color-blue-100: var(--blue-100);
+  --color-blue-500: var(--blue-500);
+  --color-blue-600: var(--blue-600);
+  --color-blue-700: var(--blue-700);
+  --color-accent-300: var(--accent-300);
   --color-accent-400: var(--accent-400);
   --color-accent-500: var(--accent-500);
   --font-sans: var(--font-heebo);
@@ -27,8 +48,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #0f1523;
     --foreground: #ededed;
+    --brand-50: #2a1a22;
+    --brand-100: #3d2430;
+    --blue-50: #1a2535;
+    --blue-100: #1e2d42;
   }
 }
 

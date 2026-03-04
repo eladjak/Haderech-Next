@@ -1,182 +1,391 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15 } },
+};
+
 export default function Home() {
   return (
-    <div className="min-h-dvh bg-white dark:bg-zinc-950">
+    <div className="min-h-dvh bg-[var(--background)]">
       <Header />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
+        {/* Hero background image */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <Image
+            src="/images/hero.jpg"
+            alt=""
+            fill
+            className="object-cover opacity-15 dark:opacity-10"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/60 via-[var(--background)]/80 to-[var(--background)]" />
+        </div>
         {/* Background decoration */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-          <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-indigo-100/50 blur-3xl dark:bg-indigo-900/20" />
-          <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-violet-100/40 blur-3xl dark:bg-violet-900/15" />
-          <div className="absolute -bottom-12 right-1/3 h-64 w-64 rounded-full bg-amber-100/30 blur-3xl dark:bg-amber-900/10" />
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-brand-100/40 blur-3xl dark:bg-brand-100/15" />
+          <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-blue-50/30 blur-3xl dark:bg-blue-100/10" />
+          <div className="absolute -bottom-12 right-1/3 h-64 w-64 rounded-full bg-accent-300/15 blur-3xl dark:bg-accent-400/8" />
         </div>
 
         <div className="container relative mx-auto px-4 pb-20 pt-24 text-center md:pb-28 md:pt-32">
-          <div className="mx-auto max-w-3xl">
+          <motion.div
+            className="mx-auto max-w-3xl"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
             {/* Badge */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              פלטפורמת למידה מובילה בעברית
-            </div>
+            <motion.div variants={fadeIn}>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-600 dark:border-brand-200/30 dark:bg-brand-50/50 dark:text-brand-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
+                461 זוגות כבר מצאו אהבה
+              </div>
+            </motion.div>
 
-            <h1 className="mb-6 text-4xl font-extrabold leading-tight text-zinc-900 dark:text-white md:text-5xl lg:text-6xl">
-              למד בקצב שלך,
+            <motion.h1
+              variants={fadeIn}
+              className="mb-6 text-4xl font-extrabold leading-tight text-blue-500 dark:text-white md:text-5xl lg:text-6xl"
+            >
+              הדרך שלך
               <br />
-              <span className="bg-gradient-to-l from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:via-violet-400 dark:to-purple-400">
-                בדרך שלך
+              <span className="bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 bg-clip-text text-transparent">
+                לזוגיות שאתה ראוי לה
               </span>
-            </h1>
-            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-              פלטפורמת הלימודים המתקדמת שמאפשרת לך ללמוד מהמומחים המובילים,
-              לעקוב אחרי ההתקדמות שלך, ולהגיע לתוצאות.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            </motion.h1>
+
+            <motion.p
+              variants={fadeIn}
+              className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-500/70 dark:text-zinc-400"
+            >
+              תוכנית "הדרך" של אומנות הקשר - 12 שבועות שישנו לך את חיי
+              הזוגיות. עם צ'אט AI חכם שמלווה אותך, סימולטור דייטים להתאמנות, וקהילה
+              תומכת של אנשים בדרך.
+            </motion.p>
+
+            <motion.div
+              variants={fadeIn}
+              className="flex flex-col items-center justify-center gap-4 sm:flex-row"
+            >
               <Link
                 href="/courses"
-                className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-l from-indigo-600 to-violet-600 px-8 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 hover:brightness-110"
+                className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-base font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30 hover:brightness-110"
               >
-                צפה בקורסים
-                <svg className="mr-2 h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                התחילו את המסע
+                <svg
+                  className="mr-2 h-4 w-4 rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                  />
                 </svg>
               </Link>
               <Link
                 href="/sign-up"
-                className="inline-flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white px-8 text-base font-semibold text-zinc-900 shadow-sm transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-indigo-800 dark:hover:bg-indigo-950/30"
+                className="inline-flex h-12 items-center justify-center rounded-xl border border-blue-500/20 bg-white px-8 text-base font-semibold text-blue-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-brand-200/30 dark:hover:bg-brand-50/20"
               >
                 התחל בחינם
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="border-y border-zinc-100 bg-zinc-50/50 py-12 dark:border-zinc-800 dark:bg-zinc-900/50">
+      <section className="border-y border-brand-100/50 bg-brand-50/30 py-12 dark:border-blue-100/20 dark:bg-blue-50/10">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-            <StatItem value="3+" label="קורסים" icon="book" />
-            <StatItem value="16+" label="שיעורים" icon="video" />
-            <StatItem value="100%" label="למידה עצמית" icon="self" />
-            <StatItem value="24/7" label="זמינות" icon="clock" />
-          </div>
+          <motion.div
+            className="grid grid-cols-2 gap-8 text-center md:grid-cols-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={staggerContainer}
+          >
+            <StatItem value="461" label="זוגות שנוצרו" icon="heart" />
+            <StatItem value="12" label="שבועות תוכנית" icon="calendar" />
+            <StatItem value="73" label="שיעורי וידאו" icon="video" />
+            <StatItem value="15+" label="שנות ניסיון" icon="star" />
+          </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* 3 Values Section */}
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4">
-          <div className="mx-auto mb-4 max-w-xl text-center">
-            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              למה הדרך?
+          <motion.div
+            className="mx-auto mb-4 max-w-xl text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
+              הגישה שלנו
             </span>
-            <h2 className="mb-4 text-3xl font-bold text-zinc-900 dark:text-white md:text-4xl">
-              הכלים שיעזרו לך להצליח
+            <h2 className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+              אמת. כלים. כבוד.
             </h2>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              הכלים שיעזרו לך ללמוד ביעילות ולהגיע לתוצאות
+            <p className="text-blue-500/60 dark:text-zinc-400">
+              שלושת הערכים שמנחים כל מה שאנחנו עושים
             </p>
-          </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          </motion.div>
+          <motion.div
+            className="mt-12 grid gap-6 md:grid-cols-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
             <FeatureCard
-              iconBg="from-indigo-500 to-blue-500"
+              iconBg="from-brand-500 to-brand-600"
               icon={
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+                  />
                 </svg>
               }
-              title="תוכן איכותי"
-              description="שיעורים מקצועיים מהמומחים המובילים בתחום, עם תוכן עשיר ותרגילים מעשיים."
+              title="אמת"
+              description='לא אגיד לך מה נעים לשמוע. אגיד לך מה אתה צריך לשמוע. ישר, בלי בולשיט.'
             />
             <FeatureCard
-              iconBg="from-violet-500 to-purple-500"
+              iconBg="from-blue-500 to-blue-600"
               icon={
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M11.42 15.17l-5.33-3.07a.75.75 0 010-1.3l5.33-3.07a.75.75 0 011.14.65v6.14a.75.75 0 01-1.14.65z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.25 12a8.25 8.25 0 11-16.5 0 8.25 8.25 0 0116.5 0z"
+                  />
                 </svg>
               }
-              title="למידה גמישה"
-              description="למד מכל מכשיר, בכל זמן. המערכת זוכרת איפה עצרת ומאפשרת לך להמשיך."
+              title="כלים"
+              description="כל פרק, כל מפגש, כל שיחה - כוללים משהו שאפשר ליישם כבר מחר בבוקר. לא תיאוריה מופשטת - כלים שעובדים."
             />
             <FeatureCard
-              iconBg="from-amber-500 to-orange-500"
+              iconBg="from-accent-400 to-accent-500"
               icon={
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                  />
                 </svg>
               }
-              title="מעקב ותעודות"
-              description="עקוב אחרי ההתקדמות שלך, מלא בחנים, קבל תעודות על סיום קורסים."
+              title="כבוד"
+              description="לא אטיף לך מוסר. באת לכאן כי אתה רוצה לשנות משהו - וזה לבד כבר אומר משהו על הערך שלך."
             />
-          </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* What You Get Section */}
+      <section className="border-t border-brand-100/30 bg-gradient-to-b from-brand-50/30 to-[var(--background)] py-20 dark:border-blue-100/10 dark:from-blue-50/5">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="mx-auto mb-4 max-w-xl text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
+              מה מחכה לך
+            </span>
+            <h2 className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+              לא סתם קורס - אקוסיסטם שלם
+            </h2>
+          </motion.div>
+          <motion.div
+            className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
+            <EcosystemCard
+              emoji="🎓"
+              title='תוכנית "הדרך" - 12 שבועות'
+              description="73 שיעורי וידאו, תרגילים מעשיים, שאלונים ובחנים. מסע מובנה מ'מי אני' עד 'מוכן לזוגיות'."
+              badge="ליבה"
+            />
+            <EcosystemCard
+              emoji="🤖"
+              title="צ'אט AI חכם - המאמן שלך"
+              description="בינה מלאכותית שמכירה את הקורס, את הספר ואותך. שואלת, מייעצת, מחזקת ומלווה כל שלב."
+              badge="AI"
+            />
+            <EcosystemCard
+              emoji="🎭"
+              title="סימולטור דייטים"
+              description="תתאמן על שיחות דייט עם פרסונות מציאותיות. בחר אופי, רמת קושי ותרחיש - וקבל משוב בזמן אמת."
+              badge="AI"
+            />
+            <EcosystemCard
+              emoji="📚"
+              title="ספרייה עשירה"
+              description="ספרים מומלצים, מאמרים, מחקרים, סרטונים ופודקאסטים - הכל מסודר לפי נושא ורמה."
+              badge="משאבים"
+            />
+            <EcosystemCard
+              emoji="💬"
+              title="כלי דייטינג מעשיים"
+              description="יוצר פרופיל היכרויות, ניתוח דייטים עם AI, נוסח הודעות פתיחה ועוד."
+              badge="כלים"
+            />
+            <EcosystemCard
+              emoji="👥"
+              title="קהילה ומועדון"
+              description="פורום, קבוצות, אתגרים יומיים, טיפ יומי, וקהילת לומדים שתומכת אחד בשני."
+              badge="קהילה"
+            />
+          </motion.div>
         </div>
       </section>
 
       {/* How it works */}
-      <section className="border-t border-zinc-100 bg-gradient-to-b from-zinc-50/80 to-white py-20 dark:border-zinc-800 dark:from-zinc-900/80 dark:to-zinc-950">
+      <section className="py-20 md:py-28">
         <div className="container mx-auto px-4">
-          <div className="mx-auto mb-4 max-w-xl text-center">
-            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              פשוט וקל
+          <motion.div
+            className="mx-auto mb-4 max-w-xl text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
+              5 פאזות למסע
             </span>
-            <h2 className="mb-12 text-3xl font-bold text-zinc-900 dark:text-white md:text-4xl">
-              איך זה עובד?
+            <h2 className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+              איך תוכנית "הדרך" עובדת?
             </h2>
-          </div>
-          <div className="mx-auto grid max-w-3xl gap-8 md:grid-cols-3">
-            <StepCard
-              step="1"
-              color="from-indigo-500 to-violet-500"
-              title="הירשם"
-              description="צור חשבון בחינם ובחר את הקורס שמתאים לך"
-            />
-            <StepCard
-              step="2"
-              color="from-violet-500 to-purple-500"
-              title="למד"
-              description="צפה בשיעורים, קרא תוכן, ותרגל עם בחנים"
-            />
-            <StepCard
-              step="3"
-              color="from-amber-500 to-orange-500"
-              title="קבל תעודה"
-              description="סיים את הקורס וקבל תעודת סיום מוכרת"
-            />
-          </div>
+          </motion.div>
+          <motion.div
+            className="mx-auto grid max-w-4xl gap-6 md:grid-cols-5"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
+            <PhaseCard step="1" color="from-brand-500 to-brand-600" title="גישה" weeks="שבועות 1-3" description="עבודה פנימית, סיפורים, גבולות" />
+            <PhaseCard step="2" color="from-blue-500 to-blue-600" title="תקשורת" weeks="שבועות 4-5" description="היכרות עצמית, רגשות, צרכים" />
+            <PhaseCard step="3" color="from-accent-400 to-accent-500" title="משיכה" weeks="שבועות 6-9" description="אומץ, היכרויות, דייטים" />
+            <PhaseCard step="4" color="from-brand-400 to-blue-500" title="חיבור" weeks="שבועות 10-11" description="כימיה, אינטימיות, פגיעות" />
+            <PhaseCard step="5" color="from-blue-500 to-brand-500" title="החלטה" weeks="שבוע 12" description="מחויבות, בניית זוגיות" />
+          </motion.div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 p-12 text-center shadow-2xl shadow-indigo-500/20 md:p-16">
+          <motion.div
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-blue-500 p-12 text-center shadow-2xl shadow-brand-500/20 md:p-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
             {/* Decorative circles */}
-            <div className="pointer-events-none absolute -top-12 -left-12 h-48 w-48 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
+            <div
+              className="pointer-events-none absolute -top-12 -left-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+              aria-hidden="true"
+            />
+            <div
+              className="pointer-events-none absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+              aria-hidden="true"
+            />
 
             <div className="relative">
               <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-                מוכנים להתחיל?
+                מוכנים להתחיל את המסע?
               </h2>
-              <p className="mx-auto mb-8 max-w-md text-indigo-100">
-                הצטרפו לאלפי לומדים שכבר בדרך לשינוי. ההרשמה חינמית.
+              <p className="mx-auto mb-8 max-w-md text-brand-100">
+                461 זוגות כבר מצאו אהבה דרך אומנות הקשר. הצעד הראשון שלך
+                מתחיל כאן.
               </p>
-              <Link
-                href="/sign-up"
-                className="inline-flex h-12 items-center justify-center rounded-xl bg-white px-8 text-base font-semibold text-indigo-700 shadow-lg transition-all hover:bg-indigo-50 hover:shadow-xl"
-              >
-                הרשמה חינמית
-                <svg className="mr-2 h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </Link>
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Link
+                  href="/sign-up"
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-white px-8 text-base font-semibold text-brand-600 shadow-lg transition-all hover:bg-brand-50 hover:shadow-xl"
+                >
+                  התחל בחינם
+                  <svg
+                    className="mr-2 h-4 w-4 rotate-180"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
+                  </svg>
+                </Link>
+                <Link
+                  href="/courses"
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-white/30 px-8 text-base font-semibold text-white transition-all hover:bg-white/10"
+                >
+                  צפה בתכנים
+                </Link>
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -197,75 +406,177 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="card-hover rounded-2xl border border-zinc-100 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${iconBg} shadow-sm`}>
+    <motion.div
+      variants={fadeIn}
+      className="card-hover rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
+    >
+      <div
+        className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${iconBg} shadow-sm`}
+      >
         {icon}
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">
+      <h3 className="mb-2 text-lg font-semibold text-blue-500 dark:text-white">
         {title}
       </h3>
-      <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{description}</p>
-    </div>
+      <p className="text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+        {description}
+      </p>
+    </motion.div>
   );
 }
 
-function StatItem({ value, label, icon }: { value: string; label: string; icon: string }) {
+function EcosystemCard({
+  emoji,
+  title,
+  description,
+  badge,
+}: {
+  emoji: string;
+  title: string;
+  description: string;
+  badge: string;
+}) {
+  return (
+    <motion.div
+      variants={fadeIn}
+      className="card-hover flex gap-4 rounded-2xl border border-brand-100/30 bg-white p-5 dark:border-blue-100/10 dark:bg-blue-50/5"
+    >
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-2xl dark:bg-brand-50/50">
+        {emoji}
+      </div>
+      <div>
+        <div className="mb-1 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-blue-500 dark:text-white">
+            {title}
+          </h3>
+          <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-50/50 dark:text-brand-300">
+            {badge}
+          </span>
+        </div>
+        <p className="text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+          {description}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+function StatItem({
+  value,
+  label,
+  icon,
+}: {
+  value: string;
+  label: string;
+  icon: string;
+}) {
   const icons: Record<string, React.ReactNode> = {
-    book: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+    heart: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+        />
+      </svg>
+    ),
+    calendar: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+        />
       </svg>
     ),
     video: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
+        />
       </svg>
     ),
-    self: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-      </svg>
-    ),
-    clock: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    star: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+        />
       </svg>
     ),
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+    <motion.div variants={fadeIn} className="flex flex-col items-center gap-2">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100/50 text-brand-500 dark:bg-brand-100/20 dark:text-brand-300">
         {icons[icon]}
       </div>
-      <p className="text-2xl font-bold text-zinc-900 dark:text-white md:text-3xl">
+      <p className="text-2xl font-bold text-blue-500 dark:text-white md:text-3xl">
         {value}
       </p>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">{label}</p>
-    </div>
+      <p className="text-sm text-blue-500/50 dark:text-zinc-400">{label}</p>
+    </motion.div>
   );
 }
 
-function StepCard({
+function PhaseCard({
   step,
   color,
   title,
+  weeks,
   description,
 }: {
   step: string;
   color: string;
   title: string;
+  weeks: string;
   description: string;
 }) {
   return (
-    <div className="text-center">
-      <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-lg font-bold text-white shadow-lg`}>
+    <motion.div variants={fadeIn} className="text-center">
+      <div
+        className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-lg font-bold text-white shadow-lg`}
+      >
         {step}
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">
+      <h3 className="mb-1 text-base font-semibold text-blue-500 dark:text-white">
         {title}
       </h3>
-      <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{description}</p>
-    </div>
+      <p className="mb-1 text-xs font-medium text-brand-500">{weeks}</p>
+      <p className="text-xs leading-relaxed text-blue-500/50 dark:text-zinc-400">
+        {description}
+      </p>
+    </motion.div>
   );
 }
