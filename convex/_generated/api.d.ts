@@ -20,6 +20,7 @@ import type * as chat from "../chat.js";
 import type * as comments from "../comments.js";
 import type * as community from "../community.js";
 import type * as courses from "../courses.js";
+import type * as dailyContent from "../dailyContent.js";
 import type * as enrollments from "../enrollments.js";
 import type * as gamification from "../gamification.js";
 import type * as lessons from "../lessons.js";
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   comments: typeof comments;
   community: typeof community;
   courses: typeof courses;
+  dailyContent: typeof dailyContent;
   enrollments: typeof enrollments;
   gamification: typeof gamification;
   lessons: typeof lessons;

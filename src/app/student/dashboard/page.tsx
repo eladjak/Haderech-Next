@@ -3,6 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -150,6 +151,27 @@ export default function StudentDashboardPage() {
               </div>
             </section>
 
+            {/* ===== Section 1b: Weekly Activity + Next Lesson ===== */}
+            <section className="mb-10" aria-label="פעילות שבועית">
+              <div className="grid gap-4 lg:grid-cols-3">
+                {/* Weekly streak dots */}
+                {streakData && (
+                  <WeeklyStreakWidget streak={streakData} />
+                )}
+
+                {/* Total study time */}
+                <StudyTimeWidget
+                  completedLessons={completedLessonsCount}
+                  currentStreak={streakData?.currentStreak ?? 0}
+                />
+
+                {/* Next lesson suggestion */}
+                {continueData?.primary && (
+                  <NextLessonSuggestion course={continueData.primary} />
+                )}
+              </div>
+            </section>
+
             {/* ===== Section 2: Continue Learning ===== */}
             {continueData && (
               <section className="mb-10" aria-label="המשך ללמוד">
@@ -242,6 +264,11 @@ export default function StudentDashboardPage() {
                     פרופיל מלא
                   </Link>
                 </div>
+
+                {/* Recent achievements sidebar strip */}
+                {earnedBadges.length > 0 && (
+                  <RecentAchievementsSidebar badges={earnedBadges.slice(0, 3)} />
+                )}
 
                 {/* Overall badges progress */}
                 <div className="mb-4 rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900">
@@ -430,6 +457,258 @@ export default function StudentDashboardPage() {
       </main>
     </div>
   );
+}
+
+// ─── New Phase 23b Sub-components ────────────────────────────────────────────
+
+const DAY_LABELS = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
+
+interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  totalActiveDays: number;
+  isActiveToday: boolean;
+  weekActivity: boolean[];
+}
+
+function WeeklyStreakWidget({ streak }: { streak: StreakData }) {
+  const today = new Date().getDay();
+
+  const weekDays = streak.weekActivity.map((active, i) => {
+    const dayOffset = 6 - i;
+    const dayIndex = (today - dayOffset + 7) % 7;
+    return { name: DAY_LABELS[dayIndex], active, isToday: i === 6 };
+  });
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+          פעילות שבועית
+        </h3>
+        <span className="flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-bold text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+          🔥 {streak.currentStreak} ימים
+        </span>
+      </div>
+
+      {/* 7-day dots row */}
+      <div className="mb-3 flex items-end justify-between gap-1">
+        {weekDays.map((day, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <motion.div
+              className={`h-8 w-8 rounded-full border-2 transition-colors ${
+                day.active
+                  ? "border-emerald-500 bg-emerald-500"
+                  : day.isToday
+                    ? "border-dashed border-zinc-300 bg-transparent dark:border-zinc-600"
+                    : "border-zinc-200 bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-700"
+              }`}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: i * 0.06, type: "spring", stiffness: 400, damping: 20 }}
+              aria-label={`${day.name}: ${day.active ? "למדת" : "לא למדת"}`}
+            >
+              {day.active && (
+                <div className="flex h-full items-center justify-center">
+                  <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </motion.div>
+            <span className="text-xs text-zinc-400 dark:text-zinc-500">{day.name}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Motivation */}
+      {!streak.isActiveToday ? (
+        <p className="text-center text-xs text-amber-600 dark:text-amber-400">
+          למד היום כדי לשמור על הרצף!
+        </p>
+      ) : (
+        <p className="text-center text-xs text-emerald-600 dark:text-emerald-400">
+          כל הכבוד! למדת היום ✓
+        </p>
+      )}
+    </div>
+  );
+}
+
+function StudyTimeWidget({
+  completedLessons,
+  currentStreak,
+}: {
+  completedLessons: number;
+  currentStreak: number;
+}) {
+  // Estimate: avg 12 min per lesson
+  const estimatedMinutesTotal = completedLessons * 12;
+  const hours = Math.floor(estimatedMinutesTotal / 60);
+  const minutes = estimatedMinutesTotal % 60;
+
+  // Weekly estimate: streak × 15 min/day
+  const weeklyMinutes = Math.min(currentStreak, 7) * 15;
+  const weeklyHours = Math.floor(weeklyMinutes / 60);
+  const weeklyMins = weeklyMinutes % 60;
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
+        זמן למידה
+      </h3>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between rounded-xl bg-blue-50 px-3 py-2.5 dark:bg-blue-950/30">
+          <div className="flex items-center gap-2">
+            <svg className="h-4 w-4 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-xs text-zinc-600 dark:text-zinc-400">
+              השבוע
+            </span>
+          </div>
+          <span className="text-sm font-bold text-zinc-900 dark:text-white">
+            {weeklyHours > 0 ? `${weeklyHours}ש ` : ""}
+            {weeklyMins}ד
+          </span>
+        </div>
+        <div className="flex items-center justify-between rounded-xl bg-zinc-100 px-3 py-2.5 dark:bg-zinc-800">
+          <div className="flex items-center gap-2">
+            <svg className="h-4 w-4 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+            </svg>
+            <span className="text-xs text-zinc-600 dark:text-zinc-400">
+              סה"כ
+            </span>
+          </div>
+          <span className="text-sm font-bold text-zinc-900 dark:text-white">
+            {hours > 0 ? `${hours}ש ` : ""}
+            {minutes}ד
+          </span>
+        </div>
+      </div>
+      <p className="mt-2 text-center text-xs text-zinc-400 dark:text-zinc-500">
+        הערכה בלבד (כ-12 דק׳ לשיעור)
+      </p>
+    </div>
+  );
+}
+
+interface NextLessonSuggestionCourse {
+  courseId: string;
+  courseTitle: string;
+  courseImage: string | null;
+  completedLessons: number;
+  totalLessons: number;
+  completionPercent: number;
+  nextLessonId: string;
+  nextLessonTitle: string;
+  nextLessonNumber: number;
+  lastActivity: number;
+  enrolledAt: number;
+}
+
+function NextLessonSuggestion({ course }: { course: NextLessonSuggestionCourse }) {
+  return (
+    <motion.div
+      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 p-5 text-white"
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.15 }}
+    >
+      {/* Decorative circle */}
+      <div className="pointer-events-none absolute -left-6 -top-6 h-24 w-24 rounded-full bg-white/10" aria-hidden="true" />
+      <div className="pointer-events-none absolute -bottom-4 -right-4 h-16 w-16 rounded-full bg-white/10" aria-hidden="true" />
+
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-white/70">
+        שיעור מוצע
+      </p>
+      <h3 className="mb-0.5 text-sm font-bold text-white/90">
+        {course.courseTitle}
+      </h3>
+      <p className="mb-4 text-base font-semibold text-white line-clamp-2">
+        {course.nextLessonTitle}
+      </p>
+
+      <div className="mb-3">
+        <div className="mb-1 flex justify-between text-xs text-white/70">
+          <span>התקדמות</span>
+          <span>{course.completionPercent}%</span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/20">
+          <div
+            className="h-full rounded-full bg-white/80 transition-all duration-500"
+            style={{ width: `${course.completionPercent}%` }}
+          />
+        </div>
+      </div>
+
+      <Link
+        href={`/course/${course.courseId}/lesson/${course.nextLessonId}`}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/30"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
+        </svg>
+        התחל שיעור {course.nextLessonNumber}
+      </Link>
+    </motion.div>
+  );
+}
+
+interface BadgeLike {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  earnedAt?: number;
+}
+
+function RecentAchievementsSidebar({ badges }: { badges: BadgeLike[] }) {
+  return (
+    <div className="mb-4 rounded-xl bg-gradient-to-l from-accent-300/10 to-transparent px-4 py-3">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-accent-500">
+        הישגים אחרונים
+      </p>
+      <div className="flex gap-3">
+        {badges.map((badge, i) => (
+          <motion.div
+            key={badge.id}
+            className="flex flex-col items-center gap-1 text-center"
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.1, type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-accent-300 to-accent-500 text-xl shadow">
+              {/* Map icon name to emoji fallback */}
+              <AchievementEmoji icon={badge.icon} />
+            </div>
+            <span className="max-w-[60px] text-xs font-medium text-zinc-700 dark:text-zinc-300 line-clamp-1">
+              {badge.title}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AchievementEmoji({ icon }: { icon: string }) {
+  const map: Record<string, string> = {
+    rocket: "🚀",
+    book: "📚",
+    bookOpen: "📖",
+    star: "⭐",
+    sword: "⚔️",
+    trophy: "🏆",
+    medal: "🥇",
+    fire: "🔥",
+    flame: "🔥",
+    crown: "👑",
+    compass: "🧭",
+    shield: "🛡️",
+  };
+  return <span aria-hidden="true">{map[icon] ?? "🎖️"}</span>;
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────────

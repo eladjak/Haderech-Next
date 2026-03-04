@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/header";
 import { CourseCard } from "@/components/course/course-card";
 import { CourseProgressTracker } from "@/components/course/course-progress-tracker";
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
+import { DailyContentWidget } from "@/components/daily-content";
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -135,6 +136,19 @@ export default function DashboardPage() {
             description="תעודות סיום שהונפקו"
             href="/certificates"
           />
+        </div>
+
+        {/* Daily Content Widget */}
+        <div className="mt-8">
+          <div className="mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
+              הטיפ היומי
+            </h2>
+            <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+              חדש כל יום
+            </span>
+          </div>
+          <DailyContentWidget />
         </div>
 
         {/* Progress Dashboard Link */}

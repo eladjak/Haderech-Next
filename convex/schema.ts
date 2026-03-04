@@ -314,4 +314,18 @@ export default defineSchema({
   })
     .index("by_reply", ["replyId"])
     .index("by_user_reply", ["userId", "replyId"]),
+
+  // תוכן יומי - טיפים, ציטוטים, אתגרים
+  dailyContent: defineTable({
+    type: v.union(
+      v.literal("tip"),
+      v.literal("quote"),
+      v.literal("challenge")
+    ),
+    content: v.string(),
+    author: v.optional(v.string()),
+    category: v.string(),
+    dayOfYear: v.number(), // 1-365, מתחלף מדי שנה
+    createdAt: v.number(),
+  }).index("by_day", ["dayOfYear"]),
 });
