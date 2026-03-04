@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useQuery } from "convex/react";
+import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -83,26 +85,32 @@ export default function Home() {
               variants={fadeIn}
               className="flex flex-col items-center justify-center gap-4 sm:flex-row"
             >
-              <Link
-                href="/courses"
-                className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-base font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30 hover:brightness-110"
+              <motion.div
+                animate={{ boxShadow: ["0 0 0 0 rgba(232,121,73,0.4)", "0 0 0 12px rgba(232,121,73,0)", "0 0 0 0 rgba(232,121,73,0)"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="rounded-xl"
               >
-                התחילו את המסע
-                <svg
-                  className="mr-2 h-4 w-4 rotate-180"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                  aria-hidden="true"
+                <Link
+                  href="/courses"
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-base font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30 hover:brightness-110"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                  />
-                </svg>
-              </Link>
+                  התחילו את המסע
+                  <svg
+                    className="mr-2 h-4 w-4 rotate-180"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
+                  </svg>
+                </Link>
+              </motion.div>
               <Link
                 href="/sign-up"
                 className="inline-flex h-12 items-center justify-center rounded-xl border border-blue-500/20 bg-white px-8 text-base font-semibold text-blue-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-brand-200/30 dark:hover:bg-brand-50/20"
@@ -110,12 +118,19 @@ export default function Home() {
                 התחל בחינם
               </Link>
             </motion.div>
+
+            <motion.p
+              variants={fadeIn}
+              className="mt-6 text-sm text-blue-500/50 dark:text-zinc-500"
+            >
+              הצטרפו ל-1,000+ תלמידים שכבר שינו את חיי הדייטינג שלהם
+            </motion.p>
           </motion.div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="border-y border-brand-100/50 bg-brand-50/30 py-12 dark:border-blue-100/20 dark:bg-blue-50/10">
+      {/* Platform Stats Counter Bar */}
+      <section className="bg-gradient-to-l from-blue-500 to-brand-500 py-10">
         <div className="container mx-auto px-4">
           <motion.div
             className="grid grid-cols-2 gap-8 text-center md:grid-cols-4"
@@ -124,10 +139,22 @@ export default function Home() {
             viewport={{ once: true, margin: "-50px" }}
             variants={staggerContainer}
           >
-            <StatItem value="461" label="זוגות שנוצרו" icon="heart" />
-            <StatItem value="12" label="שבועות תוכנית" icon="calendar" />
-            <StatItem value="73" label="שיעורי וידאו" icon="video" />
-            <StatItem value="15+" label="שנות ניסיון" icon="star" />
+            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
+              <span className="text-4xl font-extrabold text-white md:text-5xl">6+</span>
+              <span className="text-sm font-medium text-white/80">קורסים</span>
+            </motion.div>
+            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
+              <span className="text-4xl font-extrabold text-white md:text-5xl">30+</span>
+              <span className="text-sm font-medium text-white/80">שיעורים</span>
+            </motion.div>
+            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
+              <span className="text-4xl font-extrabold text-white md:text-5xl">1000+</span>
+              <span className="text-sm font-medium text-white/80">תלמידים</span>
+            </motion.div>
+            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
+              <span className="text-4xl font-extrabold text-white md:text-5xl">95%</span>
+              <span className="text-sm font-medium text-white/80">שביעות רצון</span>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -411,6 +438,12 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Success Stories Section */}
+      <SuccessStoriesSection />
+
+      {/* Featured Blog Posts Section */}
+      <FeaturedBlogSection />
+
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
@@ -544,95 +577,6 @@ function EcosystemCard({
   );
 }
 
-function StatItem({
-  value,
-  label,
-  icon,
-}: {
-  value: string;
-  label: string;
-  icon: string;
-}) {
-  const icons: Record<string, React.ReactNode> = {
-    heart: (
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-        />
-      </svg>
-    ),
-    calendar: (
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-        />
-      </svg>
-    ),
-    video: (
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
-        />
-      </svg>
-    ),
-    star: (
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-        />
-      </svg>
-    ),
-  };
-
-  return (
-    <motion.div variants={fadeIn} className="flex flex-col items-center gap-2">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100/50 text-brand-500 dark:bg-brand-100/20 dark:text-brand-300">
-        {icons[icon]}
-      </div>
-      <p className="text-2xl font-bold text-blue-500 dark:text-white md:text-3xl">
-        {value}
-      </p>
-      <p className="text-sm text-blue-500/50 dark:text-zinc-400">{label}</p>
-    </motion.div>
-  );
-}
-
 function PhaseCard({
   step,
   color,
@@ -726,5 +670,224 @@ function PricingCard({
         {cta}
       </Link>
     </motion.div>
+  );
+}
+
+// ─── Category label helpers ──────────────────────────────────────────────────
+
+const storyCategoryLabels: Record<string, string> = {
+  dating: "דייטינג",
+  relationship: "זוגיות",
+  "self-growth": "צמיחה אישית",
+  marriage: "נישואין",
+};
+
+const blogCategoryLabels: Record<string, string> = {
+  "dating-tips": "טיפים לדייטינג",
+  relationship: "זוגיות",
+  "self-improvement": "פיתוח עצמי",
+  communication: "תקשורת",
+  psychology: "פסיכולוגיה",
+};
+
+// ─── Success Stories Section ─────────────────────────────────────────────────
+
+function SuccessStoriesSection() {
+  const stories = useQuery(api.stories.listFeatured);
+
+  // Render nothing while loading or if no stories
+  if (!stories || stories.length === 0) return null;
+
+  // Show up to 3 stories on the landing page
+  const displayStories = stories.slice(0, 3);
+
+  return (
+    <section className="bg-gradient-to-b from-brand-50/40 to-[var(--background)] py-20 dark:from-blue-50/5">
+      <div className="container mx-auto px-4">
+        <motion.div
+          className="mx-auto mb-4 max-w-xl text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
+            סיפורי הצלחה אמיתיים
+          </span>
+          <h2 className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+            מה התלמידים שלנו אומרים
+          </h2>
+        </motion.div>
+
+        <motion.div
+          className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-3"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+        >
+          {displayStories.map((story) => (
+            <motion.div
+              key={story._id}
+              variants={fadeIn}
+              className="card-hover relative rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
+            >
+              {/* Quote icon */}
+              <svg
+                className="mb-4 h-8 w-8 text-brand-200 dark:text-brand-200/30"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zm-14.017 0v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" />
+              </svg>
+
+              {/* Story text - truncated to 3 lines */}
+              <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+                {story.story}
+              </p>
+
+              {/* Star rating */}
+              <div className="mb-3 flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <svg
+                    key={i}
+                    className={`h-4 w-4 ${i < story.rating ? "text-accent-400" : "text-zinc-200 dark:text-zinc-700"}`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+
+              {/* Name + category */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-blue-500 dark:text-white">
+                  {story.name}
+                </span>
+                <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-50/50 dark:text-brand-300">
+                  {storyCategoryLabels[story.category] ?? story.category}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          className="mt-8 text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <Link
+            href="/stories"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 underline underline-offset-4 transition-colors hover:text-brand-600"
+          >
+            ראה עוד סיפורים
+            <svg className="h-3.5 w-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Featured Blog Posts Section ─────────────────────────────────────────────
+
+function FeaturedBlogSection() {
+  const posts = useQuery(api.blog.listRecent);
+
+  // Render nothing while loading or if no posts
+  if (!posts || posts.length === 0) return null;
+
+  return (
+    <section className="py-20 md:py-28">
+      <div className="container mx-auto px-4">
+        <motion.div
+          className="mx-auto mb-4 max-w-xl text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
+            תוכן חדש
+          </span>
+          <h2 className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+            מהבלוג שלנו
+          </h2>
+        </motion.div>
+
+        <motion.div
+          className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+        >
+          {posts.map((post) => (
+            <motion.div
+              key={post._id}
+              variants={fadeIn}
+              className="card-hover flex flex-col rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
+            >
+              {/* Category badge */}
+              <span className="mb-3 inline-flex w-fit rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-50/50 dark:text-brand-300">
+                {blogCategoryLabels[post.category] ?? post.category}
+              </span>
+
+              {/* Title */}
+              <h3 className="mb-2 text-base font-semibold leading-snug text-blue-500 dark:text-white">
+                {post.title}
+              </h3>
+
+              {/* Excerpt - 2 lines */}
+              <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+                {post.excerpt}
+              </p>
+
+              {/* Read time + link */}
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-blue-500/40 dark:text-zinc-500">
+                  {post.readTime} דקות קריאה
+                </span>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-brand-500 transition-colors hover:text-brand-600"
+                >
+                  קרא עוד
+                  <svg className="h-3 w-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </Link>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          className="mt-8 text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 underline underline-offset-4 transition-colors hover:text-brand-600"
+          >
+            לכל המאמרים
+            <svg className="h-3.5 w-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </Link>
+        </motion.div>
+      </div>
+    </section>
   );
 }

@@ -16,6 +16,7 @@ import type * as adminLessons from "../adminLessons.js";
 import type * as adminQuizzes from "../adminQuizzes.js";
 import type * as aiSimulator from "../aiSimulator.js";
 import type * as analytics from "../analytics.js";
+import type * as blog from "../blog.js";
 import type * as certificates from "../certificates.js";
 import type * as chat from "../chat.js";
 import type * as comments from "../comments.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   adminQuizzes: typeof adminQuizzes;
   aiSimulator: typeof aiSimulator;
   analytics: typeof analytics;
+  blog: typeof blog;
   certificates: typeof certificates;
   chat: typeof chat;
   comments: typeof comments;

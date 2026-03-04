@@ -32,6 +32,7 @@ export function Footer() {
               תוכנית
             </span>
             <FooterLink href="/courses">הקורסים</FooterLink>
+            <FooterLink href="/blog">בלוג</FooterLink>
             <FooterLink href="/dashboard">האזור שלי</FooterLink>
             <FooterLink href="/certificates">תעודות</FooterLink>
             <FooterLink href="/student/leaderboard">טבלת מובילים</FooterLink>

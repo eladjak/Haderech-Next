@@ -35,6 +35,7 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-1 md:flex" aria-label="ניווט ראשי">
           <NavLink href="/courses">קורסים</NavLink>
+          <NavLink href="/blog">בלוג</NavLink>
           <NavLink href="/pricing">מחירים</NavLink>
           <SignedIn>
             <NavLink href="/dashboard">האזור שלי</NavLink>
@@ -99,6 +100,7 @@ export function Header() {
         <div className="border-t border-zinc-100 bg-white px-4 py-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950">
           <nav className="flex flex-col gap-1">
             <MobileNavLink href="/courses" onClick={closeMobileMenu}>קורסים</MobileNavLink>
+            <MobileNavLink href="/blog" onClick={closeMobileMenu}>בלוג</MobileNavLink>
             <MobileNavLink href="/pricing" onClick={closeMobileMenu}>מחירים</MobileNavLink>
             <SignedIn>
               <MobileNavLink href="/dashboard" onClick={closeMobileMenu}>האזור שלי</MobileNavLink>

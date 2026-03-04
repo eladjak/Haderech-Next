@@ -490,6 +490,33 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_scheduled", ["scheduledAt"]),
 
+  // בלוג - מאמרים
+  blogPosts: defineTable({
+    authorId: v.id("users"),
+    title: v.string(),
+    slug: v.string(),
+    excerpt: v.string(),
+    content: v.string(), // markdown content
+    coverImage: v.optional(v.string()),
+    category: v.union(
+      v.literal("dating-tips"),
+      v.literal("relationship"),
+      v.literal("self-improvement"),
+      v.literal("communication"),
+      v.literal("psychology")
+    ),
+    tags: v.array(v.string()),
+    published: v.boolean(),
+    readTime: v.number(), // estimated minutes
+    views: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_published", ["published"])
+    .index("by_category", ["category"])
+    .index("by_created", ["createdAt"]),
+
   // סיפורי הצלחה / עדויות
   successStories: defineTable({
     userId: v.optional(v.id("users")),
