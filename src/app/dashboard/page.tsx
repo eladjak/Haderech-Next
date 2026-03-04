@@ -8,6 +8,7 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { CourseCard } from "@/components/course/course-card";
 import { CourseProgressTracker } from "@/components/course/course-progress-tracker";
+import { WelcomeModal } from "@/components/onboarding/welcome-modal";
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -97,6 +98,9 @@ export default function DashboardPage() {
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
       <Header />
+
+      {/* Onboarding modal - shown once to new users */}
+      <WelcomeModal userName={user?.firstName ?? undefined} />
 
       <main className="container mx-auto px-4 py-12">
         <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-white">
@@ -284,6 +288,9 @@ export default function DashboardPage() {
             </div>
           </section>
         )}
+
+        {/* כלים חדשים - New Features Section */}
+        <NewFeaturesSection />
 
         {/* Available Courses */}
         <section className="mt-12">
@@ -695,6 +702,118 @@ function AchievementsSummaryCard({
         הצג פרופיל &rarr;
       </Link>
     </div>
+  );
+}
+
+const NEW_FEATURES = [
+  {
+    href: "/chat",
+    label: "מאמן AI",
+    description: "שיחה אישית עם מאמן דייטינג AI",
+    icon: "🤖",
+    color: "brand",
+  },
+  {
+    href: "/simulator",
+    label: "סימולטור",
+    description: "תרגול תרחישי דייט עם פרסונה AI",
+    icon: "🎭",
+    color: "purple",
+  },
+  {
+    href: "/tools",
+    label: "כלי דייטינג",
+    description: "בנה פרופיל, נתח תמונות ועוד",
+    icon: "🛠️",
+    color: "blue",
+  },
+  {
+    href: "/community",
+    label: "קהילה",
+    description: "שיתוף, עצות וסיפורי הצלחה",
+    icon: "👥",
+    color: "emerald",
+  },
+] as const;
+
+const FEATURE_COLOR_CLASSES = {
+  brand: "border-brand-200 bg-brand-50 hover:border-brand-300 hover:bg-brand-100 dark:border-brand-700/40 dark:bg-brand-900/20 dark:hover:bg-brand-900/30",
+  purple: "border-purple-200 bg-purple-50 hover:border-purple-300 hover:bg-purple-100 dark:border-purple-700/40 dark:bg-purple-900/20 dark:hover:bg-purple-900/30",
+  blue: "border-blue-200 bg-blue-50 hover:border-blue-300 hover:bg-blue-100 dark:border-blue-700/40 dark:bg-blue-900/20 dark:hover:bg-blue-900/30",
+  emerald: "border-emerald-200 bg-emerald-50 hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30",
+};
+
+const FEATURE_LABEL_CLASSES = {
+  brand: "text-brand-900 dark:text-brand-200",
+  purple: "text-purple-900 dark:text-purple-200",
+  blue: "text-blue-900 dark:text-blue-200",
+  emerald: "text-emerald-900 dark:text-emerald-200",
+};
+
+const FEATURE_DESC_CLASSES = {
+  brand: "text-brand-700 dark:text-brand-400",
+  purple: "text-purple-700 dark:text-purple-400",
+  blue: "text-blue-700 dark:text-blue-400",
+  emerald: "text-emerald-700 dark:text-emerald-400",
+};
+
+function NewFeaturesSection() {
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("haderech_new_features_dismissed");
+  });
+
+  if (dismissed) return null;
+
+  const handleDismiss = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("haderech_new_features_dismissed", "1");
+    }
+    setDismissed(true);
+  };
+
+  return (
+    <section className="mt-12">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            כלים חדשים
+          </h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            גלה את כל האפשרויות שמחכות לך
+          </p>
+        </div>
+        <button
+          onClick={handleDismiss}
+          className="text-xs text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+          aria-label="סגור סעיף כלים חדשים"
+        >
+          הסתר
+        </button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {NEW_FEATURES.map((feature) => (
+          <Link
+            key={feature.href}
+            href={feature.href}
+            className={`flex items-start gap-3 rounded-2xl border p-4 transition-all ${FEATURE_COLOR_CLASSES[feature.color]}`}
+          >
+            <span className="mt-0.5 text-2xl" aria-hidden="true">
+              {feature.icon}
+            </span>
+            <div>
+              <p className={`font-semibold ${FEATURE_LABEL_CLASSES[feature.color]}`}>
+                {feature.label}
+              </p>
+              <p className={`mt-0.5 text-xs ${FEATURE_DESC_CLASSES[feature.color]}`}>
+                {feature.description}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 

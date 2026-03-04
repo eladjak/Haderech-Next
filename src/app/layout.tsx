@@ -12,8 +12,54 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "הדרך - מערכת לימודים",
-  description: "פלטפורמה ללמידה אונליין",
+  title: {
+    default: "הדרך - אומנות הקשר",
+    template: "%s | הדרך - אומנות הקשר",
+  },
+  description:
+    "פלטפורמה ללמידת דייטינג וזוגיות באונליין. קורסים, סימולציות, כלים מעשיים ותמיכת קהילה לבניית קשרים אמיתיים ומשמעותיים.",
+  metadataBase: new URL("https://haderech.co.il"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "he_IL",
+    url: "https://haderech.co.il",
+    siteName: "הדרך - אומנות הקשר",
+    title: "הדרך - אומנות הקשר",
+    description:
+      "פלטפורמה ללמידת דייטינג וזוגיות באונליין. קורסים, סימולציות, כלים מעשיים ותמיכת קהילה.",
+    images: [
+      {
+        url: "/images/hero.jpg",
+        width: 1200,
+        height: 630,
+        alt: "הדרך - אומנות הקשר",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "הדרך - אומנות הקשר",
+    description:
+      "פלטפורמה ללמידת דייטינג וזוגיות באונליין. קורסים, סימולציות, כלים מעשיים ותמיכת קהילה.",
+    images: ["/images/hero.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

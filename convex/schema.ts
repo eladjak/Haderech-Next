@@ -47,6 +47,12 @@ export default defineSchema({
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     role: v.union(v.literal("student"), v.literal("admin")),
+    preferences: v.optional(
+      v.object({
+        interests: v.optional(v.array(v.string())),
+        onboardingCompleted: v.optional(v.boolean()),
+      })
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

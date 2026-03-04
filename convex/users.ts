@@ -190,6 +190,55 @@ export const seedAdmin = internalMutation({
   },
 });
 
+// עדכון העדפות משתמש (תחומי עניין ומטרות)
+export const updatePreferences = mutation({
+  args: {
+    interests: v.optional(v.array(v.string())),
+    onboardingCompleted: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    const currentPrefs = user.preferences ?? {};
+    await ctx.db.patch(user._id, {
+      preferences: {
+        ...currentPrefs,
+        ...(args.interests !== undefined ? { interests: args.interests } : {}),
+        ...(args.onboardingCompleted !== undefined
+          ? { onboardingCompleted: args.onboardingCompleted }
+          : {}),
+      },
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+// שליפת העדפות משתמש
+export const getPreferences = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    return user?.preferences ?? null;
+  },
+});
+
 // קידום משתמש ל-admin (לפי email)
 export const promoteToAdmin = mutation({
   args: { email: v.string() },

@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as adminComments from "../adminComments.js";
+import type * as adminCommunity from "../adminCommunity.js";
 import type * as adminLessons from "../adminLessons.js";
 import type * as adminQuizzes from "../adminQuizzes.js";
 import type * as aiSimulator from "../aiSimulator.js";
@@ -44,6 +45,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   adminComments: typeof adminComments;
+  adminCommunity: typeof adminCommunity;
   adminLessons: typeof adminLessons;
   adminQuizzes: typeof adminQuizzes;
   aiSimulator: typeof aiSimulator;
