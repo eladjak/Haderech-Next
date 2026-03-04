@@ -1,223 +1,598 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
-export const metadata: Metadata = {
-  title: "אודות",
-  description:
-    "הכירו את הדרך - אומנות הקשר. הפלטפורמה שנוצרה כדי לעזור לכם למצוא אהבה אמיתית. הסיפור שלנו, הערכים שלנו והמשימה שלנו.",
-  openGraph: {
-    title: "אודות | הדרך - אומנות הקשר",
-    description:
-      "הכירו את הדרך - הפלטפורמה שנוצרה כדי לעזור לכם למצוא אהבה אמיתית.",
-    url: "https://haderech.co.il/about",
-    images: [
-      {
-        url: "/images/hero.jpg",
-        width: 1200,
-        height: 630,
-        alt: "אודות - הדרך אומנות הקשר",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "אודות | הדרך - אומנות הקשר",
-    description:
-      "הכירו את הדרך - הפלטפורמה שנוצרה כדי לעזור לכם למצוא אהבה אמיתית.",
-    images: ["/images/hero.jpg"],
-  },
+/* ─── Animation variants ──────────────────────────────────────────── */
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55 } },
 };
 
-const VALUES = [
+const fadeInLeft = {
+  hidden: { opacity: 0, x: 30 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.55 } },
+};
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.88 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.45 } },
+};
+
+/* ─── Data ────────────────────────────────────────────────────────── */
+
+const PHASES = [
   {
-    title: "למידה בקצב שלך",
-    description:
-      "כל אחד לומד בצורה שונה. הפלטפורמה שלנו מאפשרת לך ללמוד מתי שנוח לך, בקצב שמתאים לך.",
-    icon: (
-      <svg
-        className="h-8 w-8"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
+    num: 1,
+    title: "גישה",
+    subtitle: "Approach",
+    desc: "עבודה פנימית, סיפורים מעצבים, גבולות בריאים – הכנה של האדם הפנימי.",
+    color: "from-brand-400 to-brand-600",
+    bg: "bg-brand-50 dark:bg-brand-100/10",
+    border: "border-brand-200 dark:border-brand-200/25",
+    text: "text-brand-600 dark:text-brand-300",
   },
   {
-    title: "תוכן מקצועי בעברית",
-    description:
-      "כל הקורסים נכתבו בעברית על ידי מומחים בתחום התקשורת הזוגית והאישית.",
-    icon: (
-      <svg
-        className="h-8 w-8"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
-        />
-      </svg>
-    ),
+    num: 2,
+    title: "תקשורת",
+    subtitle: "Communication",
+    desc: "היכרות עצמית עמוקה, שפת רגשות, ביטוי צרכים – הכלים לשיחה אמיתית.",
+    color: "from-blue-500 to-blue-600",
+    bg: "bg-blue-50 dark:bg-blue-50/10",
+    border: "border-blue-100 dark:border-blue-100/20",
+    text: "text-blue-500 dark:text-blue-400",
   },
   {
-    title: "מעקב התקדמות",
-    description:
-      "עקוב אחרי ההתקדמות שלך, צבור הישגים, ושמור על מוטיבציה עם מערכת הגמיפיקציה שלנו.",
-    icon: (
-      <svg
-        className="h-8 w-8"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-        />
-      </svg>
-    ),
+    num: 3,
+    title: "מעבר ומשיכה",
+    subtitle: "Transition & Attraction",
+    desc: "אומץ ליצור קשר, כיצד לגשת להיכרויות, ניהול דייטים ראשונים בביטחון.",
+    color: "from-accent-400 to-accent-500",
+    bg: "bg-amber-50 dark:bg-amber-50/10",
+    border: "border-amber-100 dark:border-amber-100/20",
+    text: "text-accent-500 dark:text-accent-300",
   },
   {
-    title: "קהילת לומדים",
-    description:
-      "הצטרף לקהילה של לומדים, שתף תובנות, שאל שאלות, וקבל תמיכה מעמיתים.",
-    icon: (
-      <svg
-        className="h-8 w-8"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-        />
-      </svg>
-    ),
+    num: 4,
+    title: "חיבור וכימיה",
+    subtitle: "Connection & Chemistry",
+    desc: "בניית כימיה אמיתית, הקשבה עמוקה, זיהוי הזדמנויות לחיבור.",
+    color: "from-rose-400 to-brand-500",
+    bg: "bg-rose-50 dark:bg-rose-50/10",
+    border: "border-rose-100 dark:border-rose-100/20",
+    text: "text-rose-600 dark:text-rose-400",
+  },
+  {
+    num: 5,
+    title: "אינטימיות",
+    subtitle: "Intimacy",
+    desc: "פגיעות בטוחה, קרבה רגשית אמיתית, 36 השאלות להתאהבות.",
+    color: "from-purple-400 to-purple-600",
+    bg: "bg-purple-50 dark:bg-purple-50/10",
+    border: "border-purple-100 dark:border-purple-100/20",
+    text: "text-purple-600 dark:text-purple-400",
+  },
+  {
+    num: 6,
+    title: "מחויבות",
+    subtitle: "Commitment",
+    desc: "קבלת החלטה מודעת, כניסה לזוגיות רשמית ובניית עתיד משותף.",
+    color: "from-emerald-400 to-emerald-600",
+    bg: "bg-emerald-50 dark:bg-emerald-50/10",
+    border: "border-emerald-100 dark:border-emerald-100/20",
+    text: "text-emerald-600 dark:text-emerald-400",
   },
 ];
 
+const VALUES = [
+  {
+    emoji: "🔍",
+    title: "אמת",
+    desc: "אנחנו מאמינים בכנות מוחלטת – עם עצמנו ועם הפרטנר. אמת היא הבסיס של כל חיבור אמיתי.",
+    color: "bg-brand-50 dark:bg-brand-100/10 border-brand-100 dark:border-brand-200/20",
+    badge: "text-brand-600 dark:text-brand-300 bg-brand-100 dark:bg-brand-200/20",
+  },
+  {
+    emoji: "🛠",
+    title: "כלים",
+    desc: "לא רק תיאוריה – כלים פרקטיים שעובדים בשטח. כל שיעור מסתיים עם משהו שאפשר לעשות עם זה מחר.",
+    color: "bg-blue-50 dark:bg-blue-50/10 border-blue-100 dark:border-blue-100/20",
+    badge: "text-blue-500 dark:text-blue-400 bg-blue-100 dark:bg-blue-100/20",
+  },
+  {
+    emoji: "🤝",
+    title: "כבוד",
+    desc: "כבוד לעצמך, לפרטנר ולתהליך. כל אדם בדרכו, בקצב שלו – ואנחנו כאן לליוות, לא לשפוט.",
+    color: "bg-amber-50 dark:bg-amber-50/10 border-amber-100 dark:border-amber-100/20",
+    badge: "text-accent-500 dark:text-accent-300 bg-amber-100 dark:bg-amber-100/20",
+  },
+];
+
+const STATS = [
+  { value: "461", label: "זוגות מצאו אהבה", icon: "❤️" },
+  { value: "73", label: "שיעורים מקצועיים", icon: "🎬" },
+  { value: "15+", label: "שנות ניסיון", icon: "⭐" },
+  { value: "6", label: "שלבים מוכחים", icon: "🗺️" },
+];
+
+const DIFFERENTIATORS = [
+  {
+    icon: "🤖",
+    title: "AI מאמן אישי 24/7",
+    desc: "צ'אט עם AI שמלווה אותך לאורך כל הדרך – עונה על שאלות, מנחה ומעודד בכל שעה.",
+  },
+  {
+    icon: "🎭",
+    title: "סימולטור דייטים מתקדם",
+    desc: "התאמן על שיחות ודייטים בסביבה בטוחה לפני שהולכים לעולם האמיתי.",
+  },
+  {
+    icon: "👥",
+    title: "קהילה תומכת",
+    desc: "הצטרף לאנשים בדרך – שתף, שאל ותמוך. אתה לא לבד במסע הזה.",
+  },
+  {
+    icon: "📊",
+    title: "שיטה מבוססת מחקר",
+    desc: "15 שנות עבודה עם מאות זוגות + ממצאים מהפסיכולוגיה החיובית ומחקרי קשרים.",
+  },
+];
+
+/* ─── Page Component ──────────────────────────────────────────────── */
+
 export default function AboutPage() {
   return (
-    <div className="min-h-dvh bg-white dark:bg-zinc-950">
+    <div className="min-h-dvh bg-[var(--background)]">
       <Header />
 
-      <main className="container mx-auto px-4 py-16">
-        {/* Hero */}
-        <div className="mx-auto mb-16 max-w-2xl text-center">
-          <h1 className="mb-4 text-4xl font-bold text-zinc-900 dark:text-white">
-            אודות הדרך
-          </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            פלטפורמת הלמידה המובילה בעברית לתקשורת זוגית ואישית. אנחנו מאמינים
-            שכל אחד יכול ללמוד את הכלים לבנות מערכות יחסים טובות יותר.
-          </p>
-        </div>
+      <main>
+        {/* ── Hero ──────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden pb-24 pt-20 md:pb-32 md:pt-28">
+          {/* Background image */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+          >
+            <Image
+              src="/images/hero.jpg"
+              alt=""
+              fill
+              className="object-cover opacity-10 dark:opacity-7"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/70 via-[var(--background)]/85 to-[var(--background)]" />
+          </div>
 
-        {/* Mission */}
-        <section className="mb-16 rounded-2xl bg-zinc-50 p-8 dark:bg-zinc-900 md:p-12">
-          <h2 className="mb-4 text-2xl font-bold text-zinc-900 dark:text-white">
-            המשימה שלנו
-          </h2>
-          <p className="max-w-3xl text-zinc-600 dark:text-zinc-400">
-            הדרך נוסדה מתוך אמונה שתקשורת טובה היא הבסיס לכל מערכת יחסים
-            בריאה. המטרה שלנו היא להנגיש ידע מקצועי ואיכותי בתחום התקשורת
-            הבינאישית, בעברית, בצורה שמתאימה לכל אחד. אנחנו מפתחים קורסים
-            מבוססי מחקר, עם תרגילים מעשיים, שמאפשרים למידה עמוקה בקצב אישי.
-          </p>
-        </section>
+          {/* Decorations */}
+          <div
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+            aria-hidden="true"
+          >
+            <div className="absolute -top-20 right-1/3 h-80 w-80 rounded-full bg-brand-100/50 blur-3xl dark:bg-brand-100/12" />
+            <div className="absolute top-28 left-1/4 h-64 w-64 rounded-full bg-blue-50/40 blur-3xl dark:bg-blue-100/8" />
+            <div className="absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-accent-300/20 blur-3xl dark:bg-accent-300/8" />
+          </div>
 
-        {/* Values */}
-        <section className="mb-16">
-          <h2 className="mb-8 text-center text-2xl font-bold text-zinc-900 dark:text-white">
-            הערכים שלנו
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2">
-            {VALUES.map((value) => (
-              <div
-                key={value.title}
-                className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800"
+          <div className="container relative mx-auto px-4 text-center">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={stagger}
+              className="mx-auto max-w-3xl"
+            >
+              {/* Badge */}
+              <motion.div variants={fadeIn}>
+                <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-600 dark:border-brand-200/30 dark:bg-brand-50/50 dark:text-brand-300">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
+                  הסיפור שמאחורי הפלטפורמה
+                </span>
+              </motion.div>
+
+              <motion.h1
+                variants={fadeIn}
+                className="mb-5 text-4xl font-extrabold leading-tight text-blue-500 dark:text-white md:text-5xl lg:text-6xl"
               >
-                <div className="mb-3 text-zinc-600 dark:text-zinc-400">
-                  {value.icon}
+                הסיפור שלנו
+              </motion.h1>
+
+              <motion.p
+                variants={fadeIn}
+                className="mx-auto max-w-2xl text-lg leading-relaxed text-blue-500/70 dark:text-zinc-400"
+              >
+                אומנות הקשר הוקמה מתוך אמונה אחת פשוטה: כל אחד ואחת ראויים
+                לאהבה אמיתית. "הדרך" היא הפלטפורמה שהפכה 15 שנות ניסיון
+                לתהליך מובנה ועוצמתי שעובד.
+              </motion.p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── The Story ─────────────────────────────────────────────── */}
+        <section className="py-20 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-2 md:items-center">
+              {/* Text */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-60px" }}
+                variants={stagger}
+              >
+                <motion.div variants={fadeIn}>
+                  <span className="mb-3 inline-block rounded-lg bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-600 dark:bg-brand-100/15 dark:text-brand-300">
+                    מי אנחנו
+                  </span>
+                </motion.div>
+
+                <motion.h2
+                  variants={fadeIn}
+                  className="mb-5 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
+                >
+                  15 שנה. אלפי שיחות.
+                  <br />
+                  <span className="bg-gradient-to-l from-brand-500 to-accent-400 bg-clip-text text-transparent">
+                    461 זוגות.
+                  </span>
+                </motion.h2>
+
+                <motion.div
+                  variants={stagger}
+                  className="space-y-4 text-blue-500/70 dark:text-zinc-400"
+                >
+                  <motion.p variants={fadeIn} className="leading-relaxed">
+                    אומנות הקשר נוסדה לפני למעלה מ-15 שנה על ידי מטפלים
+                    ומאמנים שראו שוב ושוב אנשים מדהימים שנתקעים בדרך לזוגיות.
+                    לא מחוסר רצון – אלא מחוסר כלים.
+                  </motion.p>
+                  <motion.p variants={fadeIn} className="leading-relaxed">
+                    מאז ליווינו מאות לקוחות בהתאמה אישית, ראינו מה עובד ומה
+                    לא, מה אנשים באמת צריכים ואיפה הם נתקעים. "הדרך" היא
+                    המיטב של כל הידע הזה – ארוז בתהליך ברור, נגיש, ועם
+                    ליווי של AI חכם.
+                  </motion.p>
+                  <motion.p variants={fadeIn} className="leading-relaxed">
+                    הגישה שלנו אישית ואותנטית. אנחנו לא מציעים "שיטות פיק-אפ"
+                    או טריקים – אלא עבודה אמיתית שמביאה תוצאות אמיתיות.
+                  </motion.p>
+                </motion.div>
+              </motion.div>
+
+              {/* Visual card */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-60px" }}
+                variants={fadeInLeft}
+                className="relative"
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-white p-8 shadow-xl shadow-brand-100/30 dark:border-brand-200/20 dark:from-brand-100/10 dark:to-blue-50/5 dark:shadow-none">
+                  {/* Decorative circles */}
+                  <div
+                    className="pointer-events-none absolute -top-12 -left-12 h-40 w-40 rounded-full bg-brand-100/60 blur-2xl dark:bg-brand-100/15"
+                    aria-hidden="true"
+                  />
+                  <div
+                    className="pointer-events-none absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-accent-300/30 blur-2xl dark:bg-accent-300/10"
+                    aria-hidden="true"
+                  />
+
+                  <div className="relative space-y-6">
+                    {/* Quote */}
+                    <div className="text-5xl leading-none text-brand-300 dark:text-brand-400/60">
+                      &ldquo;
+                    </div>
+                    <p className="text-lg font-medium leading-relaxed text-blue-500 dark:text-zinc-200">
+                      כל אחד ואחת ראויים לאהבה אמיתית. המשימה שלנו היא לתת
+                      לכם את הכלים, האומץ והדרך להגיע אליה.
+                    </p>
+                    <div className="flex items-center gap-3 pt-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-lg">
+                        ❤️
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-blue-500 dark:text-zinc-200">
+                          צוות אומנות הקשר
+                        </div>
+                        <div className="text-xs text-blue-500/60 dark:text-zinc-500">
+                          מייסדי הפלטפורמה
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">
-                  {value.title}
-                </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {value.description}
-                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Stats ─────────────────────────────────────────────────── */}
+        <section className="border-y border-brand-100/50 bg-gradient-to-l from-brand-50/40 via-white to-blue-50/30 py-16 dark:border-blue-100/15 dark:bg-gradient-to-l dark:from-brand-100/8 dark:via-transparent dark:to-blue-50/5">
+          <div className="container mx-auto px-4">
+            <motion.div
+              className="grid grid-cols-2 gap-8 md:grid-cols-4"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={stagger}
+            >
+              {STATS.map((stat) => (
+                <motion.div
+                  key={stat.label}
+                  variants={scaleIn}
+                  className="text-center"
+                >
+                  <div className="mb-2 text-3xl">{stat.icon}</div>
+                  <div className="mb-1 text-3xl font-extrabold text-blue-500 dark:text-white md:text-4xl">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-blue-500/60 dark:text-zinc-400">
+                    {stat.label}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Methodology – 6 Phases ────────────────────────────────── */}
+        <section className="py-20 md:py-28">
+          <div className="container mx-auto px-4">
+            {/* Section header */}
+            <motion.div
+              className="mx-auto mb-14 max-w-2xl text-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={stagger}
+            >
+              <motion.div variants={fadeIn}>
+                <span className="mb-3 inline-block rounded-lg bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-500 dark:bg-blue-50/15 dark:text-blue-400">
+                  המתודולוגיה
+                </span>
+              </motion.div>
+              <motion.h2
+                variants={fadeIn}
+                className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
+              >
+                6 שלבים לזוגיות שאתה ראוי לה
+              </motion.h2>
+              <motion.p
+                variants={fadeIn}
+                className="text-blue-500/70 dark:text-zinc-400"
+              >
+                תהליך מובנה, מדורג ומוכח שמוביל מהיכן שאתה עכשיו עד לזוגיות
+                אמיתית. כל שלב בונה על הקודם.
+              </motion.p>
+            </motion.div>
+
+            {/* Phases grid */}
+            <motion.div
+              className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={stagger}
+            >
+              {PHASES.map((phase) => (
+                <motion.div
+                  key={phase.num}
+                  variants={fadeIn}
+                  className={`relative overflow-hidden rounded-2xl border p-6 ${phase.bg} ${phase.border} transition-shadow hover:shadow-md`}
+                >
+                  {/* Number badge */}
+                  <div
+                    className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${phase.color} text-sm font-bold text-white shadow-sm`}
+                  >
+                    {phase.num}
+                  </div>
+
+                  <div className={`mb-0.5 text-xs font-medium uppercase tracking-wider opacity-60 ${phase.text}`}>
+                    {phase.subtitle}
+                  </div>
+                  <h3 className={`mb-2 text-xl font-bold ${phase.text}`}>
+                    {phase.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-blue-500/65 dark:text-zinc-400">
+                    {phase.desc}
+                  </p>
+
+                  {/* Large faint number decoration */}
+                  <div
+                    className={`pointer-events-none absolute -bottom-3 -left-1 text-8xl font-black opacity-6 ${phase.text}`}
+                    aria-hidden="true"
+                  >
+                    {phase.num}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Core Values ───────────────────────────────────────────── */}
+        <section className="bg-gradient-to-b from-transparent via-brand-50/25 to-transparent py-20 dark:via-brand-100/5 md:py-24">
+          <div className="container mx-auto px-4">
+            <motion.div
+              className="mx-auto mb-12 max-w-xl text-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={stagger}
+            >
+              <motion.div variants={fadeIn}>
+                <span className="mb-3 inline-block rounded-lg bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-600 dark:bg-brand-100/15 dark:text-brand-300">
+                  הערכים שלנו
+                </span>
+              </motion.div>
+              <motion.h2
+                variants={fadeIn}
+                className="mb-3 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
+              >
+                מה מנחה אותנו
+              </motion.h2>
+              <motion.p
+                variants={fadeIn}
+                className="text-blue-500/70 dark:text-zinc-400"
+              >
+                שלושה עמודי יסוד שעומדים בבסיס כל מה שאנחנו עושים
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={stagger}
+            >
+              {VALUES.map((val) => (
+                <motion.div
+                  key={val.title}
+                  variants={scaleIn}
+                  className={`rounded-2xl border p-7 ${val.color} text-center transition-shadow hover:shadow-md`}
+                >
+                  <div className="mb-4 text-4xl">{val.emoji}</div>
+                  <div
+                    className={`mb-2 inline-block rounded-full px-3 py-0.5 text-xs font-bold uppercase tracking-wider ${val.badge}`}
+                  >
+                    {val.title}
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+                    {val.desc}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── What Makes Us Different ───────────────────────────────── */}
+        <section className="py-20 md:py-28">
+          <div className="container mx-auto px-4">
+            <motion.div
+              className="mx-auto mb-12 max-w-xl text-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={stagger}
+            >
+              <motion.div variants={fadeIn}>
+                <span className="mb-3 inline-block rounded-lg bg-accent-300/20 px-3 py-1 text-sm font-semibold text-accent-500 dark:bg-accent-300/15 dark:text-accent-300">
+                  למה דווקא אנחנו?
+                </span>
+              </motion.div>
+              <motion.h2
+                variants={fadeIn}
+                className="mb-3 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
+              >
+                מה הופך את "הדרך" לשונה
+              </motion.h2>
+              <motion.p
+                variants={fadeIn}
+                className="text-blue-500/70 dark:text-zinc-400"
+              >
+                לא קורס סטנדרטי – חוויה מלאה עם ליווי, תרגול ותמיכה
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={stagger}
+            >
+              {DIFFERENTIATORS.map((item) => (
+                <motion.div
+                  key={item.title}
+                  variants={fadeIn}
+                  className="flex gap-5 rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/60"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100/80 text-2xl dark:from-brand-100/15 dark:to-brand-100/5">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="mb-1.5 font-bold text-blue-500 dark:text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-blue-500/65 dark:text-zinc-400">
+                      {item.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── CTA ───────────────────────────────────────────────────── */}
+        <section className="pb-24 pt-4 md:pb-32">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              variants={fadeIn}
+              className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-blue-600 via-blue-500 to-blue-600 px-8 py-16 text-center shadow-2xl md:px-16"
+            >
+              {/* Background decorations */}
+              <div
+                className="pointer-events-none absolute inset-0 overflow-hidden"
+                aria-hidden="true"
+              >
+                <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-white/5 blur-2xl" />
+                <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-brand-300/15 blur-2xl" />
+                <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-400/10 blur-3xl" />
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Stats */}
-        <section className="mb-16 rounded-2xl bg-zinc-900 p-8 text-center dark:bg-zinc-800 md:p-12">
-          <h2 className="mb-8 text-2xl font-bold text-white">
-            הדרך במספרים
-          </h2>
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            <div>
-              <div className="text-3xl font-bold text-white">3+</div>
-              <div className="mt-1 text-sm text-zinc-400">קורסים</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-white">17+</div>
-              <div className="mt-1 text-sm text-zinc-400">שיעורים</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-white">9+</div>
-              <div className="mt-1 text-sm text-zinc-400">בחנים</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-white">100%</div>
-              <div className="mt-1 text-sm text-zinc-400">תוכן בעברית</div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="text-center">
-          <h2 className="mb-4 text-2xl font-bold text-zinc-900 dark:text-white">
-            מוכנים להתחיל?
-          </h2>
-          <p className="mb-6 text-zinc-600 dark:text-zinc-400">
-            הצטרפו אלינו והתחילו את המסע לתקשורת טובה יותר
-          </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/courses"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-900 px-8 text-base font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-            >
-              צפה בקורסים
-            </Link>
-            <Link
-              href="/sign-up"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-300 px-8 text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900"
-            >
-              הרשמה חינם
-            </Link>
+              <div className="relative">
+                <div className="mb-4 text-4xl">🚀</div>
+                <h2 className="mb-4 text-3xl font-extrabold text-white md:text-4xl">
+                  מוכנים להתחיל?
+                </h2>
+                <p className="mx-auto mb-8 max-w-lg text-lg text-white/80">
+                  הצטרפו ל-461 זוגות שכבר מצאו אהבה אמיתית. המסע שלכם מתחיל
+                  עכשיו.
+                </p>
+                <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                  <Link
+                    href="/sign-up"
+                    className="inline-flex h-13 items-center justify-center rounded-xl bg-white px-8 text-base font-bold text-blue-600 shadow-lg transition-all hover:shadow-xl hover:brightness-105"
+                  >
+                    הרשמה חינם
+                    <svg
+                      className="mr-2 h-4 w-4 rotate-180"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                      />
+                    </svg>
+                  </Link>
+                  <Link
+                    href="/courses"
+                    className="inline-flex h-13 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 text-base font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+                  >
+                    צפו בקורסים
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
       </main>
