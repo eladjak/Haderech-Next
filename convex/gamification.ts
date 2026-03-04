@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // ==========================================
@@ -699,5 +699,487 @@ export const getCertificateForSharing = query({
       userImageUrl: user?.imageUrl ?? null,
       courseImageUrl: course?.imageUrl ?? null,
     };
+  },
+});
+
+// ==========================================
+// Phase 25 - Event-based XP System
+// Persistent XP events, badge tables, mutations
+// ==========================================
+
+// --- Get user stats (total XP from events, level, streak, badge count) ---
+export const getUserStats = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    // Sum XP from xpEvents table
+    const xpEvents = await ctx.db
+      .query("xpEvents")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    const totalXP = xpEvents.reduce((sum, e) => sum + e.points, 0);
+
+    // Level: level = floor(xp / 100) + 1
+    const level = Math.floor(totalXP / 100) + 1;
+    const xpInCurrentLevel = totalXP % 100;
+    const xpNeededForNextLevel = 100;
+
+    // Count current streak from progress table (consecutive days with activity)
+    const allProgress = await ctx.db
+      .query("progress")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    const activeDaysSet = new Set<string>();
+    for (const p of allProgress) {
+      const date = new Date(p.lastWatchedAt);
+      activeDaysSet.add(
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+      );
+    }
+
+    // Also count xpEvent days as active
+    for (const e of xpEvents) {
+      const date = new Date(e.createdAt);
+      activeDaysSet.add(
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+      );
+    }
+
+    const activeDays = Array.from(activeDaysSet).sort();
+    let currentStreak = 0;
+    if (activeDays.length > 0) {
+      const today = new Date();
+      const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      const yesterday = new Date(today.getTime() - 86400000);
+      const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+      const isActiveToday = activeDaysSet.has(todayKey);
+      const isActiveYesterday = activeDaysSet.has(yesterdayKey);
+
+      if (isActiveToday || isActiveYesterday) {
+        currentStreak = 1;
+        const checkDate = isActiveToday ? today : yesterday;
+        for (let i = 1; i <= activeDays.length; i++) {
+          const prevDate = new Date(checkDate.getTime() - 86400000 * i);
+          const prevKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}-${String(prevDate.getDate()).padStart(2, "0")}`;
+          if (activeDaysSet.has(prevKey)) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    // Badge count from userBadges table
+    const userBadges = await ctx.db
+      .query("userBadges")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    return {
+      totalXP,
+      level,
+      xpInCurrentLevel,
+      xpNeededForNextLevel,
+      progressPercent:
+        xpNeededForNextLevel > 0
+          ? Math.round((xpInCurrentLevel / xpNeededForNextLevel) * 100)
+          : 100,
+      currentStreak,
+      badgeCount: userBadges.length,
+    };
+  },
+});
+
+// --- Recent XP events for user (last 20) ---
+export const getUserXpHistory = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const events = await ctx.db
+      .query("xpEvents")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .take(20);
+
+    return events;
+  },
+});
+
+// --- All badges earned by user with badge details ---
+export const getUserEarnedBadges = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    // Get all badge definitions
+    const allBadges = await ctx.db.query("badges").collect();
+
+    // Get user's earned badges
+    const userBadges = await ctx.db
+      .query("userBadges")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    const earnedBadgeIds = new Set(userBadges.map((ub) => ub.badgeId));
+
+    // Map badges with earned status
+    const badges = allBadges.map((badge) => {
+      const userBadge = userBadges.find((ub) => ub.badgeId === badge._id);
+      return {
+        _id: badge._id,
+        slug: badge.slug,
+        title: badge.title,
+        description: badge.description,
+        icon: badge.icon,
+        category: badge.category,
+        condition: badge.condition,
+        earned: earnedBadgeIds.has(badge._id),
+        earnedAt: userBadge?.earnedAt,
+      };
+    });
+
+    const earnedCount = badges.filter((b) => b.earned).length;
+
+    return {
+      badges,
+      earnedCount,
+      totalCount: allBadges.length,
+    };
+  },
+});
+
+// --- Leaderboard (top 10 users by XP from events, public) ---
+export const getXpLeaderboard = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+
+    const entries = await Promise.all(
+      users.map(async (user) => {
+        const xpEvents = await ctx.db
+          .query("xpEvents")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .collect();
+
+        const totalXP = xpEvents.reduce((sum, e) => sum + e.points, 0);
+        const level = Math.floor(totalXP / 100) + 1;
+
+        const userBadges = await ctx.db
+          .query("userBadges")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .collect();
+
+        return {
+          userId: user._id,
+          name: user.name ?? "סטודנט",
+          imageUrl: user.imageUrl,
+          totalXP,
+          level,
+          badgeCount: userBadges.length,
+        };
+      })
+    );
+
+    return entries
+      .filter((e) => e.totalXP > 0)
+      .sort((a, b) => b.totalXP - a.totalXP)
+      .slice(0, 10);
+  },
+});
+
+// --- Award XP (internal mutation) ---
+export const awardXp = internalMutation({
+  args: {
+    userId: v.id("users"),
+    type: v.string(),
+    points: v.number(),
+    description: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("xpEvents", {
+      userId: args.userId,
+      type: args.type,
+      points: args.points,
+      description: args.description,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+// --- Check and award badges (internal mutation) ---
+export const checkAndAwardBadges = internalMutation({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    // Get all badge definitions
+    const allBadges = await ctx.db.query("badges").collect();
+
+    // Get user's already earned badges
+    const userBadges = await ctx.db
+      .query("userBadges")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+    const earnedSlugs = new Set<string>();
+    for (const ub of userBadges) {
+      const badge = await ctx.db.get(ub.badgeId);
+      if (badge) earnedSlugs.add(badge.slug);
+    }
+
+    // Gather user data for condition checks
+    const xpEvents = await ctx.db
+      .query("xpEvents")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+    const totalXP = xpEvents.reduce((sum, e) => sum + e.points, 0);
+
+    const allProgress = await ctx.db
+      .query("progress")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+    const completedLessons = allProgress.filter((p) => p.completed).length;
+
+    const allAttempts = await ctx.db
+      .query("quizAttempts")
+      .withIndex("by_user_quiz")
+      .collect();
+    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const passedQuizzes = userAttempts.filter((a) => a.passed).length;
+
+    const chatSessions = await ctx.db
+      .query("chatSessions")
+      .withIndex("by_user")
+      .collect();
+    const userChatSessions = chatSessions.filter(
+      (s) => s.userId === args.userId.toString()
+    );
+
+    const simulatorSessions = await ctx.db
+      .query("simulatorSessions")
+      .withIndex("by_user")
+      .collect();
+    const completedSimulations = simulatorSessions.filter(
+      (s) => s.userId === args.userId.toString() && s.status === "completed"
+    );
+
+    const communityPosts = await ctx.db
+      .query("communityTopics")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    // Calculate current streak
+    const activeDaysSet = new Set<string>();
+    for (const p of allProgress) {
+      const date = new Date(p.lastWatchedAt);
+      activeDaysSet.add(
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+      );
+    }
+    const activeDays = Array.from(activeDaysSet).sort();
+    let longestStreak = activeDays.length > 0 ? 1 : 0;
+    let tempStreak = 1;
+    for (let i = 1; i < activeDays.length; i++) {
+      const prev = new Date(activeDays[i - 1]);
+      const curr = new Date(activeDays[i]);
+      const diffDays = Math.round(
+        (curr.getTime() - prev.getTime()) / 86400000
+      );
+      if (diffDays === 1) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else {
+        tempStreak = 1;
+      }
+    }
+
+    // Check each unearned badge
+    const now = Date.now();
+    for (const badge of allBadges) {
+      if (earnedSlugs.has(badge.slug)) continue;
+
+      let qualified = false;
+
+      switch (badge.slug) {
+        case "first_lesson":
+          qualified = completedLessons >= 1;
+          break;
+        case "streak_3":
+          qualified = longestStreak >= 3;
+          break;
+        case "streak_7":
+          qualified = longestStreak >= 7;
+          break;
+        case "streak_30":
+          qualified = longestStreak >= 30;
+          break;
+        case "first_chat":
+          qualified = userChatSessions.length >= 1;
+          break;
+        case "first_simulation":
+          qualified = completedSimulations.length >= 1;
+          break;
+        case "quiz_master":
+          qualified = passedQuizzes >= 5;
+          break;
+        case "course_complete": {
+          const certificates = await ctx.db
+            .query("certificates")
+            .withIndex("by_user", (q) => q.eq("userId", args.userId))
+            .collect();
+          qualified = certificates.length >= 1;
+          break;
+        }
+        case "community_active":
+          qualified = communityPosts.length >= 5;
+          break;
+        case "xp_100":
+          qualified = totalXP >= 100;
+          break;
+        case "xp_500":
+          qualified = totalXP >= 500;
+          break;
+        case "xp_1000":
+          qualified = totalXP >= 1000;
+          break;
+      }
+
+      if (qualified) {
+        await ctx.db.insert("userBadges", {
+          userId: args.userId,
+          badgeId: badge._id,
+          earnedAt: now,
+        });
+      }
+    }
+  },
+});
+
+// --- Seed initial 12 badges ---
+export const seedBadges = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // Check if badges already seeded
+    const existing = await ctx.db.query("badges").first();
+    if (existing) {
+      return { message: "Badges already seeded", count: 0 };
+    }
+
+    const now = Date.now();
+    const badgeDefinitions = [
+      {
+        slug: "first_lesson",
+        title: "השיעור הראשון",
+        description: "השלמת את השיעור הראשון",
+        icon: "\uD83C\uDF93",
+        category: "learning" as const,
+        condition: "lessons_completed >= 1",
+      },
+      {
+        slug: "streak_3",
+        title: "3 ימים ברצף",
+        description: "למדת 3 ימים ברציפות",
+        icon: "\uD83D\uDD25",
+        category: "streak" as const,
+        condition: "streak_days >= 3",
+      },
+      {
+        slug: "streak_7",
+        title: "שבוע ברצף",
+        description: "למדת שבוע שלם ברציפות",
+        icon: "\uD83D\uDD25",
+        category: "streak" as const,
+        condition: "streak_days >= 7",
+      },
+      {
+        slug: "streak_30",
+        title: "חודש ברצף",
+        description: "למדת חודש שלם ברציפות",
+        icon: "\uD83D\uDD25",
+        category: "streak" as const,
+        condition: "streak_days >= 30",
+      },
+      {
+        slug: "first_chat",
+        title: "שיחה ראשונה",
+        description: "ניהלת שיחה ראשונה עם המאמן",
+        icon: "\uD83D\uDCAC",
+        category: "social" as const,
+        condition: "chat_sessions >= 1",
+      },
+      {
+        slug: "first_simulation",
+        title: "סימולציה ראשונה",
+        description: "השלמת סימולציה ראשונה",
+        icon: "\uD83C\uDFAD",
+        category: "learning" as const,
+        condition: "simulations_completed >= 1",
+      },
+      {
+        slug: "quiz_master",
+        title: "מאסטר בחנים",
+        description: "עברת 5 בחנים בהצלחה",
+        icon: "\uD83D\uDCDD",
+        category: "learning" as const,
+        condition: "quizzes_passed >= 5",
+      },
+      {
+        slug: "course_complete",
+        title: "סיום קורס",
+        description: "השלמת קורס שלם",
+        icon: "\uD83C\uDFC6",
+        category: "achievement" as const,
+        condition: "courses_completed >= 1",
+      },
+      {
+        slug: "community_active",
+        title: "פעיל בקהילה",
+        description: "פרסמת 5 פוסטים בקהילה",
+        icon: "\uD83D\uDC65",
+        category: "social" as const,
+        condition: "community_posts >= 5",
+      },
+      {
+        slug: "xp_100",
+        title: "100 נקודות",
+        description: "צברת 100 נקודות ניסיון",
+        icon: "\u2B50",
+        category: "achievement" as const,
+        requiredXp: 100,
+        condition: "total_xp >= 100",
+      },
+      {
+        slug: "xp_500",
+        title: "500 נקודות",
+        description: "צברת 500 נקודות ניסיון",
+        icon: "\uD83C\uDF1F",
+        category: "achievement" as const,
+        requiredXp: 500,
+        condition: "total_xp >= 500",
+      },
+      {
+        slug: "xp_1000",
+        title: "1000 נקודות",
+        description: "צברת 1000 נקודות ניסיון",
+        icon: "\uD83D\uDC8E",
+        category: "achievement" as const,
+        requiredXp: 1000,
+        condition: "total_xp >= 1000",
+      },
+    ];
+
+    for (const badge of badgeDefinitions) {
+      await ctx.db.insert("badges", {
+        ...badge,
+        createdAt: now,
+      });
+    }
+
+    return { message: "Badges seeded successfully", count: badgeDefinitions.length };
   },
 });

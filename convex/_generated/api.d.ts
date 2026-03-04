@@ -9,6 +9,7 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as adminAnalytics from "../adminAnalytics.js";
 import type * as adminComments from "../adminComments.js";
 import type * as adminCommunity from "../adminCommunity.js";
 import type * as adminLessons from "../adminLessons.js";
@@ -31,6 +32,7 @@ import type * as notifications from "../notifications.js";
 import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
 import type * as quizzes from "../quizzes.js";
+import type * as reviews from "../reviews.js";
 import type * as seed from "../seed.js";
 import type * as seedCourseData from "../seedCourseData.js";
 import type * as seedSimulatorData from "../seedSimulatorData.js";
@@ -46,6 +48,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  adminAnalytics: typeof adminAnalytics;
   adminComments: typeof adminComments;
   adminCommunity: typeof adminCommunity;
   adminLessons: typeof adminLessons;
@@ -68,6 +71,7 @@ declare const fullApi: ApiFromModules<{
   progress: typeof progress;
   quizResults: typeof quizResults;
   quizzes: typeof quizzes;
+  reviews: typeof reviews;
   seed: typeof seed;
   seedCourseData: typeof seedCourseData;
   seedSimulatorData: typeof seedSimulatorData;

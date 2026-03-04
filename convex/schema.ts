@@ -387,4 +387,67 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_created", ["createdAt"]),
+
+  // XP אירועים
+  xpEvents: defineTable({
+    userId: v.id("users"),
+    type: v.string(), // "lesson_complete", "quiz_pass", "streak_day", "chat_session", "simulator_complete", "community_post", "daily_login"
+    points: v.number(),
+    description: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_type", ["userId", "type"]),
+
+  // תגים/הישגים
+  badges: defineTable({
+    slug: v.string(),
+    title: v.string(),
+    description: v.string(),
+    icon: v.string(), // emoji
+    category: v.union(
+      v.literal("learning"),
+      v.literal("social"),
+      v.literal("streak"),
+      v.literal("achievement")
+    ),
+    requiredXp: v.optional(v.number()),
+    condition: v.string(), // e.g., "lessons_completed >= 10"
+    createdAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_category", ["category"]),
+
+  // תגים שהמשתמש השיג
+  userBadges: defineTable({
+    userId: v.id("users"),
+    badgeId: v.id("badges"),
+    earnedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_badge", ["userId", "badgeId"]),
+
+  // ביקורות על קורסים
+  courseReviews: defineTable({
+    userId: v.id("users"),
+    courseId: v.id("courses"),
+    rating: v.number(), // 1-5
+    title: v.string(),
+    content: v.string(),
+    helpful: v.number(), // count of "helpful" votes
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_course", ["courseId"])
+    .index("by_user", ["userId"])
+    .index("by_user_course", ["userId", "courseId"]),
+
+  // הצבעות "מועיל" על ביקורות
+  reviewVotes: defineTable({
+    reviewId: v.id("courseReviews"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_review", ["reviewId"])
+    .index("by_user_review", ["userId", "reviewId"]),
 });

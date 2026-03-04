@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Badge } from "@/components/ui/badge";
 import { EnrollButton } from "@/components/course/enroll-button";
+import { CourseReviews } from "@/components/reviews/course-reviews";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 export default function CourseDetailPage() {
@@ -356,6 +357,9 @@ export default function CourseDetailPage() {
               </div>
             )}
           </section>
+
+          {/* Reviews Section */}
+          <CourseReviews courseId={courseId} />
         </div>
       </main>
     </div>
