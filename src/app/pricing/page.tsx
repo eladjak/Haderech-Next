@@ -664,7 +664,7 @@ export default function PricingPage() {
     <div className="min-h-dvh bg-[var(--background)]">
       <Header />
 
-      <main>
+      <main id="main-content">
         {/* ---------------------------------------------------------------- */}
         {/* Hero Section */}
         {/* ---------------------------------------------------------------- */}

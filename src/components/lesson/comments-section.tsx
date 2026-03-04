@@ -111,7 +111,7 @@ export function CommentsSection({
             className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-600"
           />
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs text-zinc-500">
               {newComment.length}/2000
             </span>
             <button
@@ -186,11 +186,11 @@ export function CommentsSection({
                 <span className="text-sm font-medium text-zinc-900 dark:text-white">
                   {comment.userName}
                 </span>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-zinc-500">
                   {formatTime(comment.createdAt)}
                 </span>
                 {comment.updatedAt > comment.createdAt + 1000 && (
-                  <span className="text-xs text-zinc-400">(נערך)</span>
+                  <span className="text-xs text-zinc-500">(נערך)</span>
                 )}
               </div>
 
@@ -324,11 +324,11 @@ export function CommentsSection({
                         <span className="text-sm font-medium text-zinc-900 dark:text-white">
                           {reply.userName}
                         </span>
-                        <span className="text-xs text-zinc-400">
+                        <span className="text-xs text-zinc-500">
                           {formatTime(reply.createdAt)}
                         </span>
                         {reply.updatedAt > reply.createdAt + 1000 && (
-                          <span className="text-xs text-zinc-400">(נערך)</span>
+                          <span className="text-xs text-zinc-500">(נערך)</span>
                         )}
                       </div>
 

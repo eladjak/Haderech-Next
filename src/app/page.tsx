@@ -23,6 +23,7 @@ export default function Home() {
     <div className="min-h-dvh bg-[var(--background)]">
       <Header />
 
+      <main id="main-content">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Hero background image */}
@@ -504,6 +505,8 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      </main>
 
       <Footer />
     </div>

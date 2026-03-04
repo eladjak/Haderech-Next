@@ -160,7 +160,7 @@ function ReplyItem({
             <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
               {reply.authorName}
             </span>
-            <span className="text-xs text-zinc-400">{timeAgo(reply.createdAt)}</span>
+            <span className="text-xs text-zinc-500">{timeAgo(reply.createdAt)}</span>
           </div>
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
             {reply.content}
@@ -360,7 +360,7 @@ export default function TopicDetailPage() {
                 <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                   {topic.authorName}
                 </p>
-                <p className="text-xs text-zinc-400">{timeAgo(topic.createdAt)}</p>
+                <p className="text-xs text-zinc-500">{timeAgo(topic.createdAt)}</p>
               </div>
             </div>
 
@@ -390,7 +390,7 @@ export default function TopicDetailPage() {
                     </button>
                   </SignInButton>
                 </SignedOut>
-                <span className="flex items-center gap-1.5 text-sm text-zinc-400">
+                <span className="flex items-center gap-1.5 text-sm text-zinc-500">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
@@ -432,7 +432,7 @@ export default function TopicDetailPage() {
               </div>
             ) : (
               <div className="mb-8 rounded-2xl border border-dashed border-zinc-200 p-8 text-center dark:border-zinc-700">
-                <p className="text-zinc-400 dark:text-zinc-500">
+                <p className="text-zinc-500 dark:text-zinc-400">
                   אין תגובות עדיין. היה הראשון להגיב!
                 </p>
               </div>
@@ -459,7 +459,7 @@ export default function TopicDetailPage() {
                     className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-brand-600 dark:focus:bg-zinc-900"
                   />
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-zinc-400">{replyContent.length}/2000</p>
+                    <p className="text-xs text-zinc-500">{replyContent.length}/2000</p>
                     {replyError && (
                       <p className="text-xs text-red-500">{replyError}</p>
                     )}

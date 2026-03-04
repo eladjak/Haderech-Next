@@ -126,7 +126,7 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
             dir="rtl"
           />
           <div className="mt-2 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-zinc-400">
+            <div className="flex items-center gap-2 text-xs text-zinc-500">
               {saving && (
                 <span className="flex items-center gap-1">
                   <svg

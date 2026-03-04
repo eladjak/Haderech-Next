@@ -49,7 +49,7 @@ export default function CoursesPage() {
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
       <Header />
 
-      <main className="container mx-auto px-4 py-12">
+      <main id="main-content" className="container mx-auto px-4 py-12">
         {/* Page header */}
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-white">

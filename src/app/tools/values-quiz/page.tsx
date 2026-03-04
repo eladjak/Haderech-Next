@@ -532,7 +532,7 @@ export default function ValuesQuizPage() {
                             {value.label}
                           </span>
                         </div>
-                        <span className="text-xs text-zinc-400">#{i + 1}</span>
+                        <span className="text-xs text-zinc-500">#{i + 1}</span>
                       </div>
                       <div className="mb-2 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                         <motion.div

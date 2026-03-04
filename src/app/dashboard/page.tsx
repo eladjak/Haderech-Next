@@ -103,7 +103,7 @@ export default function DashboardPage() {
       {/* Onboarding modal - shown once to new users */}
       <WelcomeModal userName={user?.firstName ?? undefined} />
 
-      <main className="container mx-auto px-4 py-12">
+      <main id="main-content" className="container mx-auto px-4 py-12">
         <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-white">
           {user?.firstName ? `שלום, ${user.firstName}!` : "שלום!"}
         </h1>

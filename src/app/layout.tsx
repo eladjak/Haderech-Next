@@ -71,6 +71,12 @@ export default function RootLayout({
     <ClerkProvider localization={heIL}>
       <html lang="he" dir="rtl">
         <body className={`${heebo.variable} font-sans antialiased`}>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 focus:rounded-lg focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-white"
+          >
+            דלג לתוכן הראשי
+          </a>
           <ConvexClientProvider>{children}</ConvexClientProvider>
         </body>
       </html>

@@ -130,14 +130,14 @@ export default function ProfileBuilderPage() {
     <div className="min-h-dvh bg-white dark:bg-zinc-950" dir="rtl">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main id="main-content" className="container mx-auto px-4 py-10">
         <div className="mx-auto max-w-xl">
           {/* Back link */}
           <Link
             href="/tools"
             className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-brand-500 dark:text-zinc-400 dark:hover:text-brand-400"
           >
-            <svg className="h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
             חזרה לכלים
@@ -158,7 +158,7 @@ export default function ProfileBuilderPage() {
 
           {/* Step indicator */}
           <div className="mb-8">
-            <div className="mb-2 flex items-center justify-between text-xs text-zinc-400">
+            <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
               {STEP_LABELS.map((label, i) => (
                 <span
                   key={i}
@@ -211,7 +211,7 @@ export default function ProfileBuilderPage() {
                         <div className={`font-semibold ${formData.platform === platform.value ? "text-indigo-700 dark:text-indigo-300" : "text-zinc-800 dark:text-zinc-200"}`}>
                           {platform.label}
                         </div>
-                        <div className="text-xs text-zinc-400">{platform.description}</div>
+                        <div className="text-xs text-zinc-500">{platform.description}</div>
                       </div>
                       {formData.platform === platform.value && (
                         <div className="mr-auto flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500">
@@ -246,13 +246,15 @@ export default function ProfileBuilderPage() {
                 </h2>
                 <div className="mb-4 space-y-3.5">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label htmlFor="pb-age" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       גיל
                     </label>
                     <input
+                      id="pb-age"
                       type="number"
                       min={18}
                       max={99}
+                      aria-required="true"
                       value={formData.age}
                       onChange={(e) => setFormData((prev) => ({ ...prev, age: e.target.value }))}
                       placeholder="28"
@@ -260,11 +262,13 @@ export default function ProfileBuilderPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label htmlFor="pb-profession" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       מקצוע / תחום עיסוק
                     </label>
                     <input
+                      id="pb-profession"
                       type="text"
+                      aria-required="true"
                       value={formData.profession}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, profession: e.target.value }))
@@ -274,11 +278,13 @@ export default function ProfileBuilderPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label htmlFor="pb-hobbies" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       תחביבים ותשוקות
                     </label>
                     <input
+                      id="pb-hobbies"
                       type="text"
+                      aria-required="true"
                       value={formData.hobbies}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, hobbies: e.target.value }))
@@ -288,10 +294,11 @@ export default function ProfileBuilderPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label htmlFor="pb-things" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       3 דברים שאתה/את מאוד אוהב/ת
                     </label>
                     <textarea
+                      id="pb-things"
                       rows={3}
                       value={formData.thingsYouLove}
                       onChange={(e) =>
@@ -356,10 +363,11 @@ export default function ProfileBuilderPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label htmlFor="pb-qualities" className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       תכונות חשובות בפרטנר (אופציונלי)
                     </label>
                     <textarea
+                      id="pb-qualities"
                       rows={3}
                       value={formData.partnerQualities}
                       onChange={(e) =>
@@ -372,7 +380,7 @@ export default function ProfileBuilderPage() {
                 </div>
 
                 {error && (
-                  <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+                  <div role="alert" aria-live="polite" className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
                     {error}
                   </div>
                 )}
@@ -499,11 +507,12 @@ export default function ProfileBuilderPage() {
                 <div className="mb-4">
                   <textarea
                     rows={8}
+                    aria-label="ערוך את הביו שלך"
                     value={editedBio}
                     onChange={(e) => setEditedBio(e.target.value)}
                     className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-900 transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:border-indigo-500"
                   />
-                  <div className="mt-1.5 flex justify-between text-xs text-zinc-400">
+                  <div className="mt-1.5 flex justify-between text-xs text-zinc-500">
                     <span>ערוך/י לפי הרצון שלך</span>
                     <span>{editedBio.length} תווים</span>
                   </div>

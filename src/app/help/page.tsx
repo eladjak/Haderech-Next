@@ -227,7 +227,7 @@ export default function HelpPage() {
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
       <Header />
 
-      <main>
+      <main id="main-content">
         {/* Hero */}
         <section className="bg-gradient-to-b from-violet-50 to-white px-4 pt-16 pb-12 dark:from-violet-950/20 dark:to-zinc-950">
           <div className="mx-auto max-w-3xl text-center">

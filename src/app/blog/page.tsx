@@ -206,7 +206,7 @@ export default function BlogPage() {
     <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main id="main-content" className="container mx-auto px-4 py-10">
         {/* Hero */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}

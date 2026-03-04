@@ -154,7 +154,7 @@ export default function AboutPage() {
     <div className="min-h-dvh bg-[var(--background)]">
       <Header />
 
-      <main>
+      <main id="main-content">
         {/* ── Hero ──────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden pb-24 pt-20 md:pb-32 md:pt-28">
           {/* Background image */}

@@ -74,10 +74,11 @@ export function Header() {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-100 md:hidden dark:text-zinc-400 dark:hover:bg-zinc-800"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-100 md:hidden dark:text-zinc-400 dark:hover:bg-zinc-800"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-expanded={mobileMenuOpen}
-            aria-label={mobileMenuOpen ? "סגור תפריט" : "פתח תפריט"}
+            aria-controls="mobile-nav-menu"
+            aria-label="תפריט ניווט"
           >
             {mobileMenuOpen ? (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -96,8 +97,13 @@ export function Header() {
       </div>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="border-t border-zinc-100 bg-white px-4 py-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950">
+      <div
+        id="mobile-nav-menu"
+        role="navigation"
+        aria-label="תפריט ניווט נייד"
+        aria-hidden={!mobileMenuOpen}
+        className={`border-t border-zinc-100 bg-white px-4 py-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950 ${!mobileMenuOpen ? "hidden" : ""}`}
+      >
           <nav className="flex flex-col gap-1">
             <MobileNavLink href="/courses" onClick={closeMobileMenu}>קורסים</MobileNavLink>
             <MobileNavLink href="/blog" onClick={closeMobileMenu}>בלוג</MobileNavLink>
@@ -115,20 +121,19 @@ export function Header() {
             <SignedOut>
               <div className="flex gap-3 pt-3">
                 <SignInButton mode="modal">
-                  <button className="flex-1 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900">
+                  <button className="flex-1 min-h-[44px] rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900">
                     התחברות
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button className="flex-1 rounded-lg bg-gradient-to-l from-brand-500 to-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md">
+                  <button className="flex-1 min-h-[44px] rounded-lg bg-gradient-to-l from-brand-500 to-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md">
                     הרשמה
                   </button>
                 </SignUpButton>
               </div>
             </SignedOut>
           </nav>
-        </div>
-      )}
+      </div>
     </header>
   );
 }
@@ -137,7 +142,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+      className="inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
     >
       {children}
     </Link>
@@ -149,7 +154,7 @@ function MobileNavLink({ href, onClick, children }: { href: string; onClick: () 
     <Link
       href={href}
       onClick={onClick}
-      className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+      className="flex min-h-[44px] items-center rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
     >
       {children}
     </Link>

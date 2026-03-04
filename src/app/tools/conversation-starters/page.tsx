@@ -84,14 +84,14 @@ export default function ConversationStartersPage() {
     <div className="min-h-dvh bg-white dark:bg-zinc-950" dir="rtl">
       <Header />
 
-      <main className="container mx-auto px-4 py-10">
+      <main id="main-content" className="container mx-auto px-4 py-10">
         <div className="mx-auto max-w-2xl">
           {/* Back link */}
           <Link
             href="/tools"
             className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-brand-500 dark:text-zinc-400 dark:hover:text-brand-400"
           >
-            <svg className="h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
             חזרה לכלים
@@ -197,7 +197,7 @@ export default function ConversationStartersPage() {
 
           {/* Error */}
           {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+            <div role="alert" aria-live="polite" className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
               {error}
             </div>
           )}
@@ -253,8 +253,8 @@ export default function ConversationStartersPage() {
                     <div className="absolute left-3 top-3 flex gap-1.5">
                       <button
                         onClick={() => toggleFavorite(starter)}
-                        title="הוסף למועדפים"
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors ${
+                        aria-label={favorites.includes(starter) ? "הסר ממועדפים" : "הוסף למועדפים"}
+                        className={`flex h-11 w-11 items-center justify-center rounded-lg text-sm transition-colors ${
                           favorites.includes(starter)
                             ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400"
                             : "bg-zinc-100 text-zinc-400 hover:bg-yellow-50 hover:text-yellow-500 dark:bg-zinc-800 dark:hover:bg-yellow-500/10 dark:hover:text-yellow-400"
@@ -264,8 +264,8 @@ export default function ConversationStartersPage() {
                       </button>
                       <button
                         onClick={() => handleCopy(starter, i)}
-                        title="העתק"
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-400 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:bg-zinc-800 dark:hover:bg-brand-500/10 dark:hover:text-brand-400"
+                        aria-label="העתק"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:bg-zinc-800 dark:hover:bg-brand-500/10 dark:hover:text-brand-400"
                       >
                         {copiedIndex === i ? (
                           <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
