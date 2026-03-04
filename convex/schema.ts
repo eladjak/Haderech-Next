@@ -260,4 +260,52 @@ export default defineSchema({
     content: v.string(),
     createdAt: v.number(),
   }).index("by_session", ["sessionId"]),
+
+  // קהילה - נושאים/פוסטים
+  communityTopics: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    content: v.string(),
+    category: v.union(
+      v.literal("general"),
+      v.literal("dating-tips"),
+      v.literal("success-stories"),
+      v.literal("questions"),
+      v.literal("advice")
+    ),
+    pinned: v.boolean(),
+    likesCount: v.number(),
+    repliesCount: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_category", ["category"])
+    .index("by_user", ["userId"])
+    .index("by_created", ["createdAt"]),
+
+  // קהילה - תגובות לנושאים
+  communityReplies: defineTable({
+    topicId: v.id("communityTopics"),
+    userId: v.id("users"),
+    content: v.string(),
+    likesCount: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_topic", ["topicId"])
+    .index("by_user", ["userId"]),
+
+  // לייקים לנושאים בקהילה
+  communityTopicLikes: defineTable({
+    topicId: v.id("communityTopics"),
+    userId: v.id("users"),
+  })
+    .index("by_topic", ["topicId"])
+    .index("by_user_topic", ["userId", "topicId"]),
+
+  // לייקים לתגובות בקהילה
+  communityReplyLikes: defineTable({
+    replyId: v.id("communityReplies"),
+    userId: v.id("users"),
+  })
+    .index("by_reply", ["replyId"])
+    .index("by_user_reply", ["userId", "replyId"]),
 });

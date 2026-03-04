@@ -17,6 +17,7 @@ import type * as analytics from "../analytics.js";
 import type * as certificates from "../certificates.js";
 import type * as chat from "../chat.js";
 import type * as comments from "../comments.js";
+import type * as community from "../community.js";
 import type * as courses from "../courses.js";
 import type * as enrollments from "../enrollments.js";
 import type * as gamification from "../gamification.js";
@@ -31,6 +32,7 @@ import type * as seed from "../seed.js";
 import type * as seedCourseData from "../seedCourseData.js";
 import type * as seedSimulatorData from "../seedSimulatorData.js";
 import type * as simulator from "../simulator.js";
+import type * as tools from "../tools.js";
 import type * as users from "../users.js";
 
 import type {
@@ -49,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   certificates: typeof certificates;
   chat: typeof chat;
   comments: typeof comments;
+  community: typeof community;
   courses: typeof courses;
   enrollments: typeof enrollments;
   gamification: typeof gamification;
@@ -63,6 +66,7 @@ declare const fullApi: ApiFromModules<{
   seedCourseData: typeof seedCourseData;
   seedSimulatorData: typeof seedSimulatorData;
   simulator: typeof simulator;
+  tools: typeof tools;
   users: typeof users;
 }>;
 

@@ -388,15 +388,26 @@ export default function Home() {
               highlighted={false}
             />
           </motion.div>
-          <motion.p
-            className="mx-auto mt-8 max-w-lg text-center text-sm text-blue-500/50 dark:text-zinc-500"
+          <motion.div
+            className="mt-8 flex flex-col items-center gap-3"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            חיסכון של עד 37% בתוכנית שנתית. ביטול בכל עת.
-          </motion.p>
+            <p className="text-sm text-blue-500/50 dark:text-zinc-500">
+              חיסכון של עד 37% בתוכנית שנתית. ביטול בכל עת.
+            </p>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 underline underline-offset-4 transition-colors hover:text-brand-600"
+            >
+              ראה את כל התוכניות והפרטים המלאים
+              <svg className="h-3.5 w-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
