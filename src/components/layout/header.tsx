@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   SignInButton,
   SignUpButton,
@@ -158,10 +159,14 @@ export function Header() {
 }
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isActive = pathname === href || pathname.startsWith(href + "/");
+
   return (
     <Link
       href={href}
-      className="relative inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-all duration-150 hover:bg-brand-50/80 hover:text-brand-700 after:absolute after:bottom-1 after:left-1/2 after:h-0.5 after:w-0 after:rounded-full after:bg-brand-500 after:transition-all after:duration-150 hover:after:left-[20%] hover:after:w-[60%] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+      aria-current={isActive ? "page" : undefined}
+      className={`relative inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 after:absolute after:bottom-1 after:left-1/2 after:h-0.5 after:w-0 after:rounded-full after:bg-brand-500 after:transition-all after:duration-150 hover:after:left-[20%] hover:after:w-[60%] ${isActive ? "bg-brand-50/80 text-brand-700 dark:bg-zinc-800 dark:text-white" : "text-zinc-600 hover:bg-brand-50/80 hover:text-brand-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"}`}
     >
       {children}
     </Link>
@@ -169,11 +174,15 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 }
 
 function MobileNavLink({ href, onClick, children }: { href: string; onClick: () => void; children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isActive = pathname === href || pathname.startsWith(href + "/");
+
   return (
     <Link
       href={href}
       onClick={onClick}
-      className="flex min-h-[44px] items-center rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+      aria-current={isActive ? "page" : undefined}
+      className={`flex min-h-[44px] items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? "bg-brand-50 text-brand-700 dark:bg-zinc-800 dark:text-white" : "text-zinc-700 hover:bg-brand-50 hover:text-brand-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"}`}
     >
       {children}
     </Link>

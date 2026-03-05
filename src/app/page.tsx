@@ -25,7 +25,7 @@ export default function Home() {
 
       <main id="main-content">
       {/* Hero Section */}
-      <section className="relative overflow-hidden animate-hero-gradient">
+      <section className="relative overflow-hidden animate-hero-gradient" role="region" aria-labelledby="hero-heading">
         {/* Hero background image */}
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           <Image
@@ -57,12 +57,13 @@ export default function Home() {
             {/* Badge */}
             <motion.div variants={fadeIn}>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-600 dark:border-brand-200/30 dark:bg-brand-50/50 dark:text-brand-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" aria-hidden="true" />
                 461 זוגות כבר מצאו אהבה
               </div>
             </motion.div>
 
             <motion.h1
+              id="hero-heading"
               variants={fadeIn}
               className="text-shadow-hero mb-6 text-4xl font-black leading-[1.15] tracking-tight text-blue-500 dark:text-white md:text-5xl lg:text-6xl xl:text-7xl"
             >
@@ -156,7 +157,7 @@ export default function Home() {
       </section>
 
       {/* Platform Stats Counter Bar */}
-      <section className="relative overflow-hidden bg-gradient-to-l from-blue-500 via-blue-600 to-brand-500 py-12">
+      <section className="relative overflow-hidden bg-gradient-to-l from-blue-500 via-blue-600 to-brand-500 py-12" role="region" aria-label="סטטיסטיקות הפלטפורמה">
         {/* Subtle pattern overlay */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.04]" aria-hidden="true"
           style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }}
@@ -178,7 +179,7 @@ export default function Home() {
       </section>
 
       {/* 3 Values Section */}
-      <section className="py-20 md:py-28">
+      <section className="py-20 md:py-28" role="region" aria-labelledby="values-heading">
         <div className="container mx-auto px-4">
           <motion.div
             className="mx-auto mb-4 max-w-xl text-center"
@@ -190,7 +191,7 @@ export default function Home() {
             <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
               הגישה שלנו
             </span>
-            <h2 className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+            <h2 id="values-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               אמת. כלים. כבוד.
             </h2>
             <p className="text-blue-500/60 dark:text-zinc-400">
@@ -277,7 +278,7 @@ export default function Home() {
       </section>
 
       {/* What You Get Section */}
-      <section className="border-t border-brand-100/30 bg-gradient-to-b from-brand-50/30 to-[var(--background)] py-20 dark:border-blue-100/10 dark:from-blue-50/5">
+      <section className="border-t border-brand-100/30 bg-gradient-to-b from-brand-50/30 to-[var(--background)] py-20 dark:border-blue-100/10 dark:from-blue-50/5" role="region" aria-labelledby="ecosystem-heading">
         <div className="container mx-auto px-4">
           <motion.div
             className="mx-auto mb-4 max-w-xl text-center"
@@ -289,7 +290,7 @@ export default function Home() {
             <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
               מה מחכה לך
             </span>
-            <h2 className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+            <h2 id="ecosystem-heading" className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               לא סתם קורס - אקוסיסטם שלם
             </h2>
           </motion.div>
@@ -341,7 +342,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="py-20 md:py-28">
+      <section className="py-20 md:py-28" role="region" aria-labelledby="how-it-works-heading">
         <div className="container mx-auto px-4">
           <motion.div
             className="mx-auto mb-4 max-w-xl text-center"
@@ -353,7 +354,7 @@ export default function Home() {
             <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
               6 שלבים למסע
             </span>
-            <h2 className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+            <h2 id="how-it-works-heading" className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               איך תוכנית "הדרך" עובדת?
             </h2>
           </motion.div>
@@ -375,7 +376,7 @@ export default function Home() {
       </section>
 
       {/* Pricing Preview Section */}
-      <section className="border-t border-brand-100/30 bg-gradient-to-b from-[var(--background)] to-brand-50/20 py-20 dark:border-blue-100/10 dark:to-blue-50/5">
+      <section className="border-t border-brand-100/30 bg-gradient-to-b from-[var(--background)] to-brand-50/20 py-20 dark:border-blue-100/10 dark:to-blue-50/5" role="region" aria-labelledby="pricing-heading">
         <div className="container mx-auto px-4">
           <motion.div
             className="mx-auto mb-12 max-w-xl text-center"
@@ -387,7 +388,7 @@ export default function Home() {
             <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
               תוכניות ומחירים
             </span>
-            <h2 className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+            <h2 id="pricing-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               בחר את המסלול שלך
             </h2>
             <p className="text-blue-500/60 dark:text-zinc-400">
@@ -463,7 +464,7 @@ export default function Home() {
       <FeaturedBlogSection />
 
       {/* CTA Section */}
-      <section className="py-20">
+      <section className="py-20" role="region" aria-labelledby="cta-heading">
         <div className="container mx-auto px-4">
           <motion.div
             className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-blue-600 p-12 text-center shadow-2xl shadow-brand-500/25 md:p-16 lg:p-20"
@@ -491,7 +492,7 @@ export default function Home() {
             />
 
             <div className="relative">
-              <h2 className="mb-4 text-3xl font-black text-white md:text-4xl lg:text-5xl">
+              <h2 id="cta-heading" className="mb-4 text-3xl font-black text-white md:text-4xl lg:text-5xl">
                 מוכנים להתחיל את המסע?
               </h2>
               <p className="mx-auto mb-8 max-w-md text-lg text-white/80">
