@@ -1,24 +1,14 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { CertificateCard } from "@/components/certificate/certificate-card";
 
 export default function CertificatesPage() {
-  const { user: clerkUser } = useUser();
-
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
-  );
-
-  const certificates = useQuery(
-    api.certificates.listByUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
-  );
+  const certificates = useQuery(api.certificates.getUserCertificates);
 
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
@@ -96,19 +86,28 @@ export default function CertificatesPage() {
           {certificates !== undefined && certificates.length > 0 && (
             <div className="space-y-6">
               {certificates.map((cert) => (
-                <CertificateCard
-                  key={cert._id}
-                  userName={cert.userName}
-                  courseName={cert.courseName}
-                  certificateNumber={cert.certificateNumber}
-                  issuedAt={cert.issuedAt}
-                  completionPercent={cert.completionPercent}
-                />
+                <div key={cert._id}>
+                  <Link
+                    href={`/certificates/${cert._id}`}
+                    className="mb-2 block text-xs font-medium text-[#D4A853] hover:underline"
+                  >
+                    צפייה בתעודה המלאה
+                  </Link>
+                  <CertificateCard
+                    userName={cert.userName}
+                    courseName={cert.courseName}
+                    certificateNumber={cert.certificateNumber}
+                    issuedAt={cert.issuedAt}
+                    completionPercent={cert.completionPercent}
+                  />
+                </div>
               ))}
             </div>
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
