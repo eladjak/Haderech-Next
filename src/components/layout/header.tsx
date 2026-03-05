@@ -13,6 +13,7 @@ import {
 } from "@clerk/nextjs";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { SearchButton } from "@/components/layout/search-button";
+import { DEMO_MODE } from "@/components/providers/demo-provider";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,6 +30,10 @@ export function Header() {
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
   }, []);
+
+  // In demo mode, show all signed-in content directly
+  const SignedInWrapper = DEMO_MODE ? ({ children }: { children: React.ReactNode }) => <>{children}</> : SignedIn;
+  const SignedOutWrapper = DEMO_MODE ? ({ children }: { children: React.ReactNode }) => <span className="hidden">{children}</span> : SignedOut;
 
   return (
     <header className={`sticky top-0 z-50 w-full border-b transition-all duration-200 ${scrolled ? "border-brand-100/80 bg-white/90 shadow-sm shadow-brand-500/5 dark:border-zinc-700 dark:bg-zinc-950/90" : "border-brand-100/40 bg-white/70 dark:border-zinc-800/60 dark:bg-zinc-950/70"} glass`}>
@@ -55,19 +60,24 @@ export function Header() {
           <NavLink href="/courses">קורסים</NavLink>
           <NavLink href="/blog">בלוג</NavLink>
           <NavLink href="/pricing">מחירים</NavLink>
-          <SignedIn>
+          <SignedInWrapper>
             <NavLink href="/dashboard">האזור שלי</NavLink>
             <NavLink href="/daily">יומי</NavLink>
             <NavLink href="/community">קהילה</NavLink>
             <NavLink href="/chat">צ&apos;אט AI</NavLink>
             <NavLink href="/simulator">סימולטור</NavLink>
             <NavLink href="/mentoring">ייעוץ אישי</NavLink>
-          </SignedIn>
+          </SignedInWrapper>
         </nav>
 
         <div className="flex items-center gap-3">
           <SearchButton />
-          <SignedOut>
+          {DEMO_MODE && (
+            <span className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+              Demo Admin
+            </span>
+          )}
+          <SignedOutWrapper>
             <SignInButton mode="modal">
               <button className="hidden rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 hover:bg-zinc-50 md:inline-flex dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800">
                 התחברות
@@ -78,18 +88,20 @@ export function Header() {
                 הרשמה חינמית
               </button>
             </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <NotificationBell />
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "h-9 w-9 ring-2 ring-brand-100 dark:ring-zinc-700",
-                },
-              }}
-            />
-          </SignedIn>
+          </SignedOutWrapper>
+          <SignedInWrapper>
+            {!DEMO_MODE && <NotificationBell />}
+            {!DEMO_MODE && (
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "h-9 w-9 ring-2 ring-brand-100 dark:ring-zinc-700",
+                  },
+                }}
+              />
+            )}
+          </SignedInWrapper>
 
           {/* Mobile Menu Button */}
           <button
@@ -129,7 +141,7 @@ export function Header() {
             <MobileNavLink href="/courses" onClick={closeMobileMenu}>קורסים</MobileNavLink>
             <MobileNavLink href="/blog" onClick={closeMobileMenu}>בלוג</MobileNavLink>
             <MobileNavLink href="/pricing" onClick={closeMobileMenu}>מחירים</MobileNavLink>
-            <SignedIn>
+            <SignedInWrapper>
               <MobileNavLink href="/dashboard" onClick={closeMobileMenu}>האזור שלי</MobileNavLink>
               <MobileNavLink href="/daily" onClick={closeMobileMenu}>תוכן יומי</MobileNavLink>
               <MobileNavLink href="/community" onClick={closeMobileMenu}>קהילה</MobileNavLink>
@@ -139,8 +151,8 @@ export function Header() {
               <MobileNavLink href="/notifications" onClick={closeMobileMenu}>התראות</MobileNavLink>
               <MobileNavLink href="/student/dashboard" onClick={closeMobileMenu}>מעקב התקדמות</MobileNavLink>
               <MobileNavLink href="/certificates" onClick={closeMobileMenu}>תעודות</MobileNavLink>
-            </SignedIn>
-            <SignedOut>
+            </SignedInWrapper>
+            <SignedOutWrapper>
               <div className="flex gap-3 pt-3">
                 <SignInButton mode="modal">
                   <button className="flex-1 min-h-[44px] rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900">
@@ -153,7 +165,7 @@ export function Header() {
                   </button>
                 </SignUpButton>
               </div>
-            </SignedOut>
+            </SignedOutWrapper>
           </nav>
       </div>
     </header>

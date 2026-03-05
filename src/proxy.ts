@@ -12,6 +12,10 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // Demo mode - skip auth protection
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+    return;
+  }
   // אם זה נתיב מוגן, דרוש התחברות
   if (isProtectedRoute(req)) {
     await auth.protect();
