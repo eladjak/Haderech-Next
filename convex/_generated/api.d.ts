@@ -11,6 +11,7 @@
 import type * as activityFeed from "../activityFeed.js";
 import type * as admin from "../admin.js";
 import type * as adminAnalytics from "../adminAnalytics.js";
+import type * as adminUsers from "../adminUsers.js";
 import type * as adminComments from "../adminComments.js";
 import type * as adminCommunity from "../adminCommunity.js";
 import type * as adminLessons from "../adminLessons.js";
@@ -46,6 +47,7 @@ import type * as reviews from "../reviews.js";
 import type * as scheduledTasks from "../scheduledTasks.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
+import type * as seedContent from "../seedContent.js";
 import type * as seedCourseData from "../seedCourseData.js";
 import type * as seedSimulatorData from "../seedSimulatorData.js";
 import type * as simulator from "../simulator.js";
@@ -69,6 +71,7 @@ declare const fullApi: ApiFromModules<{
   adminCommunity: typeof adminCommunity;
   adminLessons: typeof adminLessons;
   adminQuizzes: typeof adminQuizzes;
+  adminUsers: typeof adminUsers;
   aiSimulator: typeof aiSimulator;
   analytics: typeof analytics;
   blog: typeof blog;
@@ -100,6 +103,7 @@ declare const fullApi: ApiFromModules<{
   scheduledTasks: typeof scheduledTasks;
   search: typeof search;
   seed: typeof seed;
+  seedContent: typeof seedContent;
   seedCourseData: typeof seedCourseData;
   seedSimulatorData: typeof seedSimulatorData;
   simulator: typeof simulator;

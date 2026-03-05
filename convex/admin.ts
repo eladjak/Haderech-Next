@@ -292,3 +292,70 @@ export const deleteCourse = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+// שליפת כל הקורסים עם סטטיסטיקות (מספר שיעורים, הרשמות)
+export const listAllCoursesWithStats = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_order")
+      .order("asc")
+      .collect();
+
+    const enriched = await Promise.all(
+      courses.map(async (course) => {
+        const lessons = await ctx.db
+          .query("lessons")
+          .withIndex("by_course", (q) => q.eq("courseId", course._id))
+          .collect();
+
+        const enrollments = await ctx.db
+          .query("enrollments")
+          .withIndex("by_course", (q) => q.eq("courseId", course._id))
+          .collect();
+
+        return {
+          ...course,
+          lessonCount: lessons.length,
+          enrollmentCount: enrollments.length,
+        };
+      })
+    );
+
+    return enriched;
+  },
+});
+
+// שינוי סדר קורס (הזז למעלה/למטה)
+export const reorderCourse = mutation({
+  args: {
+    id: v.id("courses"),
+    direction: v.union(v.literal("up"), v.literal("down")),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_order")
+      .order("asc")
+      .collect();
+
+    const currentIndex = courses.findIndex((c) => c._id === args.id);
+    if (currentIndex === -1) throw new Error("Course not found");
+
+    const swapIndex =
+      args.direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    if (swapIndex < 0 || swapIndex >= courses.length) return; // nothing to do
+
+    const current = courses[currentIndex];
+    const swap = courses[swapIndex];
+
+    // swap order values
+    await ctx.db.patch(current._id, { order: swap.order, updatedAt: Date.now() });
+    await ctx.db.patch(swap._id, { order: current.order, updatedAt: Date.now() });
+  },
+});

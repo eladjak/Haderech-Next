@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAction } from "convex/react";
+import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { useSubscription } from "@/hooks/useSubscription";
 import {
   PRICING_TIERS,
   ADD_ONS,
@@ -79,9 +82,15 @@ function FeatureValueCell({ value }: { value: FeatureValue }) {
 function MainPricingCard({
   tier,
   isAnnual,
+  onCheckout,
+  isCheckingOut,
+  currentPlan,
 }: {
   tier: PricingTier;
   isAnnual: boolean;
+  onCheckout: (plan: "basic" | "premium") => void;
+  isCheckingOut: boolean;
+  currentPlan: string;
 }) {
   const price = isAnnual ? tier.effectiveMonthlyOnAnnual : tier.priceMonthly;
   const savings = calculateAnnualSavings(tier);
@@ -94,7 +103,8 @@ function MainPricingCard({
     course: "רכוש את הקורס",
   };
 
-  const tierCtaHref = "/sign-up";
+  const isCurrentPlan = currentPlan === tier.id;
+  const isPaidTier = tier.id === "basic" || tier.id === "premium";
 
   const isHighlighted = tier.isRecommended;
 
@@ -238,16 +248,35 @@ function MainPricingCard({
 
       {/* CTA */}
       <div className="mt-auto">
-        <Link
-          href={tierCtaHref}
-          className={`flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all ${
-            isHighlighted
-              ? "bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/25 hover:shadow-xl hover:brightness-110"
-              : "border border-brand-200 bg-white text-brand-600 hover:bg-brand-50 dark:border-brand-500/30 dark:bg-transparent dark:text-brand-400 dark:hover:bg-brand-50/10"
-          }`}
-        >
-          {tierCtaText[tier.id]}
-        </Link>
+        {isCurrentPlan ? (
+          <div className="flex h-11 w-full items-center justify-center rounded-xl border border-green-300 bg-green-50 text-sm font-semibold text-green-700 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400">
+            התוכנית הנוכחית שלך
+          </div>
+        ) : isPaidTier ? (
+          <button
+            type="button"
+            onClick={() => onCheckout(tier.id as "basic" | "premium")}
+            disabled={isCheckingOut}
+            className={`flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+              isHighlighted
+                ? "bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/25 hover:shadow-xl hover:brightness-110"
+                : "border border-brand-200 bg-white text-brand-600 hover:bg-brand-50 dark:border-brand-500/30 dark:bg-transparent dark:text-brand-400 dark:hover:bg-brand-50/10"
+            }`}
+          >
+            {isCheckingOut ? "מעבד..." : tierCtaText[tier.id]}
+          </button>
+        ) : (
+          <Link
+            href="/sign-up"
+            className={`flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all ${
+              isHighlighted
+                ? "bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/25 hover:shadow-xl hover:brightness-110"
+                : "border border-brand-200 bg-white text-brand-600 hover:bg-brand-50 dark:border-brand-500/30 dark:bg-transparent dark:text-brand-400 dark:hover:bg-brand-50/10"
+            }`}
+          >
+            {tierCtaText[tier.id]}
+          </Link>
+        )}
         {tier.upgradeNudge && (
           <p className="mt-3 text-center text-xs text-blue-500/40 dark:text-zinc-500">
             {tier.upgradeNudge.substring(0, 80)}
@@ -266,9 +295,15 @@ function MainPricingCard({
 function SecondaryPricingCard({
   tier,
   isAnnual,
+  onCheckout,
+  isCheckingOut,
+  currentPlan,
 }: {
   tier: PricingTier;
   isAnnual: boolean;
+  onCheckout: (plan: "basic" | "premium") => void;
+  isCheckingOut: boolean;
+  currentPlan: string;
 }) {
   const price = isAnnual && tier.effectiveMonthlyOnAnnual
     ? tier.effectiveMonthlyOnAnnual
@@ -278,6 +313,9 @@ function SecondaryPricingCard({
     basic: "התחל עם מגלה",
     course: "רכוש את הקורס",
   };
+
+  const isCurrentPlan = currentPlan === tier.id;
+  const isPaidTier = tier.id === "basic";
 
   return (
     <div className="flex flex-col rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5">
@@ -316,12 +354,27 @@ function SecondaryPricingCard({
         {tier.description}
       </p>
 
-      <Link
-        href="/sign-up"
-        className="flex h-10 w-full items-center justify-center rounded-xl border border-brand-200 bg-white text-sm font-semibold text-brand-600 transition-all hover:bg-brand-50 dark:border-brand-500/30 dark:bg-transparent dark:text-brand-400 dark:hover:bg-brand-50/10"
-      >
-        {tierCtaText[tier.id] ?? "התחל"}
-      </Link>
+      {isCurrentPlan ? (
+        <div className="flex h-10 w-full items-center justify-center rounded-xl border border-green-300 bg-green-50 text-sm font-semibold text-green-700 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400">
+          התוכנית הנוכחית שלך
+        </div>
+      ) : isPaidTier ? (
+        <button
+          type="button"
+          onClick={() => onCheckout("basic")}
+          disabled={isCheckingOut}
+          className="flex h-10 w-full items-center justify-center rounded-xl border border-brand-200 bg-white text-sm font-semibold text-brand-600 transition-all hover:bg-brand-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-brand-500/30 dark:bg-transparent dark:text-brand-400 dark:hover:bg-brand-50/10"
+        >
+          {isCheckingOut ? "מעבד..." : (tierCtaText[tier.id] ?? "התחל")}
+        </button>
+      ) : (
+        <Link
+          href="/sign-up"
+          className="flex h-10 w-full items-center justify-center rounded-xl border border-brand-200 bg-white text-sm font-semibold text-brand-600 transition-all hover:bg-brand-50 dark:border-brand-500/30 dark:bg-transparent dark:text-brand-400 dark:hover:bg-brand-50/10"
+        >
+          {tierCtaText[tier.id] ?? "התחל"}
+        </Link>
+      )}
     </div>
   );
 }
@@ -588,6 +641,14 @@ const FAQ_ITEMS = [
     q: "מה זה קואצ׳ינג קבוצתי?",
     a: "מפגשים חיים בזום עם אלעד ועם קבוצה של 10-20 משתתפים מתוכנית מוביל. כל מפגש 60-90 דקות. מדברים על אתגרים אמיתיים, מקבלים משוב, עוברים תרגילים. זה לא הרצאה - זה קואצ׳ינג אמיתי. 2 מפגשים בחודש.",
   },
+  {
+    q: "איך עובד התשלום?",
+    a: "התשלום מתבצע באופן מאובטח דרך Stripe, ספק התשלומים המוביל בעולם. אנחנו תומכים בכרטיסי אשראי ישראליים ובינלאומיים. כל התשלומים בשקלים (ILS). לאחר הרכישה תקבל חשבונית במייל.",
+  },
+  {
+    q: "האם התשלום מאובטח?",
+    a: "בהחלט. אנחנו משתמשים ב-Stripe, שמעבד תשלומים עבור חברות כמו Google, Amazon ו-Shopify. פרטי כרטיס האשראי שלך לא נשמרים במערכת שלנו כלל - הכל מוצפן ומעובד ישירות ב-Stripe. בנוסף, כל עמודי התשלום מאובטחים ב-SSL.",
+  },
 ];
 
 function FAQAccordion() {
@@ -652,6 +713,29 @@ function FAQAccordion() {
 
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const { plan: currentPlan } = useSubscription();
+  // NOTE: Run `npx convex dev` to regenerate types after adding convex/stripe.ts
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const createCheckout = useAction((api as any).stripe.createCheckoutSession);
+
+  const handleCheckout = useCallback(
+    async (plan: "basic" | "premium") => {
+      setIsCheckingOut(true);
+      try {
+        const result = await createCheckout({ plan });
+        if (result.url) {
+          window.location.href = result.url;
+        }
+      } catch {
+        // User not authenticated - redirect to sign-up
+        window.location.href = "/sign-up";
+      } finally {
+        setIsCheckingOut(false);
+      }
+    },
+    [createCheckout]
+  );
 
   const mainTiers = PRICING_TIERS.filter((t) =>
     ["free", "premium", "vip"].includes(t.id)
@@ -767,6 +851,9 @@ export default function PricingPage() {
                   key={tier.id}
                   tier={tier}
                   isAnnual={isAnnual}
+                  onCheckout={handleCheckout}
+                  isCheckingOut={isCheckingOut}
+                  currentPlan={currentPlan}
                 />
               ))}
             </motion.div>
@@ -817,7 +904,13 @@ export default function PricingPage() {
             >
               {secondaryTiers.map((tier) => (
                 <motion.div key={tier.id} variants={fadeIn}>
-                  <SecondaryPricingCard tier={tier} isAnnual={isAnnual} />
+                  <SecondaryPricingCard
+                    tier={tier}
+                    isAnnual={isAnnual}
+                    onCheckout={handleCheckout}
+                    isCheckingOut={isCheckingOut}
+                    currentPlan={currentPlan}
+                  />
                 </motion.div>
               ))}
             </motion.div>
