@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as activityFeed from "../activityFeed.js";
 import type * as admin from "../admin.js";
 import type * as adminAnalytics from "../adminAnalytics.js";
 import type * as adminComments from "../adminComments.js";
@@ -17,6 +18,7 @@ import type * as adminQuizzes from "../adminQuizzes.js";
 import type * as aiSimulator from "../aiSimulator.js";
 import type * as analytics from "../analytics.js";
 import type * as blog from "../blog.js";
+import type * as bookmarks from "../bookmarks.js";
 import type * as certificates from "../certificates.js";
 import type * as chat from "../chat.js";
 import type * as comments from "../comments.js";
@@ -36,6 +38,7 @@ import type * as notes from "../notes.js";
 import type * as notificationHelpers from "../notificationHelpers.js";
 import type * as notifications from "../notifications.js";
 import type * as onboarding from "../onboarding.js";
+import type * as preferences from "../preferences.js";
 import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
 import type * as quizzes from "../quizzes.js";
@@ -59,6 +62,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  activityFeed: typeof activityFeed;
   admin: typeof admin;
   adminAnalytics: typeof adminAnalytics;
   adminComments: typeof adminComments;
@@ -68,6 +72,7 @@ declare const fullApi: ApiFromModules<{
   aiSimulator: typeof aiSimulator;
   analytics: typeof analytics;
   blog: typeof blog;
+  bookmarks: typeof bookmarks;
   certificates: typeof certificates;
   chat: typeof chat;
   comments: typeof comments;
@@ -87,6 +92,7 @@ declare const fullApi: ApiFromModules<{
   notificationHelpers: typeof notificationHelpers;
   notifications: typeof notifications;
   onboarding: typeof onboarding;
+  preferences: typeof preferences;
   progress: typeof progress;
   quizResults: typeof quizResults;
   quizzes: typeof quizzes;

@@ -600,4 +600,29 @@ export default defineSchema({
     completedAt: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_user", ["userId"]),
+
+  // העדפות משתמש מורחבות
+  userPreferences: defineTable({
+    userId: v.string(), // Clerk user ID
+    emailNotifications: v.boolean(),
+    pushNotifications: v.boolean(),
+    weeklyDigest: v.boolean(),
+    theme: v.union(v.literal("light"), v.literal("dark"), v.literal("system")),
+    language: v.union(v.literal("he"), v.literal("en")),
+    displayDensity: v.union(v.literal("comfortable"), v.literal("compact")),
+    courseReminders: v.boolean(),
+    achievementAlerts: v.boolean(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  // סימניות / מועדפים
+  bookmarks: defineTable({
+    userId: v.string(),
+    itemType: v.string(), // "course" | "lesson" | "blog"
+    itemId: v.string(),
+    itemTitle: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_item", ["userId", "itemType", "itemId"]),
 });
