@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { EnrollButton } from "@/components/course/enroll-button";
 import { CourseReviews } from "@/components/reviews/course-reviews";
 import { SocialShare } from "@/components/social-share";
+import { ShareButton } from "@/components/ui/share-button";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -307,6 +308,11 @@ export default function CourseDetailPage() {
 
                   {/* CTA Buttons */}
                   <div className="flex flex-wrap items-center gap-3">
+                    <ShareButton
+                      title={`${course.title} - הדרך: אומנות הקשר`}
+                      text={course.description}
+                      url={`https://haderech.co.il/courses/${courseId}`}
+                    />
                     {clerkUser ? (
                       <>
                         {isEnrolled !== undefined && (

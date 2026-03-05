@@ -9,6 +9,7 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SocialShare } from "@/components/social-share";
+import { ShareButton } from "@/components/ui/share-button";
 import { sanityClient } from "@/lib/sanity/client";
 import { blogPostBySlugQuery } from "@/lib/sanity/queries";
 import type { SanityBlogPost } from "@/lib/sanity/types";
@@ -338,6 +339,15 @@ export default function BlogPostPage() {
           <h1 className="mb-4 text-3xl font-bold leading-snug text-zinc-900 dark:text-white md:text-4xl">
             {post.title}
           </h1>
+
+          {/* Share Button */}
+          <div className="mb-4">
+            <ShareButton
+              title={post.title}
+              text={post.excerpt}
+              url={`https://haderech.co.il/blog/${post.slug}`}
+            />
+          </div>
 
           {/* Meta */}
           <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">

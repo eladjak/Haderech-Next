@@ -6,6 +6,10 @@ import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { ContinueLearning } from "@/components/dashboard/continue-learning";
+import { WeeklyGoal } from "@/components/dashboard/weekly-goal";
+import { LearningStats } from "@/components/dashboard/learning-stats";
+import { RecommendedCourses } from "@/components/dashboard/recommended-courses";
 
 // ==========================================
 // Phase 39 - Advanced Student Dashboard
@@ -62,7 +66,18 @@ export default function StudentDashboardPage() {
           <EmptyState />
         ) : (
           <>
-            {/* ===== Row 1: Hero Stats (4 cards) ===== */}
+            {/* ===== Row 0: Continue Learning (full width) ===== */}
+            <section className="mb-8" aria-label="המשך ללמוד">
+              <ContinueLearning />
+            </section>
+
+            {/* ===== Row 1: Weekly Goal + Learning Stats ===== */}
+            <section className="mb-8 grid gap-6 lg:grid-cols-2" aria-label="יעד שבועי וסטטיסטיקות">
+              <WeeklyGoal />
+              <LearningStats />
+            </section>
+
+            {/* ===== Row 2: Hero Stats (4 cards) ===== */}
             <section className="mb-8" aria-label="סטטיסטיקות ראשיות">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {/* Level & XP */}
@@ -212,7 +227,7 @@ export default function StudentDashboardPage() {
               </div>
             </section>
 
-            {/* ===== Row 2: Weekly Activity Chart ===== */}
+            {/* ===== Row 3: Weekly Activity Chart ===== */}
             <section className="mb-8" aria-label="פעילות שבועית">
               <div className="rounded-2xl border border-zinc-200/70 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <h2 className="mb-5 text-lg font-semibold text-zinc-900 dark:text-white">
@@ -224,7 +239,7 @@ export default function StudentDashboardPage() {
               </div>
             </section>
 
-            {/* ===== Row 3: Course Progress ===== */}
+            {/* ===== Row 4: Course Progress ===== */}
             {overview.courseProgress.length > 0 && (
               <section className="mb-8" aria-label="התקדמות בקורסים">
                 <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
@@ -246,7 +261,12 @@ export default function StudentDashboardPage() {
               </section>
             )}
 
-            {/* ===== Row 4: Quick Actions (3 cards) ===== */}
+            {/* ===== Row 5: Recommended Courses ===== */}
+            <section className="mb-8" aria-label="קורסים מומלצים">
+              <RecommendedCourses />
+            </section>
+
+            {/* ===== Row 6: Quick Actions (3 cards) ===== */}
             <section className="mb-8" aria-label="פעולות מהירות">
               <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
                 פעולות מהירות
@@ -276,7 +296,7 @@ export default function StudentDashboardPage() {
               </div>
             </section>
 
-            {/* ===== Row 5: Recent Activity Feed ===== */}
+            {/* ===== Row 7: Recent Activity Feed ===== */}
             {overview.recentXpEvents.length > 0 && (
               <section className="mb-8" aria-label="פעילות אחרונה">
                 <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
@@ -668,6 +688,20 @@ function formatRelativeTime(timestamp: number): string {
 function DashboardSkeleton() {
   return (
     <div className="animate-pulse space-y-8">
+      {/* Continue Learning */}
+      <div className="h-24 rounded-2xl bg-zinc-100 dark:bg-zinc-800" />
+      {/* Weekly Goal + Learning Stats */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="h-48 rounded-2xl bg-zinc-100 dark:bg-zinc-800" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="h-[5.5rem] rounded-2xl bg-zinc-100 dark:bg-zinc-800"
+            />
+          ))}
+        </div>
+      </div>
       {/* Stats row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
@@ -688,6 +722,8 @@ function DashboardSkeleton() {
           />
         ))}
       </div>
+      {/* Recommended courses */}
+      <div className="h-56 rounded-2xl bg-zinc-100 dark:bg-zinc-800" />
       {/* Quick actions */}
       <div className="grid gap-4 sm:grid-cols-3">
         {[...Array(3)].map((_, i) => (
