@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { PushSettings } from "@/components/notifications/push-settings";
 
 // ---- Types ----
 
@@ -387,6 +388,11 @@ export default function SettingsPage() {
                 loading={savingSection === "notifications"}
               />
             </div>
+          </Section>
+
+          {/* ── Push Notifications ── */}
+          <Section title="התראות Push">
+            <PushSettings />
           </Section>
 
           {/* ── 3. Display Preferences ── */}

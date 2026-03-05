@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as datingProfile from "../datingProfile.js";
 import type * as activityFeed from "../activityFeed.js";
 import type * as admin from "../admin.js";
 import type * as adminAnalytics from "../adminAnalytics.js";
@@ -41,6 +42,7 @@ import type * as notificationHelpers from "../notificationHelpers.js";
 import type * as notifications from "../notifications.js";
 import type * as onboarding from "../onboarding.js";
 import type * as preferences from "../preferences.js";
+import type * as pushNotifications from "../pushNotifications.js";
 import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
 import type * as quizzes from "../quizzes.js";
@@ -67,6 +69,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  datingProfile: typeof datingProfile;
   activityFeed: typeof activityFeed;
   admin: typeof admin;
   adminAnalytics: typeof adminAnalytics;
@@ -100,6 +103,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   onboarding: typeof onboarding;
   preferences: typeof preferences;
+  pushNotifications: typeof pushNotifications;
   progress: typeof progress;
   quizResults: typeof quizResults;
   quizzes: typeof quizzes;

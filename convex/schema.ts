@@ -727,4 +727,47 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_resource", ["userId", "resourceId"]),
+
+  // Push notification subscriptions
+  pushSubscriptions: defineTable({
+    userId: v.string(), // Clerk user ID
+    endpoint: v.string(), // Push endpoint URL
+    p256dh: v.string(), // Public key
+    auth: v.string(), // Auth secret
+    userAgent: v.optional(v.string()), // Browser/device info
+    active: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_endpoint", ["endpoint"])
+    .index("by_user_active", ["userId", "active"]),
+
+  // פרופילי דייטינג - Phase 70
+  datingProfiles: defineTable({
+    clerkId: v.string(),
+    displayName: v.optional(v.string()),
+    age: v.optional(v.number()),
+    location: v.optional(v.string()),
+    lookingFor: v.optional(
+      v.union(
+        v.literal("relationship"),
+        v.literal("casual"),
+        v.literal("friendship"),
+        v.literal("not-sure")
+      )
+    ),
+    genderIdentity: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    interests: v.optional(v.array(v.string())),
+    customInterests: v.optional(v.array(v.string())),
+    idealPartner: v.optional(v.string()),
+    dealBreakers: v.optional(v.array(v.string())),
+    relationshipValues: v.optional(v.array(v.string())),
+    completenessScore: v.optional(v.number()),
+    currentStep: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_clerk_id", ["clerkId"]),
 });
