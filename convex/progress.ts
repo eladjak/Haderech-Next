@@ -1,6 +1,86 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+// ---- Watch-time & resume helpers (auth-based, no userId arg) ----
+
+// עדכון זמן צפייה עם זיהוי אוטומטי של המשתמש
+export const updateWatchTime = mutation({
+  args: {
+    lessonId: v.id("lessons"),
+    courseId: v.id("courses"),
+    watchTimeSeconds: v.number(),
+    progressPercent: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const existing = await ctx.db
+      .query("progress")
+      .withIndex("by_user_lesson", (q) =>
+        q.eq("userId", user._id).eq("lessonId", args.lessonId)
+      )
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      const updates: Record<string, unknown> = {
+        progressPercent: Math.max(existing.progressPercent, args.progressPercent),
+        lastWatchedAt: now,
+        watchTimeSeconds: (existing.watchTimeSeconds ?? 0) + args.watchTimeSeconds,
+      };
+
+      // Mark as completed if 90%+
+      if (args.progressPercent >= 90 && !existing.completed) {
+        updates.completed = true;
+        updates.completedAt = now;
+      }
+
+      await ctx.db.patch(existing._id, updates);
+    } else {
+      await ctx.db.insert("progress", {
+        userId: user._id,
+        lessonId: args.lessonId,
+        courseId: args.courseId,
+        completed: args.progressPercent >= 90,
+        progressPercent: args.progressPercent,
+        lastWatchedAt: now,
+        completedAt: args.progressPercent >= 90 ? now : undefined,
+        watchTimeSeconds: args.watchTimeSeconds,
+      });
+    }
+  },
+});
+
+// שליפת התקדמות שיעור לצורך המשך צפייה (auth-based)
+export const getLessonProgress = query({
+  args: { lessonId: v.id("lessons") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) return null;
+
+    return await ctx.db
+      .query("progress")
+      .withIndex("by_user_lesson", (q) =>
+        q.eq("userId", user._id).eq("lessonId", args.lessonId)
+      )
+      .first();
+  },
+});
+
 // שליפת התקדמות משתמש בשיעור
 export const getForLesson = query({
   args: {

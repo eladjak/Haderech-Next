@@ -9,6 +9,7 @@ import { api } from "@/../convex/_generated/api";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
+import { VideoPlayer } from "@/components/lesson/video-player";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 function LessonContent() {
@@ -38,6 +39,12 @@ function LessonContent() {
   const courseProgress = useQuery(
     api.progress.getForCourse,
     convexUser?._id ? { userId: convexUser._id, courseId } : "skip"
+  );
+
+  // Lesson progress for video resume
+  const lessonProgress = useQuery(
+    api.progress.getLessonProgress,
+    lessonId ? { lessonId } : "skip"
   );
 
   // Quiz for current lesson
@@ -316,16 +323,14 @@ function LessonContent() {
 
             {/* Video Player */}
             {activeLesson.videoUrl && (
-              <div className="mb-8 aspect-video overflow-hidden rounded-2xl bg-zinc-900">
-                <video
-                  src={activeLesson.videoUrl}
-                  controls
-                  className="h-full w-full"
-                  playsInline
-                >
-                  <track kind="captions" />
-                  הדפדפן שלך לא תומך בוידאו.
-                </video>
+              <div className="mb-8">
+                <VideoPlayer
+                  videoUrl={activeLesson.videoUrl}
+                  lessonId={activeLessonId}
+                  courseId={courseId}
+                  initialProgress={lessonProgress?.progressPercent}
+                  onComplete={handleMarkComplete}
+                />
               </div>
             )}
 

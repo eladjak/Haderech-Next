@@ -26,6 +26,7 @@ import type * as courses from "../courses.js";
 import type * as dailyContent from "../dailyContent.js";
 import type * as enrollments from "../enrollments.js";
 import type * as gamification from "../gamification.js";
+import type * as health from "../health.js";
 import type * as lessons from "../lessons.js";
 import type * as lib_authGuard from "../lib/authGuard.js";
 import type * as mentoring from "../mentoring.js";
@@ -41,6 +42,7 @@ import type * as seedCourseData from "../seedCourseData.js";
 import type * as seedSimulatorData from "../seedSimulatorData.js";
 import type * as simulator from "../simulator.js";
 import type * as stories from "../stories.js";
+import type * as subscriptions from "../subscriptions.js";
 import type * as tools from "../tools.js";
 import type * as users from "../users.js";
 
@@ -69,6 +71,7 @@ declare const fullApi: ApiFromModules<{
   dailyContent: typeof dailyContent;
   enrollments: typeof enrollments;
   gamification: typeof gamification;
+  health: typeof health;
   lessons: typeof lessons;
   "lib/authGuard": typeof lib_authGuard;
   mentoring: typeof mentoring;
@@ -84,6 +87,7 @@ declare const fullApi: ApiFromModules<{
   seedSimulatorData: typeof seedSimulatorData;
   simulator: typeof simulator;
   stories: typeof stories;
+  subscriptions: typeof subscriptions;
   tools: typeof tools;
   users: typeof users;
 }>;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -541,6 +542,37 @@ export default function SettingsPage() {
                 loading={savingSection === "learning"}
               />
             </div>
+          </Section>
+
+          {/* ── Billing Link ── */}
+          <Section title="חיוב ומנוי">
+            <Link
+              href="/billing"
+              className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 p-4 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/50"
+            >
+              <div>
+                <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                  ניהול מנוי וחיוב
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  צפייה בתוכנית הנוכחית, היסטוריית תשלומים ושדרוג
+                </p>
+              </div>
+              <svg
+                className="h-5 w-5 flex-shrink-0 text-zinc-400 dark:text-zinc-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
+              </svg>
+            </Link>
           </Section>
 
           {/* ── 5. Account Actions ── */}

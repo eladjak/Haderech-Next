@@ -517,6 +517,53 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_created", ["createdAt"]),
 
+  // מנויים / subscriptions
+  subscriptions: defineTable({
+    userId: v.id("users"),
+    plan: v.union(
+      v.literal("free"),
+      v.literal("basic"),
+      v.literal("premium"),
+      v.literal("vip")
+    ),
+    status: v.union(
+      v.literal("active"),
+      v.literal("cancelled"),
+      v.literal("past_due"),
+      v.literal("trialing")
+    ),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    currentPeriodStart: v.optional(v.number()),
+    currentPeriodEnd: v.optional(v.number()),
+    cancelAtPeriodEnd: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_stripe_customer", ["stripeCustomerId"])
+    .index("by_status", ["status"]),
+
+  // היסטוריית תשלומים
+  payments: defineTable({
+    userId: v.id("users"),
+    subscriptionId: v.optional(v.id("subscriptions")),
+    amount: v.number(), // in agorot (ILS cents)
+    currency: v.string(), // "ILS"
+    status: v.union(
+      v.literal("pending"),
+      v.literal("succeeded"),
+      v.literal("failed"),
+      v.literal("refunded")
+    ),
+    stripePaymentIntentId: v.optional(v.string()),
+    description: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_subscription", ["subscriptionId"])
+    .index("by_status", ["status"]),
+
   // סיפורי הצלחה / עדויות
   successStories: defineTable({
     userId: v.optional(v.id("users")),

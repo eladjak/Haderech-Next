@@ -10,9 +10,15 @@ import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
 import { YouTubePlayer } from "@/components/video/youtube-player";
+import { VideoPlayer } from "@/components/lesson/video-player";
 import { CommentsSection } from "@/components/lesson/comments-section";
 import { LessonNotes } from "@/components/lesson/lesson-notes";
 import type { Id } from "@/../convex/_generated/dataModel";
+
+// Check if a URL is a YouTube video
+function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com|youtu\.be)/.test(url);
+}
 
 // Simple markdown renderer - handles common markdown syntax
 function renderMarkdown(content: string): string {
@@ -106,6 +112,12 @@ export default function LessonPage() {
   const lessonProgress = useQuery(
     api.progress.getForLesson,
     convexUser?._id ? { userId: convexUser._id, lessonId } : "skip"
+  );
+
+  // Auth-based lesson progress (for VideoPlayer resume)
+  const authLessonProgress = useQuery(
+    api.progress.getLessonProgress,
+    { lessonId }
   );
 
   // Mutations
@@ -264,14 +276,24 @@ export default function LessonPage() {
           {/* Video player - with progress tracking */}
           {lesson.videoUrl && (
             <div className="mb-8">
-              <YouTubePlayer
-                videoUrl={lesson.videoUrl}
-                lessonTitle={lesson.title}
-                userId={convexUser?._id ?? null}
-                lessonId={lessonId}
-                courseId={courseId}
-                onComplete={handleMarkComplete}
-              />
+              {isYouTubeUrl(lesson.videoUrl) ? (
+                <YouTubePlayer
+                  videoUrl={lesson.videoUrl}
+                  lessonTitle={lesson.title}
+                  userId={convexUser?._id ?? null}
+                  lessonId={lessonId}
+                  courseId={courseId}
+                  onComplete={handleMarkComplete}
+                />
+              ) : (
+                <VideoPlayer
+                  videoUrl={lesson.videoUrl}
+                  lessonId={lessonId}
+                  courseId={courseId}
+                  initialProgress={authLessonProgress?.progressPercent}
+                  onComplete={handleMarkComplete}
+                />
+              )}
             </div>
           )}
 
