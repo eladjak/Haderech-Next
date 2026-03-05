@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from "react";
 
+const MAX_CHARS = 1000;
+
 interface ChatInputProps {
   onSend: (message: string) => void;
   isLoading: boolean;
@@ -34,7 +36,9 @@ export function ChatInput({ onSend, isLoading, disabled }: ChatInputProps) {
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setValue(e.target.value);
+      const next = e.target.value;
+      if (next.length > MAX_CHARS) return; // enforce max
+      setValue(next);
       // Auto-resize textarea
       const el = e.target;
       el.style.height = "auto";
@@ -44,6 +48,9 @@ export function ChatInput({ onSend, isLoading, disabled }: ChatInputProps) {
   );
 
   const canSend = value.trim().length > 0 && !isLoading && !disabled;
+  const charCount = value.length;
+  const isNearLimit = charCount > MAX_CHARS * 0.8;
+  const isAtLimit = charCount >= MAX_CHARS;
 
   return (
     <div className="border-t border-brand-100/30 bg-white/80 p-4 backdrop-blur-sm dark:border-zinc-700/50 dark:bg-zinc-900/80">
@@ -58,6 +65,7 @@ export function ChatInput({ onSend, isLoading, disabled }: ChatInputProps) {
             disabled={isLoading || disabled}
             rows={1}
             aria-label="הודעה למאמן"
+            aria-describedby="char-count-hint"
             dir="rtl"
             className="flex-1 resize-none bg-transparent text-sm leading-relaxed text-blue-700 placeholder-blue-300/60 focus:outline-none disabled:opacity-50 dark:text-zinc-100 dark:placeholder-zinc-500"
             style={{ minHeight: "24px", maxHeight: "160px" }}
@@ -110,9 +118,25 @@ export function ChatInput({ onSend, isLoading, disabled }: ChatInputProps) {
           </button>
         </div>
 
-        <p className="mt-2 text-center text-xs text-blue-500/40 dark:text-zinc-500">
-          Enter לשליחה • Shift+Enter לשורה חדשה
-        </p>
+        {/* Footer: hint + char count */}
+        <div className="mt-2 flex items-center justify-between" dir="rtl">
+          <p className="text-xs text-blue-500/40 dark:text-zinc-500">
+            Enter לשליחה • Shift+Enter לשורה חדשה
+          </p>
+          {isNearLimit && (
+            <p
+              id="char-count-hint"
+              className={`text-xs tabular-nums ${
+                isAtLimit
+                  ? "font-semibold text-red-500"
+                  : "text-orange-500/70 dark:text-orange-400/60"
+              }`}
+              aria-live="polite"
+            >
+              {charCount}/{MAX_CHARS}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

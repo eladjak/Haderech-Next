@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/header";
 import { ChatMessage, TypingIndicator } from "@/components/chat/chat-message";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
+import { TopicSuggestions } from "@/components/chat/topic-suggestions";
 
 type ChatMode = "coach" | "practice" | "analysis";
 
@@ -102,6 +103,74 @@ const STARTER_PROMPTS: Record<ChatMode, string[]> = {
   ],
 };
 
+/** Welcome message shown when coach session has no messages yet */
+function CoachWelcome({
+  mode,
+  onStarterPrompt,
+  isLoading,
+}: {
+  mode: ChatMode;
+  onStarterPrompt: (prompt: string) => void;
+  isLoading: boolean;
+}) {
+  const isCoach = mode === "coach";
+
+  return (
+    <div className="flex flex-col items-center py-8 text-center" dir="rtl">
+      {/* Coach avatar */}
+      <div className="relative mb-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-2xl font-bold text-white shadow-lg shadow-blue-500/25">
+          מ
+        </div>
+        <div className="absolute -bottom-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-400 text-[10px] shadow-sm" aria-hidden="true">
+          ✓
+        </div>
+      </div>
+
+      <h2 className="mb-1 text-base font-bold text-blue-600 dark:text-white">
+        המאמן שלי
+      </h2>
+      <p className="mb-1 text-xs text-blue-500/50 dark:text-zinc-400">
+        15+ שנות ניסיון • 461 זוגות
+      </p>
+
+      {isCoach ? (
+        <p className="mb-6 max-w-xs text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+          שלום! אני כאן בשבילך. מה עובר עליך? ספר לי ונתחיל לעבוד יחד.
+        </p>
+      ) : (
+        <p className="mb-6 max-w-xs text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+          {mode === "practice"
+            ? "מוכן/ה לתרגל? בחר סיטואציה ונתחיל את הסימולציה."
+            : "ספר לי על הדייט או המצב שרוצה לנתח. אני כאן לעזור."}
+        </p>
+      )}
+
+      {/* Starter prompt pills */}
+      <div className="mb-6 flex flex-wrap justify-center gap-2">
+        {STARTER_PROMPTS[mode].map((prompt) => (
+          <button
+            key={prompt}
+            type="button"
+            onClick={() => onStarterPrompt(prompt)}
+            disabled={isLoading}
+            className="rounded-full border border-brand-200/40 bg-brand-50/50 px-3 py-1.5 text-xs font-medium text-brand-600 transition-colors hover:bg-brand-100/50 disabled:opacity-50 dark:border-brand-200/20 dark:bg-brand-50/10 dark:text-brand-300"
+          >
+            {prompt}
+          </button>
+        ))}
+      </div>
+
+      {/* Topic suggestions - only for coach mode */}
+      {isCoach && (
+        <div className="w-full max-w-lg">
+          <TopicSuggestions onSelectTopic={onStarterPrompt} disabled={isLoading} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ChatPage() {
   return (
     <>
@@ -165,12 +234,26 @@ function ChatPageContent() {
   // Send message
   const handleSendMessage = useCallback(
     async (content: string) => {
-      if (!activeSessionId || !userId || isLoading) return;
+      if (!userId || isLoading) return;
+
+      // If no active session, create a coach session first
+      let sessionId = activeSessionId;
+      if (!sessionId) {
+        try {
+          sessionId = await createSession({ userId, mode: "coach" });
+          setActiveSessionId(sessionId);
+          setError(null);
+        } catch (e) {
+          setError("שגיאה ביצירת שיחה חדשה");
+          return;
+        }
+      }
+
       setIsLoading(true);
       setError(null);
       try {
         await sendMessage({
-          sessionId: activeSessionId,
+          sessionId,
           userMessage: content,
           userId,
         });
@@ -180,7 +263,7 @@ function ChatPageContent() {
         setIsLoading(false);
       }
     },
-    [activeSessionId, userId, isLoading, sendMessage]
+    [activeSessionId, userId, isLoading, sendMessage, createSession]
   );
 
   // Delete session
@@ -198,7 +281,7 @@ function ChatPageContent() {
     [activeSessionId, deleteSession]
   );
 
-  // Use a starter prompt
+  // Use a starter prompt - send directly (creates session if needed)
   const handleStarterPrompt = useCallback(
     async (prompt: string) => {
       await handleSendMessage(prompt);
@@ -206,8 +289,8 @@ function ChatPageContent() {
     [handleSendMessage]
   );
 
-  const currentMode = activeSession?.mode ?? "coach";
-  const modeConfig = MODE_CONFIG[currentMode as ChatMode];
+  const currentMode = (activeSession?.mode ?? "coach") as ChatMode;
+  const modeConfig = MODE_CONFIG[currentMode];
 
   return (
     <div className="flex h-dvh flex-col bg-[var(--background)]">
@@ -218,7 +301,10 @@ function ChatPageContent() {
         <ChatSidebar
           sessions={sessions}
           activeSessionId={activeSessionId}
-          onSelectSession={(id) => setActiveSessionId(id as Id<"chatSessions">)}
+          onSelectSession={(id) => {
+            setActiveSessionId(id as Id<"chatSessions">);
+            setIsSidebarOpen(false);
+          }}
           onNewChat={() => setShowModeSelector(true)}
           onDeleteSession={handleDeleteSession}
           isOpen={isSidebarOpen}
@@ -258,13 +344,18 @@ function ChatPageContent() {
                 </div>
               </>
             ) : (
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-blue-500 dark:text-white">
-                  מאמן AI - אומנות הקשר
-                </p>
-                <p className="text-xs text-blue-500/50 dark:text-zinc-500">
-                  15+ שנות ניסיון, 461 זוגות
-                </p>
+              <div className="flex flex-1 items-center gap-3">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-sm">
+                  מ
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-blue-500 dark:text-white">
+                    מאמן AI - אומנות הקשר
+                  </p>
+                  <p className="text-xs text-blue-500/50 dark:text-zinc-500">
+                    15+ שנות ניסיון, 461 זוגות
+                  </p>
+                </div>
               </div>
             )}
 
@@ -308,7 +399,7 @@ function ChatPageContent() {
           {/* Messages area */}
           <div className="flex-1 overflow-y-auto">
             {!activeSession ? (
-              // Welcome / Mode selector
+              // Welcome / Mode selector (no active session)
               <div className="flex flex-col items-center justify-center min-h-full p-6 text-center">
                 <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-brand-500 to-brand-600 shadow-xl shadow-brand-500/25">
                   <svg className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -351,30 +442,24 @@ function ChatPageContent() {
                     );
                   })}
                 </div>
+
+                {/* Topic suggestions on welcome screen */}
+                <div className="mt-8 w-full max-w-2xl" dir="rtl">
+                  <TopicSuggestions
+                    onSelectTopic={handleStarterPrompt}
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
             ) : (
               <div className="mx-auto max-w-3xl space-y-4 p-4 pb-2">
                 {/* Welcome message if no messages yet */}
                 {activeSession.messages.length === 0 && (
-                  <div className="py-6 text-center">
-                    <p className="text-sm text-blue-500/50 dark:text-zinc-500">
-                      שיחה חדשה התחילה. מה תרצה לדון?
-                    </p>
-                    {/* Starter prompts */}
-                    <div className="mt-4 flex flex-wrap justify-center gap-2">
-                      {STARTER_PROMPTS[currentMode as ChatMode].map((prompt) => (
-                        <button
-                          key={prompt}
-                          type="button"
-                          onClick={() => handleStarterPrompt(prompt)}
-                          disabled={isLoading}
-                          className="rounded-full border border-brand-200/40 bg-brand-50/50 px-3 py-1.5 text-xs font-medium text-brand-600 transition-colors hover:bg-brand-100/50 disabled:opacity-50 dark:border-brand-200/20 dark:bg-brand-50/10 dark:text-brand-300"
-                        >
-                          {prompt}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <CoachWelcome
+                    mode={currentMode}
+                    onStarterPrompt={handleStarterPrompt}
+                    isLoading={isLoading}
+                  />
                 )}
 
                 {/* Messages */}
@@ -391,14 +476,12 @@ function ChatPageContent() {
             )}
           </div>
 
-          {/* Input area - only show when session is active */}
-          {activeSession && (
-            <ChatInput
-              onSend={handleSendMessage}
-              isLoading={isLoading}
-              disabled={!activeSession}
-            />
-          )}
+          {/* Input area - always show */}
+          <ChatInput
+            onSend={handleSendMessage}
+            isLoading={isLoading}
+            disabled={false}
+          />
         </main>
       </div>
 

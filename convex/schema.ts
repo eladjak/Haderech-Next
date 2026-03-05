@@ -309,6 +309,71 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_session", ["sessionId"]),
 
+  // סימולטור - תרחישי דיאלוג מובנה (Phase 68)
+  dialogueScenarios: defineTable({
+    title: v.string(),
+    description: v.string(),
+    difficulty: v.union(
+      v.literal("easy"),
+      v.literal("medium"),
+      v.literal("hard")
+    ),
+    category: v.string(),
+    estimatedMinutes: v.number(),
+    personaName: v.string(),
+    personaEmoji: v.string(),
+    personaDescription: v.string(),
+    dialoguePoints: v.array(
+      v.object({
+        id: v.string(),
+        situation: v.string(),
+        options: v.array(
+          v.object({
+            text: v.string(),
+            score: v.number(), // 0-3
+            feedback: v.string(),
+          })
+        ),
+        tip: v.string(),
+      })
+    ),
+    published: v.boolean(),
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_published", ["published"])
+    .index("by_order", ["order"])
+    .index("by_difficulty", ["difficulty"]),
+
+  // סימולטור - סשנים מובנים
+  dialogueSessions: defineTable({
+    userId: v.string(),
+    scenarioId: v.id("dialogueScenarios"),
+    status: v.union(
+      v.literal("active"),
+      v.literal("completed"),
+      v.literal("abandoned")
+    ),
+    currentStep: v.number(), // which dialogue point
+    choices: v.array(
+      v.object({
+        stepId: v.string(),
+        choiceIndex: v.number(),
+        score: v.number(),
+        feedback: v.string(),
+      })
+    ),
+    totalScore: v.optional(v.number()), // 0-100 final score
+    maxPossibleScore: v.optional(v.number()),
+    grade: v.optional(v.string()), // A/B/C/D
+    summaryFeedback: v.optional(v.string()),
+    createdAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_scenario", ["scenarioId"])
+    .index("by_user_status", ["userId", "status"]),
+
   // קהילה - נושאים/פוסטים
   communityTopics: defineTable({
     userId: v.id("users"),
@@ -625,4 +690,41 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_item", ["userId", "itemType", "itemId"]),
+
+  // משאבים - מדריכים, תרגילים, דפי עבודה
+  resources: defineTable({
+    title: v.string(),
+    description: v.string(),
+    category: v.union(
+      v.literal("guides"),    // מדריכים
+      v.literal("exercises"), // תרגילים
+      v.literal("worksheets"), // דפי עבודה
+      v.literal("summaries")  // סיכומים
+    ),
+    type: v.union(
+      v.literal("pdf"),
+      v.literal("worksheet"),
+      v.literal("exercise"),
+      v.literal("summary")
+    ),
+    estimatedTime: v.number(), // minutes
+    isFree: v.boolean(),
+    downloadCount: v.number(),
+    content: v.string(), // markdown content
+    tags: v.optional(v.array(v.string())),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_category", ["category"])
+    .index("by_free", ["isFree"])
+    .index("by_downloads", ["downloadCount"]),
+
+  // סימניות למשאבים
+  resourceBookmarks: defineTable({
+    userId: v.string(),
+    resourceId: v.id("resources"),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_resource", ["userId", "resourceId"]),
 });

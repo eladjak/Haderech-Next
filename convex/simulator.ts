@@ -374,6 +374,270 @@ export const endSession = action({
   },
 });
 
+// ==========================================
+// Structured Dialogue Simulator (Phase 68)
+// ==========================================
+
+// List all published dialogue scenarios
+export const listDialogueScenarios = query({
+  args: {},
+  handler: async (ctx) => {
+    const scenarios = await ctx.db
+      .query("dialogueScenarios")
+      .withIndex("by_published", (q) => q.eq("published", true))
+      .collect();
+    return scenarios.sort((a, b) => a.order - b.order);
+  },
+});
+
+// Get a single dialogue scenario with full data
+export const getDialogueScenario = query({
+  args: { scenarioId: v.id("dialogueScenarios") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.scenarioId);
+  },
+});
+
+// Start a structured dialogue simulation
+export const startSimulation = mutation({
+  args: { scenarioId: v.id("dialogueScenarios") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const scenario = await ctx.db.get(args.scenarioId);
+    if (!scenario) throw new Error("Scenario not found");
+    if (!scenario.published) throw new Error("Scenario is not published");
+
+    const sessionId = await ctx.db.insert("dialogueSessions", {
+      userId: identity.subject,
+      scenarioId: args.scenarioId,
+      status: "active",
+      currentStep: 0,
+      choices: [],
+      createdAt: Date.now(),
+    });
+
+    return sessionId;
+  },
+});
+
+// Get an active dialogue session
+export const getDialogueSession = query({
+  args: { sessionId: v.id("dialogueSessions") },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) return null;
+    const scenario = await ctx.db.get(session.scenarioId);
+    return { ...session, scenario };
+  },
+});
+
+// Submit a choice at a dialogue point
+export const submitChoice = mutation({
+  args: {
+    sessionId: v.id("dialogueSessions"),
+    stepId: v.string(),
+    choiceIndex: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) throw new Error("Session not found");
+    if (session.userId !== identity.subject) throw new Error("Not authorized");
+    if (session.status !== "active") throw new Error("Session is not active");
+
+    const scenario = await ctx.db.get(session.scenarioId);
+    if (!scenario) throw new Error("Scenario not found");
+
+    const dialoguePoint = scenario.dialoguePoints.find(
+      (dp) => dp.id === args.stepId
+    );
+    if (!dialoguePoint) throw new Error("Dialogue point not found");
+
+    const option = dialoguePoint.options[args.choiceIndex];
+    if (!option) throw new Error("Invalid choice index");
+
+    const newChoice = {
+      stepId: args.stepId,
+      choiceIndex: args.choiceIndex,
+      score: option.score,
+      feedback: option.feedback,
+    };
+
+    const updatedChoices = [...session.choices, newChoice];
+    const nextStep = session.currentStep + 1;
+
+    await ctx.db.patch(args.sessionId, {
+      choices: updatedChoices,
+      currentStep: nextStep,
+    });
+
+    return {
+      score: option.score,
+      feedback: option.feedback,
+      tip: dialoguePoint.tip,
+      isLast: nextStep >= scenario.dialoguePoints.length,
+    };
+  },
+});
+
+// Complete simulation and calculate final score
+export const completeSimulation = mutation({
+  args: { sessionId: v.id("dialogueSessions") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) throw new Error("Session not found");
+    if (session.userId !== identity.subject) throw new Error("Not authorized");
+    if (session.status !== "active") throw new Error("Session is not active");
+
+    const scenario = await ctx.db.get(session.scenarioId);
+    if (!scenario) throw new Error("Scenario not found");
+
+    // Each option max score is 3, so max per step = 3
+    const maxPossibleScore = scenario.dialoguePoints.length * 3;
+    const totalRawScore = session.choices.reduce((sum, c) => sum + c.score, 0);
+    const totalScore = Math.round((totalRawScore / maxPossibleScore) * 100);
+
+    let grade: string;
+    let summaryFeedback: string;
+
+    if (totalScore >= 90) {
+      grade = "A+";
+      summaryFeedback =
+        "ביצועים מעולים! אתה מדגים הבנה עמוקה של תקשורת בינאישית ויצירת קשר. המשך כך!";
+    } else if (totalScore >= 80) {
+      grade = "A";
+      summaryFeedback =
+        "מצוין! הצלחת לנהל את השיחה בצורה טובה מאוד. יש מקום קטן לשיפור בכמה נקודות.";
+    } else if (totalScore >= 70) {
+      grade = "B";
+      summaryFeedback =
+        "טוב מאוד! הראית הבנה טובה של הדינמיקה הבינאישית. עוד קצת תרגול ותגיע לשלמות.";
+    } else if (totalScore >= 60) {
+      grade = "C";
+      summaryFeedback =
+        "לא רע! יש לך בסיס טוב. שים לב לרגעים שבהם כדאי להקשיב יותר ולדבר פחות.";
+    } else if (totalScore >= 50) {
+      grade = "D";
+      summaryFeedback =
+        "אתה בדרך הנכונה, אבל יש מה לשפר. נסה לשים לב יותר לצרכי הצד השני.";
+    } else {
+      grade = "F";
+      summaryFeedback =
+        "יש מקום לשיפור משמעותי. נסה שוב עם תשומת לב לרגשות ולצרכים של הצד השני.";
+    }
+
+    await ctx.db.patch(args.sessionId, {
+      status: "completed",
+      totalScore,
+      maxPossibleScore,
+      grade,
+      summaryFeedback,
+      completedAt: Date.now(),
+    });
+
+    return { totalScore, maxPossibleScore, grade, summaryFeedback };
+  },
+});
+
+// Get user's dialogue simulation history
+export const getSimulationHistory = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const sessions = await ctx.db
+      .query("dialogueSessions")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .collect();
+
+    const sorted = sessions.sort((a, b) => b.createdAt - a.createdAt);
+
+    return await Promise.all(
+      sorted.map(async (session) => {
+        const scenario = await ctx.db.get(session.scenarioId);
+        return {
+          ...session,
+          scenarioTitle: scenario?.title ?? "תרחיש לא נמצא",
+          scenarioDifficulty: scenario?.difficulty ?? "easy",
+          personaName: scenario?.personaName ?? "",
+          personaEmoji: scenario?.personaEmoji ?? "👤",
+        };
+      })
+    );
+  },
+});
+
+// Get best score per scenario for a user (for leaderboard display on scenario cards)
+export const getUserBestScores = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return {};
+
+    const sessions = await ctx.db
+      .query("dialogueSessions")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .collect();
+
+    const bestScores: Record<string, number> = {};
+    for (const session of sessions) {
+      if (session.status === "completed" && session.totalScore !== undefined) {
+        const scenarioId = session.scenarioId;
+        const existing = bestScores[scenarioId];
+        if (existing === undefined || session.totalScore > existing) {
+          bestScores[scenarioId] = session.totalScore;
+        }
+      }
+    }
+
+    return bestScores;
+  },
+});
+
+// Get leaderboard for a scenario
+export const getLeaderboard = query({
+  args: { scenarioId: v.id("dialogueScenarios") },
+  handler: async (ctx, args) => {
+    const sessions = await ctx.db
+      .query("dialogueSessions")
+      .withIndex("by_scenario", (q) => q.eq("scenarioId", args.scenarioId))
+      .collect();
+
+    const completed = sessions.filter(
+      (s) => s.status === "completed" && s.totalScore !== undefined
+    );
+
+    // Get best score per user
+    const bestPerUser: Record<string, { userId: string; score: number }> = {};
+    for (const session of completed) {
+      const existing = bestPerUser[session.userId];
+      if (!existing || (session.totalScore ?? 0) > existing.score) {
+        bestPerUser[session.userId] = {
+          userId: session.userId,
+          score: session.totalScore ?? 0,
+        };
+      }
+    }
+
+    return Object.values(bestPerUser)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map((entry, index) => ({
+        rank: index + 1,
+        score: entry.score,
+        userId: entry.userId,
+      }));
+  },
+});
+
 // Internal mutation: mark session as completed
 export const markCompleted = internalMutation({
   args: {

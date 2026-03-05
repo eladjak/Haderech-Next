@@ -228,6 +228,32 @@ export default function SimulatorPage() {
           </div>
         )}
 
+        {/* Dialogue Scenarios Banner */}
+        <div className="mt-12 rounded-2xl border border-brand-100 bg-gradient-to-l from-brand-50 to-white p-6 dark:border-blue-500/20 dark:from-blue-500/10 dark:to-zinc-900/50">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="mb-1 flex items-center gap-2">
+                <span className="text-lg">✨</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
+                  חדש - Phase 68
+                </span>
+              </div>
+              <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-white">
+                סימולציות דיאלוג מובנה
+              </h2>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                4 תרחישים עם ניקוד, משוב מיידי, וציון אישי A-F. ללא AI נדרש.
+              </p>
+            </div>
+            <Link
+              href="/simulator/dialogue"
+              className="flex-shrink-0 rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md sm:self-start"
+            >
+              נסה עכשיו
+            </Link>
+          </div>
+        </div>
+
         {/* How it works */}
         <div className="mt-16">
           <h2 className="mb-6 text-center text-xl font-bold text-zinc-900 dark:text-white">

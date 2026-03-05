@@ -44,6 +44,7 @@ import type * as preferences from "../preferences.js";
 import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
 import type * as quizzes from "../quizzes.js";
+import type * as resources from "../resources.js";
 import type * as reviews from "../reviews.js";
 import type * as scheduledTasks from "../scheduledTasks.js";
 import type * as search from "../search.js";
@@ -102,6 +103,7 @@ declare const fullApi: ApiFromModules<{
   progress: typeof progress;
   quizResults: typeof quizResults;
   quizzes: typeof quizzes;
+  resources: typeof resources;
   reviews: typeof reviews;
   scheduledTasks: typeof scheduledTasks;
   search: typeof search;
