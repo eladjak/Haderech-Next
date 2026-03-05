@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/", "/dashboard/", "/(auth)/"],
+      disallow: ["/admin/", "/api/", "/student/"],
     },
-    sitemap: "https://haderech.co.il/sitemap.xml",
+    sitemap: "https://haderech.ohlove.co.il/sitemap.xml",
   };
 }

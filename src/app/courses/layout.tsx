@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     title: "קורסים | הדרך - אומנות הקשר",
     description:
       "גלו את מגוון הקורסים שלנו ללמידת דייטינג וזוגיות. מקורסי התחלה ועד שיפור מיומנויות מתקדמות.",
-    url: "https://haderech.co.il/courses",
+    url: "https://haderech.ohlove.co.il/courses",
     images: [
       {
-        url: "/images/hero.jpg",
+        url: "/images/haderech-banner.jpg",
         width: 1200,
         height: 630,
         alt: "קורסים - הדרך אומנות הקשר",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "קורסים | הדרך - אומנות הקשר",
     description:
       "גלו את מגוון הקורסים שלנו ללמידת דייטינג וזוגיות. מקורסי התחלה ועד שיפור מיומנויות מתקדמות.",
-    images: ["/images/hero.jpg"],
+    images: ["/images/haderech-banner.jpg"],
   },
 };
 

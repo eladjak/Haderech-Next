@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     title: "מחירים | הדרך - אומנות הקשר",
     description:
       "בחרו את התוכנית המתאימה לכם. גישה לכל הקורסים, הסימולטור וכלי ה-AI.",
-    url: "https://haderech.co.il/pricing",
+    url: "https://haderech.ohlove.co.il/pricing",
     images: [
       {
-        url: "/images/hero.jpg",
+        url: "/images/haderech-banner.jpg",
         width: 1200,
         height: 630,
         alt: "מחירים - הדרך אומנות הקשר",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "מחירים | הדרך - אומנות הקשר",
     description:
       "בחרו את התוכנית המתאימה לכם. גישה לכל הקורסים, הסימולטור וכלי ה-AI.",
-    images: ["/images/hero.jpg"],
+    images: ["/images/haderech-banner.jpg"],
   },
 };
 

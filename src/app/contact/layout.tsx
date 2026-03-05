@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     title: "צור קשר | הדרך - אומנות הקשר",
     description:
       "צרו קשר עם צוות הדרך. שאלות, הצעות או עזרה - אנחנו כאן בשבילכם.",
-    url: "https://haderech.co.il/contact",
+    url: "https://haderech.ohlove.co.il/contact",
     images: [
       {
-        url: "/images/hero.jpg",
+        url: "/images/haderech-banner.jpg",
         width: 1200,
         height: 630,
         alt: "צור קשר - הדרך אומנות הקשר",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "צור קשר | הדרך - אומנות הקשר",
     description:
       "צרו קשר עם צוות הדרך. שאלות, הצעות או עזרה - אנחנו כאן בשבילכם.",
-    images: ["/images/hero.jpg"],
+    images: ["/images/haderech-banner.jpg"],
   },
 };
 

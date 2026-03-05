@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "בלוג | הדרך",
+  title: "בלוג",
   description:
     "מאמרים, טיפים ותובנות על דייטינג, זוגיות וצמיחה אישית מצוות הדרך - אומנות הקשר.",
   openGraph: {
     title: "בלוג | הדרך - אומנות הקשר",
     description:
       "מאמרים, טיפים ותובנות על דייטינג, זוגיות וצמיחה אישית.",
-    url: "https://haderech.co.il/blog",
+    url: "https://haderech.ohlove.co.il/blog",
     images: [
       {
-        url: "/images/hero.jpg",
+        url: "/images/haderech-banner.jpg",
         width: 1200,
         height: 630,
         alt: "בלוג - הדרך אומנות הקשר",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "בלוג | הדרך - אומנות הקשר",
     description:
       "מאמרים, טיפים ותובנות על דייטינג, זוגיות וצמיחה אישית.",
-    images: ["/images/hero.jpg"],
+    images: ["/images/haderech-banner.jpg"],
   },
 };
 
