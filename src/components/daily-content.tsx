@@ -3,68 +3,30 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/../convex/_generated/api";
+import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ContentType = "tip" | "quote" | "challenge";
-
-interface DailyContentItem {
-  _id: string;
-  type: ContentType;
-  content: string;
-  author?: string;
-  category: string;
+type TodayContentResult = {
   dayOfYear: number;
-  createdAt: number;
-}
+  year: number;
+  tip: { _id: string; content: string; category: string } | null;
+  quote: { _id: string; content: string; author?: string; category: string } | null;
+  challenge: { _id: string; content: string; category: string } | null;
+} | null;
 
-// ─── Config ───────────────────────────────────────────────────────────────────
+// ─── Compact widget (for dashboard - legacy export, use DailyWidget instead) ──
 
-const TYPE_CONFIG: Record<
-  ContentType,
-  { icon: string; label: string; gradientClass: string; badgeClass: string; borderClass: string }
-> = {
-  tip: {
-    icon: "💡",
-    label: "טיפ",
-    gradientClass:
-      "from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20",
-    badgeClass:
-      "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-    borderClass: "border-amber-200 dark:border-amber-800/50",
-  },
-  quote: {
-    icon: "💬",
-    label: "ציטוט",
-    gradientClass:
-      "from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20",
-    badgeClass:
-      "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    borderClass: "border-blue-200 dark:border-blue-800/50",
-  },
-  challenge: {
-    icon: "🎯",
-    label: "אתגר",
-    gradientClass:
-      "from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20",
-    badgeClass:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-    borderClass: "border-emerald-200 dark:border-emerald-800/50",
-  },
-};
-
-// ─── Compact widget (for dashboard) ──────────────────────────────────────────
-
+/**
+ * @deprecated Use DailyWidget from @/components/daily/daily-widget instead.
+ * Kept for backwards compatibility.
+ */
 export function DailyContentWidget() {
-  const todayContent = useQuery(api.dailyContent.getTodayContent);
+  const todayContent = useQuery(api.dailyContent.getTodayContent) as TodayContentResult | undefined;
   const seedDailyContent = useMutation(api.dailyContent.seedDailyContent);
-  const allContent = useQuery(api.dailyContent.getAllContent);
-
-  const [viewIndex, setViewIndex] = useState(0);
   const [seeding, setSeeding] = useState(false);
 
-  // If no content in DB, offer to seed
-  if (todayContent === null && allContent !== undefined && allContent.length === 0) {
+  if (todayContent === null) {
     return (
       <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900">
         <p className="mb-1 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
@@ -92,7 +54,6 @@ export function DailyContentWidget() {
     );
   }
 
-  // Loading skeleton
   if (todayContent === undefined) {
     return (
       <div className="animate-pulse rounded-2xl border border-zinc-100 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
@@ -103,93 +64,37 @@ export function DailyContentWidget() {
     );
   }
 
-  // Pick displayed item: today or from allContent list by index
-  const displayItem: DailyContentItem | null | undefined =
-    allContent && allContent.length > 0
-      ? allContent[viewIndex % allContent.length]
-      : todayContent;
-
-  if (!displayItem) return null;
-
-  const cfg = TYPE_CONFIG[displayItem.type];
-
-  const handleNext = () => {
-    if (allContent && allContent.length > 0) {
-      setViewIndex((prev) => (prev + 1) % allContent.length);
-    }
-  };
+  const tip = todayContent.tip;
+  if (!tip) return null;
 
   return (
-    <div
-      className={`rounded-2xl border bg-gradient-to-br p-5 transition-all ${cfg.gradientClass} ${cfg.borderClass}`}
-    >
-      {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg" aria-hidden="true">
-            {cfg.icon}
-          </span>
-          <div>
-            <span
-              className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${cfg.badgeClass}`}
-            >
-              {cfg.label} יומי
-            </span>
-          </div>
-        </div>
-
-        {/* Next button */}
-        {allContent && allContent.length > 1 && (
-          <button
-            type="button"
-            onClick={handleNext}
-            aria-label="הצג תוכן אחר"
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/60 hover:text-zinc-600 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-300"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-              />
-            </svg>
-          </button>
-        )}
+    <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-yellow-50/40 p-5 dark:border-amber-800/40 dark:from-amber-950/30 dark:to-yellow-950/10">
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-lg" aria-hidden="true">💡</span>
+        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+          טיפ יומי
+        </span>
       </div>
-
-      {/* Content */}
-      <blockquote className="mb-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-200">
-        {displayItem.type === "quote" ? `"${displayItem.content}"` : displayItem.content}
-      </blockquote>
-
-      {/* Author (quotes) */}
-      {displayItem.author && (
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          — {displayItem.author}
-        </p>
-      )}
-
-      {/* Category tag */}
-      <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500">
-        {displayItem.category}
+      <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-200">
+        {tip.content}
       </p>
+      <Link
+        href="/daily"
+        className="mt-3 inline-block text-xs font-medium text-brand-600 hover:underline dark:text-brand-400"
+      >
+        ציטוט ואתגר יומי &rarr;
+      </Link>
     </div>
   );
 }
 
-// ─── Full standalone card ─────────────────────────────────────────────────────
+// ─── Full standalone card (legacy) ───────────────────────────────────────────
 
+/**
+ * @deprecated Use the daily page at /daily instead.
+ */
 export function DailyContentCard() {
-  const todayContent = useQuery(api.dailyContent.getTodayContent);
-  const allContent = useQuery(api.dailyContent.getAllContent);
-  const [viewIndex, setViewIndex] = useState(0);
+  const todayContent = useQuery(api.dailyContent.getTodayContent) as TodayContentResult | undefined;
 
   if (todayContent === undefined) {
     return (
@@ -204,117 +109,38 @@ export function DailyContentCard() {
 
   if (!todayContent) return null;
 
-  const displayItem: DailyContentItem =
-    allContent && allContent.length > 0
-      ? (allContent[viewIndex % allContent.length] ?? todayContent)
-      : todayContent;
-
-  const cfg = TYPE_CONFIG[displayItem.type];
-
-  const handleNext = () => {
-    if (allContent && allContent.length > 0) {
-      setViewIndex((prev) => (prev + 1) % allContent.length);
-    }
-  };
-
-  const handlePrev = () => {
-    if (allContent && allContent.length > 0) {
-      setViewIndex((prev) =>
-        prev === 0 ? allContent.length - 1 : prev - 1
-      );
-    }
-  };
+  const tip = todayContent.tip;
+  const quote = todayContent.quote;
 
   return (
-    <div
-      className={`rounded-3xl border bg-gradient-to-br p-8 ${cfg.gradientClass} ${cfg.borderClass}`}
-    >
-      {/* Header row */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl" aria-hidden="true">
-            {cfg.icon}
-          </span>
-          <div>
-            <span
-              className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${cfg.badgeClass}`}
-            >
-              {cfg.label} יומי
+    <div className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-8 dark:border-amber-800/40 dark:from-amber-950/30 dark:to-yellow-950/10">
+      {tip && (
+        <>
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-3xl" aria-hidden="true">💡</span>
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+              טיפ יומי
             </span>
-            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-              {displayItem.category}
-            </p>
           </div>
-        </div>
-
-        {/* Nav buttons */}
-        {allContent && allContent.length > 1 && (
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="תוכן קודם"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/60 hover:text-zinc-600 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-300"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="תוכן הבא"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/60 hover:text-zinc-600 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-300"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <blockquote className="mb-4 text-lg leading-relaxed text-zinc-800 dark:text-zinc-100">
-        {displayItem.type === "quote"
-          ? `"${displayItem.content}"`
-          : displayItem.content}
-      </blockquote>
-
-      {displayItem.author && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          — {displayItem.author}
-        </p>
+          <p className="mb-4 text-lg leading-relaxed text-zinc-800 dark:text-zinc-100">
+            {tip.content}
+          </p>
+        </>
       )}
-
-      {/* Counter */}
-      {allContent && allContent.length > 1 && (
-        <p className="mt-4 text-xs text-zinc-400 dark:text-zinc-500">
-          {(viewIndex % allContent.length) + 1} / {allContent.length}
-        </p>
+      {quote && (
+        <blockquote className="border-r-2 border-blue-300 pr-3 text-sm italic text-zinc-600 dark:border-blue-700 dark:text-zinc-400">
+          &ldquo;{quote.content}&rdquo;
+          {quote.author && (
+            <span className="not-italic font-medium"> — {quote.author}</span>
+          )}
+        </blockquote>
       )}
+      <Link
+        href="/daily"
+        className="mt-4 inline-block text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
+      >
+        ראה תוכן מלא &rarr;
+      </Link>
     </div>
   );
 }

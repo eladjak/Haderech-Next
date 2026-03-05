@@ -47,6 +47,7 @@ import type * as progress from "../progress.js";
 import type * as quizResults from "../quizResults.js";
 import type * as quizzes from "../quizzes.js";
 import type * as resources from "../resources.js";
+import type * as leaderboard from "../leaderboard.js";
 import type * as reviews from "../reviews.js";
 import type * as scheduledTasks from "../scheduledTasks.js";
 import type * as search from "../search.js";
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   forum: typeof forum;
   gamification: typeof gamification;
   health: typeof health;
+  leaderboard: typeof leaderboard;
   lessons: typeof lessons;
   "lib/authGuard": typeof lib_authGuard;
   mentoring: typeof mentoring;

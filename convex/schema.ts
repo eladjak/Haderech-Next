@@ -436,6 +436,16 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_day", ["dayOfYear"]),
 
+  // השלמת אתגרים יומיים על ידי משתמשים
+  dailyChallengeCompletions: defineTable({
+    userId: v.string(), // Clerk user ID
+    dayOfYear: v.number(), // 1-365
+    year: v.number(), // calendar year
+    completedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_day_year", ["userId", "dayOfYear", "year"]),
+
   // פניות יצירת קשר מהאתר
   contactMessages: defineTable({
     name: v.string(),
@@ -500,6 +510,7 @@ export default defineSchema({
     title: v.string(),
     content: v.string(),
     helpful: v.number(), // count of "helpful" votes
+    wouldRecommend: v.optional(v.boolean()), // האם ממליץ על הקורס
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -742,6 +753,26 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_endpoint", ["endpoint"])
     .index("by_user_active", ["userId", "active"]),
+
+  // השלמות אתגרים שבועיים - Phase 74
+  weeklyChallengCompletions: defineTable({
+    userId: v.id("users"),
+    challengeSlug: v.string(),
+    completedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_slug", ["userId", "challengeSlug"]),
+
+  // מימוש פרסים - Phase 74
+  rewardRedemptions: defineTable({
+    userId: v.id("users"),
+    rewardSlug: v.string(),
+    rewardTitle: v.string(),
+    xpSpent: v.number(),
+    redeemedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_reward", ["userId", "rewardSlug"]),
 
   // פרופילי דייטינג - Phase 70
   datingProfiles: defineTable({

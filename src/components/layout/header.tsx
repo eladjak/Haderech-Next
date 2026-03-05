@@ -57,6 +57,7 @@ export function Header() {
           <NavLink href="/pricing">מחירים</NavLink>
           <SignedIn>
             <NavLink href="/dashboard">האזור שלי</NavLink>
+            <NavLink href="/daily">יומי</NavLink>
             <NavLink href="/community">קהילה</NavLink>
             <NavLink href="/chat">צ&apos;אט AI</NavLink>
             <NavLink href="/simulator">סימולטור</NavLink>
@@ -130,6 +131,7 @@ export function Header() {
             <MobileNavLink href="/pricing" onClick={closeMobileMenu}>מחירים</MobileNavLink>
             <SignedIn>
               <MobileNavLink href="/dashboard" onClick={closeMobileMenu}>האזור שלי</MobileNavLink>
+              <MobileNavLink href="/daily" onClick={closeMobileMenu}>תוכן יומי</MobileNavLink>
               <MobileNavLink href="/community" onClick={closeMobileMenu}>קהילה</MobileNavLink>
               <MobileNavLink href="/chat" onClick={closeMobileMenu}>צ&apos;אט AI</MobileNavLink>
               <MobileNavLink href="/simulator" onClick={closeMobileMenu}>סימולטור דייטים</MobileNavLink>
