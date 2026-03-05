@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { motion } from "framer-motion";
@@ -9,6 +9,9 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SocialShare } from "@/components/social-share";
+import { sanityClient } from "@/lib/sanity/client";
+import { blogPostBySlugQuery } from "@/lib/sanity/queries";
+import type { SanityBlogPost } from "@/lib/sanity/types";
 
 const CATEGORY_LABELS: Record<string, string> = {
   "dating-tips": "טיפים לדייטינג",
@@ -165,27 +168,50 @@ export default function BlogPostPage() {
   const slug = params.slug as string;
   const viewIncrementedRef = useRef(false);
 
-  const post = useQuery(api.blog.getBySlug, { slug });
+  // Sanity post state
+  const [sanityPost, setSanityPost] = useState<SanityBlogPost | null | undefined>(undefined);
+  const [sanityLoaded, setSanityLoaded] = useState(false);
+
+  // Fetch from Sanity first
+  useEffect(() => {
+    sanityClient
+      .fetch<SanityBlogPost | null>(blogPostBySlugQuery, { slug })
+      .then((data) => {
+        setSanityPost(data);
+        setSanityLoaded(true);
+      })
+      .catch(() => {
+        setSanityPost(null);
+        setSanityLoaded(true);
+      });
+  }, [slug]);
+
+  // Always query Convex (used as fallback if Sanity has no match)
+  const convexPost = useQuery(api.blog.getBySlug, { slug });
   const recentPosts = useQuery(api.blog.listRecent);
   const incrementViews = useMutation(api.blog.incrementViews);
 
-  // Increment views once when post loads
+  // Determine which post to show: Sanity takes priority
+  const isSanitySource = sanityLoaded && sanityPost != null;
+  const post = isSanitySource ? sanityPost : convexPost;
+
+  // Increment views once when Convex post loads (Sanity has no view tracking)
   useEffect(() => {
-    if (post && post._id && !viewIncrementedRef.current) {
+    if (convexPost && convexPost._id && !viewIncrementedRef.current && !isSanitySource) {
       viewIncrementedRef.current = true;
-      incrementViews({ postId: post._id }).catch(() => {
+      incrementViews({ postId: convexPost._id }).catch(() => {
         // Silently ignore view increment errors
       });
     }
-  }, [post, incrementViews]);
+  }, [convexPost, incrementViews, isSanitySource]);
 
   // Filter out current post from recent
   const otherRecentPosts = recentPosts?.filter(
     (p: any) => p.slug !== slug
   );
 
-  if (post === undefined) {
-    // Loading
+  // Still loading both sources
+  if (!sanityLoaded || (convexPost === undefined && !isSanitySource)) {
     return (
       <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
         <Header />
@@ -209,8 +235,8 @@ export default function BlogPostPage() {
     );
   }
 
-  if (post === null) {
-    // Not found
+  if (post === null || post === undefined) {
+    // Not found in either source
     return (
       <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
         <Header />
@@ -250,10 +276,22 @@ export default function BlogPostPage() {
   }
 
   const categoryColor =
-    CATEGORY_COLORS[post.category] ??
+    CATEGORY_COLORS[post.category ?? ""] ??
     "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300";
 
-  const renderedContent = renderMarkdown(post.content);
+  const renderedContent = renderMarkdown(post.content ?? "");
+
+  // Determine display values depending on source
+  const displayDate = isSanitySource
+    ? (sanityPost?.publishedAt ?? "")
+    : formatDate((post as any).createdAt);
+  const displayAuthor = isSanitySource
+    ? "צוות הדרך"
+    : ((post as any).authorName ?? "צוות הדרך");
+  const displayReadTime = post.readTime ?? "";
+  const displayViews = isSanitySource ? null : (post as any).views;
+  const displayTags = isSanitySource ? [] : ((post as any).tags ?? []);
+  const displayFeaturedImage = isSanitySource ? sanityPost?.featuredImage : null;
 
   return (
     <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
@@ -277,13 +315,24 @@ export default function BlogPostPage() {
             </Link>
             <span aria-hidden="true">&lsaquo;</span>
             <span className="text-zinc-500 dark:text-zinc-400">
-              {CATEGORY_LABELS[post.category] ?? post.category}
+              {CATEGORY_LABELS[post.category ?? ""] ?? post.category}
             </span>
             <span aria-hidden="true">&lsaquo;</span>
             <span className="truncate text-zinc-600 dark:text-zinc-300">
               {post.title}
             </span>
           </nav>
+
+          {/* Featured Image */}
+          {displayFeaturedImage && (
+            <div className="mb-6 overflow-hidden rounded-2xl">
+              <img
+                src={displayFeaturedImage}
+                alt={post.title}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          )}
 
           {/* Title */}
           <h1 className="mb-4 text-3xl font-bold leading-snug text-zinc-900 dark:text-white md:text-4xl">
@@ -294,61 +343,65 @@ export default function BlogPostPage() {
           <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-xs font-bold text-white">
-                {(post.authorName ?? "צ").charAt(0)}
+                {displayAuthor.charAt(0)}
               </div>
               <span className="font-medium">
-                {post.authorName ?? "צוות הדרך"}
+                {displayAuthor}
               </span>
             </div>
-            <span>{formatDate(post.createdAt)}</span>
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {post.readTime} דק&apos; קריאה
-            </span>
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.007-9.963-7.178z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              {post.views} צפיות
-            </span>
+            {displayDate && <span>{displayDate}</span>}
+            {displayReadTime && (
+              <span className="flex items-center gap-1">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                {displayReadTime} {!isSanitySource && "דק\u0027 קריאה"}
+              </span>
+            )}
+            {displayViews != null && (
+              <span className="flex items-center gap-1">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.007-9.963-7.178z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                {displayViews} צפיות
+              </span>
+            )}
             <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${categoryColor}`}>
-              {CATEGORY_LABELS[post.category] ?? post.category}
+              {CATEGORY_LABELS[post.category ?? ""] ?? post.category}
             </span>
           </div>
 
           {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
+          {displayTags.length > 0 && (
             <div className="mb-8 flex flex-wrap gap-2">
-              {post.tags.map((tag: string) => (
+              {displayTags.map((tag: string) => (
                 <span
                   key={tag}
                   className="rounded-full bg-zinc-100 px-3 py-1 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"

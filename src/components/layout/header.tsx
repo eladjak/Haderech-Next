@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   SignInButton,
   SignUpButton,
@@ -23,13 +24,16 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-brand-100/60 bg-white/80 glass dark:border-zinc-800 dark:bg-zinc-950/80">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 shadow-sm">
-            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-            </svg>
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-l from-brand-500 to-brand-600 bg-clip-text text-transparent dark:from-brand-400 dark:to-brand-300">
-            הדרך
+          <Image
+            src="/images/omanut-hakesher-logo-clean.png"
+            alt="הדרך"
+            width={120}
+            height={40}
+            className="h-8 w-auto md:h-10"
+            priority
+          />
+          <span className="hidden text-[10px] text-zinc-400 sm:block dark:text-zinc-500">
+            by אומנות הקשר
           </span>
         </Link>
 

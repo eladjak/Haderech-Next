@@ -86,6 +86,9 @@ export const getMe = query({
   },
 });
 
+// אימיילים שתמיד יהיו admin
+const ADMIN_EMAILS = ["eladjak@gmail.com"];
+
 // יצירת משתמש אוטומטית מ-auth context (אם לא קיים)
 export const ensureUser = mutation({
   args: {},
@@ -93,20 +96,33 @@ export const ensureUser = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
+    const email = identity.email ?? "";
+    const isAutoAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+
     const existing = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    if (existing) return existing;
+    if (existing) {
+      // Auto-promote to admin if in ADMIN_EMAILS list and not already admin
+      if (isAutoAdmin && existing.role !== "admin") {
+        await ctx.db.patch(existing._id, {
+          role: "admin",
+          updatedAt: Date.now(),
+        });
+        return await ctx.db.get(existing._id);
+      }
+      return existing;
+    }
 
     const now = Date.now();
     const id = await ctx.db.insert("users", {
       clerkId: identity.subject,
-      email: identity.email ?? "",
+      email,
       name: identity.name,
       imageUrl: identity.pictureUrl,
-      role: "student",
+      role: isAutoAdmin ? "admin" : "student",
       createdAt: now,
       updatedAt: now,
     });

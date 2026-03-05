@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { sanityClient } from "@/lib/sanity/client";
+import { blogPostsQuery } from "@/lib/sanity/queries";
+import type { SanityBlogPost } from "@/lib/sanity/types";
 
 type BlogCategory =
   | "all"
@@ -87,22 +90,30 @@ function BlogCard({ post }: { post: any }) {
     >
       {/* Cover Image / Gradient Placeholder */}
       <div
-        className={`relative flex h-48 items-center justify-center bg-gradient-to-br ${gradient}`}
+        className={`relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br ${gradient}`}
       >
-        <svg
-          className="h-16 w-16 text-white/30"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1}
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d={iconPath}
+        {post.featuredImage ? (
+          <img
+            src={post.featuredImage}
+            alt={post.title}
+            className="h-full w-full object-cover"
           />
-        </svg>
+        ) : (
+          <svg
+            className="h-16 w-16 text-white/30"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d={iconPath}
+            />
+          </svg>
+        )}
         <div className="absolute bottom-3 right-3">
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${categoryColor}`}
@@ -136,50 +147,56 @@ function BlogCard({ post }: { post: any }) {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {post.readTime} דק&apos;
-            </span>
-            <span className="flex items-center gap-1">
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.007-9.963-7.178z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              {post.views}
-            </span>
+            {post.readTime && (
+              <span className="flex items-center gap-1">
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                {post.readTime} {post.source !== "sanity" && "דק\u0027"}
+              </span>
+            )}
+            {post.views != null && (
+              <span className="flex items-center gap-1">
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.007-9.963-7.178z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                {post.views}
+              </span>
+            )}
           </div>
         </div>
 
         <div className="mt-2 text-left text-xs text-zinc-400 dark:text-zinc-500">
-          {formatDate(post.createdAt)}
+          {post.source === "sanity"
+            ? post.publishedAt ?? ""
+            : formatDate(post.createdAt)}
         </div>
       </div>
     </motion.article>
@@ -189,8 +206,19 @@ function BlogCard({ post }: { post: any }) {
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] =
     useState<BlogCategory>("all");
+  const [sanityPosts, setSanityPosts] = useState<SanityBlogPost[]>([]);
 
-  const posts = useQuery(
+  // Fetch Sanity posts on mount (fire-and-forget, graceful fallback)
+  useEffect(() => {
+    sanityClient
+      .fetch<SanityBlogPost[]>(blogPostsQuery)
+      .then((data) => setSanityPosts(data ?? []))
+      .catch(() => {
+        // Sanity unreachable - silently fall back to Convex-only
+      });
+  }, []);
+
+  const convexPosts = useQuery(
     api.blog.listPublished,
     selectedCategory === "all"
       ? {}
@@ -198,9 +226,39 @@ export default function BlogPage() {
   );
 
   const filteredPosts = useMemo(() => {
-    if (!posts) return undefined;
-    return posts;
-  }, [posts]);
+    if (!convexPosts) return undefined;
+
+    // Normalize Sanity posts to match the card interface
+    const normalizedSanity = sanityPosts
+      .filter(
+        (sp) =>
+          selectedCategory === "all" || sp.category === selectedCategory
+      )
+      .map((sp) => ({
+        _id: sp._id,
+        title: sp.title,
+        slug: sp.slug,
+        excerpt: sp.excerpt ?? "",
+        category: sp.category ?? "",
+        readTime: sp.readTime ?? "",
+        publishedAt: sp.publishedAt ?? "",
+        featuredImage: sp.featuredImage ?? null,
+        authorName: "צוות הדרך",
+        views: null as number | null,
+        createdAt: 0,
+        source: "sanity" as const,
+      }));
+
+    // Mark Convex posts with source
+    const normalizedConvex = convexPosts.map((cp: any) => ({
+      ...cp,
+      source: "convex" as const,
+      featuredImage: null as string | null,
+    }));
+
+    // Merge: Sanity posts first (usually newer CMS content), then Convex
+    return [...normalizedSanity, ...normalizedConvex];
+  }, [convexPosts, sanityPosts, selectedCategory]);
 
   return (
     <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
