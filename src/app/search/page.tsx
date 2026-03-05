@@ -98,7 +98,7 @@ export default function SearchPage() {
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 md:py-12">
+      <main id="main-content" className="container mx-auto px-4 py-8 md:py-12">
         <div className="mx-auto max-w-3xl">
           {/* Page title */}
           <h1 className="mb-6 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
@@ -107,6 +107,9 @@ export default function SearchPage() {
 
           {/* Search input */}
           <div className="relative mb-8">
+            <label htmlFor="search-input" className="sr-only">
+              חיפוש
+            </label>
             <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-4">
               <svg
                 className="h-5 w-5 text-zinc-400"
@@ -124,6 +127,7 @@ export default function SearchPage() {
               </svg>
             </div>
             <input
+              id="search-input"
               ref={inputRef}
               type="search"
               value={inputValue}
@@ -144,6 +148,7 @@ export default function SearchPage() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={1.5}
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -176,6 +181,7 @@ export default function SearchPage() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={1.5}
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"

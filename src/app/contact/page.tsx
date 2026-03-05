@@ -230,6 +230,7 @@ export default function ContactPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
+                        id="form-error"
                         role="alert"
                         aria-live="polite"
                         className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400"
@@ -323,6 +324,7 @@ export default function ContactPage() {
                       id="message"
                       required
                       aria-required="true"
+                      aria-describedby="message-hint"
                       rows={5}
                       minLength={20}
                       value={form.message}
@@ -332,7 +334,7 @@ export default function ContactPage() {
                       className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-violet-600 dark:focus:ring-violet-900/30"
                       placeholder="ספרו לנו במה נוכל לעזור... (לפחות 20 תווים)"
                     />
-                    <p className="mt-1 text-left text-xs text-zinc-500">
+                    <p id="message-hint" className="mt-1 text-left text-xs text-zinc-500">
                       {form.message.length} / מינימום 20 תווים
                     </p>
                   </div>

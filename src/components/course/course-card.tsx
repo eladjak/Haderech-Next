@@ -47,6 +47,7 @@ export function CourseCard({
   return (
     <Link
       href={`/courses/${id}`}
+      aria-label={`קורס: ${title}`}
       className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-brand-100/20 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
     >
       {/* Image */}
@@ -159,6 +160,7 @@ export function CourseCard({
               aria-valuenow={progressPercent}
               aria-valuemin={0}
               aria-valuemax={100}
+              aria-label={`התקדמות בקורס: ${progressPercent}%`}
             >
               <div
                 className="h-2 rounded-full bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 shadow-sm shadow-brand-500/20 transition-all duration-300"

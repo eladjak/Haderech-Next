@@ -126,19 +126,19 @@ export default function Home() {
               variants={fadeIn}
               className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
             >
-              <span className="flex items-center gap-1.5 text-sm text-blue-500/50 dark:text-zinc-500">
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/70 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
                 ללא התחייבות
               </span>
-              <span className="flex items-center gap-1.5 text-sm text-blue-500/50 dark:text-zinc-500">
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/70 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
                 גישה מיידית
               </span>
-              <span className="flex items-center gap-1.5 text-sm text-blue-500/50 dark:text-zinc-500">
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/70 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                 </svg>
@@ -148,7 +148,7 @@ export default function Home() {
 
             <motion.p
               variants={fadeIn}
-              className="mt-4 text-sm text-blue-500/40 dark:text-zinc-600"
+              className="mt-4 text-sm text-blue-500/70 dark:text-zinc-400"
             >
               הצטרפו ל-1,000+ תלמידים שכבר שינו את חיי הדייטינג שלהם
             </motion.p>
@@ -441,7 +441,7 @@ export default function Home() {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            <p className="text-sm text-blue-500/50 dark:text-zinc-500">
+            <p className="text-sm text-blue-500/70 dark:text-zinc-400">
               חיסכון של עד 37% בתוכנית שנתית. ביטול בכל עת.
             </p>
             <Link
@@ -899,7 +899,7 @@ function FeaturedBlogSection() {
 
               {/* Read time + link */}
               <div className="flex items-center justify-between">
-                <span className="text-xs text-blue-500/40 dark:text-zinc-500">
+                <span className="text-xs text-blue-500/70 dark:text-zinc-400">
                   {post.readTime} דקות קריאה
                 </span>
                 <Link
