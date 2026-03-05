@@ -585,4 +585,19 @@ export default defineSchema({
     .index("by_approved", ["approved"])
     .index("by_featured", ["featured"])
     .index("by_category", ["category"]),
+
+  // אונבורדינג למשתמשים חדשים
+  userOnboarding: defineTable({
+    userId: v.string(),
+    completed: v.boolean(),
+    currentStep: v.number(),
+    answers: v.object({
+      goals: v.optional(v.array(v.string())),
+      experience: v.optional(v.string()),
+      preferredTopics: v.optional(v.array(v.string())),
+      ageRange: v.optional(v.string()),
+    }),
+    completedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"]),
 });
