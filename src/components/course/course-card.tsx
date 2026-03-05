@@ -47,20 +47,22 @@ export function CourseCard({
   return (
     <Link
       href={`/courses/${id}`}
-      className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+      className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-brand-100/20 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
     >
       {/* Image */}
       {imageUrl ? (
-        <div className="aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+        <div className="relative aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
           <img
             src={imageUrl}
             alt={title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
           />
+          {/* Overlay gradient for better text legibility of badges */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         </div>
       ) : (
-        <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-brand-100 via-brand-50 to-brand-100 dark:from-blue-500/40 dark:via-brand-700/30 dark:to-brand-700/40">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/80 shadow-sm dark:bg-zinc-800/80">
+        <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-brand-100 via-brand-50 to-blue-50 dark:from-blue-500/40 dark:via-brand-700/30 dark:to-brand-700/40">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/90 shadow-md ring-1 ring-brand-100/50 dark:bg-zinc-800/80 dark:ring-zinc-700">
             <svg
               className="h-7 w-7 text-brand-500 dark:text-brand-400"
               fill="none"
@@ -146,20 +148,20 @@ export function CourseCard({
 
         {/* Progress bar */}
         {progressPercent !== undefined && progressPercent > 0 && (
-          <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="mt-4 pt-3 border-t border-brand-100/20 dark:border-zinc-800">
             <div className="mb-1.5 flex justify-between text-xs">
               <span className="text-zinc-400 dark:text-zinc-500">התקדמות</span>
-              <span className="font-medium text-brand-600 dark:text-brand-400">{progressPercent}%</span>
+              <span className="font-semibold text-brand-600 dark:text-brand-400">{progressPercent}%</span>
             </div>
             <div
-              className="h-1.5 w-full overflow-hidden rounded-full bg-brand-100 dark:bg-blue-500/30"
+              className="h-2 w-full overflow-hidden rounded-full bg-brand-100/50 dark:bg-blue-500/20"
               role="progressbar"
               aria-valuenow={progressPercent}
               aria-valuemin={0}
               aria-valuemax={100}
             >
               <div
-                className="h-1.5 rounded-full bg-gradient-to-l from-brand-500 to-brand-500 transition-all duration-300"
+                className="h-2 rounded-full bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 shadow-sm shadow-brand-500/20 transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>

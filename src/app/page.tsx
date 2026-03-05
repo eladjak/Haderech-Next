@@ -25,26 +25,26 @@ export default function Home() {
 
       <main id="main-content">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden animate-hero-gradient">
         {/* Hero background image */}
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           <Image
             src="/images/hero.jpg"
             alt=""
             fill
-            className="object-cover opacity-15 dark:opacity-10"
+            className="object-cover opacity-12 dark:opacity-8"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/60 via-[var(--background)]/80 to-[var(--background)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--background)]/70 to-[var(--background)]" />
         </div>
         {/* Background decoration */}
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden"
           aria-hidden="true"
         >
-          <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-brand-100/40 blur-3xl dark:bg-brand-100/15" />
-          <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-blue-50/30 blur-3xl dark:bg-blue-100/10" />
-          <div className="absolute -bottom-12 right-1/3 h-64 w-64 rounded-full bg-accent-300/15 blur-3xl dark:bg-accent-400/8" />
+          <div className="animate-float-slow absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-brand-100/40 blur-3xl dark:bg-brand-100/15" />
+          <div className="animate-float absolute top-20 left-1/4 h-72 w-72 rounded-full bg-blue-50/30 blur-3xl dark:bg-blue-100/10" />
+          <div className="animate-float-slow absolute -bottom-12 right-1/3 h-64 w-64 rounded-full bg-accent-300/20 blur-3xl dark:bg-accent-400/8" />
         </div>
 
         <div className="container relative mx-auto px-4 pb-20 pt-24 text-center md:pb-28 md:pt-32">
@@ -64,11 +64,11 @@ export default function Home() {
 
             <motion.h1
               variants={fadeIn}
-              className="mb-6 text-4xl font-extrabold leading-tight text-blue-500 dark:text-white md:text-5xl lg:text-6xl"
+              className="text-shadow-hero mb-6 text-4xl font-black leading-[1.15] tracking-tight text-blue-500 dark:text-white md:text-5xl lg:text-6xl xl:text-7xl"
             >
               הדרך שלך
               <br />
-              <span className="bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 bg-clip-text text-transparent">
+              <span className="gradient-text bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400">
                 לזוגיות שאתה ראוי לה
               </span>
             </motion.h1>
@@ -120,9 +120,34 @@ export default function Home() {
               </Link>
             </motion.div>
 
+            {/* Trust badges */}
+            <motion.div
+              variants={fadeIn}
+              className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
+            >
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/50 dark:text-zinc-500">
+                <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                ללא התחייבות
+              </span>
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/50 dark:text-zinc-500">
+                <svg className="h-4 w-4 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                </svg>
+                גישה מיידית
+              </span>
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/50 dark:text-zinc-500">
+                <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                ניסיון חינם
+              </span>
+            </motion.div>
+
             <motion.p
               variants={fadeIn}
-              className="mt-6 text-sm text-blue-500/50 dark:text-zinc-500"
+              className="mt-4 text-sm text-blue-500/40 dark:text-zinc-600"
             >
               הצטרפו ל-1,000+ תלמידים שכבר שינו את חיי הדייטינג שלהם
             </motion.p>
@@ -131,31 +156,23 @@ export default function Home() {
       </section>
 
       {/* Platform Stats Counter Bar */}
-      <section className="bg-gradient-to-l from-blue-500 to-brand-500 py-10">
-        <div className="container mx-auto px-4">
+      <section className="relative overflow-hidden bg-gradient-to-l from-blue-500 via-blue-600 to-brand-500 py-12">
+        {/* Subtle pattern overlay */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.04]" aria-hidden="true"
+          style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+        />
+        <div className="container relative mx-auto px-4">
           <motion.div
-            className="grid grid-cols-2 gap-8 text-center md:grid-cols-4"
+            className="grid grid-cols-2 gap-6 text-center md:grid-cols-4 md:gap-0"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
             variants={staggerContainer}
           >
-            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
-              <span className="text-4xl font-extrabold text-white md:text-5xl">6+</span>
-              <span className="text-sm font-medium text-white/80">קורסים</span>
-            </motion.div>
-            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
-              <span className="text-4xl font-extrabold text-white md:text-5xl">30+</span>
-              <span className="text-sm font-medium text-white/80">שיעורים</span>
-            </motion.div>
-            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
-              <span className="text-4xl font-extrabold text-white md:text-5xl">1000+</span>
-              <span className="text-sm font-medium text-white/80">תלמידים</span>
-            </motion.div>
-            <motion.div variants={fadeIn} className="flex flex-col items-center gap-1">
-              <span className="text-4xl font-extrabold text-white md:text-5xl">95%</span>
-              <span className="text-sm font-medium text-white/80">שביעות רצון</span>
-            </motion.div>
+            <StatItem value="6+" label="קורסים" />
+            <StatItem value="30+" label="שיעורים" hasDivider />
+            <StatItem value="1000+" label="תלמידים" hasDivider />
+            <StatItem value="95%" label="שביעות רצון" hasDivider />
           </motion.div>
         </div>
       </section>
@@ -449,7 +466,7 @@ export default function Home() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <motion.div
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-blue-500 p-12 text-center shadow-2xl shadow-brand-500/20 md:p-16"
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-blue-600 p-12 text-center shadow-2xl shadow-brand-500/25 md:p-16 lg:p-20"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -457,19 +474,27 @@ export default function Home() {
           >
             {/* Decorative circles */}
             <div
-              className="pointer-events-none absolute -top-12 -left-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+              className="pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full bg-white/10 blur-3xl"
               aria-hidden="true"
             />
             <div
-              className="pointer-events-none absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+              className="pointer-events-none absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-3xl"
+              aria-hidden="true"
+            />
+            <div
+              className="pointer-events-none animate-float-slow absolute top-8 right-8 h-24 w-24 rounded-full bg-accent-400/15 blur-2xl"
+              aria-hidden="true"
+            />
+            <div
+              className="pointer-events-none animate-float absolute bottom-12 left-16 h-32 w-32 rounded-full bg-blue-500/20 blur-2xl"
               aria-hidden="true"
             />
 
             <div className="relative">
-              <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+              <h2 className="mb-4 text-3xl font-black text-white md:text-4xl lg:text-5xl">
                 מוכנים להתחיל את המסע?
               </h2>
-              <p className="mx-auto mb-8 max-w-md text-brand-100">
+              <p className="mx-auto mb-8 max-w-md text-lg text-white/80">
                 461 זוגות כבר מצאו אהבה דרך אומנות הקשר. הצעד הראשון שלך
                 מתחיל כאן.
               </p>
@@ -513,6 +538,23 @@ export default function Home() {
   );
 }
 
+function StatItem({ value, label, hasDivider }: { value: string; label: string; hasDivider?: boolean }) {
+  return (
+    <motion.div variants={fadeIn} className={`relative flex flex-col items-center gap-1.5 ${hasDivider ? "stat-divider" : ""}`}>
+      <motion.span
+        className="text-4xl font-black text-white drop-shadow-sm md:text-5xl"
+        initial={{ opacity: 0, scale: 0.5 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      >
+        {value}
+      </motion.span>
+      <span className="text-sm font-medium tracking-wide text-white/70">{label}</span>
+    </motion.div>
+  );
+}
+
 function FeatureCard({
   iconBg,
   icon,
@@ -527,14 +569,14 @@ function FeatureCard({
   return (
     <motion.div
       variants={fadeIn}
-      className="card-hover rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
+      className="card-hover gradient-border-hover rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
     >
       <div
-        className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${iconBg} shadow-sm`}
+        className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${iconBg} shadow-md shadow-brand-500/10 ring-1 ring-white/20`}
       >
         {icon}
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-blue-500 dark:text-white">
+      <h3 className="mb-2 text-lg font-bold text-blue-500 dark:text-white">
         {title}
       </h3>
       <p className="text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
@@ -558,9 +600,9 @@ function EcosystemCard({
   return (
     <motion.div
       variants={fadeIn}
-      className="card-hover flex gap-4 rounded-2xl border border-brand-100/30 bg-white p-5 dark:border-blue-100/10 dark:bg-blue-50/5"
+      className="card-hover gradient-border-hover flex gap-4 rounded-2xl border border-brand-100/30 bg-white p-5 dark:border-blue-100/10 dark:bg-blue-50/5"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-2xl dark:bg-brand-50/50">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100/50 text-2xl shadow-sm dark:from-brand-50/50 dark:to-brand-100/20">
         {emoji}
       </div>
       <div>
@@ -594,9 +636,9 @@ function PhaseCard({
   description: string;
 }) {
   return (
-    <motion.div variants={fadeIn} className="text-center">
+    <motion.div variants={fadeIn} className="group text-center">
       <div
-        className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-lg font-bold text-white shadow-lg`}
+        className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-lg font-bold text-white shadow-lg ring-1 ring-white/20 transition-transform duration-150 group-hover:scale-110`}
       >
         {step}
       </div>
@@ -635,20 +677,20 @@ function PricingCard({
   return (
     <motion.div
       variants={fadeIn}
-      className={`relative flex flex-col rounded-2xl border p-6 ${
+      className={`relative flex flex-col rounded-2xl border p-6 transition-shadow duration-200 ${
         highlighted
-          ? "border-brand-300 bg-gradient-to-b from-brand-50/60 to-white shadow-lg shadow-brand-500/10 dark:border-brand-500/40 dark:from-brand-50/10 dark:to-blue-50/5"
-          : "border-brand-100/30 bg-white dark:border-blue-100/10 dark:bg-blue-50/5"
+          ? "shimmer-effect scale-[1.02] border-brand-300 bg-gradient-to-b from-brand-50/60 to-white shadow-xl shadow-brand-500/15 dark:border-brand-500/40 dark:from-brand-50/10 dark:to-blue-50/5 md:-my-2"
+          : "border-brand-100/30 bg-white hover:border-brand-200/50 hover:shadow-md dark:border-blue-100/10 dark:bg-blue-50/5"
       }`}
     >
       {badge && (
-        <span className="absolute -top-3 right-6 rounded-full bg-brand-500 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+        <span className="absolute -top-3.5 right-6 rounded-full bg-gradient-to-l from-brand-500 to-brand-600 px-4 py-1 text-xs font-bold text-white shadow-md shadow-brand-500/20">
           {badge}
         </span>
       )}
       <h3 className="mb-1 text-lg font-bold text-blue-500 dark:text-white">{name}</h3>
       <div className="mb-3 flex items-baseline gap-1">
-        <span className="text-3xl font-bold text-blue-500 dark:text-white">{price}</span>
+        <span className={`text-3xl font-black dark:text-white ${highlighted ? "gradient-text bg-gradient-to-l from-brand-500 to-brand-600" : "text-blue-500"}`}>{price}</span>
         {period && <span className="text-sm text-blue-500/50 dark:text-zinc-400">{period}</span>}
       </div>
       <p className="mb-5 text-sm text-blue-500/60 dark:text-zinc-400">{description}</p>
