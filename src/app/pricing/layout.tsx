@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "מחירים",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "מחירים | הדרך - אומנות הקשר",
     description:
       "בחרו את התוכנית המתאימה לכם. גישה לכל הקורסים, הסימולטור וכלי ה-AI.",
-    url: "https://haderech.ohlove.co.il/pricing",
+    url: `${siteConfig.url}/pricing`,
     images: [
       {
         url: "/images/haderech-banner.jpg",

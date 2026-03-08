@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "קהילה",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "קהילה | הדרך - אומנות הקשר",
     description:
       "הצטרפו לקהילת הדרך - שאלו, שתפו ותמכו. ביחד לומדים טוב יותר.",
-    url: "https://haderech.co.il/community",
+    url: `${siteConfig.url}/community`,
     images: [
       {
         url: "/images/hero.jpg",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "צ'אט AI",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "צ'אט AI | הדרך - אומנות הקשר",
     description:
       "שוחחו עם המאמן האישי שלכם מבוסס בינה מלאכותית. עצות מותאמות אישית לשיפור מיומנויות הדייטינג.",
-    url: "https://haderech.co.il/chat",
+    url: `${siteConfig.url}/chat`,
     images: [
       {
         url: "/images/ai-chat.jpg",

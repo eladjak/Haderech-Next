@@ -12,6 +12,7 @@ import { EnrollButton } from "@/components/course/enroll-button";
 import { CourseReviews } from "@/components/reviews/course-reviews";
 import { SocialShare } from "@/components/social-share";
 import { ShareButton } from "@/components/ui/share-button";
+import { siteConfig } from "@/lib/site-config";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -311,7 +312,7 @@ export default function CourseDetailPage() {
                     <ShareButton
                       title={`${course.title} - הדרך: אומנות הקשר`}
                       text={course.description}
-                      url={`https://haderech.co.il/courses/${courseId}`}
+                      url={`${siteConfig.url}/courses/${courseId}`}
                     />
                     {clerkUser ? (
                       <>
@@ -624,7 +625,7 @@ export default function CourseDetailPage() {
             {/* Social Share */}
             <div className="mb-8">
               <SocialShare
-                url={`https://haderech.co.il/courses/${courseId}`}
+                url={`${siteConfig.url}/courses/${courseId}`}
                 title={`${course.title} - הדרך: אומנות הקשר`}
                 description={course.description}
               />

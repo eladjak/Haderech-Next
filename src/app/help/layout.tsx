@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "עזרה ותמיכה",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "עזרה ותמיכה | הדרך - אומנות הקשר",
     description:
       "מרכז העזרה של הדרך. שאלות נפוצות, מדריכי שימוש ופתרונות לבעיות.",
-    url: "https://haderech.co.il/help",
+    url: `${siteConfig.url}/help`,
     images: [
       {
         url: "/images/hero.jpg",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "סימולטור שיחות",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "סימולטור שיחות | הדרך - אומנות הקשר",
     description:
       "תרגלו שיחות דייטינג אמיתיות עם סימולטור מבוסס בינה מלאכותית. שיפרו ביטחון וקבלו משוב מיידי.",
-    url: "https://haderech.co.il/simulator",
+    url: `${siteConfig.url}/simulator`,
     images: [
       {
         url: "/images/hero.jpg",

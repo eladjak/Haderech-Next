@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>הדרך נקסט - סטטוס פיתוח</title>
+  <style>
+    :root {
+      --brand: #E85D75;
+      --blue: #1E3A5F;
+      --accent: #D4A853;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-hover: #263548;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --amber: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2.5rem;
+      background: linear-gradient(135deg, var(--blue), #2d4a6f);
+      border-radius: 1.5rem;
+      border: 1px solid rgba(232, 93, 117, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(232, 93, 117, 0.15), transparent 70%);
+      border-radius: 50%;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .header h1 span { color: var(--brand); }
+    .header .subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+      position: relative;
+    }
+    .header .date {
+      margin-top: 1rem;
+      color: var(--accent);
+      font-size: 0.9rem;
+      position: relative;
+    }
+
+    /* Stats Grid */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat {
+      background: var(--card);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat:hover {
+      transform: translateY(-2px);
+      border-color: rgba(232, 93, 117, 0.3);
+    }
+    .stat .number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--brand);
+      display: block;
+    }
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+    }
+
+    /* Progress Bar */
+    .progress-section {
+      background: var(--card);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .progress-section h2 {
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    .progress-bar-container {
+      background: rgba(255,255,255,0.1);
+      border-radius: 1rem;
+      height: 2rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: 1rem;
+      background: linear-gradient(90deg, var(--brand), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transition: width 1s ease;
+    }
+    .milestones {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 2.5rem;
+    }
+    .section h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--brand);
+      display: inline-block;
+    }
+
+    /* Tech Stack */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .tech-item {
+      background: var(--card);
+      border-radius: 0.75rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .tech-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .tech-item .tech-name { font-weight: 600; font-size: 0.95rem; }
+    .tech-item .tech-role { color: var(--muted); font-size: 0.8rem; }
+
+    /* Phase Timeline */
+    .timeline {
+      position: relative;
+      padding-right: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--brand), var(--accent), var(--green));
+      border-radius: 3px;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1rem;
+      padding: 1rem 1.5rem;
+      background: var(--card);
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      right: -2.35rem;
+      top: 1.2rem;
+      width: 12px;
+      height: 12px;
+      background: var(--green);
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+    }
+    .timeline-item.current::before {
+      background: var(--amber);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+    }
+    .timeline-item .phase-title { font-weight: 700; font-size: 0.95rem; }
+    .timeline-item .phase-desc { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+    .timeline-item .phase-badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-right: 0.5rem;
+    }
+    .badge-done { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+    .badge-active { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+
+    /* Routes */
+    .routes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.75rem;
+    }
+    .route-category {
+      background: var(--card);
+      border-radius: 0.75rem;
+      padding: 1.2rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .route-category h3 {
+      font-size: 0.95rem;
+      color: var(--brand);
+      margin-bottom: 0.7rem;
+    }
+    .route-category ul {
+      list-style: none;
+      padding: 0;
+    }
+    .route-category li {
+      padding: 0.2rem 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      direction: ltr;
+      text-align: left;
+    }
+
+    /* Checklist */
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.75rem;
+    }
+    .check-item {
+      background: var(--card);
+      border-radius: 0.75rem;
+      padding: 0.8rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.9rem;
+    }
+    .check-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1><span>הדרך</span> נקסט</h1>
+    <div class="subtitle">פלטפורמה ללמידה אונליין בעברית - סטטוס פיתוח</div>
+    <div class="date">עדכון אחרון: 8 מרץ 2026 | Phase 76 הושלם</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <span class="number">76</span>
+      <div class="label">שלבי פיתוח</div>
+    </div>
+    <div class="stat">
+      <span class="number">80</span>
+      <div class="label">דפים / נתיבים</div>
+    </div>
+    <div class="stat">
+      <span class="number">234</span>
+      <div class="label">קבצי קוד</div>
+    </div>
+    <div class="stat">
+      <span class="number">72</span>
+      <div class="label">קומפוננטות React</div>
+    </div>
+    <div class="stat">
+      <span class="number">61</span>
+      <div class="label">מודולי Convex</div>
+    </div>
+    <div class="stat">
+      <span class="number">47</span>
+      <div class="label">טבלאות DB</div>
+    </div>
+    <div class="stat">
+      <span class="number">48</span>
+      <div class="label">טסטים (E2E + Unit)</div>
+    </div>
+    <div class="stat">
+      <span class="number" style="color: var(--green)">0</span>
+      <div class="label">שגיאות TypeScript</div>
+    </div>
+  </div>
+
+  <!-- Overall Progress -->
+  <div class="progress-section">
+    <h2>התקדמות כללית</h2>
+    <div class="progress-bar-container">
+      <div class="progress-bar" style="width: 92%">92% - מוכן לפרודקשן</div>
+    </div>
+    <div class="milestones">
+      <span>MVP</span>
+      <span>Core Features</span>
+      <span>AI + Social</span>
+      <span>Polish</span>
+      <span>Deploy</span>
+    </div>
+  </div>
+
+  <!-- Tech Stack -->
+  <div class="section">
+    <h2>טכנולוגיות</h2>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(0,0,0,0.3)">N</div>
+        <div><div class="tech-name">Next.js 16</div><div class="tech-role">Frontend + SSR</div></div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(232,93,117,0.15)">C</div>
+        <div><div class="tech-name">Convex</div><div class="tech-role">Real-time Backend + DB</div></div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(99,91,255,0.15)">Ck</div>
+        <div><div class="tech-name">Clerk</div><div class="tech-role">Auth (Hebrew)</div></div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(56,189,248,0.15)">Tw</div>
+        <div><div class="tech-name">Tailwind CSS 4</div><div class="tech-role">Styling + RTL</div></div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(212,168,83,0.15)">AI</div>
+        <div><div class="tech-name">Claude AI</div><div class="tech-role">Chat Coach + Simulator</div></div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(34,197,94,0.15)">Ts</div>
+        <div><div class="tech-name">TypeScript</div><div class="tech-role">Type Safety</div></div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(168,85,247,0.15)">Fm</div>
+        <div><div class="tech-name">Framer Motion</div><div class="tech-role">Animations</div></div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon" style="background: rgba(245,158,11,0.15)">Pw</div>
+        <div><div class="tech-name">Playwright</div><div class="tech-role">E2E Testing</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Timeline -->
+  <div class="section">
+    <h2>שלבי פיתוח (Timeline)</h2>
+    <div class="timeline">
+      <div class="timeline-item current">
+        <span class="phase-badge badge-active">Phase 76</span>
+        <span class="phase-title">Production Deployment Prep</span>
+        <div class="phase-desc">env-driven URLs, PWA manifest, security headers (HSTS, CSP)</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">73-75</span>
+        <span class="phase-title">Daily Content, Gamification, Reviews</span>
+        <div class="phase-desc">תוכן יומי, לידרבורד, תגמולים, ביקורות ועדויות</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">70-72</span>
+        <span class="phase-title">Profile Builder, Admin Analytics, Push</span>
+        <div class="phase-desc">בנאי פרופיל דייטינג, דשבורד אנליטיקס מנהל, תשתית התראות</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">67-69</span>
+        <span class="phase-title">AI Chat, Dating Simulator, Resources</span>
+        <div class="phase-desc">צ'אט AI חכם, סימולטור דייטים, ספריית משאבים</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">64-66</span>
+        <span class="phase-title">Quizzes, Dashboard, Forum</span>
+        <div class="phase-desc">חידונים אינטראקטיביים, דשבורד מתקדם, פורום קהילה</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">61-63</span>
+        <span class="phase-title">i18n, Accessibility, Polish</span>
+        <div class="phase-desc">תרגום, נגישות, דפי 404, טעינה, שגיאות</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">55-60</span>
+        <span class="phase-title">Admin, Courses, Email, Sharing</span>
+        <div class="phase-desc">ניהול תוכן, נגן שיעורים, אימיילים, שיתוף חברתי</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">52-54</span>
+        <span class="phase-title">SEO, PWA, Analytics</span>
+        <div class="phase-desc">מטא תגיות, service worker, GA4</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">41-51</span>
+        <span class="phase-title">Testing, UX, Design</span>
+        <div class="phase-desc">טסטים E2E, אונבורדינג, חיפוש, תעודות, FAQ, ביצועים</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">24-40</span>
+        <span class="phase-title">Core Features</span>
+        <div class="phase-desc">גיימיפיקציה, ביקורות, אנליטיקס, התראות, מנטורינג, בלוג, אימיילים</div>
+      </div>
+      <div class="timeline-item">
+        <span class="phase-badge badge-done">1-23</span>
+        <span class="phase-title">Foundation</span>
+        <div class="phase-desc">Next.js + Convex + Clerk, דפים ראשיים, קורסים, דשבורד</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Map -->
+  <div class="section">
+    <h2>מפת פיצ'רים</h2>
+    <div class="routes-grid">
+      <div class="route-category">
+        <h3>למידה</h3>
+        <ul>
+          <li>/courses - קטלוג קורסים</li>
+          <li>/courses/[id] - פרטי קורס</li>
+          <li>/courses/[id]/learn - נגן שיעורים</li>
+          <li>/courses/[id]/lessons/[id]/quiz - חידון</li>
+          <li>/certificates/[id] - תעודות</li>
+          <li>/daily - תוכן יומי</li>
+        </ul>
+      </div>
+      <div class="route-category">
+        <h3>כלי AI</h3>
+        <ul>
+          <li>/chat - מאמן AI אישי</li>
+          <li>/simulator - סימולטור דייטים</li>
+          <li>/simulator/dialogue/[id] - שיחה חיה</li>
+          <li>/tools/conversation-starters - מחולל שיחות</li>
+          <li>/tools/dating-profile - בנאי פרופיל</li>
+          <li>/tools/values-quiz - חידון ערכים</li>
+        </ul>
+      </div>
+      <div class="route-category">
+        <h3>קהילה</h3>
+        <ul>
+          <li>/community/forum - פורום דיונים</li>
+          <li>/community/leaderboard - לידרבורד</li>
+          <li>/community/challenges - אתגרים</li>
+          <li>/community/rewards - תגמולים</li>
+          <li>/stories - סיפורי הצלחה</li>
+          <li>/mentoring - ייעוץ אישי</li>
+        </ul>
+      </div>
+      <div class="route-category">
+        <h3>אישי</h3>
+        <ul>
+          <li>/dashboard - לוח בקרה</li>
+          <li>/student/analytics - אנליטיקס</li>
+          <li>/student/badges - תגים</li>
+          <li>/student/bookmarks - סימניות</li>
+          <li>/student/notes - הערות</li>
+          <li>/onboarding - אשף הצטרפות</li>
+        </ul>
+      </div>
+      <div class="route-category">
+        <h3>תוכן</h3>
+        <ul>
+          <li>/blog - בלוג (מאמרים)</li>
+          <li>/blog/[slug] - מאמר בודד</li>
+          <li>/resources - ספריית משאבים</li>
+          <li>/faq - שאלות נפוצות</li>
+          <li>/testimonials - עדויות</li>
+          <li>/about - אודות</li>
+        </ul>
+      </div>
+      <div class="route-category">
+        <h3>ניהול (Admin)</h3>
+        <ul>
+          <li>/admin - דשבורד ראשי</li>
+          <li>/admin/analytics - אנליטיקס</li>
+          <li>/admin/courses - ניהול קורסים</li>
+          <li>/admin/blog - ניהול בלוג</li>
+          <li>/admin/users - ניהול משתמשים</li>
+          <li>/admin/emails - תבניות אימייל</li>
+          <li>/admin/deploy - צ'קליסט Deploy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 76 Details -->
+  <div class="section">
+    <h2>Phase 76 - הכנה לפרודקשן</h2>
+    <div class="checklist">
+      <div class="check-item"><span class="check-icon">&#10003;</span> site-config.ts - URL מרכזי (env-driven)</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> 22 קבצים - החלפת URLs קשיחים</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> manifest.json - PWA עם RTL ועברית</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> HSTS Header - אבטחת HTTPS</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> CSP Header - Content Security Policy</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> .env.production.example - מעודכן</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> 0 שגיאות TypeScript</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> Build עובר בהצלחה</div>
+    </div>
+  </div>
+
+  <!-- Next Steps -->
+  <div class="section">
+    <h2>הצעדים הבאים</h2>
+    <div class="checklist">
+      <div class="check-item"><span class="check-icon" style="color: var(--amber)">&#9679;</span> Vercel Deploy + Custom Domain</div>
+      <div class="check-item"><span class="check-icon" style="color: var(--amber)">&#9679;</span> Convex Production Deployment</div>
+      <div class="check-item"><span class="check-icon" style="color: var(--amber)">&#9679;</span> Stripe Activation (תשלומים)</div>
+      <div class="check-item"><span class="check-icon" style="color: var(--amber)">&#9679;</span> VAPID Keys (התראות Push)</div>
+      <div class="check-item"><span class="check-icon" style="color: var(--amber)">&#9679;</span> Content Seeding (פרודקשן)</div>
+      <div class="check-item"><span class="check-icon" style="color: var(--amber)">&#9679;</span> Lighthouse Audit</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>הדרך נקסט &middot; אומנות הקשר &middot; נבנה עם Next.js 16 + Convex + Clerk + Claude AI</p>
+    <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">76 שלבי פיתוח &middot; 80 דפים &middot; 234 קבצי קוד &middot; 0 שגיאות</p>
+  </div>
+
+</body>
+</html>

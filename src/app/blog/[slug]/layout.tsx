@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "מאמר | הדרך",
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "מאמר | הדרך - אומנות הקשר",
     description: "מאמר מקצועי מצוות הדרך - אומנות הקשר.",
-    url: "https://haderech.co.il/blog",
+    url: `${siteConfig.url}/blog`,
     images: [
       {
         url: "/images/hero.jpg",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "סיפורי הצלחה | הדרך",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "סיפורי הצלחה | הדרך - אומנות הקשר",
     description:
       "סיפורי הצלחה מתלמידי הדרך - שינוי אמיתי בזוגיות, דייטינג וצמיחה אישית.",
-    url: "https://haderech.co.il/stories",
+    url: `${siteConfig.url}/stories`,
     images: [
       {
         url: "/images/hero.jpg",

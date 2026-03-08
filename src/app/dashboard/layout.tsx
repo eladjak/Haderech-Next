@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "לוח בקרה",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "לוח בקרה | הדרך - אומנות הקשר",
     description: "לוח הבקרה האישי שלכם - עקבו אחר ההתקדמות והמשיכו ללמוד.",
-    url: "https://haderech.co.il/dashboard",
+    url: `${siteConfig.url}/dashboard`,
     images: [
       {
         url: "/images/hero.jpg",

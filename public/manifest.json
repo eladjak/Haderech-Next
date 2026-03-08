@@ -1,0 +1,24 @@
+{
+  "name": "הדרך - אומנות הקשר",
+  "short_name": "הדרך",
+  "description": "פלטפורמה ללמידה אונליין בעברית - קורסים, כלים ושיטות לבניית מערכות יחסים בריאות",
+  "start_url": "/",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "he",
+  "background_color": "#1E3A5F",
+  "theme_color": "#E85D75",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/haderech-icon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/haderech-logo-square.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

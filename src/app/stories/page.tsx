@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { SocialShare } from "@/components/social-share";
+import { siteConfig } from "@/lib/site-config";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -169,7 +170,7 @@ export default function StoriesPage() {
             {/* Social Share */}
             <div className="mt-4 flex justify-center">
               <SocialShare
-                url="https://haderech.co.il/stories"
+                url={`${siteConfig.url}/stories`}
                 title="סיפורי הצלחה - הדרך: אומנות הקשר"
                 description="קראו סיפורי הצלחה מתלמידים שעברו את הקורסים שלנו"
               />

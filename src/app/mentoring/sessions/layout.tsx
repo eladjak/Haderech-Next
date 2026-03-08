@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "הפגישות שלי | הדרך",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "הפגישות שלי | הדרך - אומנות הקשר",
     description:
       "צפו בפגישות הייעוץ שלכם - פגישות קרובות, עבר ודירוגים.",
-    url: "https://haderech.co.il/mentoring/sessions",
+    url: `${siteConfig.url}/mentoring/sessions`,
     images: [
       {
         url: "/images/hero.jpg",

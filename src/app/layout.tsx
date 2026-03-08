@@ -9,6 +9,7 @@ import { GoogleAnalyticsScript } from "@/components/analytics/ga-script";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { ErrorTracker } from "@/components/analytics/error-tracker";
 import { WebsiteJsonLd } from "@/components/seo/json-ld";
+import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
   authors: [{ name: "אלעד יעקבוביץ׳ - אומנות הקשר" }],
   creator: "אומנות הקשר",
   publisher: "אומנות הקשר",
-  metadataBase: new URL("https://haderech.ohlove.co.il"),
+  metadataBase: new URL(siteConfig.url),
   alternates: {
     canonical: "/",
     languages: { "he-IL": "/" },

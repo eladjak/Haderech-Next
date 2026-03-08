@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "ייעוץ אישי | הדרך",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
     title: "ייעוץ אישי | הדרך - אומנות הקשר",
     description:
       "קבלו הכוונה אישית ממאמנים מנוסים בתחום הדייטינג והזוגיות. הזמינו פגישת ייעוץ 1-על-1.",
-    url: "https://haderech.co.il/mentoring",
+    url: `${siteConfig.url}/mentoring`,
     images: [
       {
         url: "/images/hero.jpg",

@@ -10,6 +10,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SocialShare } from "@/components/social-share";
 import { ShareButton } from "@/components/ui/share-button";
+import { siteConfig } from "@/lib/site-config";
 import { sanityClient } from "@/lib/sanity/client";
 import { blogPostBySlugQuery } from "@/lib/sanity/queries";
 import type { SanityBlogPost } from "@/lib/sanity/types";
@@ -345,7 +346,7 @@ export default function BlogPostPage() {
             <ShareButton
               title={post.title}
               text={post.excerpt}
-              url={`https://haderech.co.il/blog/${post.slug}`}
+              url={`${siteConfig.url}/blog/${post.slug}`}
             />
           </div>
 
@@ -431,7 +432,7 @@ export default function BlogPostPage() {
           {/* Divider */}
           <div className="mb-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <SocialShare
-              url={`https://haderech.co.il/blog/${post.slug}`}
+              url={`${siteConfig.url}/blog/${post.slug}`}
               title={post.title}
               description={post.excerpt}
             />

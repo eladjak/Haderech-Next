@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "אודות",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     title: "אודות | הדרך - אומנות הקשר",
     description:
       "הכירו את הדרך - הפלטפורמה שנוצרה כדי לעזור לכם למצוא אהבה אמיתית.",
-    url: "https://haderech.co.il/about",
+    url: `${siteConfig.url}/about`,
     images: [
       {
         url: "/images/hero.jpg",

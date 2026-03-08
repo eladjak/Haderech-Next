@@ -1,11 +1,13 @@
+import { siteConfig } from "@/lib/site-config";
+
 export function WebsiteJsonLd() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     name: "הדרך - אומנות הקשר",
     description: "תוכנית 12 שבועות לזוגיות",
-    url: "https://haderech.ohlove.co.il",
-    logo: "https://haderech.ohlove.co.il/images/haderech-logo-square.jpg",
+    url: siteConfig.url,
+    logo: `${siteConfig.url}/images/haderech-logo-square.jpg`,
     sameAs: ["https://ohlove.co.il"],
     offers: {
       "@type": "Offer",
