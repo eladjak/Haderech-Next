@@ -34,11 +34,19 @@ export default defineSchema({
     duration: v.optional(v.number()), // משך בשניות
     order: v.number(),
     published: v.boolean(),
+    // שדות תוכן קורס (נוספו ב-Iteration 2)
+    description: v.optional(v.string()),     // תיאור קצר של השיעור
+    weekNumber: v.optional(v.number()),      // שבוע 1-12
+    phaseNumber: v.optional(v.number()),     // שלב 1-6
+    phaseName: v.optional(v.string()),       // שם השלב בעברית
+    scriptIndex: v.optional(v.string()),     // אינדקס תסריט e.g. "1.1.1"
+    pdfUrl: v.optional(v.string()),          // שם קובץ PDF נלווה
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_course", ["courseId"])
-    .index("by_course_order", ["courseId", "order"]),
+    .index("by_course_order", ["courseId", "order"])
+    .index("by_week", ["courseId", "weekNumber"]),
 
   // משתמשים (מסונכרן עם Clerk)
   users: defineTable({

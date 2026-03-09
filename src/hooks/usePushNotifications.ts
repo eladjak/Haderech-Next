@@ -4,11 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 
-// VAPID public key - יש לשנות למפתח האמיתי לפני production
-// לייצור: npx web-push generate-vapid-keys
+// VAPID public key — reads from env, falls back to generated key
 const VAPID_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ??
-  "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U";
+  "BKSeHFW4CVX6sAvImUjsMAaabOOQBCkL-GIoDqFRPso-KZR_YHN6eIyEDFEf0L7K8kk1Jw-oVdBuMgWmivP8a5Y";
 
 function urlBase64ToArrayBuffer(base64String: string): ArrayBuffer {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);

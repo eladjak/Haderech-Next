@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
         hostname: "*.convex.cloud",
       },
     ],
+    formats: ["image/avif", "image/webp"],
   },
 
   // כותרות אבטחה
@@ -42,6 +43,10 @@ const nextConfig: NextConfig = {
             value: "max-age=63072000; includeSubDomains; preload",
           },
           {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
@@ -50,7 +55,8 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://*.clerk.com https://*.clerk.dev https://img.clerk.com https://images.clerk.dev https://*.convex.cloud https://*.google-analytics.com https://*.googletagmanager.com",
               "connect-src 'self' https://*.clerk.com https://*.clerk.dev https://*.convex.cloud https://*.google-analytics.com https://*.googletagmanager.com",
-              "frame-src 'self' https://*.clerk.com https://*.clerk.dev",
+              "frame-src 'self' https://*.clerk.com https://*.clerk.dev https://www.youtube.com https://www.youtube-nocookie.com",
+              "media-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
               "worker-src 'self' blob:",
             ].join("; "),
           },
@@ -58,6 +64,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // ביצועים
+  poweredByHeader: false,
+  compress: true,
+  reactStrictMode: true,
 };
 
 export default nextConfig;
