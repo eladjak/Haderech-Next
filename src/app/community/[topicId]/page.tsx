@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "convex/react";
 import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
@@ -57,9 +58,11 @@ function timeAgo(timestamp: number): string {
 function AuthorAvatar({ name = "משתמש", imageUrl }: { name?: string; imageUrl?: string | null }) {
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
         alt={name}
+        width={40}
+        height={40}
         className="h-10 w-10 rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900"
       />
     );

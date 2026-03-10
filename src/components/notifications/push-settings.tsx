@@ -133,12 +133,20 @@ export function PushSettings() {
     }
   };
 
+  const updatePrefs = useMutation(api.preferences.updatePreferences);
+
   const handleSaveCategories = async () => {
     setIsSavingCategories(true);
-    // TODO: save to Convex userPreferences when backend supports category granularity
-    await new Promise((r) => setTimeout(r, 300)); // simulate save
+    try {
+      await updatePrefs({
+        courseReminders: categories.learningReminders || categories.courseUpdates,
+        achievementAlerts: categories.achievements,
+      });
+      showSuccess("הגדרות הקטגוריות נשמרו");
+    } catch {
+      // Save failed silently - UI state remains unchanged
+    }
     setIsSavingCategories(false);
-    showSuccess("הגדרות הקטגוריות נשמרו");
   };
 
   // דפדפן לא תומך בהתראות push

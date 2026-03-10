@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -401,11 +402,13 @@ export default function CourseDetailPage() {
                 {/* Image side */}
                 <div className="lg:col-span-2">
                   {course.imageUrl ? (
-                    <div className="overflow-hidden rounded-2xl shadow-xl shadow-black/10">
-                      <img
+                    <div className="relative aspect-video overflow-hidden rounded-2xl shadow-xl shadow-black/10">
+                      <Image
                         src={course.imageUrl}
                         alt={course.title}
-                        className="h-full w-full object-cover"
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 40vw"
+                        className="object-cover"
                       />
                     </div>
                   ) : (
