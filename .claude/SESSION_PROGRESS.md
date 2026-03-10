@@ -1,8 +1,8 @@
 # הדרך נקסט - מעקב התקדמות
 
-> **עדכון אחרון:** 2026-03-09
-> **סטטוס:** Phase 77 הושלם | **80 דפים | 62 מודולי Convex | 236 קבצי קוד | 0 שגיאות TS**
-> **הישג:** 77 phases - Production hardening, VAPID keys, deployment runbook, seed scripts
+> **עדכון אחרון:** 2026-03-10
+> **סטטוס:** Phase 78 הושלם | **83 דפים | 62 מודולי Convex | 239 קבצי קוד | 0 שגיאות TS | 0 `any` types**
+> **הישג:** 78 phases - Quality, accessibility & type safety polish
 
 ---
 
@@ -10,9 +10,9 @@
 
 | מדד | ערך |
 |-----|-----|
-| שלבים שהושלמו | 77 |
-| דפים/נתיבים | 80 |
-| קבצי קוד | 236 |
+| שלבים שהושלמו | 78 |
+| דפים/נתיבים | 83 |
+| קבצי קוד | 239 |
 | קומפוננטות React | 72 |
 | מודולי Convex | 62 |
 | טבלאות DB | 47 |
@@ -23,6 +23,36 @@
 ## סקירה ויזואלית
 
 פתח בדפדפן: `public/dev-status.html`
+
+## Phase 78 - Quality, Accessibility & Type Safety Polish (2026-03-10)
+
+### מה נעשה:
+1. **Image Optimization** - הוחלפו כל תגיות `<img>` ל-Next.js `<Image>` (course-card, blog, course detail, community avatar) עם `fill`, `sizes`, ו-auto-optimization
+2. **Type Safety** - הוסרו כל 14 שימושי `any` בקוד. נוצרו interfaces: `NormalizedPost`, `CommunityTopicView`, `CommunityReplyView`, `RecentPost`
+3. **Error Boundaries** - נוספו error boundaries לנתיבי blog, courses, student (עברית מלאה)
+4. **Accessibility** - נוסף `<label>` ל-newsletter email input, שופרה AuthorAvatar עם optional props
+5. **Push Notifications Fix** - מימוש שמירת קטגוריות הודעות (היה TODO עם setTimeout) → כעת שומר ב-Convex userPreferences
+6. **Console.log Cleanup** - הוסרו console.log מ-service worker registration
+7. **Seed Data Update** - שיעור NVC חדש, 3 PDFs נלווים חדשים, תיאורי קורס מעודכנים
+
+### קבצים שנערכו (15):
+- `src/components/course/course-card.tsx` - `<img>` → `<Image>`
+- `src/components/layout/footer.tsx` - newsletter form label
+- `src/app/blog/page.tsx` - NormalizedPost type, `<img>` → `<Image>`
+- `src/app/blog/[slug]/page.tsx` - RecentPost type
+- `src/app/blog/error.tsx` (חדש)
+- `src/app/courses/error.tsx` (חדש)
+- `src/app/student/error.tsx` (חדש)
+- `src/app/community/page.tsx` - CommunityTopicView type
+- `src/app/community/[topicId]/page.tsx` - CommunityReplyView type, `<img>` → `<Image>`
+- `src/app/community/forum/page.tsx` - removed `any` types
+- `src/app/community/forum/[postId]/page.tsx` - removed `any` types
+- `src/app/courses/[courseId]/page.tsx` - `<img>` → `<Image>`
+- `src/components/notifications/push-settings.tsx` - implemented category save
+- `src/lib/register-sw.ts` - removed console.log
+- `convex/seedCourseData.ts` - NVC lesson + PDFs
+
+### Commits: `743b5a8`, `3d1de5c`, `020691b`
 
 ## Phase 77 - Production Hardening & Deployment Runbook (2026-03-09)
 
@@ -134,8 +164,9 @@
 | 75 | Course reviews & testimonials page | done |
 | 76 | Production deployment prep (URLs, CSP, manifest) | done |
 | 77 | Production hardening, VAPID, seed scripts, runbook | done |
+| 78 | Quality, accessibility & type safety polish | done |
 
-## מה הלאה (Phase 78+)
+## מה הלאה (Phase 79+)
 
 1. **Vercel Deploy** - `vercel --prod` + custom domain (ראה DEPLOY.md)
 2. **Convex Production** - `npx convex deploy` + seed data
@@ -173,3 +204,7 @@
 - `c3b2f01` Demo mode
 - `b147fa2` Phase 76 (Production Deployment Prep)
 - `c7a5cd0` Phase 77 (Production Hardening, Seed Scripts, Deploy Runbook)
+- `9c91f4e` Landing page deep update
+- `743b5a8` Seed data update (NVC, PDFs)
+- `3d1de5c` Phase 78 (Quality, Accessibility, Type Safety)
+- `020691b` Phase 78 continued (Image optimization, push settings)

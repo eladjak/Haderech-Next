@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>הדרך נקסט - מדריך השקה + סקירת פרויקט</title>
+  <style>
+    :root {
+      --brand: #E85D75;
+      --brand-light: #f0899b;
+      --blue: #1E3A5F;
+      --blue-light: #2d5a8f;
+      --accent: #D4A853;
+      --green: #22c55e;
+      --green-bg: rgba(34, 197, 94, 0.1);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.1);
+      --red: #ef4444;
+      --bg: #0c1222;
+      --bg2: #111827;
+      --card: #1e293b;
+      --card-border: rgba(232, 93, 117, 0.15);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --dim: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    a { color: var(--brand-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      background: rgba(255,255,255,0.08);
+      padding: 0.15em 0.4em;
+      border-radius: 0.3em;
+      font-size: 0.88em;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: var(--accent);
+    }
+    pre {
+      background: #0d1117;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin: 0.75rem 0;
+      direction: ltr;
+      text-align: left;
+    }
+    pre code { background: none; padding: 0; color: var(--text); }
+    .comment { color: var(--dim); }
+    .cmd { color: var(--green); }
+    .flag { color: var(--amber); }
+
+    /* Header */
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(160deg, var(--blue), #1a2e4a 60%, #1e293b);
+      border-radius: 1.5rem;
+      border: 1px solid var(--card-border);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -20%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(232,93,117,0.12), transparent 65%);
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      right: -15%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(212,168,83,0.08), transparent 65%);
+      border-radius: 50%;
+    }
+    .hero * { position: relative; }
+    .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .hero h1 span { color: var(--brand); }
+    .hero .sub { color: var(--muted); font-size: 1.05rem; }
+    .hero .date { color: var(--accent); font-size: 0.85rem; margin-top: 0.75rem; }
+
+    /* Navigation */
+    .nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .nav a {
+      padding: 0.5rem 1.25rem;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav a:hover {
+      background: rgba(232,93,117,0.15);
+      border-color: var(--brand);
+      text-decoration: none;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat .num {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--brand);
+      display: block;
+    }
+    .stat .label { font-size: 0.8rem; color: var(--muted); }
+
+    /* Sections */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section h2 .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .section h3 {
+      font-size: 1.1rem;
+      color: var(--brand-light);
+      margin: 1.25rem 0 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(232,93,117,0.15);
+    }
+
+    /* Steps */
+    .step {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      position: relative;
+      padding-right: 3.5rem;
+    }
+    .step-num {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--brand), var(--blue));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .step h4 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .step p { font-size: 0.9rem; color: var(--muted); }
+    .step .warning {
+      background: var(--amber-bg);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--amber);
+    }
+    .step .success {
+      background: var(--green-bg);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--green);
+    }
+
+    /* Feature grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .feature {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+    }
+    .feature .emoji { margin-left: 0.4rem; }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-done { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+    .badge-todo { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+    .badge-phase { background: rgba(232,93,117,0.15); color: var(--brand-light); border: 1px solid rgba(232,93,117,0.2); }
+
+    /* Checklist */
+    .checklist { list-style: none; }
+    .checklist li {
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .checklist li::before {
+      content: '▪';
+      color: var(--brand);
+      font-size: 0.8rem;
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 0.6rem 0.75rem;
+      text-align: right;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      body { padding: 1rem; }
+      .hero { padding: 2rem 1.25rem; }
+      .hero h1 { font-size: 1.6rem; }
+      .step { padding-right: 3rem; }
+      .step-num { right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <h1>הדרך <span>נקסט</span> - מדריך השקה</h1>
+  <p class="sub">סקירת פרויקט + הנחיות deployment שלב אחר שלב</p>
+  <p class="date">עדכון: 10 במרץ 2026 | Phase 78 הושלם</p>
+</div>
+
+<!-- ─── NAV ─── -->
+<div class="nav">
+  <a href="#status">סטטוס</a>
+  <a href="#review">מה נעשה</a>
+  <a href="#features">פיצ'רים</a>
+  <a href="#deploy">מדריך השקה</a>
+  <a href="#env">משתני סביבה</a>
+  <a href="#checklist">צ'קליסט</a>
+</div>
+
+<!-- ─── STATS ─── -->
+<div class="stats" id="status">
+  <div class="stat"><span class="num">78</span><span class="label">שלבי פיתוח</span></div>
+  <div class="stat"><span class="num">83</span><span class="label">דפים/נתיבים</span></div>
+  <div class="stat"><span class="num">239</span><span class="label">קבצי קוד</span></div>
+  <div class="stat"><span class="num">75</span><span class="label">שיעורים</span></div>
+  <div class="stat"><span class="num">62</span><span class="label">מודולי Convex</span></div>
+  <div class="stat"><span class="num">0</span><span class="label">שגיאות TS</span></div>
+  <div class="stat"><span class="num">0</span><span class="label">סוגי any</span></div>
+</div>
+
+<!-- ─── REVIEW: WHAT WAS DONE ─── -->
+<div class="section" id="review">
+  <h2><span class="icon" style="background:rgba(34,197,94,0.15)">&#10003;</span> מה נעשה - סקירת שלב 78</h2>
+
+  <h3>אופטימיזציית תמונות</h3>
+  <p>כל תגיות <code>&lt;img&gt;</code> הוחלפו ב-Next.js <code>&lt;Image&gt;</code> — אופטימיזציה אוטומטית, lazy loading, ו-WebP/AVIF. קבצים שהשתנו:</p>
+  <ul class="checklist">
+    <li>כרטיסי קורסים (course-card.tsx)</li>
+    <li>דף בלוג (blog/page.tsx) - כולל featured images</li>
+    <li>דף קורס מפורט (courses/[courseId]/page.tsx)</li>
+    <li>אוואטרים בקהילה (community/[topicId]/page.tsx)</li>
+  </ul>
+
+  <h3>Type Safety - אפס שימושי any</h3>
+  <p>14 שימושי <code>any</code> הוסרו והוחלפו ב-interfaces מוקפדים:</p>
+  <table>
+    <tr><th>Interface</th><th>קובץ</th><th>שדות</th></tr>
+    <tr><td><code>NormalizedPost</code></td><td>blog/page.tsx</td><td>title, slug, excerpt, category, source, ...</td></tr>
+    <tr><td><code>RecentPost</code></td><td>blog/[slug]/page.tsx</td><td>slug, title, category, readTime</td></tr>
+    <tr><td><code>CommunityTopicView</code></td><td>community/page.tsx</td><td>title, content, category, pinned, likes, ...</td></tr>
+    <tr><td><code>CommunityReplyView</code></td><td>community/[topicId]/page.tsx</td><td>content, likesCount, authorName, ...</td></tr>
+  </table>
+
+  <h3>Error Boundaries</h3>
+  <p>3 error boundaries חדשים נוספו בעברית מלאה:</p>
+  <ul class="checklist">
+    <li><code>src/app/blog/error.tsx</code> — "שגיאה בטעינת הבלוג"</li>
+    <li><code>src/app/courses/error.tsx</code> — "שגיאה בטעינת הקורסים"</li>
+    <li><code>src/app/student/error.tsx</code> — "שגיאה באזור האישי"</li>
+  </ul>
+
+  <h3>נגישות (Accessibility)</h3>
+  <ul class="checklist">
+    <li>Label לאימייל ניוזלטר בפוטר (WCAG 2.1)</li>
+    <li>שיפור AuthorAvatar - מטפל ב-name/image אופציונלי</li>
+    <li>Skip-to-content כבר קיים (layout.tsx)</li>
+    <li>ARIA labels על תפריט נייד, ניווט, progress bars</li>
+  </ul>
+
+  <h3>תיקוני באגים</h3>
+  <ul class="checklist">
+    <li>Push notification categories — מימוש שמירה אמיתי ב-Convex (היה setTimeout mock)</li>
+    <li>console.log הוסרו מ-service worker registration</li>
+    <li>Meta description עודכן ל-75 שיעורים (במקום 73)</li>
+    <li>Seed data: שיעור NVC חדש + 3 PDFs נלווים</li>
+  </ul>
+</div>
+
+<!-- ─── FEATURES ─── -->
+<div class="section" id="features">
+  <h2><span class="icon" style="background:rgba(232,93,117,0.15)">&#9733;</span> כל הפיצ'רים</h2>
+
+  <div class="features">
+    <div class="feature"><span class="emoji">📚</span> 75 שיעורי וידאו</div>
+    <div class="feature"><span class="emoji">🤖</span> צ'אט AI חכם</div>
+    <div class="feature"><span class="emoji">💕</span> סימולטור דייטים</div>
+    <div class="feature"><span class="emoji">👥</span> קהילה + פורום</div>
+    <div class="feature"><span class="emoji">📝</span> בלוג (CMS + Convex)</div>
+    <div class="feature"><span class="emoji">🎮</span> גיימיפיקציה (XP, תגים)</div>
+    <div class="feature"><span class="emoji">📊</span> דאשבורד מתקדם</div>
+    <div class="feature"><span class="emoji">🏆</span> תעודות + הישגים</div>
+    <div class="feature"><span class="emoji">🔔</span> התראות Push</div>
+    <div class="feature"><span class="emoji">💳</span> תשלומים (Stripe)</div>
+    <div class="feature"><span class="emoji">📧</span> מיילים (Resend)</div>
+    <div class="feature"><span class="emoji">🎯</span> Onboarding wizard</div>
+    <div class="feature"><span class="emoji">🔍</span> חיפוש גלובלי</div>
+    <div class="feature"><span class="emoji">📱</span> PWA + Service Worker</div>
+    <div class="feature"><span class="emoji">📈</span> Analytics (GA4)</div>
+    <div class="feature"><span class="emoji">🌙</span> Dark mode</div>
+    <div class="feature"><span class="emoji">♿</span> נגישות מלאה</div>
+    <div class="feature"><span class="emoji">🔒</span> Auth (Clerk)</div>
+    <div class="feature"><span class="emoji">🎙️</span> ייעוץ אישי (שבת-aware)</div>
+    <div class="feature"><span class="emoji">📖</span> ספריית משאבים</div>
+    <div class="feature"><span class="emoji">💡</span> תוכן יומי</div>
+    <div class="feature"><span class="emoji">🎓</span> Admin panel מלא</div>
+    <div class="feature"><span class="emoji">🔗</span> SEO + OG images</div>
+    <div class="feature"><span class="emoji">⚡</span> ביצועים (lazy load)</div>
+  </div>
+</div>
+
+<!-- ─── DEPLOYMENT GUIDE ─── -->
+<div class="section" id="deploy">
+  <h2><span class="icon" style="background:rgba(212,168,83,0.15)">🚀</span> מדריך השקה - שלב אחר שלב</h2>
+
+  <p style="color:var(--muted);margin-bottom:1rem;">יש לבצע את השלבים לפי הסדר. כל שלב תלוי בקודם.</p>
+
+  <!-- Step 1: Convex -->
+  <h3>שלב 1: Convex Production</h3>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <h4>יצירת Convex production deployment</h4>
+    <p>הריצו את הפקודה הזו כדי ליצור deployment חדש ל-production:</p>
+    <pre><code><span class="cmd">npx convex deploy</span></code></pre>
+    <p>הפקודה תשאל אם ליצור deployment חדש. בחרו <code>Yes</code> ותנו שם (למשל: <code>haderech-production</code>).</p>
+    <div class="warning">⚠️ שמרו את ה-Deployment URL שתקבלו — תצטרכו אותו בשלב הבא</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <h4>Seed data - טעינת תוכן ראשוני</h4>
+    <p>אחרי ה-deploy, טענו את הקורס ואת הנתונים:</p>
+    <pre><code><span class="comment"># טעינת הקורס + שיעורים + PDFs</span>
+<span class="cmd">npx convex run seedHaderech:seedHaderechCourse</span>
+
+<span class="comment"># טעינת תוכן יומי (ציטוטים, טיפים, אתגרים)</span>
+<span class="cmd">npx convex run dailyContent:seedDailyContent</span>
+
+<span class="comment"># טעינת בלוג פוסטים</span>
+<span class="cmd">npx convex run blog:seedBlogPosts</span></code></pre>
+    <div class="success">✓ אחרי הרצה — בדקו ב-Convex Dashboard שהנתונים נטענו</div>
+  </div>
+
+  <!-- Step 2: Clerk -->
+  <h3>שלב 2: Clerk Production</h3>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <h4>יצירת Clerk Production Instance</h4>
+    <p>היכנסו ל-<a href="https://dashboard.clerk.com" target="_blank">dashboard.clerk.com</a>:</p>
+    <ul class="checklist">
+      <li>לחצו על ה-instance הנוכחי → <b>Production</b> tab</li>
+      <li>צרו Production instance חדש</li>
+      <li>העתיקו את <code>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> (מתחיל ב-<code>pk_live_</code>)</li>
+      <li>העתיקו את <code>CLERK_SECRET_KEY</code> (מתחיל ב-<code>sk_live_</code>)</li>
+    </ul>
+    <div class="warning">⚠️ מפתחות production מתחילים ב-<code>pk_live_</code> ו-<code>sk_live_</code> (לא <code>pk_test_</code>)</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <h4>הגדרת Clerk Webhook</h4>
+    <p>ב-Clerk Dashboard → <b>Webhooks</b>:</p>
+    <ul class="checklist">
+      <li>צרו webhook endpoint חדש: <code>https://YOUR-DOMAIN.co.il/api/webhooks/clerk</code></li>
+      <li>בחרו events: <code>user.created</code>, <code>user.updated</code>, <code>user.deleted</code></li>
+      <li>העתיקו את <code>CLERK_WEBHOOK_SECRET</code></li>
+    </ul>
+  </div>
+
+  <!-- Step 3: Vercel -->
+  <h3>שלב 3: Vercel Deploy</h3>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <h4>חיבור לפרויקט Vercel</h4>
+    <p>אם לא חיברתם עדיין:</p>
+    <pre><code><span class="cmd">npx vercel</span>                    <span class="comment"># קישור ראשוני</span>
+<span class="cmd">npx vercel env pull .env.local</span>  <span class="comment"># משיכת env vars</span></code></pre>
+    <p>או דרך <a href="https://vercel.com/new" target="_blank">vercel.com/new</a> — יבוא מ-GitHub.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <h4>הגדרת Environment Variables ב-Vercel</h4>
+    <p>ב-Vercel Dashboard → Settings → Environment Variables, הוסיפו (ראו <a href="#env">טבלת משתנים</a>):</p>
+    <pre><code><span class="comment"># חובה</span>
+NEXT_PUBLIC_CONVEX_URL=<span class="flag">https://YOUR-PROD.convex.cloud</span>
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<span class="flag">pk_live_...</span>
+CLERK_SECRET_KEY=<span class="flag">sk_live_...</span>
+NEXT_PUBLIC_APP_URL=<span class="flag">https://haderech.co.il</span>
+
+<span class="comment"># רצוי</span>
+CLERK_WEBHOOK_SECRET=<span class="flag">whsec_...</span>
+NEXT_PUBLIC_GA_MEASUREMENT_ID=<span class="flag">G-XXXXXXX</span>
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=<span class="flag">(כבר מוגדר בקוד)</span></code></pre>
+    <div class="warning">⚠️ Scope: הגדירו לכל הסביבות (Production, Preview, Development)</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <h4>Deploy ל-Production</h4>
+    <pre><code><span class="cmd">npx vercel --prod</span></code></pre>
+    <p>או פשוט <code>git push</code> — Vercel ירוץ אוטומטית אם מחובר ל-GitHub.</p>
+    <div class="success">✓ אחרי deploy — בדקו ש-<code>/api/health</code> מחזיר status: "ok"</div>
+  </div>
+
+  <!-- Step 4: Domain -->
+  <h3>שלב 4: דומיין</h3>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <h4>חיבור דומיין (אופציונלי)</h4>
+    <p>ב-Vercel Dashboard → Settings → Domains:</p>
+    <ul class="checklist">
+      <li>הוסיפו דומיין: <code>haderech.co.il</code> (או הדומיין שלכם)</li>
+      <li>עדכנו DNS records לפי ההוראות של Vercel</li>
+      <li>SSL certificate ניתן אוטומטית</li>
+      <li>עדכנו <code>NEXT_PUBLIC_APP_URL</code> ב-Vercel env vars</li>
+    </ul>
+  </div>
+
+  <!-- Step 5: Stripe -->
+  <h3>שלב 5: Stripe (אופציונלי - כשמוכנים לתשלומים)</h3>
+
+  <div class="step">
+    <div class="step-num">9</div>
+    <h4>הגדרת Stripe</h4>
+    <p>היכנסו ל-<a href="https://dashboard.stripe.com" target="_blank">dashboard.stripe.com</a>:</p>
+    <ul class="checklist">
+      <li>העבירו ל-live mode (לא test)</li>
+      <li>צרו מוצרים + מחירים (Basic, Premium)</li>
+      <li>העתיקו את <code>STRIPE_SECRET_KEY</code> ו-<code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code></li>
+      <li>צרו Webhook endpoint: <code>https://YOUR-DOMAIN/api/webhooks/stripe</code></li>
+      <li>Events: <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code></li>
+    </ul>
+    <div class="warning">⚠️ Stripe לא חובה לשלב הראשון — האתר עובד גם בלי</div>
+  </div>
+
+  <!-- Step 6: Resend -->
+  <h3>שלב 6: Resend (אופציונלי - מיילים)</h3>
+
+  <div class="step">
+    <div class="step-num">10</div>
+    <h4>הגדרת Resend למיילים</h4>
+    <p>היכנסו ל-<a href="https://resend.com" target="_blank">resend.com</a>:</p>
+    <ul class="checklist">
+      <li>צרו API key</li>
+      <li>אמתו דומיין (DNS records)</li>
+      <li>הגדירו <code>RESEND_API_KEY</code> ב-Vercel</li>
+    </ul>
+  </div>
+
+  <!-- Step 7: Monitoring -->
+  <h3>שלב 7: ניטור</h3>
+
+  <div class="step">
+    <div class="step-num">11</div>
+    <h4>בדיקות אחרי ההשקה</h4>
+    <ul class="checklist">
+      <li>בדקו <code>https://YOUR-DOMAIN/api/health</code> — צריך להחזיר <code>"status":"ok"</code></li>
+      <li>הרשמו עם Clerk (יצירת חשבון ראשון)</li>
+      <li>בדקו שהקורסים נטענים</li>
+      <li>בדקו שה-AI Chat עובד</li>
+      <li>בדקו Push Notifications (צריך HTTPS)</li>
+      <li>בדקו שה-sitemap.xml נוצר</li>
+      <li>הריצו Lighthouse audit</li>
+    </ul>
+    <div class="success">✓ הריצו: <code>npx lighthouse https://YOUR-DOMAIN --output html</code></div>
+  </div>
+</div>
+
+<!-- ─── ENV VARS TABLE ─── -->
+<div class="section" id="env">
+  <h2><span class="icon" style="background:rgba(34,197,94,0.15)">🔑</span> משתני סביבה</h2>
+
+  <table>
+    <thead>
+      <tr><th>משתנה</th><th>נדרש</th><th>מקור</th><th>תיאור</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>NEXT_PUBLIC_CONVEX_URL</code></td>
+        <td><span class="badge badge-done">חובה</span></td>
+        <td>Convex Dashboard</td>
+        <td>כתובת ה-production deployment</td>
+      </tr>
+      <tr>
+        <td><code>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code></td>
+        <td><span class="badge badge-done">חובה</span></td>
+        <td>Clerk Dashboard</td>
+        <td>מפתח פומבי (pk_live_...)</td>
+      </tr>
+      <tr>
+        <td><code>CLERK_SECRET_KEY</code></td>
+        <td><span class="badge badge-done">חובה</span></td>
+        <td>Clerk Dashboard</td>
+        <td>מפתח סודי (sk_live_...)</td>
+      </tr>
+      <tr>
+        <td><code>NEXT_PUBLIC_APP_URL</code></td>
+        <td><span class="badge badge-done">חובה</span></td>
+        <td>הדומיין שלך</td>
+        <td>כתובת האתר (https://...)</td>
+      </tr>
+      <tr>
+        <td><code>CLERK_WEBHOOK_SECRET</code></td>
+        <td><span class="badge badge-todo">רצוי</span></td>
+        <td>Clerk Webhooks</td>
+        <td>סנכרון משתמשים ל-Convex</td>
+      </tr>
+      <tr>
+        <td><code>NEXT_PUBLIC_GA_MEASUREMENT_ID</code></td>
+        <td><span class="badge badge-todo">רצוי</span></td>
+        <td>Google Analytics</td>
+        <td>GA4 tracking (G-XXXXX)</td>
+      </tr>
+      <tr>
+        <td><code>ANTHROPIC_API_KEY</code></td>
+        <td><span class="badge badge-todo">רצוי</span></td>
+        <td>Anthropic Console</td>
+        <td>AI Chat Coach (fallback בלי)</td>
+      </tr>
+      <tr>
+        <td><code>STRIPE_SECRET_KEY</code></td>
+        <td><span class="badge badge-phase">אופציונלי</span></td>
+        <td>Stripe Dashboard</td>
+        <td>תשלומים</td>
+      </tr>
+      <tr>
+        <td><code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code></td>
+        <td><span class="badge badge-phase">אופציונלי</span></td>
+        <td>Stripe Dashboard</td>
+        <td>תשלומים (צד לקוח)</td>
+      </tr>
+      <tr>
+        <td><code>STRIPE_WEBHOOK_SECRET</code></td>
+        <td><span class="badge badge-phase">אופציונלי</span></td>
+        <td>Stripe Webhooks</td>
+        <td>אישורי תשלום</td>
+      </tr>
+      <tr>
+        <td><code>RESEND_API_KEY</code></td>
+        <td><span class="badge badge-phase">אופציונלי</span></td>
+        <td>Resend.com</td>
+        <td>שליחת מיילים</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ─── CHECKLIST ─── -->
+<div class="section" id="checklist">
+  <h2><span class="icon" style="background:rgba(232,93,117,0.15)">✅</span> צ'קליסט להשקה</h2>
+
+  <h3>לפני deploy</h3>
+  <ul class="checklist">
+    <li>TypeScript: <code>npx tsc --noEmit</code> → 0 שגיאות ✓</li>
+    <li>Build: <code>npm run build:local</code> → עובר ✓</li>
+    <li>אין <code>console.log</code> מיותרים ✓</li>
+    <li>אין <code>any</code> types ✓</li>
+    <li>אין secrets בקוד ✓</li>
+    <li>כל ה-error boundaries במקום ✓</li>
+    <li><code>.gitignore</code> מעודכן (.vercel, .env*.local) ✓</li>
+  </ul>
+
+  <h3>אחרי deploy</h3>
+  <ul class="checklist">
+    <li>Health check: <code>/api/health</code> מחזיר ok</li>
+    <li>הרשמה + התחברות עובדים (Clerk)</li>
+    <li>קורסים נטענים מ-Convex</li>
+    <li>AI Chat עובד (אם יש ANTHROPIC_API_KEY)</li>
+    <li>Push notifications עובדות (HTTPS)</li>
+    <li>Sitemap.xml נגיש</li>
+    <li>Lighthouse score > 90</li>
+    <li>מייל ראשון נשלח (Resend, אם מוגדר)</li>
+  </ul>
+
+  <h3>SEO & Marketing</h3>
+  <ul class="checklist">
+    <li>הוסיפו את האתר ל-<a href="https://search.google.com/search-console" target="_blank">Google Search Console</a></li>
+    <li>שלחו את ה-sitemap: <code>https://YOUR-DOMAIN/sitemap.xml</code></li>
+    <li>בדקו OG tags עם <a href="https://developers.facebook.com/tools/debug/" target="_blank">Facebook Debugger</a></li>
+    <li>בדקו Twitter Card עם <a href="https://cards-dev.twitter.com/validator" target="_blank">Twitter Validator</a></li>
+  </ul>
+</div>
+
+<!-- ─── TECH STACK ─── -->
+<div class="section">
+  <h2><span class="icon" style="background:rgba(212,168,83,0.15)">⚙️</span> Stack טכנולוגי</h2>
+  <table>
+    <tr><th>רכיב</th><th>טכנולוגיה</th><th>גרסה</th></tr>
+    <tr><td>Frontend</td><td>Next.js (App Router)</td><td>16</td></tr>
+    <tr><td>Language</td><td>TypeScript</td><td>5.x</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS</td><td>4</td></tr>
+    <tr><td>Backend/DB</td><td>Convex</td><td>Real-time</td></tr>
+    <tr><td>Auth</td><td>Clerk</td><td>Hebrew</td></tr>
+    <tr><td>Payments</td><td>Stripe</td><td>Optional</td></tr>
+    <tr><td>Email</td><td>Resend</td><td>Optional</td></tr>
+    <tr><td>Analytics</td><td>Google Analytics 4</td><td>Optional</td></tr>
+    <tr><td>AI</td><td>Claude (Anthropic)</td><td>Optional</td></tr>
+    <tr><td>Animation</td><td>Framer Motion</td><td>—</td></tr>
+    <tr><td>Font</td><td>Heebo (Google)</td><td>Hebrew</td></tr>
+  </table>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<div style="text-align:center;padding:2rem;color:var(--dim);font-size:0.85rem;">
+  <p>הדרך נקסט — אומנות הקשר | 78 שלבי פיתוח | מרץ 2026</p>
+  <p style="margin-top:0.5rem;font-size:0.75rem;">נבנה עם ❤️ ו-Claude Code</p>
+</div>
+
+</body>
+</html>
