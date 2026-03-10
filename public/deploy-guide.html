@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הדרך נקסט — מדריך פריסה לפרודקשן</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #E85D75;
+    --brand-light: #f0899b;
+    --brand-dark: #c94460;
+    --blue: #1E3A5F;
+    --blue-light: #2a5080;
+    --blue-dark: #142840;
+    --accent: #D4A853;
+    --accent-light: #e6c77a;
+    --bg: #0f1419;
+    --bg-card: #1a2332;
+    --bg-card-hover: #1f2b3d;
+    --border: #2a3a4e;
+    --text: #e8edf3;
+    --text-muted: #8899aa;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --error: #f87171;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 50%, var(--brand-dark) 100%);
+    padding: 60px 20px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(232,93,117,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(212,168,83,0.08) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    position: relative;
+    background: linear-gradient(135deg, #fff 0%, var(--brand-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .subtitle {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.7);
+    position: relative;
+    margin-bottom: 30px;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* Container */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* Section header */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    margin-top: 50px;
+  }
+  .section-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .section-header .badge {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .badge-required { background: rgba(232,93,117,0.2); color: var(--brand-light); }
+  .badge-optional { background: rgba(212,168,83,0.2); color: var(--accent-light); }
+  .badge-auto { background: rgba(52,211,153,0.2); color: var(--success); }
+
+  /* Card */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--brand); }
+  .card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--brand-light);
+  }
+  .card p {
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+  }
+
+  /* Steps */
+  .steps {
+    list-style: none;
+    counter-reset: step;
+  }
+  .steps li {
+    counter-increment: step;
+    padding: 12px 16px 12px 0;
+    border-bottom: 1px solid rgba(42,58,78,0.5);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .steps li:last-child { border-bottom: none; }
+  .steps li::before {
+    content: counter(step);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--blue-light);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* Code block */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    overflow-x: auto;
+    direction: ltr;
+    text-align: left;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  .code-block .comment { color: #8b949e; }
+  .code-block .cmd { color: #79c0ff; }
+  .code-block .string { color: #a5d6ff; }
+  .code-block .flag { color: #d2a8ff; }
+
+  /* Checklist */
+  .checklist {
+    list-style: none;
+  }
+  .checklist li {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(42,58,78,0.3);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .check-box:hover { border-color: var(--brand); }
+  .check-box.checked {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .check-box.checked::after {
+    content: '\2713';
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  .checklist li.done { opacity: 0.5; text-decoration: line-through; }
+
+  /* Env table */
+  .env-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+  .env-table th {
+    text-align: right;
+    padding: 10px 12px;
+    background: rgba(30,58,95,0.3);
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+    color: var(--brand-light);
+  }
+  .env-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(42,58,78,0.4);
+    color: var(--text-muted);
+  }
+  .env-table td:first-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent);
+    direction: ltr;
+    text-align: left;
+    font-size: 0.82rem;
+  }
+  .env-table tr:hover td { background: rgba(232,93,117,0.05); }
+
+  /* Alert boxes */
+  .alert {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 16px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.92rem;
+  }
+  .alert-icon { font-size: 1.3rem; flex-shrink: 0; }
+  .alert-info { background: rgba(30,58,95,0.3); border: 1px solid var(--blue-light); }
+  .alert-warning { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); }
+  .alert-success { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-right: 30px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--brand), var(--blue), var(--accent));
+    border-radius: 2px;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    right: -26px;
+    top: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--brand);
+    border: 3px solid var(--bg);
+  }
+  .timeline-item h4 {
+    color: var(--brand-light);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .timeline-item p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .timeline-item .time-est {
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: 6px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Progress bar */
+  .progress-wrapper {
+    margin: 30px 0;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+  .progress-bar {
+    height: 10px;
+    background: var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--brand), var(--accent));
+    transition: width 0.5s ease;
+  }
+
+  /* Color helpers */
+  .c-brand { color: var(--brand-light); }
+  .c-accent { color: var(--accent); }
+  .c-success { color: var(--success); }
+  .c-muted { color: var(--text-muted); }
+  .fw-600 { font-weight: 600; }
+  .mt-8 { margin-top: 8px; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 2rem; }
+    .stats-bar { gap: 16px; }
+    .stat-value { font-size: 1.5rem; }
+    .container { padding: 20px 16px 60px; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>הדרך נקסט — מדריך פריסה</h1>
+  <p class="subtitle">מ-Development לפרודקשן — 6 שלבים פשוטים</p>
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value">77</div>
+      <div class="stat-label">שלבי פיתוח הושלמו</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">80</div>
+      <div class="stat-label">דפים</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">62</div>
+      <div class="stat-label">מודולי Backend</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">0</div>
+      <div class="stat-label">שגיאות</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Overview Timeline -->
+  <div class="section-header" style="margin-top: 20px;">
+    <h2>סדר הפעולות — הזמנים המשוערים</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <h4>1. Convex Production</h4>
+      <p>פריסת Backend + מילוי נתונים ראשוניים</p>
+      <div class="time-est">~ 5 דקות</div>
+    </div>
+    <div class="timeline-item">
+      <h4>2. Clerk Production</h4>
+      <p>הגדרת אימות משתמשים בסביבת Production</p>
+      <div class="time-est">~ 10 דקות</div>
+    </div>
+    <div class="timeline-item">
+      <h4>3. Vercel Deploy</h4>
+      <p>פריסת Frontend + משתני סביבה</p>
+      <div class="time-est">~ 10 דקות</div>
+    </div>
+    <div class="timeline-item">
+      <h4>4. DNS & Domain</h4>
+      <p>חיבור דומיין + SSL אוטומטי</p>
+      <div class="time-est">~ 5 דקות (+ המתנה ל-DNS)</div>
+    </div>
+    <div class="timeline-item">
+      <h4>5. Stripe תשלומים</h4>
+      <p>הפעלת תשלומים (אופציונלי — כשמוכנים)</p>
+      <div class="time-est">~ 15 דקות</div>
+    </div>
+    <div class="timeline-item">
+      <h4>6. בדיקות + Monitoring</h4>
+      <p>Health check, Analytics, אימות סופי</p>
+      <div class="time-est">~ 10 דקות</div>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">&#9432;</span>
+    <div><strong>סה"כ:</strong> כ-45–60 דקות לפריסה מלאה. שלבים 5 (Stripe) אופציונלי ואפשר לדחות.</div>
+  </div>
+
+  <!-- ===== STEP 1: CONVEX ===== -->
+  <div class="section-header">
+    <div class="section-number" style="background: linear-gradient(135deg, var(--brand), var(--brand-dark));">1</div>
+    <h2>Convex Production</h2>
+    <span class="badge badge-required">חובה</span>
+  </div>
+
+  <div class="card">
+    <h3>מה זה Convex?</h3>
+    <p>ה-Backend של האפליקציה — מסד נתונים, פונקציות שרת, real-time sync. צריך לפרוס אותו בנפרד מ-Vercel.</p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <span class="fw-600">פתחו את דשבורד Convex</span>
+          <p class="c-muted mt-8">כנסו ל-<a href="https://dashboard.convex.dev" target="_blank" style="color: var(--accent);">dashboard.convex.dev</a> ובחרו את הפרויקט <code>colorless-guanaco-894</code></p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">פרסו לפרודקשן</span>
+          <p class="c-muted mt-8">מהטרמינל, בתיקיית הפרויקט:</p>
+          <div class="code-block">
+<span class="comment"># Login (if needed)</span>
+<span class="cmd">npx</span> convex login
+
+<span class="comment"># Deploy to production</span>
+<span class="cmd">npx</span> convex deploy
+          </div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">הגדירו Environment Variables</span>
+          <div class="code-block">
+<span class="comment"># AI Chat Coach</span>
+<span class="cmd">npx</span> convex env set <span class="flag">ANTHROPIC_API_KEY</span> <span class="string">sk-ant-xxxxx</span>
+
+<span class="comment"># Push Notifications</span>
+<span class="cmd">npx</span> convex env set <span class="flag">VAPID_PUBLIC_KEY</span> <span class="string">BKSeHFW4CVX6sAvImUjsMAaabOOQBCkL-...</span>
+<span class="cmd">npx</span> convex env set <span class="flag">VAPID_PRIVATE_KEY</span> <span class="string">XOsUbTzKoUbtdHAGV52OLSNeotppIuXQx...</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">מלאו נתונים ראשוניים (Seed)</span>
+          <div class="code-block">
+<span class="comment"># Insert main course with all 75 lessons</span>
+<span class="cmd">npx</span> convex run seedHaderech:seedHaderechCourse
+          </div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">שמרו את ה-Production URL</span>
+          <p class="c-muted mt-8">העתיקו מ-Settings → Deployment URL. נראה כמו: <code style="color: var(--accent);">https://xxx-production.convex.cloud</code></p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- ===== STEP 2: CLERK ===== -->
+  <div class="section-header">
+    <div class="section-number" style="background: linear-gradient(135deg, var(--blue), var(--blue-dark));">2</div>
+    <h2>Clerk Production</h2>
+    <span class="badge badge-required">חובה</span>
+  </div>
+
+  <div class="card">
+    <h3>הגדרת אימות משתמשים</h3>
+    <p>Clerk מנהל הרשמה, כניסה, ופרופילי משתמשים. צריך Production instance נפרד מ-Development.</p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <span class="fw-600">פתחו את <a href="https://dashboard.clerk.com" target="_blank" style="color: var(--accent);">Clerk Dashboard</a></span>
+          <p class="c-muted mt-8">לחצו על <strong>"Production"</strong> בתפריט העליון (ליד Development)</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">הגדירו Sign-in Methods</span>
+          <p class="c-muted mt-8">ב-User & Authentication → Email, Password, Google Sign-in</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">הוסיפו את הדומיין</span>
+          <p class="c-muted mt-8">ב-Settings → Domains → הוסיפו <code style="color: var(--accent);">haderech.co.il</code></p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">העתיקו Production Keys</span>
+          <p class="c-muted mt-8">ב-API Keys → העתיקו:</p>
+          <table class="env-table">
+            <tr><td>pk_live_xxxxx</td><td>Publishable Key</td></tr>
+            <tr><td>sk_live_xxxxx</td><td>Secret Key</td></tr>
+          </table>
+        </div>
+      </li>
+    </ol>
+
+    <div class="alert alert-success">
+      <span class="alert-icon">&#10003;</span>
+      <div>לוקליזציה בעברית כבר מוגדרת בקוד — אין צורך בהגדרה נוספת.</div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3: VERCEL ===== -->
+  <div class="section-header">
+    <div class="section-number" style="background: linear-gradient(135deg, var(--accent), #b8912f);">3</div>
+    <h2>Vercel Deploy</h2>
+    <span class="badge badge-required">חובה</span>
+  </div>
+
+  <div class="card">
+    <h3>פריסת Frontend</h3>
+    <p>Vercel מריץ את ה-Next.js app. Region מוגדר ל-<code>fra1</code> (Frankfurt) — הכי קרוב לישראל.</p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <span class="fw-600">התקינו Vercel CLI</span>
+          <div class="code-block">
+<span class="cmd">npm</span> i -g vercel
+          </div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">חברו את הפרויקט</span>
+          <div class="code-block">
+<span class="cmd">vercel</span> link
+          </div>
+          <p class="c-muted mt-8">בחרו את הארגון והפרויקט (או צרו חדש)</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">הגדירו Environment Variables</span>
+          <p class="c-muted mt-8">ב-Vercel Dashboard → Settings → Environment Variables, או מהטרמינל:</p>
+          <div class="code-block">
+<span class="comment"># Required</span>
+<span class="cmd">vercel</span> env add <span class="flag">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</span>
+<span class="cmd">vercel</span> env add <span class="flag">CLERK_SECRET_KEY</span>
+<span class="cmd">vercel</span> env add <span class="flag">NEXT_PUBLIC_CONVEX_URL</span>
+<span class="cmd">vercel</span> env add <span class="flag">CONVEX_DEPLOY_KEY</span>
+<span class="cmd">vercel</span> env add <span class="flag">NEXT_PUBLIC_APP_URL</span>     <span class="comment"># https://haderech.co.il</span>
+<span class="cmd">vercel</span> env add <span class="flag">NEXT_PUBLIC_APP_NAME</span>    <span class="comment"># הדרך</span>
+<span class="cmd">vercel</span> env add <span class="flag">NEXT_PUBLIC_VAPID_PUBLIC_KEY</span>
+
+<span class="comment"># Optional</span>
+<span class="cmd">vercel</span> env add <span class="flag">NEXT_PUBLIC_GA_ID</span>       <span class="comment"># G-XXXXXXXXXX</span>
+<span class="cmd">vercel</span> env add <span class="flag">RESEND_API_KEY</span>          <span class="comment"># re_xxxxx</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">פרסו!</span>
+          <div class="code-block">
+<span class="cmd">vercel</span> <span class="flag">--prod</span>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="alert alert-warning">
+      <span class="alert-icon">&#9888;</span>
+      <div><strong>חשוב:</strong> ודאו ש-<code>NEXT_PUBLIC_CONVEX_URL</code> מצביע על ה-<strong>Production</strong> URL של Convex (לא Development)!</div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4: DNS ===== -->
+  <div class="section-header">
+    <div class="section-number" style="background: linear-gradient(135deg, var(--success), #22a870);">4</div>
+    <h2>DNS & Domain</h2>
+    <span class="badge badge-required">חובה</span>
+  </div>
+
+  <div class="card">
+    <h3>חיבור הדומיין</h3>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <span class="fw-600">ב-Vercel: הוסיפו דומיין</span>
+          <p class="c-muted mt-8">Settings → Domains → Add → <code style="color: var(--accent);">haderech.co.il</code></p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">ב-ספק ה-DNS שלכם:</span>
+          <table class="env-table">
+            <thead><tr><th>Type</th><th>Name</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>A</td><td>@</td><td style="font-family: monospace; direction: ltr; text-align: left;">76.76.21.21</td></tr>
+              <tr><td>CNAME</td><td>www</td><td style="font-family: monospace; direction: ltr; text-align: left;">cname.vercel-dns.com</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">המתינו ל-DNS propagation</span>
+          <p class="c-muted mt-8">בדרך כלל 5-30 דקות. SSL מופעל אוטומטית על ידי Vercel.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- ===== STEP 5: STRIPE ===== -->
+  <div class="section-header">
+    <div class="section-number" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">5</div>
+    <h2>Stripe תשלומים</h2>
+    <span class="badge badge-optional">אופציונלי</span>
+  </div>
+
+  <div class="card">
+    <h3>הפעלת תשלומים (כשמוכנים)</h3>
+    <p>התשתית כבר קיימת בקוד. כשתרצו להפעיל תשלומים — הוסיפו את המפתחות.</p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <span class="fw-600">צרו חשבון Stripe ב-<a href="https://dashboard.stripe.com" target="_blank" style="color: var(--accent);">dashboard.stripe.com</a></span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">צרו Products & Prices</span>
+          <p class="c-muted mt-8">מסלול בסיסי + מסלול פרימיום → שמרו את ה-Price IDs</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">הגדירו Webhook</span>
+          <p class="c-muted mt-8">Endpoint: <code style="color: var(--accent);">https://haderech.co.il/api/webhooks/stripe</code></p>
+          <p class="c-muted">Events: <code>checkout.session.completed</code>, <code>customer.subscription.*</code></p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <span class="fw-600">הוסיפו Variables ב-Vercel:</span>
+          <div class="code-block">
+<span class="cmd">vercel</span> env add <span class="flag">STRIPE_SECRET_KEY</span>
+<span class="cmd">vercel</span> env add <span class="flag">STRIPE_WEBHOOK_SECRET</span>
+<span class="cmd">vercel</span> env add <span class="flag">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</span>
+<span class="cmd">vercel</span> env add <span class="flag">STRIPE_BASIC_PRICE_ID</span>
+<span class="cmd">vercel</span> env add <span class="flag">STRIPE_PREMIUM_PRICE_ID</span>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- ===== STEP 6: VERIFY ===== -->
+  <div class="section-header">
+    <div class="section-number" style="background: linear-gradient(135deg, var(--success), #059669);">6</div>
+    <h2>בדיקות סופיות</h2>
+    <span class="badge badge-required">חובה</span>
+  </div>
+
+  <div class="card">
+    <h3>רשימת אימות</h3>
+    <p>בדקו כל פריט אחרי הפריסה. לחצו לסימון:</p>
+
+    <ul class="checklist" id="final-checklist">
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Health check מחזיר 200: <code style="color: var(--accent);">https://haderech.co.il/healthz</code></span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>דף הבית נטען תקין</span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>הרשמה/כניסה עובדים (Clerk)</span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>רשימת קורסים מוצגת (Convex)</span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>דשבורד תלמיד נטען</span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>AI Chat Coach מגיב</span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Sitemap נגיש: <code>/sitemap.xml</code></span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Security headers מופיעים (CSP, HSTS, X-Frame-Options)</span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>PWA: manifest.json תקין, icon מופיע</span></li>
+      <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Google Analytics מדווח (אם מוגדר)</span></li>
+    </ul>
+
+    <div class="code-block" style="margin-top: 20px;">
+<span class="comment"># Quick verification commands</span>
+<span class="cmd">curl</span> https://haderech.co.il/healthz
+<span class="cmd">curl</span> -sI https://haderech.co.il | grep -iE <span class="string">'x-frame|strict-transport|content-security'</span>
+<span class="cmd">curl</span> -I https://haderech.co.il/sitemap.xml
+    </div>
+  </div>
+
+  <!-- Environment Variables Reference -->
+  <div class="section-header">
+    <h2>&#128270; כל משתני הסביבה</h2>
+  </div>
+
+  <div class="card">
+    <table class="env-table">
+      <thead>
+        <tr><th>משתנה</th><th>מקור</th><th>חובה?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</td><td>Clerk Dashboard</td><td class="c-brand">חובה</td></tr>
+        <tr><td>CLERK_SECRET_KEY</td><td>Clerk Dashboard</td><td class="c-brand">חובה</td></tr>
+        <tr><td>NEXT_PUBLIC_CONVEX_URL</td><td>Convex Dashboard (Production!)</td><td class="c-brand">חובה</td></tr>
+        <tr><td>CONVEX_DEPLOY_KEY</td><td>Convex Dashboard</td><td class="c-brand">חובה</td></tr>
+        <tr><td>NEXT_PUBLIC_APP_URL</td><td>הדומיין שלכם</td><td class="c-brand">חובה</td></tr>
+        <tr><td>NEXT_PUBLIC_APP_NAME</td><td>הדרך</td><td class="c-brand">חובה</td></tr>
+        <tr><td>NEXT_PUBLIC_VAPID_PUBLIC_KEY</td><td>כבר נוצר</td><td class="c-accent">מומלץ</td></tr>
+        <tr><td>ANTHROPIC_API_KEY</td><td>Anthropic (Convex env)</td><td class="c-accent">מומלץ</td></tr>
+        <tr><td>NEXT_PUBLIC_GA_ID</td><td>Google Analytics</td><td class="c-muted">אופציונלי</td></tr>
+        <tr><td>RESEND_API_KEY</td><td>Resend</td><td class="c-muted">אופציונלי</td></tr>
+        <tr><td>STRIPE_SECRET_KEY</td><td>Stripe</td><td class="c-muted">בהמשך</td></tr>
+        <tr><td>STRIPE_WEBHOOK_SECRET</td><td>Stripe</td><td class="c-muted">בהמשך</td></tr>
+        <tr><td>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</td><td>Stripe</td><td class="c-muted">בהמשך</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>הדרך נקסט — Phase 77 &bull; 2026-03-09</p>
+    <p style="margin-top: 6px;">80 דפים &bull; 62 מודולי Convex &bull; 236 קבצי קוד &bull; 0 שגיאות</p>
+  </div>
+</div>
+
+<script>
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const li = el.parentElement;
+  li.classList.toggle('done');
+
+  // Update progress
+  const total = document.querySelectorAll('#final-checklist .check-box').length;
+  const checked = document.querySelectorAll('#final-checklist .check-box.checked').length;
+  const pct = Math.round((checked / total) * 100);
+
+  let bar = document.getElementById('verify-progress');
+  if (!bar) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'progress-wrapper';
+    wrapper.innerHTML = `
+      <div class="progress-label">
+        <span>התקדמות אימות</span>
+        <span id="verify-pct">${pct}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="verify-progress" style="width: ${pct}%"></div>
+      </div>`;
+    document.getElementById('final-checklist').parentElement.appendChild(wrapper);
+  } else {
+    bar.style.width = pct + '%';
+    document.getElementById('verify-pct').textContent = pct + '%';
+  }
+}
+</script>
+</body>
+</html>

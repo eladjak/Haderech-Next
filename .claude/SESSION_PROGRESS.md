@@ -1,8 +1,8 @@
 # הדרך נקסט - מעקב התקדמות
 
-> **עדכון אחרון:** 2026-03-08
-> **סטטוס:** Phase 76 הושלם | **80 דפים | 61 מודולי Convex | 234 קבצי קוד | 0 שגיאות TS**
-> **הישג:** 76 phases - פלטפורמה מוכנה לפרודקשן עם URLs דינמיים, אבטחה, PWA
+> **עדכון אחרון:** 2026-03-09
+> **סטטוס:** Phase 77 הושלם | **80 דפים | 62 מודולי Convex | 236 קבצי קוד | 0 שגיאות TS**
+> **הישג:** 77 phases - Production hardening, VAPID keys, deployment runbook, seed scripts
 
 ---
 
@@ -10,11 +10,11 @@
 
 | מדד | ערך |
 |-----|-----|
-| שלבים שהושלמו | 76 |
+| שלבים שהושלמו | 77 |
 | דפים/נתיבים | 80 |
-| קבצי קוד | 234 |
+| קבצי קוד | 236 |
 | קומפוננטות React | 72 |
-| מודולי Convex | 61 |
+| מודולי Convex | 62 |
 | טבלאות DB | 47 |
 | טסטים (E2E + Unit) | 48 |
 | שגיאות TypeScript | 0 |
@@ -23,6 +23,34 @@
 ## סקירה ויזואלית
 
 פתח בדפדפן: `public/dev-status.html`
+
+## Phase 77 - Production Hardening & Deployment Runbook (2026-03-09)
+
+### מה נעשה:
+1. **`vercel.json`** - caching headers (images, fonts, static), SW headers, /healthz rewrite, Permissions-Policy
+2. **`next.config.ts`** - YouTube CSP (frame-src, media-src), Permissions-Policy, image/avif+webp, poweredByHeader off, compress, strictMode
+3. **`/api/health`** - env checks (Convex/Clerk/APP_URL), uptime counter, degraded status (503), cache headers
+4. **VAPID keys** - Generated real key pair, updated usePushNotifications hook + .env.production.example
+5. **`convex/seedHaderech.ts`** - Idempotent seed/update/clear mutations for main course
+6. **`convex/schema.ts`** - Added lesson metadata: weekNumber, phaseNumber, phaseName, scriptIndex, pdfUrl + by_week index
+7. **`convex/seedCourseData.ts`** - New lesson (שפות האהבה), PDF attachments (מכתב סליחה, חוזה מחויבות, שאלון שפות), reordering
+8. **`.env.production.example`** - Complete documentation with all vars (VAPID, Stripe, Resend, GA4)
+9. **`DEPLOY.md`** - Step-by-step deployment runbook (Convex, Clerk, Vercel, DNS, Stripe, monitoring)
+10. **`launch-claude.sh`** - Quick project launch script
+
+### קבצים שנערכו:
+- `vercel.json` - Enhanced caching + rewrites
+- `next.config.ts` - Security + performance upgrades
+- `src/app/api/health/route.ts` - Enhanced health endpoint
+- `src/hooks/usePushNotifications.ts` - Real VAPID key
+- `.env.production.example` - Complete variable documentation
+- `convex/schema.ts` - Lesson metadata fields + index
+- `convex/seedCourseData.ts` - New content + PDFs
+- `convex/seedHaderech.ts` (חדש) - Seed script
+- `DEPLOY.md` (חדש) - Deployment runbook
+- `launch-claude.sh` (חדש) - Launch script
+
+### Commit: `c7a5cd0`
 
 ## Phase 76 - Production Deployment Prep (2026-03-08)
 
@@ -105,15 +133,17 @@
 | 74 | Advanced gamification (leaderboard, rewards) | done |
 | 75 | Course reviews & testimonials page | done |
 | 76 | Production deployment prep (URLs, CSP, manifest) | done |
+| 77 | Production hardening, VAPID, seed scripts, runbook | done |
 
-## מה הלאה (Phase 77+)
+## מה הלאה (Phase 78+)
 
-1. **Vercel Deploy** - Deploy to Vercel + custom domain + `NEXT_PUBLIC_APP_URL`
-2. **Convex Production** - Deploy to production environment
-3. **Stripe Activation** - Real payment processing with webhooks
-4. **VAPID Keys** - Real push notification delivery
-5. **Content Seeding** - Run all seed functions on production
+1. **Vercel Deploy** - `vercel --prod` + custom domain (ראה DEPLOY.md)
+2. **Convex Production** - `npx convex deploy` + seed data
+3. **Clerk Production** - Production instance + webhook
+4. **Stripe Activation** - Real payment processing with webhooks
+5. **Content Seeding** - `npx convex run seedHaderech:seedHaderechCourse`
 6. **Lighthouse Audit** - Performance, Core Web Vitals
+7. **Monitoring** - Health check alerts, error tracking
 
 ## Commits
 
@@ -141,4 +171,5 @@
 - `b07333c` Phases 70-72 (Profile Builder, Admin Analytics, Push)
 - `06a4541` Phases 73-75 (Daily Content, Gamification, Reviews)
 - `c3b2f01` Demo mode
-- *(pending)* Phase 76 (Production Deployment Prep)
+- `b147fa2` Phase 76 (Production Deployment Prep)
+- `c7a5cd0` Phase 77 (Production Hardening, Seed Scripts, Deploy Runbook)
