@@ -66,6 +66,7 @@ export function Header() {
             <NavLink href="/community">קהילה</NavLink>
             <NavLink href="/chat">צ&apos;אט AI</NavLink>
             <NavLink href="/simulator">סימולטור</NavLink>
+            <NavLink href="/tools">כלים</NavLink>
             <NavLink href="/mentoring">ייעוץ אישי</NavLink>
           </SignedInWrapper>
         </nav>
@@ -147,6 +148,7 @@ export function Header() {
               <MobileNavLink href="/community" onClick={closeMobileMenu}>קהילה</MobileNavLink>
               <MobileNavLink href="/chat" onClick={closeMobileMenu}>צ&apos;אט AI</MobileNavLink>
               <MobileNavLink href="/simulator" onClick={closeMobileMenu}>סימולטור דייטים</MobileNavLink>
+              <MobileNavLink href="/tools" onClick={closeMobileMenu}>כלים</MobileNavLink>
               <MobileNavLink href="/mentoring" onClick={closeMobileMenu}>ייעוץ אישי</MobileNavLink>
               <MobileNavLink href="/notifications" onClick={closeMobileMenu}>התראות</MobileNavLink>
               <MobileNavLink href="/student/dashboard" onClick={closeMobileMenu}>מעקב התקדמות</MobileNavLink>

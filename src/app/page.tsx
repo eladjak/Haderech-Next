@@ -79,8 +79,8 @@ export default function Home() {
               className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-500/70 dark:text-zinc-400"
             >
               תוכנית "הדרך" של אומנות הקשר - 12 שבועות שישנו לך את חיי
-              הזוגיות. עם צ'אט AI חכם שמלווה אותך, סימולטור דייטים להתאמנות, וקהילה
-              תומכת של אנשים בדרך.
+              הזוגיות. עם מאמן AI אישי, סימולטור דייטים, ארגז כלים אינטראקטיבי,
+              ומערכת גיימיפיקציה שתשאיר אותך בדרך.
             </motion.p>
 
             <motion.div
@@ -171,7 +171,7 @@ export default function Home() {
             variants={staggerContainer}
           >
             <StatItem value="6+" label="קורסים" />
-            <StatItem value="30+" label="שיעורים" hasDivider />
+            <StatItem value="90+" label="שיעורים" hasDivider />
             <StatItem value="1000+" label="תלמידים" hasDivider />
             <StatItem value="95%" label="שביעות רצון" hasDivider />
           </motion.div>
@@ -295,7 +295,7 @@ export default function Home() {
             </h2>
           </motion.div>
           <motion.div
-            className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2"
+            className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -304,39 +304,123 @@ export default function Home() {
             <EcosystemCard
               emoji="🎓"
               title='תוכנית "הדרך" - 12 שבועות'
-              description="73 שיעורי וידאו, תרגילים מעשיים, שאלונים ובחנים. מסע מובנה מ'מי אני' עד 'מוכן לזוגיות'."
+              description="90+ שיעורים, תרגילים, בחנים, PDF. מסע מובנה מ'מי אני' עד 'מוכן לזוגיות'."
               badge="ליבה"
             />
             <EcosystemCard
               emoji="🤖"
-              title="צ'אט AI חכם - המאמן שלך"
-              description="בינה מלאכותית שמכירה את הקורס, את הספר ואותך. שואלת, מייעצת, מחזקת ומלווה כל שלב."
+              title="מאמן AI אישי"
+              description="ליווי מותאם אישית, ניתוח דייטים, ייעוץ מבוסס הקורס."
               badge="AI"
             />
             <EcosystemCard
               emoji="🎭"
               title="סימולטור דייטים"
-              description="תתאמן על שיחות דייט עם פרסונות מציאותיות. בחר אופי, רמת קושי ותרחיש - וקבל משוב בזמן אמת."
+              description="4 תרחישים, פרסונות מציאותיות, משוב בזמן אמת."
               badge="AI"
+            />
+            <EcosystemCard
+              emoji="🛠️"
+              title="ארגז כלים אינטראקטיבי"
+              description="בונה פרופיל, שאלון ערכים, פותחי שיחה, ביו בילדר."
+              badge="כלים"
+            />
+            <EcosystemCard
+              emoji="🏆"
+              title="XP, תגים ולוח מובילים"
+              description="צבור XP, עלה רמות, פתח תגי הישג, תחרה בלוח מובילים."
+              badge="גיימיפיקציה"
+            />
+            <EcosystemCard
+              emoji="📅"
+              title="טיפ יומי ואתגרים"
+              description="תוכן חדש כל יום - טיפים, אתגרים, השראה וציטוטים."
+              badge="יומי"
             />
             <EcosystemCard
               emoji="📚"
               title="ספרייה עשירה"
-              description="ספרים מומלצים, מאמרים, מחקרים, סרטונים ופודקאסטים - הכל מסודר לפי נושא ורמה."
+              description="ספרים, מאמרים, מחקרים, סרטונים - הכל לפי נושא ורמה."
               badge="משאבים"
             />
             <EcosystemCard
-              emoji="💬"
-              title="כלי דייטינג מעשיים"
-              description="יוצר פרופיל היכרויות, ניתוח דייטים עם AI, נוסח הודעות פתיחה ועוד."
-              badge="כלים"
-            />
-            <EcosystemCard
               emoji="👥"
-              title="קהילה ומועדון"
-              description="פורום, קבוצות, אתגרים יומיים, טיפ יומי, וקהילת לומדים שתומכת אחד בשני."
+              title="קהילה, ייעוץ ותעודות"
+              description="פורום, ייעוץ אישי, תעודות סיום, סיפורי הצלחה."
               badge="קהילה"
             />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Interactive Tools Showcase */}
+      <section className="py-20 md:py-28" role="region" aria-labelledby="tools-heading">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="mx-auto mb-4 max-w-xl text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
+              כלים אינטראקטיביים
+            </span>
+            <h2 id="tools-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+              ארגז הכלים שלך לדייטינג
+            </h2>
+            <p className="text-blue-500/60 dark:text-zinc-400">
+              כלים מעשיים שתוכל להשתמש בהם כבר היום
+            </p>
+          </motion.div>
+          <motion.div
+            className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
+            <ToolCard
+              emoji="💬"
+              title="בונה פרופיל דייטינג"
+              description="אשף 6 שלבים לבניית פרופיל מלא עם טיפים וציון AI"
+              href="/tools/dating-profile"
+            />
+            <ToolCard
+              emoji="✍️"
+              title="בונה ביו AI"
+              description="AI כותב לך ביו מקצועי מותאם לפלטפורמה ולאישיות שלך"
+              href="/tools/profile-builder"
+            />
+            <ToolCard
+              emoji="💎"
+              title="שאלון ערכים בזוגיות"
+              description="גלה מה באמת חשוב לך בזוגיות ומי מתאים לך"
+              href="/tools/values-quiz"
+            />
+            <ToolCard
+              emoji="🗣️"
+              title="פותחי שיחה"
+              description="רעיונות לפתיחת שיחה בדייט ראשון או בהודעה"
+              href="/tools/conversation-starters"
+            />
+          </motion.div>
+          <motion.div
+            className="mt-8 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <Link
+              href="/tools"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 underline underline-offset-4 transition-colors hover:text-brand-600"
+            >
+              לכל הכלים
+              <svg className="h-3.5 w-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -417,7 +501,7 @@ export default function Home() {
               price="₪149"
               period="/חודש"
               description="שינוי אמיתי: AI ללא הגבלה, סימולטור קולי, קהילה פעילה"
-              features={["כל 73 השיעורים", "מאמן AI ללא הגבלה", "סימולטור קולי + וידאו", "קהילה + לוח מובילים", "תעודת סיום"]}
+              features={["כל 90+ השיעורים", "מאמן AI ללא הגבלה", "סימולטור קולי + וידאו", "קהילה + לוח מובילים", "תעודת סיום"]}
               badge="הכי פופולרי"
               cta="התחל תקופת ניסיון"
               ctaHref="/sign-up"
@@ -601,24 +685,57 @@ function EcosystemCard({
   return (
     <motion.div
       variants={fadeIn}
-      className="card-hover gradient-border-hover flex gap-4 rounded-2xl border border-brand-100/30 bg-white p-5 dark:border-blue-100/10 dark:bg-blue-50/5"
+      className="card-hover gradient-border-hover flex flex-col items-center rounded-2xl border border-brand-100/30 bg-white p-5 text-center dark:border-blue-100/10 dark:bg-blue-50/5"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100/50 text-2xl shadow-sm dark:from-brand-50/50 dark:to-brand-100/20">
+      <div className="mb-3 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100/50 text-2xl shadow-sm dark:from-brand-50/50 dark:to-brand-100/20">
         {emoji}
       </div>
-      <div>
-        <div className="mb-1 flex items-center gap-2">
-          <h3 className="text-base font-semibold text-blue-500 dark:text-white">
-            {title}
-          </h3>
-          <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-50/50 dark:text-brand-300">
-            {badge}
-          </span>
+      <h3 className="mb-1 text-sm font-semibold text-blue-500 dark:text-white">
+        {title}
+      </h3>
+      <span className="mb-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-50/50 dark:text-brand-300">
+        {badge}
+      </span>
+      <p className="text-xs leading-relaxed text-blue-500/60 dark:text-zinc-400">
+        {description}
+      </p>
+    </motion.div>
+  );
+}
+
+function ToolCard({
+  emoji,
+  title,
+  description,
+  href,
+}: {
+  emoji: string;
+  title: string;
+  description: string;
+  href: string;
+}) {
+  return (
+    <motion.div variants={fadeIn}>
+      <Link
+        href={href}
+        className="card-hover group flex flex-col items-center rounded-2xl border border-brand-100/30 bg-gradient-to-b from-brand-50/40 to-white p-6 text-center transition-all hover:border-brand-200/50 hover:shadow-md dark:border-blue-100/10 dark:from-blue-50/5 dark:to-blue-50/5 dark:hover:border-blue-100/20"
+      >
+        <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-2xl shadow-lg shadow-brand-500/15 ring-1 ring-white/20 transition-transform duration-150 group-hover:scale-110 dark:from-brand-400/80 dark:to-brand-500/80">
+          {emoji}
         </div>
-        <p className="text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+        <h3 className="mb-1.5 text-base font-semibold text-blue-500 dark:text-white">
+          {title}
+        </h3>
+        <p className="mb-3 text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
           {description}
         </p>
-      </div>
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-500 transition-colors group-hover:text-brand-600">
+          נסה עכשיו
+          <svg className="h-3 w-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </span>
+      </Link>
     </motion.div>
   );
 }
