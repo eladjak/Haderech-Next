@@ -55,6 +55,7 @@ import type * as search from "../search.js";
 import type * as seed from "../seed.js";
 import type * as seedContent from "../seedContent.js";
 import type * as seedCourseData from "../seedCourseData.js";
+import type * as seedHaderech from "../seedHaderech.js";
 import type * as seedQuizzes from "../seedQuizzes.js";
 import type * as seedReviews from "../seedReviews.js";
 import type * as seedScenarios from "../seedScenarios.js";
@@ -122,6 +123,7 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   seedContent: typeof seedContent;
   seedCourseData: typeof seedCourseData;
+  seedHaderech: typeof seedHaderech;
   seedQuizzes: typeof seedQuizzes;
   seedReviews: typeof seedReviews;
   seedScenarios: typeof seedScenarios;

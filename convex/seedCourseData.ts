@@ -493,15 +493,16 @@ const HADERECH_MODULES: SeedModule[] = [
         scriptIndex: "5.2.1",
       },
       {
-        title: "להסכים לקבל",
+        title: "ניהול קונפליקטים - תקשורת מקרבת (NVC)",
         description:
-          "למה קשה לנו לקבל ואיך מתגברים על זה. הרבה אנשים יודעים לתת אבל מתקשים לקבל. להסכים לקבל אהבה, עזרה ותמיכה זה חלק חיוני מזוגיות מאוזנת ובריאה.",
+          "ארבעת שלבי התקשורת המקרבת (NVC) של מרשל רוזנברג לניהול קונפליקטים בזוגיות. תצפית, רגשות, צרכים ובקשות - המסגרת שמאפשרת לדבר על בעיות מבלי להאשים ולתקוף. כולל שלושה תרחישים מהחיים שמדגימים איך NVC עובד בשיחות אמיתיות.",
         order: 3,
         weekNumber: 5,
         phaseNumber: 2,
         phaseName: PHASES[2].name,
-        duration: 150,
+        duration: 300,
         scriptIndex: "5.2.2",
+        pdfUrl: "כלי_NVC_תקשורת.pdf",
       },
       {
         title: "שפות האהבה - לדבר בשפה של הלב",
@@ -835,6 +836,7 @@ const HADERECH_MODULES: SeedModule[] = [
         phaseName: PHASES[4].name,
         duration: 420,
         scriptIndex: "10.1.1",
+        pdfUrl: "מפת_כימיה_אישית.pdf",
       },
       {
         title: "מיתוסים על כימיה - מה עושה ומה לא עושה",
@@ -1042,13 +1044,14 @@ const HADERECH_MODULES: SeedModule[] = [
       {
         title: "סיכום הקורס - המסע שלך רק מתחיל",
         description:
-          "דברי סיכום, השראה והמשך הדרך. 12 שבועות של עבודה, למידה וצמיחה - אבל המסע עוד לא נגמר. הוא רק מתחיל. סיכום של הדרך שעברנו יחד, עם מבט קדימה למה שמחכה.",
+          "דברי סיכום, השראה והמשך הדרך. 12 שבועות של עבודה, למידה וצמיחה - אבל המסע עוד לא נגמר. הוא רק מתחיל. סיכום של הדרך שעברנו יחד, עם מבט קדימה למה שמחכה. כולל מדריך 32 התרגילים המלא - אוסף כל התרגילים מהקורס לעיון ותרגול חוזר.",
         order: 5,
         weekNumber: 12,
         phaseNumber: 6,
         phaseName: PHASES[6].name,
         duration: 180,
         scriptIndex: "12.4.1",
+        pdfUrl: "32_תרגילים_מדריך_מלא.pdf",
       },
     ],
   },
@@ -1289,7 +1292,7 @@ export const SEED_COURSES: SeedCourse[] = [
   {
     title: "הדרך - אומנות הקשר",
     description:
-      "תוכנית מקיפה בת 12 שבועות למציאת זוגיות משמעותית. מהעבודה הפנימית ועד ליצירת חיבור אמיתי - תהליך מובנה ומוכח שמלווה אתכם צעד אחרי צעד. 73 שיעורי וידאו, תרגילים מעשיים, ותמיכה קהילתית.",
+      "תוכנית מקיפה בת 12 שבועות למציאת זוגיות משמעותית. מהעבודה הפנימית ועד ליצירת חיבור אמיתי - תהליך מובנה ומוכח שמלווה אתכם צעד אחרי צעד. 75 שיעורי וידאו, 8 מסמכי PDF נלווים, תרגילים מעשיים, ותמיכה קהילתית.",
     category: "זוגיות",
     level: "beginner",
     estimatedHours: 24,
@@ -1363,20 +1366,26 @@ export function totalDurationMinutes(course: SeedCourse): number {
 // Summary (for verification)
 // ---------------------------------------------------------------------------
 // Course 1: "הדרך - אומנות הקשר"
-//   - 12 modules (weeks), 75 lessons (was 73 + 2 new)
-//   - Phase 1 (גישה): Weeks 1-3 = 22 lessons
-//   - Phase 2 (תקשורת): Weeks 4-5 = 14 lessons (was 13, +1: 5.3.1 שפות האהבה)
-//   - Phase 3 (מעבר ומשיכה): Weeks 6-9 = 21 lessons
-//   - Phase 4 (חיבור וכימיה): Weeks 10-11 = 12 lessons (was 11, +1: 10.1.2 מיתוסים)
+//   - 12 modules (weeks), 75 lessons
+//   - Phase 1 (גישה): Weeks 1-3 = 22 lessons  (8+6+8)
+//   - Phase 2 (תקשורת): Weeks 4-5 = 14 lessons  (7+7)
+//     - 5.2.2: NVC / ניהול קונפליקטים (updated from original "להסכים לקבל")
+//     - 5.3.1: שפות האהבה (new lesson added in Iter 2)
+//   - Phase 3 (מעבר ומשיכה): Weeks 6-9 = 21 lessons  (6+5+5+5)
+//   - Phase 4 (חיבור וכימיה): Weeks 10-11 = 12 lessons  (5+7)
+//     - 10.1.2: מיתוסים על כימיה (new lesson added in Iter 2)
 //   - Phase 6 (מחויבות): Week 12 = 6 lessons
 //   Total: 8+6+8+7+7+6+5+5+5+5+7+6 = 75 lessons
 //
-// PDFs linked to lessons (pdfUrl field):
-//   - חוזה_מחויבות_אישי.pdf → 1.5.1
-//   - מכתב_הסליחה.pdf → 3.3.1
-//   - שאלון_שפות_האהבה.pdf → 5.3.1 (new lesson)
-//   - תבנית_דיווח_דייט.pdf → 9.3.1
-//   - תסריט_השיחה_אז_מה_אנחנו.pdf → 12.2.2
+// PDFs linked to lessons (pdfUrl field) — 8 total:
+//   - חוזה_מחויבות_אישי.pdf      → 1.5.1  (Week 1: commitment contract)
+//   - מכתב_הסליחה.pdf            → 3.3.1  (Week 3: forgiveness letter)
+//   - שאלון_שפות_האהבה.pdf       → 5.3.1  (Week 5: love languages quiz)
+//   - כלי_NVC_תקשורת.pdf         → 5.2.2  (Week 5: NVC communication tools)
+//   - תבנית_דיווח_דייט.pdf       → 9.3.1  (Week 9: date report template)
+//   - מפת_כימיה_אישית.pdf        → 10.1.1 (Week 10: personal chemistry map)
+//   - תסריט_השיחה_אז_מה_אנחנו.pdf → 12.2.2 (Week 12: "so what are we" script)
+//   - 32_תרגילים_מדריך_מלא.pdf   → 12.4.1 (All course: 32 exercises full guide)
 //
 // Course 2: "אומנות השיחה" - 8 lessons (stub)
 // Course 3: "פרופיל מנצח" - 5 lessons (stub)
