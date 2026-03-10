@@ -58,7 +58,9 @@ export function Footer() {
                   onSubmit={handleSubscribe}
                   className="flex max-w-xs gap-2"
                 >
+                  <label htmlFor="newsletter-email" className="sr-only">כתובת אימייל</label>
                   <input
+                    id="newsletter-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

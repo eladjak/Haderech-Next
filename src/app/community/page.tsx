@@ -17,6 +17,18 @@ type Category =
   | "questions"
   | "advice";
 
+interface CommunityTopicView {
+  _id: string;
+  title: string;
+  content: string;
+  category: string;
+  pinned: boolean;
+  likesCount: number;
+  repliesCount: number;
+  createdAt: number;
+  authorName?: string;
+}
+
 const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: "all", label: "הכל", emoji: "🌟" },
   { value: "dating-tips", label: "טיפים", emoji: "💡" },
@@ -231,7 +243,7 @@ function NewTopicModal({
   );
 }
 
-function TopicCard({ topic }: { topic: any }) {
+function TopicCard({ topic }: { topic: CommunityTopicView }) {
   const categoryColor =
     CATEGORY_COLORS[topic.category] ||
     "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300";
@@ -341,7 +353,7 @@ export default function CommunityPage() {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return topics;
     return topics.filter(
-      (t: any) =>
+      (t) =>
         t.title.toLowerCase().includes(q) ||
         t.content.toLowerCase().includes(q) ||
         (t.authorName ?? "").toLowerCase().includes(q)
@@ -510,7 +522,7 @@ export default function CommunityPage() {
         ) : (
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
-              {filteredTopics.map((topic: any) => (
+              {filteredTopics.map((topic) => (
                 <TopicCard key={topic._id} topic={topic} />
               ))}
             </AnimatePresence>

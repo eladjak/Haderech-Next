@@ -383,7 +383,7 @@ export default function PostDetailPage() {
             {replies.length > 0 ? (
               <div className="mb-8 space-y-5">
                 <AnimatePresence mode="popLayout">
-                  {replies.map((reply: any, i: number) => (
+                  {replies.map((reply, i) => (
                     <ReplyItem
                       key={reply._id}
                       reply={reply}

@@ -126,7 +126,14 @@ function processInline(text: string): string {
   return result;
 }
 
-function RecentPostCard({ post }: { post: any }) {
+interface RecentPost {
+  slug: string;
+  title: string;
+  category: string;
+  readTime: number;
+}
+
+function RecentPostCard({ post }: { post: RecentPost }) {
   const gradient =
     CATEGORY_GRADIENTS[post.category] ?? "from-brand-400 to-brand-600";
 
@@ -209,7 +216,7 @@ export default function BlogPostPage() {
 
   // Filter out current post from recent
   const otherRecentPosts = recentPosts?.filter(
-    (p: any) => p.slug !== slug
+    (p) => p.slug !== slug
   );
 
   // Still loading both sources
@@ -446,7 +453,7 @@ export default function BlogPostPage() {
               מאמרים נוספים
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {otherRecentPosts.slice(0, 3).map((recentPost: any) => (
+              {otherRecentPosts.slice(0, 3).map((recentPost) => (
                 <RecentPostCard key={recentPost._id} post={recentPost} />
               ))}
             </div>

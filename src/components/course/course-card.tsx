@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 const LEVEL_LABELS: Record<string, string> = {
   beginner: "מתחילים",
@@ -53,10 +54,12 @@ export function CourseCard({
       {/* Image */}
       {imageUrl ? (
         <div className="relative aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-          <img
+          <Image
             src={imageUrl}
             alt={title}
-            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-200 group-hover:scale-105"
           />
           {/* Overlay gradient for better text legibility of badges */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />

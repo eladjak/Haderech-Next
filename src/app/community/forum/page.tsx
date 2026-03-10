@@ -109,7 +109,7 @@ export default function ForumPage() {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return posts;
     return posts.filter(
-      (p: any) =>
+      (p) =>
         p.title.toLowerCase().includes(q) ||
         p.content.toLowerCase().includes(q) ||
         (p.authorName ?? "").toLowerCase().includes(q)
@@ -310,7 +310,7 @@ export default function ForumPage() {
         ) : (
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
-              {filteredPosts.map((post: any, i: number) => (
+              {filteredPosts.map((post, i) => (
                 <PostCard
                   key={post._id}
                   post={post}

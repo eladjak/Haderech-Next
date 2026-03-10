@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -18,6 +19,21 @@ type BlogCategory =
   | "self-improvement"
   | "communication"
   | "psychology";
+
+interface NormalizedPost {
+  _id?: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  readTime: string | number;
+  publishedAt: string;
+  featuredImage: string | null;
+  authorName: string;
+  views: number | null;
+  createdAt: number;
+  source: "sanity" | "convex";
+}
 
 const CATEGORIES: { value: BlogCategory; label: string }[] = [
   { value: "all", label: "הכל" },
@@ -73,7 +89,7 @@ function formatDate(timestamp: number): string {
   });
 }
 
-function BlogCard({ post }: { post: any }) {
+function BlogCard({ post }: { post: NormalizedPost }) {
   const categoryColor =
     CATEGORY_COLORS[post.category] ??
     "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300";
@@ -93,10 +109,12 @@ function BlogCard({ post }: { post: any }) {
         className={`relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br ${gradient}`}
       >
         {post.featuredImage ? (
-          <img
+          <Image
             src={post.featuredImage}
             alt={post.title}
-            className="h-full w-full object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
           />
         ) : (
           <svg
@@ -250,10 +268,11 @@ export default function BlogPage() {
       }));
 
     // Mark Convex posts with source
-    const normalizedConvex = convexPosts.map((cp: any) => ({
+    const normalizedConvex = convexPosts.map((cp) => ({
       ...cp,
       source: "convex" as const,
-      featuredImage: null as string | null,
+      featuredImage: (cp.coverImage ?? null) as string | null,
+      publishedAt: new Date(cp.createdAt).toISOString(),
     }));
 
     // Merge: Sanity posts first (usually newer CMS content), then Convex
@@ -354,7 +373,7 @@ export default function BlogPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             <AnimatePresence mode="popLayout">
-              {filteredPosts.map((post: any) => (
+              {filteredPosts.map((post) => (
                 <BlogCard key={post._id} post={post} />
               ))}
             </AnimatePresence>

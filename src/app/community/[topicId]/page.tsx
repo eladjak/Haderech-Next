@@ -11,6 +11,16 @@ import { type Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
+interface CommunityReplyView {
+  _id: Id<"communityReplies">;
+  content: string;
+  likesCount: number;
+  createdAt: number;
+  authorName?: string;
+  authorImage?: string | null;
+  userId?: string;
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   general: "כללי",
   "dating-tips": "טיפים",
@@ -44,7 +54,7 @@ function timeAgo(timestamp: number): string {
   return `לפני ${months} חודשים`;
 }
 
-function AuthorAvatar({ name, imageUrl }: { name: string; imageUrl?: string | null }) {
+function AuthorAvatar({ name = "משתמש", imageUrl }: { name?: string; imageUrl?: string | null }) {
   if (imageUrl) {
     return (
       <img
@@ -106,7 +116,7 @@ function ReplyItem({
   currentUserId,
   onDelete,
 }: {
-  reply: any;
+  reply: CommunityReplyView;
   currentUserId?: string;
   onDelete: (id: Id<"communityReplies">) => void;
 }) {
@@ -420,7 +430,7 @@ export default function TopicDetailPage() {
             {topic.replies && topic.replies.length > 0 ? (
               <div className="mb-8 space-y-5">
                 <AnimatePresence mode="popLayout">
-                  {topic.replies.map((reply: any) => (
+                  {topic.replies.map((reply) => (
                     <ReplyItem
                       key={reply._id}
                       reply={reply}
