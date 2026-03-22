@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFFAF7;
+  --background: #F7F9FC;
   --foreground: #1a1a2e;
-  /* Omanut HaKesher brand colors */
-  --brand-50: #fef2f4;
-  --brand-100: #fde6ea;
-  --brand-200: #f8c4cc;
-  --brand-300: #F08C9E;
-  --brand-400: #E85D75;
-  --brand-500: #E85D75;
-  --brand-600: #C94A62;
-  --brand-700: #a83a50;
-  /* Deep Blue */
-  --blue-50: #e8eef5;
-  --blue-100: #c5d4e6;
+  /* HaDerekh Next - Educational platform brand colors */
+  --brand-50: #EFF6FF;
+  --brand-100: #DBEAFE;
+  --brand-200: #BFDBFE;
+  --brand-300: #60A5FA;
+  --brand-400: #3B82F6;
+  --brand-500: #2563EB;
+  --brand-600: #1D4ED8;
+  --brand-700: #1E40AF;
+  /* Deep Navy */
+  --blue-50: #EFF6FF;
+  --blue-100: #DBEAFE;
   --blue-500: #1E3A5F;
   --blue-600: #152B47;
   --blue-700: #0f1f33;
-  /* Warm Gold accent */
-  --accent-300: #E8C97D;
-  --accent-400: #D4A853;
-  --accent-500: #B08A3A;
+  /* Warm Teal accent */
+  --accent-300: #5EEAD4;
+  --accent-400: #2DD4BF;
+  --accent-500: #14B8A6;
 }
 
 @theme inline {
@@ -50,8 +50,8 @@
   :root {
     --background: #0f1523;
     --foreground: #ededed;
-    --brand-50: #2a1a22;
-    --brand-100: #3d2430;
+    --brand-50: #1e2a3d;
+    --brand-100: #1e3a5f;
     --blue-50: #1a2535;
     --blue-100: #1e2d42;
   }
@@ -65,7 +65,7 @@ body {
 
 /* Accessible focus ring */
 :focus-visible {
-  outline: 2px solid #E85D75;
+  outline: 2px solid #2563EB;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -107,7 +107,7 @@ html {
 }
 .card-hover:hover {
   transform: translateY(-3px) scale(1.005);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(232, 93, 117, 0.06);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(37, 99, 235, 0.06);
 }
 
 /* Glass effect */
