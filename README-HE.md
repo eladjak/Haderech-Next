@@ -1,3 +1,11 @@
+<div align="center" dir="rtl">
+
+⭐ אם המאגר הזה שימושי, בבקשה תנו כוכב! ⭐
+
+[🇺🇸 English](README.md)
+
+</div>
+
 <div dir="rtl">
 
 # הדרך - פלטפורמת למידה מתקדמת

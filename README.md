@@ -1,3 +1,11 @@
+<div align="center">
+
+⭐ If you find this project useful, please star it! ⭐
+
+[🇮🇱 עברית](README-HE.md)
+
+</div>
+
 # 🛣️ HaDerech - Advanced Learning Platform
 
 ## 📝 Description
