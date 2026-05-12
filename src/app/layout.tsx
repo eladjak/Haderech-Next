@@ -8,7 +8,7 @@ import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { GoogleAnalyticsScript } from "@/components/analytics/ga-script";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { ErrorTracker } from "@/components/analytics/error-tracker";
-import { WebsiteJsonLd } from "@/components/seo/json-ld";
+import { WebsiteJsonLd, HomePageFallback } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
@@ -96,6 +96,7 @@ export default function RootLayout({
         </head>
         <body className={`${heebo.variable} font-sans antialiased`}>
           <GoogleAnalyticsScript />
+          <HomePageFallback />
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:right-4 focus:z-[100] focus:rounded-lg focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
