@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // שליפת שיעור לפי ID
 export const getById = query({
@@ -31,6 +32,7 @@ export const create = mutation({
     duration: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const now = Date.now();
 
     // מציאת הסדר הגבוה ביותר בקורס
@@ -63,6 +65,7 @@ export const update = mutation({
     published: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
 
     const existing = await ctx.db.get(id);
@@ -79,6 +82,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("lessons") },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const existing = await ctx.db.get(args.id);
     if (!existing) throw new Error("Lesson not found");
 

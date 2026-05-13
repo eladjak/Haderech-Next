@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // ---- Watch-time & resume helpers (auth-based, no userId arg) ----
 
@@ -88,6 +89,7 @@ export const getForLesson = query({
     lessonId: v.id("lessons"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("progress")
       .withIndex("by_user_lesson", (q) =>
@@ -104,6 +106,7 @@ export const getForCourse = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("progress")
       .withIndex("by_user_course", (q) =>
@@ -120,6 +123,7 @@ export const getCourseCompletion = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const lessons = await ctx.db
       .query("lessons")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
@@ -149,6 +153,7 @@ export const updateProgress = mutation({
     watchTimeSeconds: v.optional(v.number()), // זמן צפייה שנוסף מאז העדכון האחרון
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const now = Date.now();
     const completed = args.progressPercent >= 90;
 
@@ -193,6 +198,7 @@ export const markComplete = mutation({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const now = Date.now();
 
     const existing = await ctx.db

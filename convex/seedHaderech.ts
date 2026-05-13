@@ -13,6 +13,7 @@
 
 import { internalMutation, mutation } from "./_generated/server";
 import { SEED_COURSES } from "./seedCourseData";
+import { requireAdmin } from "./lib/authGuard";
 
 // ---------------------------------------------------------------------------
 // Main seed mutation — public so it can be called from the Convex dashboard
@@ -21,6 +22,7 @@ import { SEED_COURSES } from "./seedCourseData";
 export const seedHaderechCourse = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const now = Date.now();
     const results: {
       courses: string[];
@@ -114,6 +116,7 @@ export const seedHaderechCourse = mutation({
 export const updateHaderechLessons = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const now = Date.now();
     let updated = 0;
     let notFound = 0;

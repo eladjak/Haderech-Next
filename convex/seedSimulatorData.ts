@@ -1,4 +1,5 @@
 import { mutation } from "./_generated/server";
+import { requireAdmin } from "./lib/authGuard";
 
 // ==========================================
 // Seed Simulator Scenarios - Phase 17
@@ -119,6 +120,7 @@ const SIMULATOR_SCENARIOS = [
 export const seedSimulatorScenarios = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     // Check if scenarios already exist
     const existing = await ctx.db.query("simulatorScenarios").collect();
     if (existing.length > 0) {

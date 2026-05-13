@@ -1,5 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -361,10 +362,11 @@ export const addContent = mutation({
   },
 });
 
-/** זריעת 30 ימי תוכן יומי בעברית - כל יום עם טיפ, ציטוט ואתגר */
+/** זריעת 30 ימי תוכן יומי בעברית - כל יום עם טיפ, ציטוט ואתגר. Admin-only. */
 export const seedDailyContent = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const existing = await ctx.db.query("dailyContent").first();
     if (existing) return { message: "תוכן יומי כבר קיים במערכת", count: 0 };
 

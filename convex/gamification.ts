@@ -1,5 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // ==========================================
 // Gamification Module - Phase 5
@@ -1060,10 +1061,11 @@ export const checkAndAwardBadges = internalMutation({
   },
 });
 
-// --- Seed initial 12 badges ---
+// --- Seed initial 12 badges. Admin-only. ---
 export const seedBadges = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     // Check if badges already seeded
     const existing = await ctx.db.query("badges").first();
     if (existing) {

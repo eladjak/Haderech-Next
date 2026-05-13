@@ -1,10 +1,60 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
 ## סטטוס: in_progress
-## עדכון אחרון: 2026-02-19
+## עדכון אחרון: 2026-05-13
 
 ## מצב נוכחי
-Phase 1-13 הושלמו. Convex + Clerk מחוברים. **Phase 13:** Watch Time Tracking, Admin First-Setup, Deploy Config. TypeScript עובר, 131 בדיקות עוברות, 29 עמודים.
+**מגה־אודיט 2026-05-13** הושלם. 5 סוכני Opus במקביל (Architecture/UX/Security/Market/Investor). 7 פערי אבטחה קריטיים תוקנו. דוח HTML מלא ב-`Documents/reports/iteration-haderech-2026-05-13.html`. tsc ✅, 131 בדיקות ✅.
+
+## מה בוצע - מגה־אודיט (סשן 2026-05-13)
+
+### תיקוני אבטחה קריטיים — impersonation prevention
+- [x] **`convex/lib/authGuard.ts`** — הוספת `requireUser` + `requireSelfOrAdmin` helpers
+- [x] **`convex/courses.ts`** — `requireAdmin` ב-create/update (היו פתוחים לכל משתמש מאומת)
+- [x] **`convex/lessons.ts`** — `requireAdmin` ב-create/update/remove
+- [x] **`convex/enrollments.ts`** — `requireSelfOrAdmin` ב-isEnrolled/listByUser/enroll/unenroll (מנע גניבת זהות + הרס נתונים)
+- [x] **`convex/progress.ts`** — `requireSelfOrAdmin` ב-5 פונקציות (סימון "הושלם" בשם משתמש אחר → תעודה מזויפת)
+- [x] **`convex/certificates.ts`** — `requireSelfOrAdmin` ב-issue/getByUserAndCourse/listByUser
+- [x] **10 seed mutations** ציבוריים → הוסף `requireAdmin` (seed.ts × 3, blog/dailyContent/gamification/mentoring/stories/seedSimulatorData/seedHaderech × 7) — מנע seed/clear ע"י כל משתמש
+
+### דוח HTML עברי מלא (Documents/reports/iteration-haderech-2026-05-13.html)
+- אזהרות קריטיות: מספרים שקריים (חוק הגנת הצרכן), Stripe placeholder, hardcoded admin email
+- ארכיטקטורה: 10 חולשות עיקריות (3 מודולי analytics כפולים, 3 simulators, schema mismatch, N+1 leaderboard, 0 pagination)
+- אבטחה: 8 פריטי HIGH נותרו (CSP unsafe-eval, VAPID rotation, rate-limit, search index, 14+ עוד userId-from-client)
+- UX: 10 בעיות (brand color conflict rose vs blue, 3 dashboards, header overload)
+- Feature Gap: 10 פיצ'רים שמתחרים יש (Live cohorts, affiliate, WhatsApp, Cardcom, RAG Q&A, transcripts, drip, bundles, mobile app, public API)
+- 5 פיצ'רים מבדלים ייחודיים (Hebrew AI Coach, WhatsApp microlearning, Real Date Debrief, Peer Profile Review, Shabbat-aware)
+- 15 Quick Wins מדורגים
+- מודל עסקי מומלץ: Hybrid Product-Led — Diagnostic חינם + Sprint 21 ימים ₪497 + Cohort ₪1,800/6w (זנח את ₪149/חודש)
+- ICP מדויק: גרוש 32-44, מרכז, שכר 18-28K
+- תוכנית 90 ימים: validation → pre-sell → cohort #1 ידני → iterate
+
+### אימות
+- [x] TypeScript: `npx tsc --noEmit` ✅ ללא שגיאות
+- [x] Vitest: 131/131 בדיקות עוברות (5 file failures = playwright config preexisting)
+
+### לא בוצע (דורש החלטה עסקית או migration)
+- מספרים שקריים landing/pricing/about (7 קבצים) — דורש החלטה בין הסרה / "Beta" / נתונים דינמיים
+- Stripe webhook + checkout אמיתי — דורש החלטה האם להפעיל עכשיו
+- typo `weeklyChallengCompletions` — דורש Convex migration script
+- N+1 leaderboard — דורש refactor של `getLeaderboard` ל-xpEvents groupBy
+- איחוד 3 מודולי analytics + 3 simulators
+
+## מה בוצע - Phase 13 Watch Time, Admin Setup, Deploy (סשן 2026-02-19)
+- [x] **Schema Update** (`convex/schema.ts`) - Added `watchTimeSeconds` optional field to progress table
+- [x] **Progress Tracking** (`convex/progress.ts`) - `updateProgress` now accepts `watchTimeSeconds` and accumulates it
+- [x] **YouTube Player Enhanced** (`src/components/video/youtube-player.tsx`) - Tracks actual seconds watched using timestamp-based counting, sends accumulated time with each progress update, restores seconds on failed saves
+- [x] **Analytics Backend** (`convex/analytics.ts`) - `getStudentOverview` returns `totalWatchTimeSeconds` aggregated from all progress entries
+- [x] **Analytics UI** (`src/app/student/analytics/page.tsx`) - New watch time card showing total watch time in hours/minutes format
+- [x] **Admin Setup Page** (`src/app/admin/setup/page.tsx`) - NEW: First admin setup flow - allows first logged-in user to become admin when no admins exist, shows "admin exists" page otherwise
+- [x] **User Functions** (`convex/users.ts`) - Added `hasAnyAdmin` query and `promoteSelfToAdmin` mutation for admin setup flow
+- [x] **Deploy Config** (`next.config.ts`) - Added image remotePatterns (Clerk, Convex), security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+- [x] **Build Scripts** (`package.json`) - Updated build to `npx convex deploy --cmd 'next build'` (official Convex pattern), added `build:local` for local-only builds
+- [x] **Shared Utils** (`src/lib/progress-utils.ts`) - Added `formatWatchTime()` function for Hebrew watch time formatting
+- [x] **Tests** (`src/__tests__/progress-utils.test.ts`) - 7 new tests for formatWatchTime (total: 39 in file, 131 overall)
+- [x] **TypeScript** - עובר ללא שגיאות
+- [x] **Build** - `next build` עובר בהצלחה (29 עמודים, +1 admin/setup)
+- [x] **Tests** - 131 בדיקות עוברות
 
 ## מה בוצע - Phase 13 Watch Time, Admin Setup, Deploy (סשן 2026-02-19)
 - [x] **Schema Update** (`convex/schema.ts`) - Added `watchTimeSeconds` optional field to progress table

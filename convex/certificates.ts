@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // שליפת תעודה לפי ID (ציבורי - לשיתוף)
 export const getCertificate = query({
@@ -111,6 +112,7 @@ export const getByUserAndCourse = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("certificates")
       .withIndex("by_user_course", (q) =>
@@ -124,6 +126,7 @@ export const getByUserAndCourse = query({
 export const listByUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("certificates")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -151,6 +154,7 @@ export const issue = mutation({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // בדיקה שאין כבר תעודה
     const existing = await ctx.db
       .query("certificates")

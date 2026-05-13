@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // שליפת כל המנטורים הזמינים
 export const listMentors = query({
@@ -259,7 +260,9 @@ export const rateSession = mutation({
 
 // Seed 3 sample mentors
 export const seedMentors = mutation({
+  args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     // Check if mentors already exist
     const existing = await ctx.db.query("mentors").collect();
     if (existing.length > 0) {

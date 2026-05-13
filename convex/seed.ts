@@ -1,4 +1,5 @@
 import { internalMutation, mutation } from "./_generated/server";
+import { requireAdmin } from "./lib/authGuard";
 
 // Seed data: 3 starter courses with Hebrew content
 const SEED_COURSES = [
@@ -140,9 +141,11 @@ const SEED_COURSES = [
 ] as const;
 
 // Seed all courses and lessons into the database
+// Public but admin-only: prevents arbitrary users from corrupting DB
 export const seedCourses = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     // Check if courses already exist
     const existingCourses = await ctx.db.query("courses").collect();
     if (existingCourses.length > 0) {
@@ -409,9 +412,11 @@ const SEED_COMMUNITY_TOPICS = [
 ];
 
 // Seed community topics (uses a system/first admin user)
+// Public but admin-only
 export const seedCommunity = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     // Check if community topics already exist
     const existingTopics = await ctx.db.query("communityTopics").take(1);
     if (existingTopics.length > 0) {
@@ -469,9 +474,11 @@ export const seedCommunity = mutation({
 });
 
 // Unified seed command - seeds all data
+// Public but admin-only
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const results: { courses?: string; simulator?: string; community?: string } = {};
 
     // 1. Seed courses

@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // שליפת כל הקורסים המפורסמים
 export const listPublished = query({
@@ -74,6 +75,7 @@ export const create = mutation({
     estimatedHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const now = Date.now();
 
     // מציאת הסדר הגבוה ביותר
@@ -114,6 +116,7 @@ export const update = mutation({
     estimatedHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
 
     const existing = await ctx.db.get(id);

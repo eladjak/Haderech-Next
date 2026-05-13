@@ -330,10 +330,11 @@ export const deletePost = mutation({
 
 // ─── Seed ─────────────────────────────────────────────────────────────────────
 
-/** נתוני דוגמה לבלוג - 6 מאמרים בעברית */
+/** נתוני דוגמה לבלוג - 6 מאמרים בעברית. Admin-only. */
 export const seedBlogPosts = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const user = await requireAdmin(ctx);
 
     // Check if posts already exist
