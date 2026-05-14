@@ -97,10 +97,10 @@ function MainPricingCard({
 
   const tierCtaText: Record<string, string> = {
     free: "התחל בחינם",
-    basic: "התחל עם מגלה",
-    premium: "התחל עם משנה",
-    vip: "הצטרף ל-VIP",
-    course: "רכוש את הקורס",
+    basic: "הצטרף לרשימה — בקרוב",
+    premium: "הצטרף לרשימה — בקרוב",
+    vip: "הצטרף לרשימה — בקרוב",
+    course: "הצטרף לרשימה — בקרוב",
   };
 
   const isCurrentPlan = currentPlan === tier.id;
@@ -253,18 +253,16 @@ function MainPricingCard({
             התוכנית הנוכחית שלך
           </div>
         ) : isPaidTier ? (
-          <button
-            type="button"
-            onClick={() => onCheckout(tier.id as "basic" | "premium")}
-            disabled={isCheckingOut}
-            className={`flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+          <Link
+            href="/contact?topic=waitlist"
+            className={`flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all ${
               isHighlighted
                 ? "bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/25 hover:shadow-xl hover:brightness-110"
                 : "border border-brand-200 bg-white text-brand-600 hover:bg-brand-50 dark:border-brand-500/30 dark:bg-transparent dark:text-brand-400 dark:hover:bg-brand-50/10"
             }`}
           >
-            {isCheckingOut ? "מעבד..." : tierCtaText[tier.id]}
-          </button>
+            {tierCtaText[tier.id]}
+          </Link>
         ) : (
           <Link
             href="/sign-up"
@@ -1050,7 +1048,7 @@ export default function PricingPage() {
                 className="mb-12 grid gap-6 sm:grid-cols-3"
               >
                 {[
-                  { value: "461", label: "זוגות שנוצרו", icon: "💑" },
+                  { value: "Beta", label: "אתה מהראשונים", icon: "🚀" },
                   { value: "73", label: "שיעורים בקורס", icon: "📚" },
                   { value: "30", label: "ימי אחריות החזר", icon: "🛡️" },
                 ].map((stat) => (
@@ -1178,7 +1176,7 @@ export default function PricingPage() {
               <div className="relative">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-sm font-medium text-white">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-                  461 זוגות כבר מצאו אהבה
+                  Beta — תוכנית חדשה
                 </div>
                 <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
                   מוכן להתחיל את המסע?

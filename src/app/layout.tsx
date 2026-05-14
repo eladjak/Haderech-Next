@@ -8,6 +8,7 @@ import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { GoogleAnalyticsScript } from "@/components/analytics/ga-script";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { ErrorTracker } from "@/components/analytics/error-tracker";
+import { CookieConsent } from "@/components/compliance/cookie-consent";
 import { WebsiteJsonLd, HomePageFallback } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
@@ -110,6 +111,7 @@ export default function RootLayout({
           </ConvexClientProvider>
           <ErrorTracker />
           <ServiceWorkerRegister />
+          <CookieConsent />
         </body>
       </html>
     </ClerkProvider>

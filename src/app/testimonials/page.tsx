@@ -108,7 +108,7 @@ export default function TestimonialsPage() {
             </h1>
 
             <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-              אלפי גברים ונשים שינו את חיי הדייטינג שלהם עם הדרך. הנה מה שהם
+              מצטרפים חדשים מתחילים את המסע שלהם בהדרך. הנה מה שהם
               אומרים על החוויה שלהם.
             </p>
 
@@ -410,7 +410,7 @@ export default function TestimonialsPage() {
                 <StarDisplay count={5} />
               </div>
               <h2 className="mb-4 text-3xl font-extrabold text-zinc-900 dark:text-white">
-                הצטרף לאלפי הסטודנטים המרוצים
+                הצטרף לראשוני הסטודנטים
               </h2>
               <p className="mb-8 text-base text-zinc-600 dark:text-zinc-400">
                 התחל את המסע שלך לקשרים עמוקים ומשמעותיים יותר. הקורסים

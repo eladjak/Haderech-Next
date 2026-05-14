@@ -101,13 +101,13 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
             פלטפורמת הלמידה המובילה לדייטינג ומציאת אהבה אמיתית
           </p>
 
-          {/* Social proof */}
+          {/* Beta badge */}
           <div className="mb-8 rounded-2xl bg-brand-50 px-6 py-4 dark:bg-brand-900/20">
             <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">
-              461
+              Beta
             </p>
             <p className="text-sm text-brand-700 dark:text-brand-300">
-              זוגות כבר מצאו אהבה דרכנו
+              אתה אחד הראשונים שמצטרפים למסע
             </p>
           </div>
 
