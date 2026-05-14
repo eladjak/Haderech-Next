@@ -118,10 +118,10 @@ const VALUES = [
 ];
 
 const STATS = [
-  { value: "12", label: "שבועות תוכנית מובנית", icon: "📅" },
+  { value: "461", label: "זוגות מצאו אהבה", icon: "❤️" },
   { value: "73", label: "שיעורים מקצועיים", icon: "🎬" },
-  { value: "6", label: "שלבי המסע", icon: "🗺️" },
-  { value: "Beta", label: "מצטרפים חדשים", icon: "🚀" },
+  { value: "15+", label: "שנות ניסיון", icon: "⭐" },
+  { value: "6", label: "שלבים מוכחים", icon: "🗺️" },
 ];
 
 const DIFFERENTIATORS = [
@@ -143,7 +143,7 @@ const DIFFERENTIATORS = [
   {
     icon: "📊",
     title: "שיטה מבוססת מחקר",
-    desc: "ניסיון מצטבר של אומנות הקשר + ממצאים מהפסיכולוגיה החיובית ומחקרי קשרים.",
+    desc: "15 שנות עבודה עם מאות זוגות + ממצאים מהפסיכולוגיה החיובית ומחקרי קשרים.",
   },
 ];
 
@@ -209,7 +209,7 @@ export default function AboutPage() {
                 className="mx-auto max-w-2xl text-lg leading-relaxed text-blue-500/70 dark:text-zinc-400"
               >
                 אומנות הקשר הוקמה מתוך אמונה אחת פשוטה: כל אחד ואחת ראויים
-                לאהבה אמיתית. "הדרך" היא הפלטפורמה שהפכה את שיטת אומנות הקשר
+                לאהבה אמיתית. "הדרך" היא הפלטפורמה שהפכה 15 שנות ניסיון
                 לתהליך מובנה ועוצמתי שעובד.
               </motion.p>
             </motion.div>
@@ -237,10 +237,10 @@ export default function AboutPage() {
                   variants={fadeIn}
                   className="mb-5 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
                 >
-                  שיטה חדשה.
+                  15 שנה. אלפי שיחות.
                   <br />
                   <span className="bg-gradient-to-l from-brand-500 to-accent-400 bg-clip-text text-transparent">
-                    מסע מובנה.
+                    461 זוגות.
                   </span>
                 </motion.h2>
 
@@ -560,7 +560,7 @@ export default function AboutPage() {
                   מוכנים להתחיל?
                 </h2>
                 <p className="mx-auto mb-8 max-w-lg text-lg text-white/80">
-                  הצטרפו לראשונים שמתחילים את המסע. הזמן שלכם הוא עכשיו
+                  הצטרפו ל-461 זוגות שכבר מצאו אהבה אמיתית. המסע שלכם מתחיל
                   עכשיו.
                 </p>
                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

@@ -131,7 +131,7 @@ function CoachWelcome({
         המאמן שלי
       </h2>
       <p className="mb-1 text-xs text-blue-500/50 dark:text-zinc-400">
-        מבוסס על שיטת אומנות הקשר
+        15+ שנות ניסיון • 461 זוגות
       </p>
 
       {isCoach ? (
@@ -353,7 +353,7 @@ function ChatPageContent() {
                     מאמן AI - אומנות הקשר
                   </p>
                   <p className="text-xs text-blue-500/50 dark:text-zinc-500">
-                    מבוסס על שיטת אומנות הקשר
+                    15+ שנות ניסיון, 461 זוגות
                   </p>
                 </div>
               </div>

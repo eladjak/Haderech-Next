@@ -1048,7 +1048,7 @@ export default function PricingPage() {
                 className="mb-12 grid gap-6 sm:grid-cols-3"
               >
                 {[
-                  { value: "Beta", label: "אתה מהראשונים", icon: "🚀" },
+                  { value: "461", label: "זוגות שנוצרו", icon: "💑" },
                   { value: "73", label: "שיעורים בקורס", icon: "📚" },
                   { value: "30", label: "ימי אחריות החזר", icon: "🛡️" },
                 ].map((stat) => (
@@ -1176,7 +1176,7 @@ export default function PricingPage() {
               <div className="relative">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-sm font-medium text-white">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-                  Beta — תוכנית חדשה
+                  461 זוגות כבר מצאו אהבה
                 </div>
                 <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
                   מוכן להתחיל את המסע?

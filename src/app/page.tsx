@@ -58,7 +58,7 @@ export default function Home() {
             <motion.div variants={fadeIn}>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-600 dark:border-brand-200/30 dark:bg-brand-50/50 dark:text-brand-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" aria-hidden="true" />
-                Beta — תוכנית חדשה
+                461 זוגות כבר מצאו אהבה
               </div>
             </motion.div>
 
@@ -150,7 +150,7 @@ export default function Home() {
               variants={fadeIn}
               className="mt-4 text-sm text-blue-500/70 dark:text-zinc-400"
             >
-              הצטרפו לראשונים שמתחילים את המסע
+              הצטרפו ל-1,000+ תלמידים שכבר שינו את חיי הדייטינג שלהם
             </motion.p>
           </motion.div>
         </div>
@@ -172,8 +172,8 @@ export default function Home() {
           >
             <StatItem value="6+" label="קורסים" />
             <StatItem value="90+" label="שיעורים" hasDivider />
-            <StatItem value="12" label="שבועות תוכנית" hasDivider />
-            <StatItem value="6" label="שלבים מובנים" hasDivider />
+            <StatItem value="1000+" label="תלמידים" hasDivider />
+            <StatItem value="95%" label="שביעות רצון" hasDivider />
           </motion.div>
         </div>
       </section>
@@ -580,7 +580,7 @@ export default function Home() {
                 מוכנים להתחיל את המסע?
               </h2>
               <p className="mx-auto mb-8 max-w-md text-lg text-white/80">
-                Beta — תוכנית חדשה דרך אומנות הקשר. הצעד הראשון שלך
+                461 זוגות כבר מצאו אהבה דרך אומנות הקשר. הצעד הראשון שלך
                 מתחיל כאן.
               </p>
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
