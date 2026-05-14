@@ -1,6 +1,6 @@
-import { query, mutation, action } from "./_generated/server";
+import { query, mutation, action, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 // ─── Queries ─────────────────────────────────────────────────
 
@@ -19,8 +19,10 @@ export const getSubscriptions = query({
   },
 });
 
-// שליפת subscriptions לפי userId (לשימוש פנימי ב-action)
-export const getSubscriptionsByUserId = query({
+// שליפת subscriptions לפי userId — internal only (callable from actions
+// inside Convex, NOT from clients). Was public → could enumerate
+// other users' push subscriptions.
+export const getSubscriptionsByUserId = internalQuery({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -164,9 +166,9 @@ export const sendNotification = action({
     tag: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<{ sent: number; reason?: string; payload?: string; subscriptions?: { endpoint: string }[] }> => {
-    // שליפת subscriptions של המשתמש
+    // שליפת subscriptions של המשתמש (internal — server-only)
     const subscriptions = (await ctx.runQuery(
-      api.pushNotifications.getSubscriptionsByUserId,
+      internal.pushNotifications.getSubscriptionsByUserId,
       { userId: args.userId }
     )) as PushSubscriptionRow[];
 
