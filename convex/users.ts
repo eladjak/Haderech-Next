@@ -86,8 +86,16 @@ export const getMe = query({
   },
 });
 
-// אימיילים שתמיד יהיו admin
-const ADMIN_EMAILS = ["eladjak@gmail.com"];
+// Bootstrap admin emails - configured via env var BOOTSTRAP_ADMIN_EMAILS
+// (comma-separated list). Empty by default → no auto-promotion.
+// To configure: `npx convex env set BOOTSTRAP_ADMIN_EMAILS "you@example.com"`
+function getAdminEmails(): string[] {
+  const raw = process.env.BOOTSTRAP_ADMIN_EMAILS ?? "";
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => e.length > 0);
+}
 
 // יצירת משתמש אוטומטית מ-auth context (אם לא קיים)
 export const ensureUser = mutation({
@@ -97,7 +105,7 @@ export const ensureUser = mutation({
     if (!identity) return null;
 
     const email = identity.email ?? "";
-    const isAutoAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+    const isAutoAdmin = getAdminEmails().includes(email.toLowerCase());
 
     const existing = await ctx.db
       .query("users")

@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // שליפת הערה של משתמש לשיעור
 export const getForLesson = query({
@@ -8,6 +9,7 @@ export const getForLesson = query({
     lessonId: v.id("lessons"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("notes")
       .withIndex("by_user_lesson", (q) =>
@@ -24,6 +26,7 @@ export const listByCourse = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const notes = await ctx.db
       .query("notes")
       .withIndex("by_user_course", (q) =>
@@ -51,6 +54,7 @@ export const listByCourse = query({
 export const listAll = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const notes = await ctx.db
       .query("notes")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))

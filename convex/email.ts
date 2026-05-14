@@ -15,6 +15,18 @@ import {
 const DEFAULT_FROM = "הדרך <noreply@ohlove.co.il>";
 
 /**
+ * Resolve `{{APP_URL}}` placeholders in email templates to the production URL.
+ * Convex env var `APP_URL` overrides; falls back to public site URL.
+ */
+function resolveTemplate(html: string): string {
+  const appUrl =
+    process.env.APP_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    "https://haderech.vercel.app";
+  return html.replaceAll("{{APP_URL}}", appUrl);
+}
+
+/**
  * Internal helper – calls the Resend REST API (or logs in dev mode).
  * Not exported as a Convex function; used only inside this module.
  */
@@ -26,6 +38,7 @@ async function callResend(options: {
 }): Promise<{ success: boolean; id?: string; error?: string; dev?: boolean }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = options.from ?? DEFAULT_FROM;
+  const html = resolveTemplate(options.html);
 
   if (!apiKey) {
     console.log("[Email Dev]", {
@@ -47,7 +60,7 @@ async function callResend(options: {
         from,
         to: options.to,
         subject: options.subject,
-        html: options.html,
+        html,
       }),
     });
 
