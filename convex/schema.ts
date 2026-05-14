@@ -237,7 +237,18 @@ export default defineSchema({
     mode: v.union(
       v.literal("coach"),
       v.literal("practice"),
-      v.literal("analysis")
+      v.literal("analysis"),
+      v.literal("debrief"),
+      v.literal("mentor")
+    ),
+    archetype: v.optional(v.string()), // optional persona/archetype for context
+    debriefData: v.optional(
+      v.object({
+        date_when: v.optional(v.string()),
+        what_happened: v.optional(v.string()),
+        how_felt: v.optional(v.string()),
+        would_change: v.optional(v.string()),
+      })
     ),
     messageCount: v.number(),
     createdAt: v.number(),
@@ -255,10 +266,19 @@ export default defineSchema({
       v.literal("system")
     ),
     content: v.string(),
+    feedback: v.optional(v.union(v.literal("up"), v.literal("down"))),
+    feedbackText: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_session", ["sessionId"])
     .index("by_session_created", ["sessionId", "createdAt"]),
+
+  // מעקב שימוש יומי - rate limiting (Phase 80)
+  dailyUsage: defineTable({
+    userId: v.string(), // Clerk user ID
+    dateStr: v.string(), // YYYY-MM-DD
+    messageCount: v.number(),
+  }).index("by_user_date", ["userId", "dateStr"]),
 
   // סימולטור דייטינג - תרחישים
   simulatorScenarios: defineTable({
