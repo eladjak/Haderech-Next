@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { FAQChat } from "@/components/faq/faq-chat";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -305,6 +306,13 @@ export default function FAQPage() {
                 />
               </div>
             </motion.div>
+          </div>
+        </section>
+
+        {/* ── Interactive FAQ Chat ────────────────────────────────────── */}
+        <section className="px-4 py-6">
+          <div className="mx-auto max-w-2xl">
+            <FAQChat />
           </div>
         </section>
 
