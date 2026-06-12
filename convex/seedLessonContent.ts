@@ -17,6 +17,29 @@ import { LESSON_CONTENT } from "./lessonContentData";
 
 const COURSE_TITLE = "הדרך - אומנות הקשר";
 
+/**
+ * Set the course hero image (served from public/images/courses/).
+ * Generated 2026-06-12 with Gemini (nano-banana-poster), brand palette
+ * per BRAND.md (E85D75 / 1E3A5F / D4A853 on cream).
+ */
+export const setCourseImage = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const course = await ctx.db
+      .query("courses")
+      .filter((q) => q.eq(q.field("title"), COURSE_TITLE))
+      .first();
+    if (!course) {
+      return { success: false, message: `Course "${COURSE_TITLE}" not found.` };
+    }
+    await ctx.db.patch(course._id, {
+      imageUrl: "/images/courses/haderech-hero.jpg",
+      updatedAt: Date.now(),
+    });
+    return { success: true, imageUrl: "/images/courses/haderech-hero.jpg" };
+  },
+});
+
 export const applyLessonContent = mutation({
   args: {},
   handler: async (ctx) => {
