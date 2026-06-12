@@ -8,7 +8,10 @@ const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
   "/quiz(.*)",
   "/student(.*)",
-  "/course(.*)",
+  // Legacy singular course player routes (/course/[id]/...).
+  // NOTE: must be "/course/(.*)" and not "/course(.*)" — the latter also
+  // matches "/courses" and locked the public catalog behind auth (prod 404).
+  "/course/(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
