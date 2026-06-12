@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // ---- Watch-time & resume helpers (auth-based, no userId arg) ----
 
@@ -149,6 +150,7 @@ export const updateProgress = mutation({
     watchTimeSeconds: v.optional(v.number()), // זמן צפייה שנוסף מאז העדכון האחרון
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const now = Date.now();
     const completed = args.progressPercent >= 90;
 
@@ -193,6 +195,7 @@ export const markComplete = mutation({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const now = Date.now();
 
     const existing = await ctx.db

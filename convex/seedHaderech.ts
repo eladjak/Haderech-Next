@@ -18,7 +18,7 @@ import { SEED_COURSES } from "./seedCourseData";
 // Main seed mutation — public so it can be called from the Convex dashboard
 // ---------------------------------------------------------------------------
 
-export const seedHaderechCourse = mutation({
+export const seedHaderechCourse = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
@@ -111,7 +111,7 @@ export const seedHaderechCourse = mutation({
 // Update lessons for an existing course — adds new fields without re-creating
 // ---------------------------------------------------------------------------
 
-export const updateHaderechLessons = mutation({
+export const updateHaderechLessons = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();

@@ -1,6 +1,11 @@
-import { query, mutation, action } from "./_generated/server";
+import {
+  query,
+  mutation,
+  internalMutation,
+  action,
+} from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 // =======================================
 // AI Chat Coach - Phase 16
@@ -135,6 +140,12 @@ export const createSession = mutation({
     title: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    if (identity.subject !== args.userId) {
+      throw new Error("Not authorized to create a session for another user");
+    }
+
     const now = Date.now();
     const sessionId = await ctx.db.insert("chatSessions", {
       userId: args.userId,
@@ -158,8 +169,8 @@ export const createSession = mutation({
   },
 });
 
-// שמירת הודעת משתמש
-export const addUserMessage = mutation({
+// שמירת הודעת משתמש (internal — נקרא רק מתוך sendMessage)
+export const addUserMessage = internalMutation({
   args: {
     sessionId: v.id("chatSessions"),
     content: v.string(),
@@ -185,8 +196,8 @@ export const addUserMessage = mutation({
   },
 });
 
-// שמירת תשובת AI
-export const addAssistantMessage = mutation({
+// שמירת תשובת AI (internal — נקרא רק מתוך sendMessage)
+export const addAssistantMessage = internalMutation({
   args: {
     sessionId: v.id("chatSessions"),
     content: v.string(),
@@ -262,18 +273,24 @@ export const sendMessage = action({
     userId: v.string(),
   },
   handler: async (ctx, args): Promise<string> => {
-    // 1. Save user message
-    await ctx.runMutation(api.chat.addUserMessage, {
-      sessionId: args.sessionId,
-      content: args.userMessage,
-    });
+    // 0. Auth: caller must be signed in and own the session
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
 
-    // 2. Get full session with messages
     const session = await ctx.runQuery(api.chat.getSession, {
       sessionId: args.sessionId,
     });
 
     if (!session) throw new Error("Session not found");
+    if (session.userId !== identity.subject) {
+      throw new Error("Not authorized to send messages in this session");
+    }
+
+    // 1. Save user message
+    await ctx.runMutation(internal.chat.addUserMessage, {
+      sessionId: args.sessionId,
+      content: args.userMessage,
+    });
 
     // 3. Get all messages (including system) for API call
     const allMessages = await ctx.runQuery(
@@ -285,20 +302,33 @@ export const sendMessage = action({
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-3-5-haiku-20241022",
-        max_tokens: 1024,
-        system: allMessages.systemPrompt,
-        messages: allMessages.conversationMessages,
-      }),
-    });
+    // Phase 14: Model upgraded to claude-haiku-4-5-20251001 (claude-3-5-haiku-20241022 returns 404).
+    // Fall back to sonnet on rate-limit / 5xx for resilience.
+    const PRIMARY_MODEL = "claude-haiku-4-5-20251001";
+    const FALLBACK_MODEL = "claude-sonnet-4-6-20251022";
+
+    async function callClaude(model: string): Promise<Response> {
+      return fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey as string,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 1024,
+          system: allMessages.systemPrompt,
+          messages: allMessages.conversationMessages,
+        }),
+      });
+    }
+
+    let response = await callClaude(PRIMARY_MODEL);
+    if (!response.ok && (response.status === 429 || response.status >= 500)) {
+      // Retry once with fallback model
+      response = await callClaude(FALLBACK_MODEL);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -318,7 +348,7 @@ export const sendMessage = action({
     }
 
     // 6. Save assistant response
-    await ctx.runMutation(api.chat.addAssistantMessage, {
+    await ctx.runMutation(internal.chat.addAssistantMessage, {
       sessionId: args.sessionId,
       content: assistantContent,
       updateTitle,

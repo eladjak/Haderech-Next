@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 // ==========================================
 // Seed Simulator Scenarios - Phase 17
@@ -116,7 +116,7 @@ const SIMULATOR_SCENARIOS = [
   },
 ] as const;
 
-export const seedSimulatorScenarios = mutation({
+export const seedSimulatorScenarios = internalMutation({
   args: {},
   handler: async (ctx) => {
     // Check if scenarios already exist

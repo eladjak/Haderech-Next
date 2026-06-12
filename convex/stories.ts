@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
@@ -237,10 +238,11 @@ export const toggleFeatured = mutation({
   },
 });
 
-// Seed sample stories
+// Seed sample stories (admin only)
 export const seedStories = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const sampleStories = [
       {
         name: "דני, 34",

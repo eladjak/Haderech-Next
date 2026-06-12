@@ -1,4 +1,5 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
+import { requireSelfOrAdmin, requireUser } from "./lib/authGuard";
 import { v } from "convex/values";
 
 // שליפת התראות של משתמש (50 אחרונות)
@@ -31,8 +32,12 @@ export const countUnread = query({
 export const markAsRead = mutation({
   args: { id: v.id("notifications") },
   handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
     const notification = await ctx.db.get(args.id);
     if (!notification) throw new Error("Notification not found");
+    if (notification.userId !== user._id && user.role !== "admin") {
+      throw new Error("Not authorized");
+    }
     await ctx.db.patch(args.id, { read: true });
   },
 });
@@ -41,6 +46,7 @@ export const markAsRead = mutation({
 export const markAllAsRead = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const unread = await ctx.db
       .query("notifications")
       .withIndex("by_user_read", (q) =>
@@ -56,7 +62,7 @@ export const markAllAsRead = mutation({
 });
 
 // יצירת התראה (internal - נקרא מפונקציות אחרות)
-export const create = mutation({
+export const create = internalMutation({
   args: {
     userId: v.id("users"),
     type: v.union(

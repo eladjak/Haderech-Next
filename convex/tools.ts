@@ -25,7 +25,10 @@ export const generateConversationStarters = action({
       v.literal("romantic")
     ),
   },
-  handler: async (_ctx, args): Promise<string[]> => {
+  handler: async (ctx, args): Promise<string[]> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
 
@@ -116,7 +119,10 @@ export const generateProfileBio = action({
     lookingFor: v.string(),
     partnerQualities: v.string(),
   },
-  handler: async (_ctx, args): Promise<string[]> => {
+  handler: async (ctx, args): Promise<string[]> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
 

@@ -1,4 +1,4 @@
-import { action } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import {
   welcomeTemplate,
@@ -66,7 +66,7 @@ async function callResend(options: {
 // ─── 1. Welcome Email ────────────────────────────────────────────────────────
 
 /** שליחת מייל ברוכים הבאים לאחר הרשמה */
-export const sendWelcomeEmail = action({
+export const sendWelcomeEmail = internalAction({
   args: {
     email: v.string(),
     name: v.string(),
@@ -84,7 +84,7 @@ export const sendWelcomeEmail = action({
 // ─── 2. Course Enrollment Email ──────────────────────────────────────────────
 
 /** שליחת מייל אישור הרשמה לקורס */
-export const sendEnrollmentEmail = action({
+export const sendEnrollmentEmail = internalAction({
   args: {
     email: v.string(),
     name: v.string(),
@@ -104,7 +104,7 @@ export const sendEnrollmentEmail = action({
 // ─── 3. Certificate Issued Email ─────────────────────────────────────────────
 
 /** שליחת מייל עם תעודת סיום */
-export const sendCertificateEmail = action({
+export const sendCertificateEmail = internalAction({
   args: {
     email: v.string(),
     name: v.string(),
@@ -123,7 +123,7 @@ export const sendCertificateEmail = action({
 // ─── 4. Weekly Digest Email ──────────────────────────────────────────────────
 
 /** שליחת סיכום שבועי */
-export const sendWeeklyDigestEmail = action({
+export const sendWeeklyDigestEmail = internalAction({
   args: {
     email: v.string(),
     name: v.string(),

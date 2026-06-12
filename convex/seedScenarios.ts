@@ -1,4 +1,4 @@
-import { internalMutation, mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 // ==========================================
 // Seed Structured Dialogue Scenarios - Phase 68
@@ -759,7 +759,7 @@ export const seedDatingScenarios = internalMutation({
 });
 
 // Public mutation to run seed (for admin/setup)
-export const runSeedDatingScenarios = mutation({
+export const runSeedDatingScenarios = internalMutation({
   args: {},
   handler: async (ctx) => {
     const existing = await ctx.db.query("dialogueScenarios").collect();

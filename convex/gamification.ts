@@ -1061,7 +1061,7 @@ export const checkAndAwardBadges = internalMutation({
 });
 
 // --- Seed initial 12 badges ---
-export const seedBadges = mutation({
+export const seedBadges = internalMutation({
   args: {},
   handler: async (ctx) => {
     // Check if badges already seeded

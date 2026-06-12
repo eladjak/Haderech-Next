@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // שליפת כל הניסיונות של משתמש בבוחן מסוים
 export const getAttemptsByUserAndQuiz = query({
@@ -82,6 +83,7 @@ export const submitEnhancedAttempt = mutation({
     timeTakenSeconds: v.number(), // זמן שלקח בשניות
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // שליפת השאלות
     const questions = await ctx.db
       .query("quizQuestions")

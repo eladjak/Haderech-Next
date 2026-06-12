@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // בדיקה אם משתמש רשום לקורס
 export const isEnrolled = query({
@@ -50,6 +51,7 @@ export const enroll = mutation({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // בדיקה שהקורס קיים ומפורסם
     const course = await ctx.db.get(args.courseId);
     if (!course) throw new Error("Course not found");
@@ -80,6 +82,7 @@ export const unenroll = mutation({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const enrollment = await ctx.db
       .query("enrollments")
       .withIndex("by_user_course", (q) =>

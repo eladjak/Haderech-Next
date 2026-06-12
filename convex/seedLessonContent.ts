@@ -12,7 +12,7 @@
  *   npx convex run --prod seedLessonContent:applyLessonContent   (production)
  */
 
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { LESSON_CONTENT } from "./lessonContentData";
 
 const COURSE_TITLE = "הדרך - אומנות הקשר";
@@ -22,7 +22,7 @@ const COURSE_TITLE = "הדרך - אומנות הקשר";
  * Generated 2026-06-12 with Gemini (nano-banana-poster), brand palette
  * per BRAND.md (E85D75 / 1E3A5F / D4A853 on cream).
  */
-export const setCourseImage = mutation({
+export const setCourseImage = internalMutation({
   args: {},
   handler: async (ctx) => {
     const course = await ctx.db
@@ -40,7 +40,7 @@ export const setCourseImage = mutation({
   },
 });
 
-export const applyLessonContent = mutation({
+export const applyLessonContent = internalMutation({
   args: {},
   handler: async (ctx) => {
     const course = await ctx.db

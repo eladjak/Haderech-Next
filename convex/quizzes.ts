@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin, requireSelfOrAdmin } from "./lib/authGuard";
 
 // שליפת בוחן לפי שיעור (alias לשימוש מהדף החדש)
 export const getQuizByLesson = query({
@@ -33,6 +34,7 @@ export const submitQuizAnswer = mutation({
     timeTakenSeconds: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const questions = await ctx.db
       .query("quizQuestions")
       .withIndex("by_quiz", (q) => q.eq("quizId", args.quizId))
@@ -208,6 +210,7 @@ export const submitAttempt = mutation({
     answers: v.array(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // שליפת השאלות
     const questions = await ctx.db
       .query("quizQuestions")
@@ -267,6 +270,7 @@ export const create = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const quizId = await ctx.db.insert("quizzes", {
       lessonId: args.lessonId,
       courseId: args.courseId,

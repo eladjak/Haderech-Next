@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // Get current user's subscription
 export const getCurrentSubscription = query({
@@ -49,6 +50,7 @@ export const getPaymentHistory = query({
 export const createFreeSubscription = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const existing = await ctx.db
       .query("subscriptions")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))

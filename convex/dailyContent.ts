@@ -1,5 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authGuard";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -365,6 +366,7 @@ export const addContent = mutation({
 export const seedDailyContent = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const existing = await ctx.db.query("dailyContent").first();
     if (existing) return { message: "תוכן יומי כבר קיים במערכת", count: 0 };
 

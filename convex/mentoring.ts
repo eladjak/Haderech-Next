@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // שליפת כל המנטורים הזמינים
@@ -258,7 +258,7 @@ export const rateSession = mutation({
 });
 
 // Seed 3 sample mentors
-export const seedMentors = mutation({
+export const seedMentors = internalMutation({
   handler: async (ctx) => {
     // Check if mentors already exist
     const existing = await ctx.db.query("mentors").collect();

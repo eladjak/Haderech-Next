@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireSelfOrAdmin } from "./lib/authGuard";
 
 // שליפת תעודה לפי ID (ציבורי - לשיתוף)
 export const getCertificate = query({
@@ -151,6 +152,7 @@ export const issue = mutation({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // בדיקה שאין כבר תעודה
     const existing = await ctx.db
       .query("certificates")

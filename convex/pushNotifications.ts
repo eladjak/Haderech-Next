@@ -1,4 +1,4 @@
-import { query, mutation, action } from "./_generated/server";
+import { query, mutation, internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 
@@ -154,7 +154,7 @@ type PushSubscriptionRow = {
   updatedAt: number;
 };
 
-export const sendNotification = action({
+export const sendNotification = internalAction({
   args: {
     userId: v.string(),
     title: v.string(),
@@ -221,7 +221,7 @@ export const sendNotification = action({
 });
 
 // שליחת push notification לכל המשתמשים (broadcast)
-export const broadcastNotification = action({
+export const broadcastNotification = internalAction({
   args: {
     title: v.string(),
     body: v.string(),

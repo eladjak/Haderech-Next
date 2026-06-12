@@ -11,7 +11,7 @@
  *   npx convex run --prod seedWeeklyQuizzes:seedWeeklyQuizzes   (production)
  */
 
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 const COURSE_TITLE = "הדרך - אומנות הקשר";
 
@@ -709,7 +709,7 @@ export const WEEKLY_QUIZZES: WeeklyQuiz[] = [
   },
 ];
 
-export const seedWeeklyQuizzes = mutation({
+export const seedWeeklyQuizzes = internalMutation({
   args: {},
   handler: async (ctx) => {
     const course = await ctx.db
