@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
@@ -27,7 +27,10 @@ interface ChoiceResult {
 export default function DialogueScenarioPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const scenarioId = params.scenarioId as Id<"dialogueScenarios">;
+  // Sync: arrived from a lesson's Smart Advisor
+  const fromLesson = searchParams.get("from") === "lesson";
 
   const scenario = useQuery(api.simulator.getDialogueScenario, { scenarioId });
 
@@ -287,6 +290,16 @@ export default function DialogueScenarioPage() {
           </svg>
           כל התרחישים
         </Link>
+
+        {/* Sync banner — arrived from a lesson's Smart Advisor */}
+        {fromLesson && (
+          <div className="mb-6 flex items-center gap-2 rounded-xl border border-brand-200/60 bg-brand-50/60 px-4 py-3 text-sm text-brand-700 dark:border-brand-500/20 dark:bg-brand-900/15 dark:text-brand-300">
+            <span aria-hidden="true">✦</span>
+            <span>
+              היועץ החכם הפנה אותך לכאן כדי לתרגל את הכישור מהשיעור שלך. בהצלחה!
+            </span>
+          </div>
+        )}
 
         {/* Scenario card */}
         <div className="mb-8 rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">

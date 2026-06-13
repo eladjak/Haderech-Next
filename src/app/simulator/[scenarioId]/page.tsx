@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
@@ -14,7 +14,10 @@ import Link from "next/link";
 export default function ScenarioPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const scenarioId = params.scenarioId as Id<"simulatorScenarios">;
+  // Sync: lesson the learner came from (advisor/course -> simulator)
+  const fromLessonId = searchParams.get("lessonId") as Id<"lessons"> | null;
 
   const scenario = useQuery(api.simulator.getScenario, { scenarioId });
   const startSession = useMutation(api.simulator.startSession);
@@ -29,7 +32,10 @@ export default function ScenarioPage() {
     setIsStarting(true);
     setError(null);
     try {
-      const sessionId = await startSession({ scenarioId });
+      const sessionId = await startSession({
+        scenarioId,
+        ...(fromLessonId ? { lessonId: fromLessonId } : {}),
+      });
       setActiveSessionId(sessionId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "שגיאה בהתחלת הסשן");
@@ -98,6 +104,16 @@ export default function ScenarioPage() {
           </svg>
           כל התרחישים
         </Link>
+
+        {/* Sync banner — arrived from a lesson */}
+        {fromLessonId && (
+          <div className="mb-6 flex items-center gap-2 rounded-xl border border-brand-200/60 bg-brand-50/60 px-4 py-3 text-sm text-brand-700 dark:border-brand-500/20 dark:bg-brand-900/15 dark:text-brand-300">
+            <span aria-hidden="true">✦</span>
+            <span>
+              היועץ החכם הפנה אותך לכאן כדי לתרגל את הכישור מהשיעור שלך. בהצלחה!
+            </span>
+          </div>
+        )}
 
         {/* Scenario header */}
         <div className="mb-8 rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">

@@ -79,26 +79,37 @@ function buildAnalysisSystemPrompt(): string {
 }`;
 }
 
+// Phase 18: claude-3-5-haiku-20241022 returns 404. Pin to the available
+// haiku-4.5, fall back to sonnet on rate-limit / 5xx for resilience.
+const PRIMARY_MODEL = "claude-haiku-4-5-20251001";
+const FALLBACK_MODEL = "claude-sonnet-4-6-20251022";
+
 async function callAnthropic(
   apiKey: string,
   systemPrompt: string,
   messages: Message[],
   maxTokens = 300
 ): Promise<string> {
-  const response = await fetch(ANTHROPIC_BASE_URL, {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "claude-3-5-haiku-20241022",
-      max_tokens: maxTokens,
-      system: systemPrompt,
-      messages,
-    }),
-  });
+  const doFetch = (model: string) =>
+    fetch(ANTHROPIC_BASE_URL, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages,
+      }),
+    });
+
+  let response = await doFetch(PRIMARY_MODEL);
+  if (!response.ok && (response.status === 429 || response.status >= 500)) {
+    response = await doFetch(FALLBACK_MODEL);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();

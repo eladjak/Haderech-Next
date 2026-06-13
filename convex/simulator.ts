@@ -80,7 +80,12 @@ export const listUserSessions = query({
 
 // Start a new simulator session
 export const startSession = mutation({
-  args: { scenarioId: v.id("simulatorScenarios") },
+  args: {
+    scenarioId: v.id("simulatorScenarios"),
+    // Phase 18: optional lesson context — links practice to the lesson
+    // the learner came from (advisor/course <-> simulator sync).
+    lessonId: v.optional(v.id("lessons")),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
@@ -94,6 +99,7 @@ export const startSession = mutation({
     const sessionId = await ctx.db.insert("simulatorSessions", {
       userId: identity.subject,
       scenarioId: args.scenarioId,
+      lessonId: args.lessonId,
       status: "active",
       messageCount: 0,
       createdAt: now,
@@ -241,16 +247,25 @@ export const sendMessage = action({
     let personaResponse: string;
 
     if (!apiKey) {
-      // Fallback without AI
-      const fallbacks = [
-        "אה, זה מעניין מה שאמרת... ספר/י לי יותר.",
-        "כן, אני מבין/ה. ומה עוד?",
-        "זה נשמע מעניין. רוצה לשמוע עוד על זה.",
-        "אממ, נחמד. ספר/י לי על עצמך.",
+      // Free-degradation: persona-flavored, turn-aware fallback (no AI key).
+      // Keeps the practice loop usable for demos without a paid key.
+      const name = context.scenario.personaName;
+      const turn = conversationHistory.filter((m) => m.role === "user").length;
+      const lastUser = trimmed;
+      const askedQuestion = /\?|מה |איך |למה |איפה |מתי |האם /.test(lastUser);
+      const opensWell = lastUser.length > 25;
+
+      const earlyTurn = [
+        `נעים מאוד, אני ${name}. אהבתי שפתחת ככה — ספר/י לי קצת עליך, מה מביא אותך לכאן?`,
+        `היי! ${askedQuestion ? "שאלה טובה, " : ""}אני ${name}. אני סקרן/ית לשמוע עוד — מה התחביבים שלך?`,
       ];
-      personaResponse =
-        fallbacks[Math.floor(Math.random() * fallbacks.length)] ??
-        fallbacks[0];
+      const midTurn = [
+        `מעניין מה שאמרת. ${askedQuestion ? "ואצלך? " : "ומה גרם לך להתעניין בזה?"}`,
+        `אהבתי את הכנות. ${opensWell ? "אתה/את נשמע/ת אמיתי/ת." : "ספר/י לי עוד, אני מקשיב/ה."}`,
+        `${askedQuestion ? "כן, לגמרי — " : ""}זה אומר עליך משהו טוב. מה הכי חשוב לך בקשר?`,
+      ];
+      const pool = turn <= 1 ? earlyTurn : midTurn;
+      personaResponse = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
     } else {
       personaResponse = await ctx.runAction(
         internal.aiSimulator.getPersonaResponse,
@@ -333,15 +348,54 @@ export const endSession = action({
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
+      // Free-degradation: heuristic scoring so the feedback loop works
+      // without a paid key. Rewards engagement, questions, and length.
+      const userMsgs = session.messages.filter(
+        (m: { role: string }) => m.role === "user"
+      );
+      const userCount = userMsgs.length;
+      const askedQuestions = userMsgs.filter((m: { content: string }) =>
+        /\?|מה |איך |למה |האם |ספר|ספרי/.test(m.content)
+      ).length;
+      const avgLen =
+        userMsgs.reduce(
+          (s: number, m: { content: string }) => s + m.content.length,
+          0
+        ) / Math.max(1, userCount);
+
+      let score = 45;
+      score += Math.min(20, userCount * 4); // engagement
+      score += Math.min(20, askedQuestions * 7); // curiosity
+      score += avgLen > 40 ? 12 : avgLen > 20 ? 6 : 0; // depth
+      score = Math.min(92, Math.max(30, score));
+
+      const strengths: string[] = [];
+      if (userCount >= 4) strengths.push("ניהלת שיחה מתמשכת וזורמת");
+      if (askedQuestions >= 2) strengths.push("שאלת שאלות והראית עניין אמיתי");
+      if (avgLen > 40) strengths.push("פתחת והעמקת במקום תשובות קצרות");
+      if (strengths.length === 0) strengths.push("התחלת את התרגול — זה הצעד הכי חשוב");
+
+      const improvements: string[] = [];
+      if (askedQuestions < 2)
+        improvements.push("שאל/י יותר שאלות פתוחות כדי להוביל את השיחה");
+      if (avgLen <= 20)
+        improvements.push("הרחב/י קצת — תשובה קצרה מדי מקשה על חיבור");
+      if (userCount < 4)
+        improvements.push("נהל/י שיחה ארוכה יותר כדי לבנות כימיה");
+      if (improvements.length === 0)
+        improvements.push("המשך/י לתרגל בתרחישים קשים יותר");
+
       const analysis = {
-        score: 65,
-        feedback: "סיימת את הסימולציה. המשך להתאמן כדי לשפר את הכישורים שלך.",
-        strengths: ["השלמת את הסימולציה", "ניסית לנהל שיחה"],
-        improvements: [
-          "שאל/י יותר שאלות פתוחות",
-          "הראה/י עניין אישי",
-          "שמור/י על שיחה זורמת",
-        ],
+        score,
+        feedback: `סיימת את התרגול עם ${userCount} הודעות. ${
+          score >= 75
+            ? "ניהלת שיחה טובה — אתה בכיוון הנכון!"
+            : score >= 55
+              ? "בסיס טוב. עוד תרגול ותשתפר/י משמעותית."
+              : "התחלה טובה. בוא/י נתרגל עוד כדי לבנות ביטחון."
+        }`,
+        strengths: strengths.slice(0, 3),
+        improvements: improvements.slice(0, 3),
       };
       await ctx.runMutation(internal.simulator.saveAnalysis, {
         sessionId: args.sessionId,

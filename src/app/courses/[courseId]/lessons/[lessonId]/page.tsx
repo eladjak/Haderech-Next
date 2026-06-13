@@ -10,6 +10,7 @@ import { Header } from "@/components/layout/header";
 import { VideoPlayer } from "@/components/lesson/video-player";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
 import { LessonNotes } from "@/components/lesson/lesson-notes";
+import { LessonAdvisor } from "@/components/lesson/lesson-advisor";
 import { CommentsSection } from "@/components/lesson/comments-section";
 import { LessonNav } from "@/components/course/lesson-nav";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
@@ -484,6 +485,12 @@ export default function LessonPlayerPage() {
               </div>
             </section>
           )}
+
+          {/* Smart Advisor — context-aware, lesson-synced (Phase 18) */}
+          <LessonAdvisor
+            lessonId={lessonId}
+            userId={convexUser?._id}
+          />
 
           {/* Quiz Section */}
           {quiz && quizQuestions && quizQuestions.length > 0 && (

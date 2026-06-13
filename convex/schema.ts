@@ -240,6 +240,10 @@ export default defineSchema({
       v.literal("analysis")
     ),
     messageCount: v.number(),
+    // Phase 18: lesson context — makes the advisor aware of which
+    // lesson/phase the user is on when the session was opened.
+    lessonId: v.optional(v.id("lessons")),
+    courseId: v.optional(v.id("courses")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -288,6 +292,8 @@ export default defineSchema({
   simulatorSessions: defineTable({
     userId: v.string(),
     scenarioId: v.id("simulatorScenarios"),
+    // Phase 18: lesson that prompted this practice (advisor/course <-> simulator sync)
+    lessonId: v.optional(v.id("lessons")),
     status: v.union(
       v.literal("active"),
       v.literal("completed"),

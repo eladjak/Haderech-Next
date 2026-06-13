@@ -6,6 +6,11 @@ import {
 } from "./_generated/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
+import {
+  buildAdvisorSystemPrompt,
+  buildTemplateReply,
+  type LessonContext,
+} from "./lib/advisorTemplates";
 
 // =======================================
 // AI Chat Coach - Phase 16
@@ -138,6 +143,10 @@ export const createSession = mutation({
       v.literal("analysis")
     ),
     title: v.optional(v.string()),
+    // Phase 18: optional lesson context — when opened from a lesson,
+    // the coach becomes lesson-aware (advisor <-> course sync).
+    lessonId: v.optional(v.id("lessons")),
+    courseId: v.optional(v.id("courses")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -151,23 +160,80 @@ export const createSession = mutation({
       userId: args.userId,
       mode: args.mode,
       title: args.title,
+      lessonId: args.lessonId,
+      courseId: args.courseId,
       messageCount: 0,
       createdAt: now,
       updatedAt: now,
     });
 
-    // Insert system prompt as first message
-    const modeConfig = CHAT_MODES[args.mode];
+    // Build the system prompt. For coach mode with a lesson, use the
+    // lesson-aware advisor prompt; otherwise fall back to the static mode prompt.
+    let systemPrompt = CHAT_MODES[args.mode].systemPrompt;
+    if (args.mode === "coach" && args.lessonId) {
+      const lessonCtx = await resolveLessonContext(ctx, args.lessonId, args.userId);
+      if (lessonCtx) {
+        systemPrompt = buildAdvisorSystemPrompt(lessonCtx);
+      }
+    }
+
     await ctx.db.insert("chatMessages", {
       sessionId,
       role: "system",
-      content: modeConfig.systemPrompt,
+      content: systemPrompt,
       createdAt: now,
     });
 
     return sessionId;
   },
 });
+
+// Helper: resolve lesson context from inside a mutation/query ctx.
+// Mirrors advisor.getLessonContext but usable in the createSession mutation.
+async function resolveLessonContext(
+  ctx: { db: any },
+  lessonId: any,
+  clerkUserId: string
+): Promise<LessonContext | null> {
+  const lesson = await ctx.db.get(lessonId);
+  if (!lesson) return null;
+
+  const allLessons = await ctx.db
+    .query("lessons")
+    .withIndex("by_course", (q: any) => q.eq("courseId", lesson.courseId))
+    .collect();
+  const publishedLessons = allLessons.filter((l: any) => l.published);
+
+  let completedLessons = 0;
+  let isLessonComplete = false;
+  // Map clerk id -> convex user for progress lookup
+  const convexUser = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", clerkUserId))
+    .first();
+  if (convexUser) {
+    const progress = await ctx.db
+      .query("progress")
+      .withIndex("by_user_course", (q: any) =>
+        q.eq("userId", convexUser._id).eq("courseId", lesson.courseId)
+      )
+      .collect();
+    completedLessons = progress.filter((p: any) => p.completed).length;
+    isLessonComplete =
+      progress.find((p: any) => p.lessonId === lessonId)?.completed === true;
+  }
+
+  return {
+    lessonTitle: lesson.title,
+    lessonDescription: lesson.description,
+    weekNumber: lesson.weekNumber,
+    phaseNumber: lesson.phaseNumber,
+    phaseName: lesson.phaseName,
+    completedLessons,
+    totalLessons: publishedLessons.length,
+    isLessonComplete,
+  };
+}
 
 // שמירת הודעת משתמש (internal — נקרא רק מתוך sendMessage)
 export const addUserMessage = internalMutation({
@@ -298,47 +364,64 @@ export const sendMessage = action({
       { sessionId: args.sessionId }
     );
 
-    // 4. Call Claude API
+    // 4. Call Claude API — with FREE-DEGRADATION.
+    // Phase 18: no key (or any failure) -> deterministic template reply,
+    // lesson-aware when this session was opened from a lesson.
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
 
-    // Phase 14: Model upgraded to claude-haiku-4-5-20251001 (claude-3-5-haiku-20241022 returns 404).
-    // Fall back to sonnet on rate-limit / 5xx for resilience.
-    const PRIMARY_MODEL = "claude-haiku-4-5-20251001";
-    const FALLBACK_MODEL = "claude-sonnet-4-6-20251022";
+    // Build a lesson-aware template fallback once.
+    const fallbackLessonCtx: LessonContext | null = session.lessonId
+      ? await ctx.runQuery(api.advisor.getLessonContext, {
+          lessonId: session.lessonId,
+        }).then((r) => r?.context ?? null)
+      : null;
+    const templateReply = buildTemplateReply(args.userMessage, fallbackLessonCtx);
 
-    async function callClaude(model: string): Promise<Response> {
-      return fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey as string,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          max_tokens: 1024,
-          system: allMessages.systemPrompt,
-          messages: allMessages.conversationMessages,
-        }),
-      });
+    let assistantContent: string;
+
+    if (!apiKey) {
+      assistantContent = templateReply.text;
+    } else {
+      // Phase 14: claude-haiku-4-5-20251001 primary, sonnet fallback on 429/5xx.
+      const PRIMARY_MODEL = "claude-haiku-4-5-20251001";
+      const FALLBACK_MODEL = "claude-sonnet-4-6-20251022";
+
+      async function callClaude(model: string): Promise<Response> {
+        return fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey as string,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 1024,
+            system: allMessages.systemPrompt,
+            messages: allMessages.conversationMessages,
+          }),
+        });
+      }
+
+      try {
+        let response = await callClaude(PRIMARY_MODEL);
+        if (!response.ok && (response.status === 429 || response.status >= 500)) {
+          response = await callClaude(FALLBACK_MODEL);
+        }
+        if (!response.ok) {
+          // Degrade gracefully to the template instead of erroring out.
+          assistantContent = templateReply.text;
+        } else {
+          const data = (await response.json()) as {
+            content: Array<{ type: string; text: string }>;
+          };
+          assistantContent =
+            data.content[0]?.text ?? templateReply.text;
+        }
+      } catch {
+        assistantContent = templateReply.text;
+      }
     }
-
-    let response = await callClaude(PRIMARY_MODEL);
-    if (!response.ok && (response.status === 429 || response.status >= 500)) {
-      // Retry once with fallback model
-      response = await callClaude(FALLBACK_MODEL);
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Claude API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = (await response.json()) as {
-      content: Array<{ type: string; text: string }>;
-    };
-    const assistantContent = data.content[0]?.text ?? "לא הצלחתי לענות, נסה שוב.";
 
     // 5. Auto-generate title from first exchange if no title yet
     let updateTitle: string | undefined;
