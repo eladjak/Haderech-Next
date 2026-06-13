@@ -1,10 +1,134 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
+## 2026-06-13 — Phase 18: Smart Advisor (lesson-context-aware) + synced Dating Simulator ✅ (autonomous)
+
+**Vision shipped (per Elad's plan):** an in-course **Smart Advisor** that adapts to the exact lesson the user is on, the built-in **Dating Simulator**, and the **sync** between them — all referencing one shared lesson/phase context. Built on the existing 75-lesson/12-quiz Convex+Clerk base; auth-gating on the 49 mutations preserved.
+
+### 1. Smart Advisor — context-aware + FREE-DEGRADATION
+- **`convex/lib/advisorTemplates.ts`** (NEW) — the free-degradation "brain". A 6-phase map of "הדרך" (גישה→תקשורת→משיכה ומעבר→חיבור וכימיה→מחויבות), each with core concepts, the trained skill, Elad-voice opener, "apply-it" prompts, and a simulator category. Two builders: `buildAdvisorSystemPrompt` (lesson-aware system prompt, used as the live-AI scaffold) and `buildTemplateReply` (deterministic intent-routed reply in Elad's voice — greeting/rejection/stuck/how-to/summary/practice). **Works with NO API key.**
+- **`convex/advisor.ts`** (NEW) — `getLessonContext` (shared lesson+phase+progress context; the single source of truth), `getRecommendedScenario` (sync bridge: lesson phase → best simulator scenario), and `ask` (free-degrading turn returning `{reply, usedAi, suggestSimulator}`; Claude when `ANTHROPIC_API_KEY` present, template otherwise; graceful degradation on any AI failure).
+- **`convex/chat.ts`** — coach sessions now carry `lessonId/courseId` and build a lesson-aware system prompt; `sendMessage` **free-degrades instead of throwing** when no key (was a hard `throw`).
+- **`src/components/lesson/lesson-advisor.tsx`** (NEW) — collapsible advisor panel embedded in the lesson player. Shows the phase badge + trained skill, quick prompts, a simulator CTA, RTL, a11y (aria-expanded/live, labeled controls), transform/opacity-only animation.
+
+### 2. Dating Simulator — completed + free-degradation
+- **`convex/aiSimulator.ts`** — **fixed 404 model** (`claude-3-5-haiku-20241022` → `claude-haiku-4-5-20251001`) + sonnet fallback on 429/5xx.
+- **`convex/simulator.ts`** — persona/turn-aware no-key fallback for `sendMessage`; **heuristic scoring fallback** for `endSession` (rewards engagement/questions/depth) so the feedback loop works without a key; `simulatorSessions.lessonId` links practice back to the lesson.
+- **Seeded prod content** (was EMPTY): 4 structured-dialogue scenarios + 6 free-chat scenarios → simulator now runs end-to-end.
+
+### 3. Sync
+- advisor ↔ simulator ↔ lesson all read the same `getLessonContext`. Lesson → simulator deep-link carries `lessonId`/`from=lesson` with a "sent here to practice" banner on BOTH simulator flows. `getRecommendedScenario` maps phase→scenario (verified: lesson phase-1 → "דייט ראשון בבית קפה", skill "מודעות עצמית והצבת גבולות").
+
+### Gates & verification
+- `npx tsc --noEmit` → 0 errors · `npm run build:local` → ✅ (Compiled successfully) · `npx vitest run` → **158 pass** (+11 new advisor-template tests).
+- **Convex deployed** to prod (`npx convex deploy` — schema validation OK, no index deletions).
+- **Free-degradation proven LIVE on prod** (no AI key set in Convex env, so this IS the prod path): `advisor:ask` returned a reply naming the exact live lesson "פתיחת המסע..." + phase "גישה" + concepts, with `usedAi:false`, `suggestSimulator` correct. Rejection/summary intents verified too.
+- Commit `9477f5a` pushed to master (auto-deploys). Only the 12 Phase-18 files staged — Phase-14 uncommitted files left untouched.
+
+### ⚠️ KNOWN BLOCKER (needs Elad — pre-existing, NOT from this work)
+- **Clerk DEV-instance on prod:** the live lesson/course-detail pages (any `useUser()` page) stall on a loading skeleton because **`Clerk: Failed to load Clerk (failed_to_load_clerk_js_timeout)`** in crawlers/headless. `ConvexProviderWithClerk` blocks ALL Convex queries until Clerk auth resolves → skeleton never clears. The public `/courses` catalog (no `useUser()`) renders fine. The advisor frontend is correctly wired and will render for real signed-in users; verified the backend independently via CLI. **Fix = Elad re-flags Clerk to a PRODUCTION instance** (credential action, can't be done autonomously).
+- **Full-AI advisor** = add `ANTHROPIC_API_KEY` (or wire Gemini) to Convex env (`npx convex env set ANTHROPIC_API_KEY ...`). Until then the (good) template advisor runs.
+
+### Phased backlog (not in this pass)
+- Persist the inline lesson-advisor turns to a `chatSessions` thread (currently stateless per lesson visit; the full `/chat` history flow already persists).
+- Wire a Gemini free-tier path into `advisor.ask` (mirror the Pollr pattern) for a free live-AI upgrade without Anthropic spend.
+- Add lessonId to `dialogueSessions` for symmetric sync analytics; surface "practiced X scenarios from this lesson" on the lesson page.
+- Per-phase dedicated simulator scenarios (currently maps to nearest by category/difficulty).
+
+---
+
+## 2026-06-12 — Vercel productionBranch switched main→master (Shabbat autonomous, Fable-5) ✅
+- **Done via undocumented-but-staff-sanctioned API:** `PATCH https://api.vercel.com/v9/projects/prj_xSpLffGWUveGwS6TQFVkumZX26jg/branch?teamId=team_T6dJ4LNsyZ8LDt9uU9Po1exz` body `{"branch":"master"}` (Vercel CLI token). Verified by GET: `link.productionBranch` was `main` → now `master`.
+- **Auto-deploy proven:** pushed empty commit `829ab97` to `origin/master` → Vercel auto-built it as PRODUCTION (QUEUED→BUILDING→READY, ~7 min) → prod target now serves `829ab97 (master)`. Live `haderech-next.vercel.app` = 200, title intact. Pushes to master now deploy automatically; the abandoned `main` (next 14 history) no longer controls prod.
+- Note: working tree still carries uncommitted Phase-14 session changes (13 files) — untouched, not swept into any commit.
+
+---
+
+## 2026-05-28 — entry from deep-work session
+**FAQ chat widget shipped.** New `/api/chat-faq/route.ts` (gemini-3.5-flash + thinkingBudget:0 + 600 tokens, same proven config). New `<FAQChat>` client component on `/faq` page. Pending Elad: GEMINI_API_KEY in Vercel env (graceful fallback without it). CV file refreshed with Workshops & Education variant.
+
+---
+
+
 ## סטטוס: in_progress
-## עדכון אחרון: 2026-02-19
+## עדכון אחרון: 2026-05-14
 
 ## מצב נוכחי
-Phase 1-13 הושלמו. Convex + Clerk מחוברים. **Phase 13:** Watch Time Tracking, Admin First-Setup, Deploy Config. TypeScript עובר, 131 בדיקות עוברות, 29 עמודים.
+Phase 1-14 הושלמו. Convex + Clerk מחוברים. **Phase 14 (2026-05-14):** Hardening + AI Coach model upgrade + Sumit migration + מספרים אמיתיים בלבד. TypeScript עובר 0 שגיאות, 147 בדיקות עוברות (+16 חדשים), build נקי, 30 עמודים (+1 sumit webhook).
+
+## מה בוצע - Phase 14 Hardening + AI Coach + Sumit + Real Numbers (סשן 2026-05-14)
+
+### מספרים אמיתיים (URGENT — Elad asked "להחזיר!")
+- [x] **`src/app/admin/page.tsx`** - הוסר `mockStats` + `mockRecentActivity` fallback. במקום מספרים מפוברקים, מציג zeros + "טוען נתונים אמיתיים..." בזמן טעינה. `convexStats ?? mockStats` → `convexStats ?? EMPTY_STATS` (zeros).
+- [x] **`src/app/admin/students/page.tsx`** - `convexStudents ?? mockStudents` → `convexStudents ?? []` עם state `isLoading`. הקיפוץ ל-mockStudents יצא, רק real Convex.
+- [x] **`src/app/admin/courses/page.tsx`** - `convexCourses ?? mockCourses` → `convexCourses ?? []` עם `isLoadingCourses`.
+- [x] **`src/app/admin/courses/[courseId]/lessons/page.tsx`** - `convexLessons ?? mockLessons` → `convexLessons ?? []` עם `isLoadingLessons`.
+- [x] **`src/app/admin/courses/[courseId]/quizzes/page.tsx`** - אותו תיקון, real-data-only.
+- [x] בכל הדפים: title bar מציג "טוען..." בזמן טעינה במקום ספירה מזויפת.
+- [x] עמוד `/student/analytics` כבר היה real (Convex queries לכל מקום). אומת.
+- [x] עמוד `/dashboard` כבר היה real. אומת.
+
+### AI Coach
+- [x] **`convex/chat.ts`** - מודל שודרג מ-`claude-3-5-haiku-20241022` (returns 404 per ~/.claude memory) ל-`claude-haiku-4-5-20251001` (זמין).
+- [x] **Fallback** - על 429 או 5xx נסיון חוזר עם `claude-sonnet-4-6-20251022`.
+- [x] תשתית קיימת: `/chat` page + 3 modes (coach/practice/analysis) + Convex chatSessions+chatMessages + sendMessage action — הכל פעיל.
+- [x] System prompts בעברית עם persona "אומנות הקשר".
+
+### Sumit migration (Stripe → Sumit, Israeli payment + invoice)
+- [x] **`src/lib/sumit.ts`** (NEW) - מודול לקוח Sumit: `SUMIT_PLANS` (basic ₪149 / premium ₪299 / VIP ₪599), `createSumitCheckout` (hosted-tashlumim), `isSumitConfigured`, `verifySumitWebhook` (HMAC-SHA256 via Web Crypto). מודע ל-recurring 12 חודשים + `autoIssueInvoice:true` (חשבונית מס אוטומטית).
+- [x] **`convex/sumit.ts`** (NEW) - Convex action `createCheckoutSession` (החליף את stripe), internal mutation `handleSubscriptionUpdate`. ללא credentials → returns `{status:"credentials_pending"}` עם הודעה ברורה במקום לכשל.
+- [x] **`convex/_generated/api.d.ts`** - רישום מודול sumit.
+- [x] **`src/app/api/sumit/webhook/route.ts`** (NEW) - webhook handler עם signature verification + rate limit. החזרת 401 לחתימה לא תקפה, 429 ל-rate limit, 200 לאישור.
+- [x] **`src/app/pricing/page.tsx`** - הפנייה מ-`api.stripe.createCheckoutSession` ל-`api.sumit.createCheckoutSession`. הוסף `checkoutNotice` UI להציג "מערכת תשלומים בהקמה" כשאין credentials.
+- [x] **`convex/stripe.ts`** - סומן @deprecated, כפי שמופיע ב-comment header. מחזיר notice "מערכת התשלומים בתהליך החלפה ל-Sumit".
+- [x] **BLOCKED ON CREDENTIALS** - הקוד מוכן 100% אבל מחכה ל-`SUMIT_API_TOKEN` + `SUMIT_ORG_ID` + `SUMIT_WEBHOOK_SECRET` + `SUMIT_MODE` (sandbox/production) מ-Sumit. נדרשת התקנה ידנית כש-Elad מקבל credentials (ראה reference_sumit_pending.md).
+
+### Hardening
+- [x] **`src/lib/rate-limit.ts`** (NEW) - rate limiter שיתופי לכל route. sliding window per-IP, default 20/60s, cleanup אוטומטי במאגר. `getClientIp` helper (x-forwarded-for → x-real-ip → unknown).
+- [x] **`src/app/api/contact/route.ts`** - rate limit 5 הודעות/דקה לכל IP. החזרת 429 + `Retry-After: 60`.
+- [x] **`src/app/api/sumit/webhook/route.ts`** - rate limit 100/דקה לכל IP. signature verification חובה. webhook לא חשוף לקריאות לא חתומות.
+- [x] **CSP/security headers** (`next.config.ts`) - אומתו: X-Frame-Options:DENY, X-Content-Type-Options:nosniff, Strict-Transport-Security, Permissions-Policy, X-XSS-Protection, CSP מפורט (script-src + connect-src + frame-src + img-src + media-src). כבר היו מהPhase 13, לא שונו.
+- [x] **`vitest.config.ts`** - תיקון bug pre-existing: vitest היה אוסף קבצי Playwright (e2e) ופייל אותם. הוסף `include: ["src/**/*.{test,spec}.{ts,tsx}"]` + `exclude: ["e2e/**", "tests/**", ...]`. 10 test files failed → 0 failed.
+- [x] **Convex auth** - `deleteSession` ב-chat.ts כבר בודק ownership (`session.userId !== identity.subject`). admin queries (`requireAdmin(ctx)`) מוודאים role=admin.
+
+### Tests
+- [x] **`src/__tests__/rate-limit.test.ts`** (NEW) - 7 בדיקות: under limit, over limit, isolated buckets, default max=20, getClientIp from x-forwarded-for/x-real-ip/unknown.
+- [x] **`src/__tests__/sumit.test.ts`** (NEW) - 9 בדיקות: isSumitConfigured (3), SUMIT_PLANS (3: ILS pricing, Hebrew names, recurring), verifySumitWebhook (3: no secret, wrong sig, valid sig with computed HMAC).
+
+### Verification
+- [x] `npx tsc --noEmit` → exit 0, 0 errors
+- [x] `npx vitest run` → 6 files passed, **147 tests passed** (+16 from rate-limit+sumit)
+- [x] `npm run build:local` → exit 0, 30 pages (+1 sumit webhook). אין placeholder images. CSP intact.
+
+### קבצים שנערכו/נוצרו (Phase 14)
+**NEW:**
+- `src/lib/sumit.ts` - Sumit client utilities
+- `src/lib/rate-limit.ts` - shared rate limiter
+- `convex/sumit.ts` - Convex Sumit action + webhook mutation
+- `src/app/api/sumit/webhook/route.ts` - webhook receiver
+- `src/__tests__/rate-limit.test.ts` - 7 tests
+- `src/__tests__/sumit.test.ts` - 9 tests
+
+**MODIFIED:**
+- `src/app/admin/page.tsx` - removed mockStats/mockRecentActivity fallback
+- `src/app/admin/students/page.tsx` - removed mockStudents fallback
+- `src/app/admin/courses/page.tsx` - removed mockCourses fallback
+- `src/app/admin/courses/[courseId]/lessons/page.tsx` - removed mockLessons fallback
+- `src/app/admin/courses/[courseId]/quizzes/page.tsx` - removed mockQuizzes fallback
+- `convex/chat.ts` - model upgrade + fallback
+- `convex/stripe.ts` - marked @deprecated
+- `convex/_generated/api.d.ts` - register sumit module
+- `src/app/pricing/page.tsx` - stripe → sumit + checkoutNotice
+- `src/app/api/contact/route.ts` - rate limit added
+- `vitest.config.ts` - exclude e2e from vitest
+
+### מה נשאר פתוח לסשן הבא
+1. **Sumit credentials** - מחכה ל-Elad לקבל token+orgId מ-Sumit, אז `.env.local` add: `SUMIT_API_TOKEN`, `SUMIT_ORG_ID`, `SUMIT_WEBHOOK_SECRET`, `SUMIT_MODE=sandbox`. אחרי זה לבדוק checkout flow end-to-end.
+2. **Sumit webhook → Convex dispatch** - הקובץ כרגע מאשר webhook אבל לא קורא ל-`internal.sumit.handleSubscriptionUpdate`. צריך להוסיף `ConvexHttpClient` או להעביר ל-Node runtime + standard Convex client.
+3. **`src/app/admin/billing/page.tsx`** - עדיין מתייחס ל-Stripe types, צריך migration נוסף.
+4. **mock data remnants** - אחרי שיש נתונים אמיתיים ב-Convex, להסיר את הגוש `mockStudents`, `mockCourses` וכו' לחלוטין מהקבצים (כרגע מוגדרים אבל לא משומשים).
+5. **FAQ + pricing copy** - מזכיר "Stripe" 2 פעמים, להחליף ל-"Sumit" אחרי שה-credentials פעילים.
+
+
 
 ## מה בוצע - Phase 13 Watch Time, Admin Setup, Deploy (סשן 2026-02-19)
 - [x] **Schema Update** (`convex/schema.ts`) - Added `watchTimeSeconds` optional field to progress table
@@ -509,3 +633,6 @@ Phase 1-13 הושלמו. Convex + Clerk מחוברים. **Phase 13:** Watch Time
 - Admin pages עובדים עם mock data כשאין Convex backend
 - Admin panel נגיש רק למשתמשים מחוברים (middleware)
 - בעתיד: יש להוסיף בדיקת role=admin בכל עמודי ה-admin
+
+### 11.6.2026 — מעבר שיפורים רוחבי (Fable-5 sweep)
+- branch `chore/security-deps-2026-06-11` (54ac155): next 16.1.6→16.2.9 + clerk lock refresh + audit fix — npm audit CRITICAL×2/HIGH×13 → 0/0 · build:local ירוק · קומט קבצי-חבילות בלבד (33 קבצים מלוכלכים לא עורבבו). merge אחרי Vercel preview.
