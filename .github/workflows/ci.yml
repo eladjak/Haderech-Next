@@ -27,7 +27,10 @@ jobs:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZHVtbXktY2xlcmsta2V5LWZvci1jaS1idWlsZC5jbGVyay5hY2NvdW50cy5kZXYk
       CLERK_SECRET_KEY: sk_test_dummyclerksecretkeyforcibuild
       NEXT_PUBLIC_CONVEX_URL: https://dummy-ci-build.convex.cloud
-      NODE_ENV: production
+      # NOTE: do NOT set NODE_ENV=production at the job level -- `npm ci` would then
+      # skip devDependencies (vitest, @types/*, eslint), and tsconfig includes the
+      # test files, so typecheck would fail on missing 'vitest'. next build sets its
+      # own production mode regardless.
 
     steps:
       - name: Checkout
