@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Typecheck & Build
+    runs-on: ubuntu-latest
+
+    # Dummy *public* build-time values only. The real app uses Convex + Clerk,
+    # but `next build` (build:local) only needs the NEXT_PUBLIC_* keys present to
+    # render the providers — it never contacts Convex/Clerk at build time. No
+    # production secrets are required (or used) for this CI to genuinely verify
+    # typecheck + build. The full `npm run build` (`convex deploy`) is intentionally
+    # NOT run here because it needs a real CONVEX_DEPLOY_KEY (prod deploy = Vercel's job).
+    env:
+      # Syntactically valid throwaway Clerk test key (base64 host "dummy-clerk-key-for-ci-build.clerk.accounts.dev$").
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZHVtbXktY2xlcmsta2V5LWZvci1jaS1idWlsZC5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: sk_test_dummyclerksecretkeyforcibuild
+      NEXT_PUBLIC_CONVEX_URL: https://dummy-ci-build.convex.cloud
+      NODE_ENV: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build:local
