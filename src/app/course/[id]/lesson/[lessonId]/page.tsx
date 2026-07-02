@@ -13,6 +13,7 @@ import { YouTubePlayer } from "@/components/video/youtube-player";
 import { VideoPlayer } from "@/components/lesson/video-player";
 import { CommentsSection } from "@/components/lesson/comments-section";
 import { LessonNotes } from "@/components/lesson/lesson-notes";
+import { LessonAdvisor } from "@/components/lesson/lesson-advisor";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 // Check if a URL is a YouTube video
@@ -357,6 +358,11 @@ export default function LessonPage() {
             courseId={courseId}
             userId={convexUser?._id ?? null}
           />
+
+          {/* Smart Advisor — context-aware, lesson-synced (Phase 19) */}
+          <div className="mt-8">
+            <LessonAdvisor lessonId={lessonId} userId={convexUser?._id} />
+          </div>
 
           {/* Lesson duration */}
           {lesson.duration && lesson.duration > 0 && (

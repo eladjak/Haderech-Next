@@ -1,6 +1,8 @@
 import { query, mutation, internalMutation, action } from "./_generated/server";
 import { v } from "convex/values";
 import { internal, api } from "./_generated/api";
+import { readLlmKeys, hasLlmKey } from "./lib/llm";
+import { scoreConversationHeuristic } from "./lib/simulatorScoring";
 
 // ==========================================
 // Simulator - Phase 17
@@ -243,12 +245,32 @@ export const sendMessage = action({
         content: m.content,
       }));
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    let personaResponse: string;
+    // Live AI (Gemini free-tier preferred, then Claude) when a provider
+    // token is set; otherwise (or on failure) a persona-flavored template.
+    const keys = readLlmKeys();
+    const aiResponse = hasLlmKey(keys)
+      ? await ctx.runAction(internal.aiSimulator.getPersonaResponse, {
+          geminiKey: keys.geminiKey,
+          anthropicKey: keys.anthropicKey,
+          persona: {
+            personaName: context.scenario.personaName,
+            personaAge: context.scenario.personaAge,
+            personaGender: context.scenario.personaGender,
+            personaBackground: context.scenario.personaBackground,
+            personaPersonality: context.scenario.personaPersonality,
+            scenarioContext: context.scenario.scenarioContext,
+            difficulty: context.scenario.difficulty,
+          },
+          conversationHistory,
+        })
+      : null;
 
-    if (!apiKey) {
-      // Free-degradation: persona-flavored, turn-aware fallback (no AI key).
-      // Keeps the practice loop usable for demos without a paid key.
+    let personaResponse: string;
+    if (aiResponse) {
+      personaResponse = aiResponse;
+    } else {
+      // Free-degradation: persona-flavored, turn-aware fallback.
+      // Keeps the practice loop usable for demos without any key.
       const name = context.scenario.personaName;
       const turn = conversationHistory.filter((m) => m.role === "user").length;
       const lastUser = trimmed;
@@ -266,23 +288,6 @@ export const sendMessage = action({
       ];
       const pool = turn <= 1 ? earlyTurn : midTurn;
       personaResponse = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
-    } else {
-      personaResponse = await ctx.runAction(
-        internal.aiSimulator.getPersonaResponse,
-        {
-          apiKey,
-          persona: {
-            personaName: context.scenario.personaName,
-            personaAge: context.scenario.personaAge,
-            personaGender: context.scenario.personaGender,
-            personaBackground: context.scenario.personaBackground,
-            personaPersonality: context.scenario.personaPersonality,
-            scenarioContext: context.scenario.scenarioContext,
-            difficulty: context.scenario.difficulty,
-          },
-          conversationHistory,
-        }
-      );
     }
 
     // Save persona response
@@ -345,75 +350,25 @@ export const endSession = action({
       return analysis;
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-
-    if (!apiKey) {
-      // Free-degradation: heuristic scoring so the feedback loop works
-      // without a paid key. Rewards engagement, questions, and length.
-      const userMsgs = session.messages.filter(
-        (m: { role: string }) => m.role === "user"
-      );
-      const userCount = userMsgs.length;
-      const askedQuestions = userMsgs.filter((m: { content: string }) =>
-        /\?|מה |איך |למה |האם |ספר|ספרי/.test(m.content)
-      ).length;
-      const avgLen =
-        userMsgs.reduce(
-          (s: number, m: { content: string }) => s + m.content.length,
-          0
-        ) / Math.max(1, userCount);
-
-      let score = 45;
-      score += Math.min(20, userCount * 4); // engagement
-      score += Math.min(20, askedQuestions * 7); // curiosity
-      score += avgLen > 40 ? 12 : avgLen > 20 ? 6 : 0; // depth
-      score = Math.min(92, Math.max(30, score));
-
-      const strengths: string[] = [];
-      if (userCount >= 4) strengths.push("ניהלת שיחה מתמשכת וזורמת");
-      if (askedQuestions >= 2) strengths.push("שאלת שאלות והראית עניין אמיתי");
-      if (avgLen > 40) strengths.push("פתחת והעמקת במקום תשובות קצרות");
-      if (strengths.length === 0) strengths.push("התחלת את התרגול — זה הצעד הכי חשוב");
-
-      const improvements: string[] = [];
-      if (askedQuestions < 2)
-        improvements.push("שאל/י יותר שאלות פתוחות כדי להוביל את השיחה");
-      if (avgLen <= 20)
-        improvements.push("הרחב/י קצת — תשובה קצרה מדי מקשה על חיבור");
-      if (userCount < 4)
-        improvements.push("נהל/י שיחה ארוכה יותר כדי לבנות כימיה");
-      if (improvements.length === 0)
-        improvements.push("המשך/י לתרגל בתרחישים קשים יותר");
-
-      const analysis = {
-        score,
-        feedback: `סיימת את התרגול עם ${userCount} הודעות. ${
-          score >= 75
-            ? "ניהלת שיחה טובה — אתה בכיוון הנכון!"
-            : score >= 55
-              ? "בסיס טוב. עוד תרגול ותשתפר/י משמעותית."
-              : "התחלה טובה. בוא/י נתרגל עוד כדי לבנות ביטחון."
-        }`,
-        strengths: strengths.slice(0, 3),
-        improvements: improvements.slice(0, 3),
-      };
-      await ctx.runMutation(internal.simulator.saveAnalysis, {
-        sessionId: args.sessionId,
-        ...analysis,
-        completedAt: now,
-      });
-      return analysis;
-    }
-
-    const analysis: { score: number; feedback: string; strengths: string[]; improvements: string[] } = await ctx.runAction(
-      internal.aiSimulator.analyzeConversation,
-      {
-        apiKey,
-        scenarioTitle: session.scenario?.title ?? "תרחיש",
-        difficulty: session.scenario?.difficulty ?? "easy",
-        conversationHistory,
-      }
+    // Deterministic heuristic scorer — the free-degradation feedback loop,
+    // and the fallback if live-AI analysis is unavailable or unparseable.
+    const heuristic = scoreConversationHeuristic(
+      session.messages.filter((m: { role: string }) => m.role === "user")
     );
+
+    // Live coach analysis when a provider (Gemini free / Claude) is set.
+    const keys = readLlmKeys();
+    const aiAnalysis = hasLlmKey(keys)
+      ? await ctx.runAction(internal.aiSimulator.analyzeConversation, {
+          geminiKey: keys.geminiKey,
+          anthropicKey: keys.anthropicKey,
+          scenarioTitle: session.scenario?.title ?? "תרחיש",
+          difficulty: session.scenario?.difficulty ?? "easy",
+          conversationHistory,
+        })
+      : null;
+
+    const analysis = aiAnalysis ?? heuristic;
 
     await ctx.runMutation(internal.simulator.saveAnalysis, {
       sessionId: args.sessionId,
@@ -454,7 +409,12 @@ export const getDialogueScenario = query({
 
 // Start a structured dialogue simulation
 export const startSimulation = mutation({
-  args: { scenarioId: v.id("dialogueScenarios") },
+  args: {
+    scenarioId: v.id("dialogueScenarios"),
+    // Phase 19: optional lesson context — links practice to the lesson the
+    // learner came from (symmetric with the free-chat simulator).
+    lessonId: v.optional(v.id("lessons")),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
@@ -466,6 +426,7 @@ export const startSimulation = mutation({
     const sessionId = await ctx.db.insert("dialogueSessions", {
       userId: identity.subject,
       scenarioId: args.scenarioId,
+      lessonId: args.lessonId,
       status: "active",
       currentStep: 0,
       choices: [],
@@ -473,6 +434,52 @@ export const startSimulation = mutation({
     });
 
     return sessionId;
+  },
+});
+
+// Phase 19: how many practice sessions this user ran from a given lesson
+// (both simulator types), and the best structured-dialogue score. Surfaced
+// on the lesson's Smart Advisor to close the lesson <-> simulator loop.
+export const getLessonPracticeStats = query({
+  args: { lessonId: v.id("lessons") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return { total: 0, completed: 0, bestScore: null as number | null };
+    }
+
+    const chatSessions = await ctx.db
+      .query("simulatorSessions")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .collect();
+    const dialogueSessions = await ctx.db
+      .query("dialogueSessions")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .collect();
+
+    const chatForLesson = chatSessions.filter(
+      (s) => s.lessonId === args.lessonId
+    );
+    const dialogueForLesson = dialogueSessions.filter(
+      (s) => s.lessonId === args.lessonId
+    );
+
+    const total = chatForLesson.length + dialogueForLesson.length;
+    const completed =
+      chatForLesson.filter((s) => s.status === "completed").length +
+      dialogueForLesson.filter((s) => s.status === "completed").length;
+
+    const scores: number[] = [
+      ...chatForLesson
+        .map((s) => s.score)
+        .filter((n): n is number => typeof n === "number"),
+      ...dialogueForLesson
+        .map((s) => s.totalScore)
+        .filter((n): n is number => typeof n === "number"),
+    ];
+    const bestScore = scores.length > 0 ? Math.max(...scores) : null;
+
+    return { total, completed, bestScore };
   },
 });
 

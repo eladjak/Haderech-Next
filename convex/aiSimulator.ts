@@ -1,17 +1,12 @@
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
+import { generateChat } from "./lib/llm";
 
-// ==========================================
-// AI Simulator - Phase 17
-// Anthropic Claude plays a realistic Israeli dating persona
-// ==========================================
-
-const ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1/messages";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
+// AI Simulator - Phase 17 (Phase 19: multi-provider).
+// A live-AI dating persona + coach analysis. Runs on whichever provider
+// is configured (Gemini free-tier preferred, then Claude); returns null
+// when no provider is available so the simulator degrades to its
+// persona-flavored template / heuristic scorer.
 
 interface SimulatorPersona {
   personaName: string;
@@ -79,55 +74,13 @@ function buildAnalysisSystemPrompt(): string {
 }`;
 }
 
-// Phase 18: claude-3-5-haiku-20241022 returns 404. Pin to the available
-// haiku-4.5, fall back to sonnet on rate-limit / 5xx for resilience.
-const PRIMARY_MODEL = "claude-haiku-4-5-20251001";
-const FALLBACK_MODEL = "claude-sonnet-4-6-20251022";
-
-async function callAnthropic(
-  apiKey: string,
-  systemPrompt: string,
-  messages: Message[],
-  maxTokens = 300
-): Promise<string> {
-  const doFetch = (model: string) =>
-    fetch(ANTHROPIC_BASE_URL, {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: maxTokens,
-        system: systemPrompt,
-        messages,
-      }),
-    });
-
-  let response = await doFetch(PRIMARY_MODEL);
-  if (!response.ok && (response.status === 429 || response.status >= 500)) {
-    response = await doFetch(FALLBACK_MODEL);
-  }
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Anthropic API error ${response.status}: ${errorText}`);
-  }
-
-  const data = (await response.json()) as {
-    content: Array<{ type: string; text: string }>;
-  };
-  const textBlock = data.content.find((b) => b.type === "text");
-  if (!textBlock) throw new Error("No text content in Anthropic response");
-  return textBlock.text;
-}
-
-// Internal action: get persona response during active simulation
+// Internal action: get a live persona response (Gemini free-tier or Claude).
+// Returns null when no provider token is set OR the call failed, so the
+// caller (simulator.sendMessage) uses its persona-flavored template.
 export const getPersonaResponse = internalAction({
   args: {
-    apiKey: v.string(),
+    geminiKey: v.optional(v.string()),
+    anthropicKey: v.optional(v.string()),
     persona: v.object({
       personaName: v.string(),
       personaAge: v.number(),
@@ -148,22 +101,24 @@ export const getPersonaResponse = internalAction({
       })
     ),
   },
-  handler: async (_ctx, args) => {
-    const systemPrompt = buildPersonaSystemPrompt(args.persona);
-    const response = await callAnthropic(
-      args.apiKey,
-      systemPrompt,
-      args.conversationHistory,
-      400
-    );
-    return response;
+  handler: async (_ctx, args): Promise<string | null> => {
+    const ai = await generateChat({
+      system: buildPersonaSystemPrompt(args.persona),
+      messages: args.conversationHistory,
+      maxTokens: 400,
+      keys: { geminiKey: args.geminiKey, anthropicKey: args.anthropicKey },
+    });
+    return ai?.text ?? null;
   },
 });
 
-// Internal action: analyze the conversation and produce score + feedback
+// Internal action: analyze the conversation -> score + feedback. Returns
+// null when no provider is available OR the model output can't be parsed,
+// so the caller (simulator.endSession) uses its heuristic scorer.
 export const analyzeConversation = internalAction({
   args: {
-    apiKey: v.string(),
+    geminiKey: v.optional(v.string()),
+    anthropicKey: v.optional(v.string()),
     scenarioTitle: v.string(),
     difficulty: v.union(
       v.literal("easy"),
@@ -177,62 +132,57 @@ export const analyzeConversation = internalAction({
       })
     ),
   },
-  handler: async (_ctx, args) => {
-    const systemPrompt = buildAnalysisSystemPrompt();
-
+  handler: async (
+    _ctx,
+    args
+  ): Promise<{
+    score: number;
+    feedback: string;
+    strengths: string[];
+    improvements: string[];
+  } | null> => {
     const userPrompt = `נתח את השיחה הבאה מתרחיש: "${args.scenarioTitle}" (רמת קושי: ${args.difficulty})
 
 השיחה:
 ${args.conversationHistory
-  .map(
-    (m) => `${m.role === "user" ? "המשתמש" : "הפרסונה"}: ${m.content}`
-  )
+  .map((m) => `${m.role === "user" ? "המשתמש" : "הפרסונה"}: ${m.content}`)
   .join("\n\n")}
 
 החזר ניתוח JSON בלבד.`;
 
-    const analysisText = await callAnthropic(
-      args.apiKey,
-      systemPrompt,
-      [{ role: "user", content: userPrompt }],
-      600
-    );
+    const ai = await generateChat({
+      system: buildAnalysisSystemPrompt(),
+      messages: [{ role: "user", content: userPrompt }],
+      maxTokens: 600,
+      temperature: 0.3,
+      keys: { geminiKey: args.geminiKey, anthropicKey: args.anthropicKey },
+    });
+    if (!ai) return null;
 
-    // Parse JSON from response
-    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      // Return default analysis if parsing fails
-      return {
-        score: 60,
-        feedback:
-          "הצלחת לנהל שיחה בסיסית. המשך להתאמן כדי לשפר את הכישורים שלך.",
-        strengths: ["ניסית לנהל שיחה", "התמדת בתרגול"],
-        improvements: [
-          "שאל יותר שאלות פתוחות",
-          "הראה יותר עניין אישי",
-          "שמור על שיחה זורמת",
-        ],
+    const jsonMatch = ai.text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null; // unparseable -> caller uses heuristic
+
+    try {
+      const parsed = JSON.parse(jsonMatch[0]) as {
+        score?: number;
+        feedback?: string;
+        strengths?: string[];
+        improvements?: string[];
       };
+      return {
+        score: Math.min(100, Math.max(0, parsed.score ?? 60)),
+        feedback:
+          parsed.feedback ??
+          "הצלחת לנהל שיחה. המשך להתאמן כדי לשפר את הכישורים שלך.",
+        strengths: Array.isArray(parsed.strengths)
+          ? parsed.strengths.slice(0, 5)
+          : [],
+        improvements: Array.isArray(parsed.improvements)
+          ? parsed.improvements.slice(0, 5)
+          : [],
+      };
+    } catch {
+      return null;
     }
-
-    const parsed = JSON.parse(jsonMatch[0]) as {
-      score: number;
-      feedback: string;
-      strengths: string[];
-      improvements: string[];
-    };
-
-    return {
-      score: Math.min(100, Math.max(0, parsed.score ?? 60)),
-      feedback:
-        parsed.feedback ??
-        "הצלחת לנהל שיחה. המשך להתאמן כדי לשפר את הכישורים שלך.",
-      strengths: Array.isArray(parsed.strengths)
-        ? parsed.strengths.slice(0, 5)
-        : [],
-      improvements: Array.isArray(parsed.improvements)
-        ? parsed.improvements.slice(0, 5)
-        : [],
-    };
   },
 });

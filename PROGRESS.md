@@ -1,5 +1,44 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
+## 2026-07-02 — Phase 19: FREE-tier live AI (Gemini) for Advisor+Simulator + symmetric lesson↔simulator sync ✅ (autonomous, branch feat/advanced-course-experience)
+
+**מטרה:** להביא את שני הבידולים המרכזיים (הסימולטור + היועץ החכם בכל שיעור) למצב השלם ביותר האפשרי בלי אלעד (בלי מפתחות/צילומים/סליקה). בנוי על Phase 18, לא שכתוב.
+
+### 1. שכבת AI חינמית משותפת (`convex/lib/llm.ts`) — NEW
+- `generateChat` — נקודת כניסה אחת עם סולם ספקים + degradation חינני: **Gemini 3.5 Flash (free-tier) מועדף → Claude Haiku 4.5 (בתשלום) → null** (ואז כל קורא נופל לתבנית/היוריסטיקה שלו). מדגים בדיוק את דפוס ה-FAQ המוכח (`thinkingBudget:0`).
+- פונקציות טהורות ונבדקות: `selectLlmProvider`, `hasLlmKey`, `buildGeminiPrompt`, `readLlmKeys`.
+- **🔑 איפה המפתח נכנס (Convex env — Gemini חינם):** `npx convex env set GEMINI_API_KEY ...` (או `ANTHROPIC_API_KEY`). ללא מפתח — הכל עובד בתבניות (זה נתיב ה-prod היום). זה סוגר את פריט ה-backlog של Phase 18 ("Gemini free-tier path").
+
+### 2. חיווט השכבה לכל שלושת משטחי ה-AI
+- **`convex/advisor.ts`** (`ask`) — הוחלף בלוק ה-Anthropic-בלבד ב-`generateChat`. `usedAi` נגזר מ-provider.
+- **`convex/aiSimulator.ts`** — persona + analysis עוברים דרך `generateChat`, מקבלים שני מפתחות, ומחזירים `null` בכשל/היעדר-ספק (הקורא נופל להיוריסטיקה).
+- **`convex/simulator.ts`** — persona ב-`sendMessage` וניתוח ב-`endSession` דרך `hasLlmKey` + `generateChat`; הניתוח נשען על scorer היוריסטי חדש.
+- **`convex/chat.ts`** (מאמן /chat) — גם הוא הועבר ל-`generateChat` לעקביות.
+- **`convex/lib/simulatorScoring.ts`** (NEW) — חילוץ ה-scorer ההיוריסטי לפונקציה טהורה נבדקת (`scoreConversationHeuristic`).
+
+### 3. סנכרון שיעור↔סימולטור סימטרי + לולאת משוב
+- **סכימה:** `dialogueSessions.lessonId` (optional) — סימטרי ל-`simulatorSessions.lessonId` (הדיאלוג המובנה איבד את ה-lessonId עד עכשיו).
+- **`startSimulation`** מקבל+שומר `lessonId`; דף הדיאלוג מעביר `lessonId` מה-URL.
+- **`getLessonPracticeStats`** (query) — כמה תרגולים (2 סוגי סימולטור) רץ המשתמש מהשיעור + הציון הכי טוב.
+- **`LessonAdvisor`** מציג "תרגלת X פעמים מהשיעור הזה · הציון הכי טוב שלך: Y" — סוגר ויזואלית את לולאת שיעור→תרגול.
+
+### 4. היועץ בכל משטח שיעור (כיסוי מלא)
+- אומת: `/courses/[courseId]/learn` + `/courses/[courseId]/lessons/[lessonId]` כבר נשאו את היועץ (Phase 18).
+- **תוקן:** משטח השיעור הישן `/course/[id]/lesson/[lessonId]` (viewer מ-Phase 4) **חסר** את היועץ → נוסף. עכשיו כל שלושת משטחי-השיעור נושאים את היועץ.
+
+### שערים ואימות (verbatim)
+- `npx tsc --noEmit` → **0 שגיאות**.
+- `npx vitest run` → **174 עוברים** (9 קבצים; +16 חדשים: 11 ב-llm.test + 5 ב-simulator-scoring.test).
+- `npm run build:local` → **✓ Compiled successfully**, 73 עמודים סטטיים, כל מסלולי הסימולטור + `/course/[id]/lesson/[lessonId]` נבנים.
+- לא נפרס, לא commit ל-master, לא נגעתי ב-Clerk-prod/סליקה. commit מקומי לענף feat/advanced-course-experience בלבד.
+
+### מה עדיין דורש אלעד
+- **AI חי:** `npx convex env set GEMINI_API_KEY <free-key>` (או ANTHROPIC) → היועץ+הסימולטור עוברים מתבנית לחי. (בלי זה — עובד בתבניות, מדגים מלא.)
+- **סכימת Convex:** `dialogueSessions.lessonId` היא תוספת (additive) — דורשת `npx convex deploy` כדי לעלות לפרוד (בטוח, ללא מחיקת אינדקסים).
+- ללא שינוי: Clerk-prod, Sumit credentials, סרטונים.
+
+---
+
 ## 2026-06-13 — Phase 18: Smart Advisor (lesson-context-aware) + synced Dating Simulator ✅ (autonomous)
 
 **Vision shipped (per Elad's plan):** an in-course **Smart Advisor** that adapts to the exact lesson the user is on, the built-in **Dating Simulator**, and the **sync** between them — all referencing one shared lesson/phase context. Built on the existing 75-lesson/12-quiz Convex+Clerk base; auth-gating on the 49 mutations preserved.

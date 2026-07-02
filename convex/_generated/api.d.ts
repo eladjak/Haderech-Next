@@ -41,6 +41,8 @@ import type * as lessonContentData from "../lessonContentData.js";
 import type * as lessons from "../lessons.js";
 import type * as lib_advisorTemplates from "../lib/advisorTemplates.js";
 import type * as lib_authGuard from "../lib/authGuard.js";
+import type * as lib_llm from "../lib/llm.js";
+import type * as lib_simulatorScoring from "../lib/simulatorScoring.js";
 import type * as mentoring from "../mentoring.js";
 import type * as notes from "../notes.js";
 import type * as notificationHelpers from "../notificationHelpers.js";
@@ -115,6 +117,8 @@ declare const fullApi: ApiFromModules<{
   lessons: typeof lessons;
   "lib/advisorTemplates": typeof lib_advisorTemplates;
   "lib/authGuard": typeof lib_authGuard;
+  "lib/llm": typeof lib_llm;
+  "lib/simulatorScoring": typeof lib_simulatorScoring;
   mentoring: typeof mentoring;
   notes: typeof notes;
   notificationHelpers: typeof notificationHelpers;

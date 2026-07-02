@@ -7,6 +7,7 @@ import {
   getPhaseProfile,
   type LessonContext,
 } from "./lib/advisorTemplates";
+import { generateChat } from "./lib/llm";
 
 // ============================================================
 // Smart Advisor — Phase 18
@@ -195,73 +196,23 @@ export const ask = action({
     // answer and the graceful fallback if the AI call fails.
     const template = buildTemplateReply(trimmed, lessonContext);
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return {
-        reply: template.text,
-        usedAi: false,
-        suggestSimulator: template.suggestSimulator,
-      };
-    }
-
-    // Upgrade path: live Claude, scaffolded by the lesson-aware prompt.
-    try {
-      const systemPrompt = buildAdvisorSystemPrompt(lessonContext);
-      const messages = [
+    // Upgrade path: live AI (Gemini free-tier preferred, then Claude),
+    // scaffolded by the lesson-aware system prompt. `generateChat` returns
+    // null when no token is set OR the call fails — so we always land on the
+    // good template. This is why the advisor works with zero credentials.
+    const ai = await generateChat({
+      system: buildAdvisorSystemPrompt(lessonContext),
+      messages: [
         ...(args.history ?? []),
         { role: "user" as const, content: trimmed },
-      ];
+      ],
+      maxTokens: 700,
+    });
 
-      const PRIMARY = "claude-haiku-4-5-20251001";
-      const FALLBACK = "claude-sonnet-4-6-20251022";
-
-      const call = (model: string) =>
-        fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            model,
-            max_tokens: 700,
-            system: systemPrompt,
-            messages,
-          }),
-        });
-
-      let response = await call(PRIMARY);
-      if (!response.ok && (response.status === 429 || response.status >= 500)) {
-        response = await call(FALLBACK);
-      }
-      if (!response.ok) {
-        // Degrade gracefully to template instead of erroring out.
-        return {
-          reply: template.text,
-          usedAi: false,
-          suggestSimulator: template.suggestSimulator,
-        };
-      }
-
-      const data = (await response.json()) as {
-        content: Array<{ type: string; text: string }>;
-      };
-      const text =
-        data.content.find((b) => b.type === "text")?.text ?? template.text;
-
-      return {
-        reply: text,
-        usedAi: true,
-        suggestSimulator: template.suggestSimulator,
-      };
-    } catch {
-      // Network/parse failure -> graceful degradation.
-      return {
-        reply: template.text,
-        usedAi: false,
-        suggestSimulator: template.suggestSimulator,
-      };
-    }
+    return {
+      reply: ai?.text ?? template.text,
+      usedAi: ai !== null,
+      suggestSimulator: template.suggestSimulator,
+    };
   },
 });

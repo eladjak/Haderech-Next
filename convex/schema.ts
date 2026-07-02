@@ -363,6 +363,9 @@ export default defineSchema({
   dialogueSessions: defineTable({
     userId: v.string(),
     scenarioId: v.id("dialogueScenarios"),
+    // Phase 19: lesson that prompted this practice (advisor/course <-> simulator
+    // sync — symmetric with simulatorSessions.lessonId).
+    lessonId: v.optional(v.id("lessons")),
     status: v.union(
       v.literal("active"),
       v.literal("completed"),

@@ -31,6 +31,7 @@ export default function DialogueScenarioPage() {
   const scenarioId = params.scenarioId as Id<"dialogueScenarios">;
   // Sync: arrived from a lesson's Smart Advisor
   const fromLesson = searchParams.get("from") === "lesson";
+  const fromLessonId = searchParams.get("lessonId") as Id<"lessons"> | null;
 
   const scenario = useQuery(api.simulator.getDialogueScenario, { scenarioId });
 
@@ -59,7 +60,10 @@ export default function DialogueScenarioPage() {
     setIsStarting(true);
     setError(null);
     try {
-      const id = await startSimulation({ scenarioId });
+      const id = await startSimulation({
+        scenarioId,
+        ...(fromLessonId ? { lessonId: fromLessonId } : {}),
+      });
       setSessionId(id);
       setCurrentStep(0);
       setChoices([]);

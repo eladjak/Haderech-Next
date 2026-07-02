@@ -45,6 +45,7 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
     ...(userId ? { userId } : {}),
   });
   const recommended = useQuery(api.advisor.getRecommendedScenario, { lessonId });
+  const practice = useQuery(api.simulator.getLessonPracticeStats, { lessonId });
   const ask = useAction(api.advisor.ask);
 
   useEffect(() => {
@@ -188,6 +189,24 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
               )}
             </div>
           </div>
+
+          {/* Practice loop feedback — sessions run from this lesson (sync) */}
+          {practice && practice.total > 0 && (
+            <div className="px-4 pb-1 pt-1">
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                <span aria-hidden="true">🎯</span>
+                <span>
+                  תרגלת {practice.total}{" "}
+                  {practice.total === 1 ? "פעם" : "פעמים"} מהשיעור הזה
+                </span>
+                {practice.bestScore !== null && (
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    הציון הכי טוב שלך: {practice.bestScore}
+                  </span>
+                )}
+              </p>
+            </div>
+          )}
 
           {/* Simulator bridge (sync) */}
           {(suggestSim || turns.length === 0) && recommended && (

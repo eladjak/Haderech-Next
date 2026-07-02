@@ -11,6 +11,7 @@ import {
   buildTemplateReply,
   type LessonContext,
 } from "./lib/advisorTemplates";
+import { generateChat } from "./lib/llm";
 
 // =======================================
 // AI Chat Coach - Phase 16
@@ -364,10 +365,10 @@ export const sendMessage = action({
       { sessionId: args.sessionId }
     );
 
-    // 4. Call Claude API — with FREE-DEGRADATION.
-    // Phase 18: no key (or any failure) -> deterministic template reply,
-    // lesson-aware when this session was opened from a lesson.
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    // 4. Call live AI — with FREE-DEGRADATION.
+    // Phase 19: Gemini free-tier preferred, then Claude; no token (or any
+    // failure) -> deterministic template reply, lesson-aware when this
+    // session was opened from a lesson.
 
     // Build a lesson-aware template fallback once.
     const fallbackLessonCtx: LessonContext | null = session.lessonId
@@ -377,51 +378,15 @@ export const sendMessage = action({
       : null;
     const templateReply = buildTemplateReply(args.userMessage, fallbackLessonCtx);
 
-    let assistantContent: string;
-
-    if (!apiKey) {
-      assistantContent = templateReply.text;
-    } else {
-      // Phase 14: claude-haiku-4-5-20251001 primary, sonnet fallback on 429/5xx.
-      const PRIMARY_MODEL = "claude-haiku-4-5-20251001";
-      const FALLBACK_MODEL = "claude-sonnet-4-6-20251022";
-
-      async function callClaude(model: string): Promise<Response> {
-        return fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey as string,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            model,
-            max_tokens: 1024,
-            system: allMessages.systemPrompt,
-            messages: allMessages.conversationMessages,
-          }),
-        });
-      }
-
-      try {
-        let response = await callClaude(PRIMARY_MODEL);
-        if (!response.ok && (response.status === 429 || response.status >= 500)) {
-          response = await callClaude(FALLBACK_MODEL);
-        }
-        if (!response.ok) {
-          // Degrade gracefully to the template instead of erroring out.
-          assistantContent = templateReply.text;
-        } else {
-          const data = (await response.json()) as {
-            content: Array<{ type: string; text: string }>;
-          };
-          assistantContent =
-            data.content[0]?.text ?? templateReply.text;
-        }
-      } catch {
-        assistantContent = templateReply.text;
-      }
-    }
+    const ai = await generateChat({
+      system: allMessages.systemPrompt,
+      messages: allMessages.conversationMessages.map((m) => ({
+        role: m.role === "user" ? ("user" as const) : ("assistant" as const),
+        content: m.content,
+      })),
+      maxTokens: 1024,
+    });
+    const assistantContent = ai?.text ?? templateReply.text;
 
     // 5. Auto-generate title from first exchange if no title yet
     let updateTitle: string | undefined;
