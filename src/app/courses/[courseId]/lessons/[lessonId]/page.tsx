@@ -8,6 +8,7 @@ import { useState, useCallback } from "react";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { VideoPlayer } from "@/components/lesson/video-player";
+import { LessonContent } from "@/components/lesson/lesson-content";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
 import { LessonNotes } from "@/components/lesson/lesson-notes";
 import { LessonAdvisor } from "@/components/lesson/lesson-advisor";
@@ -71,6 +72,33 @@ export default function LessonPlayerPage() {
   // Mutations
   const markComplete = useMutation(api.progress.markComplete);
   const submitQuizAttempt = useMutation(api.quizzes.submitAttempt);
+
+  // Handlers (declared before the early-return guards so hook order stays
+  // consistent between the loading, not-found, and loaded renders).
+  const handleMarkComplete = useCallback(async () => {
+    if (!convexUser?._id) return;
+    await markComplete({
+      userId: convexUser._id,
+      lessonId,
+      courseId,
+    });
+  }, [convexUser, markComplete, lessonId, courseId]);
+
+  const handleSubmitQuiz = useCallback(
+    async (answers: number[]) => {
+      if (!convexUser?._id || !quiz?._id) {
+        throw new Error("Missing data for quiz submission");
+      }
+      return await submitQuizAttempt({
+        userId: convexUser._id,
+        quizId: quiz._id,
+        lessonId,
+        courseId,
+        answers,
+      });
+    },
+    [convexUser, quiz, submitQuizAttempt, lessonId, courseId]
+  );
 
   // Loading state
   if (courseWithLessons === undefined || lesson === undefined) {
@@ -156,166 +184,6 @@ export default function LessonPlayerPage() {
   );
   const isCurrentLessonComplete =
     progressMap.get(lessonId)?.completed === true;
-
-  const handleMarkComplete = useCallback(async () => {
-    if (!convexUser?._id) return;
-    await markComplete({
-      userId: convexUser._id,
-      lessonId,
-      courseId,
-    });
-  }, [convexUser?._id, markComplete, lessonId, courseId]);
-
-  const handleSubmitQuiz = useCallback(
-    async (answers: number[]) => {
-      if (!convexUser?._id || !quiz?._id) {
-        throw new Error("Missing data for quiz submission");
-      }
-      return await submitQuizAttempt({
-        userId: convexUser._id,
-        quizId: quiz._id,
-        lessonId,
-        courseId,
-        answers,
-      });
-    },
-    [convexUser?._id, quiz?._id, submitQuizAttempt, lessonId, courseId]
-  );
-
-  // Render markdown-like content
-  const renderContent = (content: string) => {
-    const lines = content.split("\n");
-    const elements: React.ReactNode[] = [];
-    let inList = false;
-    let listItems: string[] = [];
-
-    const flushList = () => {
-      if (listItems.length > 0) {
-        elements.push(
-          <ul
-            key={`list-${elements.length}`}
-            className="my-4 list-inside list-disc space-y-2 text-zinc-700 dark:text-zinc-300"
-          >
-            {listItems.map((item, idx) => (
-              <li key={idx} className="leading-relaxed">
-                {item}
-              </li>
-            ))}
-          </ul>
-        );
-        listItems = [];
-      }
-      inList = false;
-    };
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmed = line.trim();
-
-      // Headers
-      if (trimmed.startsWith("### ")) {
-        flushList();
-        elements.push(
-          <h3
-            key={i}
-            className="mb-3 mt-8 text-lg font-bold text-zinc-900 dark:text-white"
-          >
-            {trimmed.slice(4)}
-          </h3>
-        );
-        continue;
-      }
-      if (trimmed.startsWith("## ")) {
-        flushList();
-        elements.push(
-          <h2
-            key={i}
-            className="mb-4 mt-10 text-xl font-bold text-zinc-900 dark:text-white"
-          >
-            {trimmed.slice(3)}
-          </h2>
-        );
-        continue;
-      }
-      if (trimmed.startsWith("# ")) {
-        flushList();
-        elements.push(
-          <h1
-            key={i}
-            className="mb-4 mt-10 text-2xl font-bold text-zinc-900 dark:text-white"
-          >
-            {trimmed.slice(2)}
-          </h1>
-        );
-        continue;
-      }
-
-      // List items
-      if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-        inList = true;
-        listItems.push(trimmed.slice(2));
-        continue;
-      }
-
-      // Numbered list items
-      if (/^\d+\.\s/.test(trimmed)) {
-        if (!inList) {
-          flushList();
-          inList = true;
-        }
-        listItems.push(trimmed.replace(/^\d+\.\s/, ""));
-        continue;
-      }
-
-      // Empty line
-      if (trimmed === "") {
-        flushList();
-        continue;
-      }
-
-      // Horizontal rule
-      if (trimmed === "---" || trimmed === "***") {
-        flushList();
-        elements.push(
-          <hr
-            key={i}
-            className="my-8 border-zinc-200 dark:border-zinc-800"
-          />
-        );
-        continue;
-      }
-
-      // Blockquote
-      if (trimmed.startsWith("> ")) {
-        flushList();
-        elements.push(
-          <blockquote
-            key={i}
-            className="my-4 border-r-4 border-brand-400 bg-brand-50/50 py-3 pr-4 pl-2 text-zinc-700 dark:border-brand-500 dark:bg-brand-900/10 dark:text-zinc-300"
-          >
-            {trimmed.slice(2)}
-          </blockquote>
-        );
-        continue;
-      }
-
-      // Regular paragraph
-      flushList();
-      // Process inline formatting: **bold**, *italic*, `code`
-      const formatted = formatInline(trimmed);
-      elements.push(
-        <p
-          key={i}
-          className="my-3 leading-relaxed text-zinc-700 dark:text-zinc-300"
-        >
-          {formatted}
-        </p>
-      );
-    }
-
-    flushList();
-    return elements;
-  };
 
   return (
     <div className="min-h-dvh bg-background">
@@ -480,9 +348,10 @@ export default function LessonPlayerPage() {
                 </svg>
                 תוכן השיעור
               </h2>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6 md:p-8 dark:border-zinc-800 dark:bg-zinc-900/50">
-                {renderContent(lesson.content)}
-              </div>
+              <LessonContent
+                content={lesson.content}
+                className="rounded-2xl border border-zinc-200 bg-white p-6 md:p-8 dark:border-zinc-800 dark:bg-zinc-900/50"
+              />
             </section>
           )}
 
@@ -502,6 +371,9 @@ export default function LessonPlayerPage() {
                 onSubmit={handleSubmitQuiz}
                 lastScore={lastQuizAttempt?.score ?? null}
                 lastPassed={lastQuizAttempt?.passed ?? null}
+                courseId={courseId}
+                lessonId={lessonId}
+                nextLessonId={nextLesson?._id}
               />
             </section>
           )}
@@ -613,73 +485,4 @@ function formatDuration(seconds: number): string {
   if (minutes === 0) return `${remainingSeconds} שניות`;
   if (remainingSeconds === 0) return `${minutes} דקות`;
   return `${minutes}:${String(remainingSeconds).padStart(2, "0")} דקות`;
-}
-
-function formatInline(text: string): React.ReactNode {
-  // Process **bold**, *italic*, `code` patterns
-  const parts: React.ReactNode[] = [];
-  let remaining = text;
-  let keyIdx = 0;
-
-  while (remaining.length > 0) {
-    // Bold: **text**
-    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
-    // Code: `text`
-    const codeMatch = remaining.match(/`(.+?)`/);
-    // Italic: *text* (not **)
-    const italicMatch = remaining.match(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/);
-
-    // Find earliest match
-    const matches = [
-      boldMatch ? { type: "bold", match: boldMatch } : null,
-      codeMatch ? { type: "code", match: codeMatch } : null,
-      italicMatch ? { type: "italic", match: italicMatch } : null,
-    ]
-      .filter(Boolean)
-      .sort((a, b) => (a!.match.index ?? 0) - (b!.match.index ?? 0));
-
-    if (matches.length === 0 || matches[0] === null) {
-      parts.push(remaining);
-      break;
-    }
-
-    const first = matches[0]!;
-    const idx = first.match.index ?? 0;
-
-    // Text before the match
-    if (idx > 0) {
-      parts.push(remaining.slice(0, idx));
-    }
-
-    // The formatted text
-    if (first.type === "bold") {
-      parts.push(
-        <strong
-          key={keyIdx++}
-          className="font-bold text-zinc-900 dark:text-white"
-        >
-          {first.match[1]}
-        </strong>
-      );
-    } else if (first.type === "code") {
-      parts.push(
-        <code
-          key={keyIdx++}
-          className="rounded bg-zinc-100 px-1.5 py-0.5 text-sm font-mono text-brand-600 dark:bg-zinc-800 dark:text-brand-400"
-        >
-          {first.match[1]}
-        </code>
-      );
-    } else {
-      parts.push(
-        <em key={keyIdx++} className="italic">
-          {first.match[1]}
-        </em>
-      );
-    }
-
-    remaining = remaining.slice(idx + first.match[0].length);
-  }
-
-  return parts.length === 1 ? parts[0] : parts;
 }

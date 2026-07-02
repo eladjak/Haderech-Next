@@ -1,18 +1,21 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useEffect, useMemo } from "react";
 import { api } from "@/../convex/_generated/api";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
+import { LessonContent } from "@/components/lesson/lesson-content";
+import { LessonAdvisor } from "@/components/lesson/lesson-advisor";
+import { LessonNotes } from "@/components/lesson/lesson-notes";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
 import { VideoPlayer } from "@/components/lesson/video-player";
 import type { Id } from "@/../convex/_generated/dataModel";
 
-function LessonContent() {
+function LearnContent() {
   const params = useParams<{ courseId: string }>();
   const searchParams = useSearchParams();
   const courseId = params.courseId as Id<"courses">;
@@ -73,6 +76,47 @@ function LessonContent() {
     setMobileSidebarOpen(false);
   }, []);
 
+  // Sibling lesson ids for keyboard navigation, derived without touching the
+  // values computed after the early-return guards (keeps hook order stable).
+  const router = useRouter();
+  const { prevLessonId, nextLessonId } = useMemo(() => {
+    if (!courseWithLessons) {
+      return { prevLessonId: null as Id<"lessons"> | null, nextLessonId: null as Id<"lessons"> | null };
+    }
+    const published = courseWithLessons.lessons.filter((l) => l.published);
+    const activeId = lessonId ?? published[0]?._id ?? null;
+    const idx = published.findIndex((l) => l._id === activeId);
+    return {
+      prevLessonId: idx > 0 ? published[idx - 1]._id : null,
+      nextLessonId:
+        idx >= 0 && idx < published.length - 1 ? published[idx + 1]._id : null,
+    };
+  }, [courseWithLessons, lessonId]);
+
+  // Keyboard navigation between lessons (RTL-aware). ArrowRight goes to the
+  // previous lesson (visually to the right in RTL), ArrowLeft to the next.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.key === "ArrowRight" && prevLessonId) {
+        router.push(`/courses/${courseId}/learn?lesson=${prevLessonId}`);
+      } else if (e.key === "ArrowLeft" && nextLessonId) {
+        router.push(`/courses/${courseId}/learn?lesson=${nextLessonId}`);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [router, courseId, prevLessonId, nextLessonId]);
+
   if (courseWithLessons === undefined) {
     return (
       <div className="flex min-h-dvh">
@@ -131,6 +175,9 @@ function LessonContent() {
     currentIndex < publishedLessons.length - 1
       ? publishedLessons[currentIndex + 1]
       : null;
+
+  const courseComplete =
+    publishedLessons.length > 0 && completedCount >= publishedLessons.length;
 
   const isCurrentLessonComplete =
     activeLessonId !== null &&
@@ -370,11 +417,24 @@ function LessonContent() {
 
             {/* Lesson Content */}
             {activeLesson.content && (
-              <div className="prose prose-zinc dark:prose-invert mb-8 max-w-none">
-                <div className="whitespace-pre-wrap leading-relaxed text-zinc-700 dark:text-zinc-300">
-                  {activeLesson.content}
-                </div>
-              </div>
+              <LessonContent content={activeLesson.content} className="mb-8" />
+            )}
+
+            {/* Notes (self-managing collapsible) */}
+            {convexUser && activeLessonId && (
+              <LessonNotes
+                lessonId={activeLessonId}
+                courseId={courseId}
+                userId={convexUser._id}
+              />
+            )}
+
+            {/* Smart Advisor — context-aware, lesson-synced */}
+            {activeLessonId && (
+              <LessonAdvisor
+                lessonId={activeLessonId}
+                userId={convexUser?._id}
+              />
             )}
 
             {/* Quiz Section */}
@@ -387,7 +447,44 @@ function LessonContent() {
                   onSubmit={handleSubmitQuiz}
                   lastScore={lastQuizAttempt?.score ?? null}
                   lastPassed={lastQuizAttempt?.passed ?? null}
+                  courseId={courseId}
+                  lessonId={activeLessonId ?? undefined}
+                  nextLessonId={nextLesson?._id}
                 />
+              </div>
+            )}
+
+            {/* Course-completion celebration */}
+            {courseComplete && (
+              <div className="mb-8 overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-l from-emerald-50 to-white dark:border-emerald-800 dark:from-emerald-900/20 dark:to-zinc-900">
+                <div className="p-6 text-center">
+                  <div
+                    className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-3xl dark:bg-emerald-900/40"
+                    aria-hidden="true"
+                  >
+                    🎓
+                  </div>
+                  <h2 className="mb-1 text-xl font-bold text-emerald-800 dark:text-emerald-300">
+                    כל הכבוד! סיימת את כל השיעורים
+                  </h2>
+                  <p className="mb-5 text-sm text-emerald-700 dark:text-emerald-400">
+                    השלמת 100% מהקורס. אפשר להנפיק תעודת סיום ולשתף את ההישג.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <Link
+                      href={`/courses/${courseId}`}
+                      className="inline-flex h-10 items-center gap-2 rounded-full bg-emerald-600 px-6 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                    >
+                      הנפק תעודת סיום
+                    </Link>
+                    <Link
+                      href="/certificates"
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-emerald-300 bg-white px-6 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 dark:border-emerald-700 dark:bg-zinc-900 dark:text-emerald-400 dark:hover:bg-zinc-800"
+                    >
+                      התעודות שלי
+                    </Link>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -452,7 +549,7 @@ export default function LearnPage() {
         </div>
       }
     >
-      <LessonContent />
+      <LearnContent />
     </Suspense>
   );
 }
