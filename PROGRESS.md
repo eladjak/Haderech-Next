@@ -1,5 +1,16 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
+## 2026-07-04 — Phase 20: הסימולטור והיועץ עלו ל-PREVIEW ציבורי ✅ (ריצת שבת אוטונומית)
+
+**הפער שנסגר:** Phase 18-19 נבנו ואומתו אבל מעולם לא נפרסו — אי אפשר היה לחוות אותם. עכשיו:
+- **Preview חי:** https://haderech-preview.vercel.app (alias קבוע; feat/advanced-course-experience)
+- מחובר ל-**Convex DEV** (colorless-guanaco-894 — אומת בתוך JS chunk של הדיפלוי) — שם הסכימה החדשה (dialogueSessions.lessonId) + **GEMINI_API_KEY** כבר מוגדרים → היועץ והסימולטור רצים עם AI חי, בחינם.
+- Clerk: זוג מפתחות ה-DEV (pk_test/sk_test) — הרשמה/כניסה על מופע הפיתוח, בלי לגעת ב-prod.
+- **תשתית שסודרה בדרך:** משתני preview היו נעולים על ענף ישן — הועלו כ-preview כלליים (Vercel REST, upsert). **Deployment Protection הוסר** (חסם כל preview מאחורי SSO; ה-prod הציבורי לא מושפע).
+- אימות: tsc 0 שגיאות · דיפלוי ✓ · /,/courses,/simulator = 200 ציבורי · תוכן הסימולטור נרנדר · Convex URL בצ'אנק ✓.
+- **לא נגעתי ב-prod.** בעץ קיימת עבודת Sumit/branding לא-קשורה (uncommitted) — לא נגעתי בה.
+- **צעד אלעד:** לפתוח מהנייד, להירשם (מופע dev), ולחוות שיעור→יועץ→סימולטור.
+
 ## 2026-07-02 — Phase 19: FREE-tier live AI (Gemini) for Advisor+Simulator + symmetric lesson↔simulator sync ✅ (autonomous, branch feat/advanced-course-experience)
 
 **מטרה:** להביא את שני הבידולים המרכזיים (הסימולטור + היועץ החכם בכל שיעור) למצב השלם ביותר האפשרי בלי אלעד (בלי מפתחות/צילומים/סליקה). בנוי על Phase 18, לא שכתוב.
