@@ -263,13 +263,16 @@ export function buildTemplateReply(
   const profile = getPhaseProfile(ctx?.phaseNumber);
   const intent = detectIntent(userMessage);
   const lessonRef = ctx ? `"${ctx.lessonTitle}"` : "השיעור שלך";
+  // Grammar-safe "in the lesson" form: prefixing ב to "השיעור שלך" produced
+  // "בהשיעור שלך" (found live on prod, fixed 2026-07-05).
+  const inLessonRef = ctx ? `ב"${ctx.lessonTitle}"` : "בשיעור שלך";
   const concept = profile.concepts[0] ?? "תקשורת בינאישית";
   const apply = profile.applyPrompts[0] ?? "בחר צעד קטן אחד ליישם השבוע.";
 
   switch (intent) {
     case "greeting":
       return {
-        text: `${profile.opener}\n\nאני רואה שאתה עכשיו ב${lessonRef}${
+        text: `${profile.opener}\n\nאני רואה שאתה עכשיו ${inLessonRef}${
           profile.phaseNumber > 0 ? ` — שלב ${profile.name}` : ""
         }. רוצה שנעבוד על ${profile.skill}?`,
         suggestSimulator: false,
@@ -281,12 +284,12 @@ export function buildTemplateReply(
       };
     case "stuck":
       return {
-        text: `אני שומע אותך. תקיעות זה לא כישלון — זה הנקודה שבה הצמיחה מתחילה. ב${lessonRef} (${profile.name}) המוקד הוא: ${concept}.\n\nבוא נקטין את זה לצעד אחד קטן: ${apply}\n\nמה מהשניים מרגיש לך אפשרי יותר עכשיו?`,
+        text: `אני שומע אותך. תקיעות זה לא כישלון — זה הנקודה שבה הצמיחה מתחילה. ${inLessonRef} (${profile.name}) המוקד הוא: ${concept}.\n\nבוא נקטין את זה לצעד אחד קטן: ${apply}\n\nמה מהשניים מרגיש לך אפשרי יותר עכשיו?`,
         suggestSimulator: false,
       };
     case "howto":
       return {
-        text: `שאלה טובה. בשלב ${profile.name} הכלי המרכזי הוא ${profile.skill}.\n\nהדרך המעשית: ${apply}\n\nוזכור — אמ"כ: אמת (תהיה כן עם עצמך), כלים (תשתמש במה שלמדת ב${lessonRef}), כבוד (גם כלפיך וגם כלפי השני). רוצה לתרגל את זה בסימולטור לפני המציאות?`,
+        text: `שאלה טובה. בשלב ${profile.name} הכלי המרכזי הוא ${profile.skill}.\n\nהדרך המעשית: ${apply}\n\nוזכור — אמ"כ: אמת (תהיה כן עם עצמך), כלים (תשתמש במה שלמדת ${inLessonRef}), כבוד (גם כלפיך וגם כלפי השני). רוצה לתרגל את זה בסימולטור לפני המציאות?`,
         suggestSimulator: true,
       };
     case "summary":

@@ -244,3 +244,37 @@ export const clearHaderechCourse = internalMutation({
     };
   },
 });
+
+// ---------------------------------------------------------------------------
+// Unpublish legacy demo courses so the catalog shows only the canonical
+// "הדרך - אומנות הקשר" (mirrors production). Idempotent; dev hygiene.
+// ---------------------------------------------------------------------------
+
+const CANONICAL_COURSE_TITLE = "הדרך - אומנות הקשר";
+
+export const unpublishLegacyCourses = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const courses = await ctx.db.query("courses").collect();
+    const unpublished: string[] = [];
+
+    for (const course of courses) {
+      if (course.title !== CANONICAL_COURSE_TITLE && course.published) {
+        await ctx.db.patch(course._id, {
+          published: false,
+          updatedAt: Date.now(),
+        });
+        unpublished.push(course.title);
+      }
+    }
+
+    return {
+      success: true,
+      unpublished,
+      message:
+        unpublished.length > 0
+          ? `Unpublished ${unpublished.length} legacy course(s).`
+          : "Catalog already clean — only the canonical course is published.",
+    };
+  },
+});

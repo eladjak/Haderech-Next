@@ -283,6 +283,21 @@ export default defineSchema({
     published: v.boolean(),
     order: v.number(),
     createdAt: v.number(),
+    // --- Phase 22: persona depth from Elad's typology (all optional/additive) ---
+    /** הטיפוס מתורת אומנות-הקשר (למשל "החרדה שנפגעה בעבר") */
+    personaArchetype: v.optional(v.string()),
+    /** רמת המשיכה הדומיננטית: שכלית / רגשית / פיזית */
+    attractionProfile: v.optional(v.string()),
+    /** מה מכבה את הפרסונה (תלונות, חקירה, התנשאות...) */
+    triggers: v.optional(v.array(v.string())),
+    /** מה מקרב אותה (סקרנות אמיתית, פגיעות מדודה, הומור...) */
+    openers: v.optional(v.array(v.string())),
+    /** ביטים של הבמאי — הנחיה שנכנסת בתור מסוים */
+    beats: v.optional(
+      v.array(v.object({ atTurn: v.number(), direction: v.string() }))
+    ),
+    /** שלב-הקורס שהתרחיש מאמן (1-5) — לסנכרון שיעור->תרחיש */
+    phaseNumber: v.optional(v.number()),
   })
     .index("by_published", ["published"])
     .index("by_order", ["order"])
@@ -306,6 +321,43 @@ export default defineSchema({
     improvements: v.optional(v.array(v.string())),
     createdAt: v.number(),
     completedAt: v.optional(v.number()),
+    // --- Phase 22: director state (emotional arc) + deep debrief ---
+    /** מד-החיבור הנוכחי 0-100 (הבמאי מעדכן כל תור) */
+    currentConnection: v.optional(v.number()),
+    /** היסטוריית מד-החיבור — גרף הקשת הרגשית בדיבריף */
+    connectionLog: v.optional(
+      v.array(v.object({ turn: v.number(), connection: v.number() }))
+    ),
+    /** רגעי-מפתח מצוטטים מהשיחה, עם ניתוח ו"מה היה עובד" */
+    keyMoments: v.optional(
+      v.array(
+        v.object({
+          quote: v.string(),
+          analysis: v.string(),
+          better: v.string(),
+        })
+      )
+    ),
+    /** רדאר כישורים — 5 צירים כנגד 5 שלבי הקורס (0-100) */
+    skillRadar: v.optional(
+      v.object({
+        initiative: v.number(), // יוזמה (שלב 3)
+        emotion: v.number(), // הבעת רגש (שלב 2)
+        courage: v.number(), // אומץ וגבולות (שלב 1)
+        depth: v.number(), // עומק ופגיעות (שלב 4)
+        leading: v.number(), // הובלה (שלב 5)
+      })
+    ),
+    /** תרגיל אחד לפעם הבאה */
+    drill: v.optional(v.string()),
+    /** השיעור המומלץ להשלמת הפער שנמצא (RAG) */
+    recommendedLesson: v.optional(
+      v.object({
+        lessonId: v.id("lessons"),
+        courseId: v.id("courses"),
+        title: v.string(),
+      })
+    ),
   })
     .index("by_user", ["userId"])
     .index("by_scenario", ["scenarioId"])
@@ -818,4 +870,29 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_clerk_id", ["clerkId"]),
+
+  // ידע-הקורס לאחזור (RAG) — Phase 21. נבנה ע"י scripts/build-knowledge-index.mjs
+  // מ-3 מקורות: 75 שיעורי הקורס, הספר "אומנות הקשר", וסיכומי 12 השבועות.
+  // היועץ (advisor.ask) מאחזר מכאן עם ctx.vectorSearch ומעגן את תשובותיו
+  // בידע האמיתי של אלעד — עם ציטוט מקור (ref).
+  knowledgeChunks: defineTable({
+    /** תווית-ציטוט אנושית, למשל: 'שיעור 30: שלוש רמות המשיכה' */
+    ref: v.string(),
+    source: v.union(
+      v.literal("lesson"),
+      v.literal("book"),
+      v.literal("summary")
+    ),
+    title: v.string(),
+    weekNumber: v.optional(v.number()),
+    phaseNumber: v.optional(v.number()),
+    lessonOrder: v.optional(v.number()),
+    chunkIndex: v.number(),
+    text: v.string(),
+    embedding: v.array(v.float64()),
+  }).vectorIndex("by_embedding", {
+    vectorField: "embedding",
+    dimensions: 768,
+    filterFields: ["source", "phaseNumber"],
+  }),
 });

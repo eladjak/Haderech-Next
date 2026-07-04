@@ -19,7 +19,12 @@ interface LessonAdvisorProps {
   userId?: Id<"users">;
 }
 
-type Turn = { role: "user" | "assistant"; content: string };
+type Turn = {
+  role: "user" | "assistant";
+  content: string;
+  /** citation refs from the RAG layer (Phase 21) — shown under AI replies */
+  sources?: string[];
+};
 
 function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -60,14 +65,25 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
       setTurns((t) => [...t, { role: "user", content: text }]);
       setLoading(true);
       try {
-        const history = turns.slice(-6);
+        const history = turns
+          .slice(-6)
+          .map(({ role, content }) => ({ role, content }));
         const res = await ask({
           message: text,
           lessonId,
           ...(userId ? { userId } : {}),
           history,
         });
-        setTurns((t) => [...t, { role: "assistant", content: res.reply }]);
+        setTurns((t) => [
+          ...t,
+          {
+            role: "assistant",
+            content: res.reply,
+            ...(res.sources && res.sources.length > 0
+              ? { sources: res.sources }
+              : {}),
+          },
+        ]);
         setSuggestSim(res.suggestSimulator);
       } catch {
         setTurns((t) => [
@@ -171,6 +187,12 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
                     }`}
                   >
                     {t.role === "assistant" ? renderInline(t.content) : t.content}
+                    {t.role === "assistant" && t.sources && t.sources.length > 0 && (
+                      <p className="mt-2 border-t border-zinc-200/70 pt-1.5 text-[11px] leading-relaxed text-zinc-400 dark:border-zinc-700 dark:text-zinc-500">
+                        <span aria-hidden="true">📚 </span>
+                        מבוסס על: {t.sources.join(" · ")}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

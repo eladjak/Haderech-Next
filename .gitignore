@@ -53,3 +53,6 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# RAG index build artifacts (5MB+, regenerate with build-knowledge-index.mjs)
+scripts/out/

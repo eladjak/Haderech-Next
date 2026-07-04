@@ -1,13 +1,21 @@
 import { query, action } from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import {
   buildAdvisorSystemPrompt,
   buildTemplateReply,
   getPhaseProfile,
   type LessonContext,
 } from "./lib/advisorTemplates";
-import { generateChat } from "./lib/llm";
+import { generateChat, readLlmKeys } from "./lib/llm";
+import {
+  embedQuery,
+  buildGroundingBlock,
+  uniqueRefs,
+  TOP_K,
+  MIN_SCORE,
+  type RetrievedPassage,
+} from "./lib/retrieval";
 
 // ============================================================
 // Smart Advisor — Phase 18
@@ -177,6 +185,7 @@ export const ask = action({
     reply: string;
     usedAi: boolean;
     suggestSimulator: boolean;
+    sources: string[];
   }> => {
     const trimmed = args.message.trim();
     if (!trimmed) throw new Error("Message cannot be empty");
@@ -196,12 +205,40 @@ export const ask = action({
     // answer and the graceful fallback if the AI call fails.
     const template = buildTemplateReply(trimmed, lessonContext);
 
+    // RAG (Phase 21): ground the reply in Elad's actual course + book.
+    // Embed the question -> vectorSearch over knowledgeChunks -> grounding
+    // block appended to the system prompt, with source citations. Every step
+    // degrades silently: no key / embed failure / empty index -> no grounding,
+    // and the advisor still answers exactly as before.
+    let grounding = "";
+    let sources: string[] = [];
+    const keys = readLlmKeys();
+    if (keys.geminiKey) {
+      const qVec = await embedQuery(keys.geminiKey, trimmed);
+      if (qVec) {
+        const hits = await ctx.vectorSearch("knowledgeChunks", "by_embedding", {
+          vector: qVec,
+          limit: TOP_K,
+        });
+        const good = hits.filter((h) => h._score >= MIN_SCORE);
+        if (good.length > 0) {
+          const passages: RetrievedPassage[] = await ctx.runQuery(
+            internal.knowledge.getChunksByIds,
+            { ids: good.map((h) => h._id) }
+          );
+          grounding = buildGroundingBlock(passages);
+          sources = uniqueRefs(passages).slice(0, 3);
+        }
+      }
+    }
+
     // Upgrade path: live AI (Gemini free-tier preferred, then Claude),
-    // scaffolded by the lesson-aware system prompt. `generateChat` returns
-    // null when no token is set OR the call fails — so we always land on the
-    // good template. This is why the advisor works with zero credentials.
+    // scaffolded by the lesson-aware system prompt + retrieved knowledge.
+    // `generateChat` returns null when no token is set OR the call fails —
+    // so we always land on the good template. This is why the advisor works
+    // with zero credentials.
     const ai = await generateChat({
-      system: buildAdvisorSystemPrompt(lessonContext),
+      system: buildAdvisorSystemPrompt(lessonContext) + grounding,
       messages: [
         ...(args.history ?? []),
         { role: "user" as const, content: trimmed },
@@ -213,6 +250,7 @@ export const ask = action({
       reply: ai?.text ?? template.text,
       usedAi: ai !== null,
       suggestSimulator: template.suggestSimulator,
+      sources: ai !== null ? sources : [],
     };
   },
 });

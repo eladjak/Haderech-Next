@@ -1,6 +1,48 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
-## 2026-07-04 — Phase 20: הסימולטור והיועץ עלו ל-PREVIEW ציבורי ✅ (ריצת שבת אוטונומית)
+## 2026-07-05 — Phases 21-22: יועץ-RAG + סימולטור שחקן/במאי/מאמן — חיים ומאומתי-עומק על ה-preview ✅ (ריצה אוטונומית, ענף feat/advanced-course-experience)
+
+**ההקשר:** ביצוע MASTERPIECE-PLAN.md (ראה בלוק ✅ סטטוס שם). הכל על Convex DEV + Vercel preview בלבד — **אפס נגיעה ב-prod**.
+
+### 1. החייאת ה-preview (Phase 20 היה חלול — ראה תיקון-רישום למטה)
+- `npx convex dev --once` דחף את קוד הענף ל-colorless-guanaco-894 (לפני כן: אפס פונקציות advisor על ה-dev!).
+- זריעה מלאה: `seedHaderech:seedHaderechCourse` → 75 שיעורים · `seedLessonContent:applyLessonContent` → 75/75 עם תוכן · `seedWeeklyQuizzes` · `seedScenarios:seedDatingScenarios` (4 דיאלוגים) · `seedSimulatorData` (6 free-chat) · `seedHaderech:unpublishLegacyCourses` (NEW — הסיר 3 קורסי-לגאסי מהקטלוג, כמו בפרוד).
+- GEMINI_API_KEY כבר היה ב-env של dev → `advisor:ask` מחזיר `usedAi:true`.
+
+### 2. ארבעה באגים חוסמי-משתמש נתפסו באימות-עומק ותוקנו (`next.config.ts` + provider)
+1. **CSP חסם את Clerk:** script-src התיר `*.clerk.dev` אבל מופע-dev נטען מ-`*.clerk.accounts.dev` → clerk-js נחסם → ConvexProviderWithClerk תקוע → **כל useQuery נתלה לנצח** (זה השורש של "failed_to_load_clerk_js_timeout" שב-Phase 18 יוחס בטעות ל-crawlers).
+2. **CSP חסם את ה-WebSocket של Convex:** `https://*.convex.cloud` לא מכסה `wss://` בכרום (אומת: fetch מהעמוד עבר, WS נכשל; מ-Node אותו WS נפתח) → נוסף `wss://*.convex.cloud`.
+3. **CSP חסם את Turnstile:** ההרשמה נכשלה ("כשל באימות האבטחה") כי `challenges.cloudflare.com` לא הותר → **הרשמה הייתה שבורה לכל משתמש**.
+4. **משתמש חדש בלי שורת users:** אין Clerk-webhook ב-dev ו-ensureUser נקרא רק בעמודי-אדמין → convexUser=null → כפתור "הירשם לקורס" לא הופיע כלל. תוקן: `EnsureUser` בתוך `ConvexClientProvider` (אידמפוטנטי, בטוח לפרוד).
+
+### 3. Phase 21 — יועץ-RAG על ~120K מילים (דפוס bookRetrieval המוכח של זהות)
+- `scripts/build-knowledge-index.mjs` — קורפוס: 75 שיעורים (מה-deployment) + הספר (19 קבצי פרקים מ-omanut-hakesher-book) + 12 סיכומי-שבוע (OneDrive `_ידע_מעובד`) → 106 מסמכים → **747 צ'אנקים** (תיקון CRLF היה קריטי: לפניו יצאו 264 צ'אנקים ענקיים) → gemini-embedding-001 (768d, חינם) → JSONL → `npx convex import --table knowledgeChunks --replace -y`.
+- סכימה: `knowledgeChunks` + `vectorIndex by_embedding` (dimensions 768, filterFields: source/phaseNumber).
+- `convex/lib/retrieval.ts` (embedQuery / buildGroundingBlock / uniqueRefs — טהורות+נבדקות) · `convex/knowledge.ts` (getChunksByIds + stats כ-probe).
+- `advisor.ask`: embed שאלה → `ctx.vectorSearch` top-5 (MIN_SCORE 0.45) → בלוק-עיגון בפרומפט עם הנחיית-ציטוט → מחזיר `sources[]`; ה-UI (LessonAdvisor) מציג "📚 מבוסס על: ...". **free-degradation נשמר** (בלי מפתח → תבניות).
+- תיקון באג-דקדוק "בהשיעור" (`inLessonRef` + בדיקות).
+
+### 4. Phase 22 — סימולטור שחקן+במאי+מאמן
+- **במאי** (`convex/lib/director.ts`, טהור+נבדק): מד-חיבור 0-100 (התחלה 50, גבולות 5-95) — היוריסטיקות עברית (שאלות/אמפתיה/שיתוף-רגש מעלים; חד-מילתיות/שליליות/חקירה/טריגרים-של-הפרסונה מורידים) + `buildDirectorNote` — הנחיית-במה סודית (מצב-רוח + ביט-לתור). נשמר ב-`simulatorSessions.currentConnection/connectionLog` (`updateDirectorState`).
+- **שחקן:** פרומפט-פרסונה מועשר (archetype / attractionProfile / openers / triggers מהטיפולוגיה של אלעד) + directorNote; תבניות-fallback מגיבות למד (מאגר קר/חם) — הקשת עובדת גם בלי מפתח.
+- **מאמן:** `analyzeConversation` בסכימה עשירה (keyMoments מצוטטים / skillRadar 5 צירים=5 שלבי-הקורס / drill) + fallback היוריסטי מלא (`buildDeepDebrief`). **גשר-RAG:** ה-drill+improvements מוטמעים → vectorSearch (source=lesson) → `recommendedLesson` עם דיפ-לינק לשיעור המתאים.
+- **UI:** SessionFeedback — גרף-חיבור SVG, רגעי-מפתח, רדאר-פסים, תרגיל, קישור-שיעור; simulator-chat — מד-חיבור חי בכותרת (role=meter).
+- **תרחישים:** `seedScenariosV2:applyScenariosV2` — 6 קיימים הועשרו + 5 חדשים (טל/אורי/עדי/יובל/דנה — אחד לכל שלב-קורס, קטגוריה===simulatorCategory) = **11 free-chat + 4 דיאלוגים = 15**.
+
+### שערים ואימות-עומק (verbatim)
+- `npx tsc --noEmit` → 0 · `npx vitest run` → **193/193** (+7 retrieval, +12 director/debrief) · `npm run build:local` → ✓ 73 עמודים · 3 פריסות preview → Ready · **alias haderech-preview.vercel.app עודכן**.
+- **Probes:** advisor:ask על dev → `usedAi:true, sources:["שיעור 45: שלוש רמות המשיכה","הספר — פרק 8"]` · knowledge:stats → 747 · listScenarios → 11 · listDialogueScenarios → 4 · 75/75 שיעורים עם תוכן.
+- **E2E כמשתמש אמיתי (agent-browser):** הרשמה (משתמש נוצר ב-Clerk Backend API כי Turnstile חוסם אוטומציה — לבני-אדם עובד) → התחברות (`haderech.qa+clerk_test@example.com`, קוד 424242) → הרשמה לקורס → שיעור 1 → **היועץ ענה חי עם ציטוט "מתוך שיעור 45"** → סימולציית "פתיחה קרה בבית קפה" 4 תורות: **מד 50→61→55→71→77** (עדי עקצה את הפתיחה לפי ביט-תור-1, התקררה על "סבבה", התחממה על כנות) → דיבריף: **ציון 88**, "סבבה" צוטט כרגע-כשל עם ניסוח חלופי, רדאר, תרגיל, קישור לשיעור "יצירת הזדמנויות לחיבור". צילומים: `Documents/reports/mega-plan-2026-07-05/proof-*.png`.
+
+### מה נשאר (ליורש — MASTERPIECE-PLAN אופק א' 4/8/9 + אופק ב')
+זיכרון-לומד (advisorProfiles) · דמו-אורח `/simulator/try` (דורש נתיב ללא-auth + rate-limit) · עמוד `/simulator/progress` (הדאטה כבר נשמר per-session) · קול-TTS · Replay · **לפרוד:** מיזוג feat→master אחרי preview+council (safe-live-refactor), `convex deploy`, זריעת knowledge+scenarios על פרוד, GEMINI key בפרוד, Clerk production instance (אלעד).
+
+### ⚠️ תיקון-רישום ל-Phase 20 (חשוב לדורות הבאים)
+Phase 20 דיווח "היועץ והסימולטור רצים עם AI חי על ה-preview" — **הרישום היה שגוי; האימות היה שטחי** (סטטוס-קודים + Convex-URL-בצ'אנק בלבד). בפועל ב-4.7: על פריסת ה-dev לא היו פונקציות advisor בכלל (קוד ישן), 0 שיעורים ו-0 תרחישים, וה-CSP חסם Clerk+WebSocket כך ששום query לא רץ בדפדפן אמיתי. הלקח מעוגן ב-MASTERPIECE-PLAN.md (סעיף 9 — פרוטוקול אימות-עומק): probe פונקציות + probe דאטה + E2E דפדפן אמיתי + הצלבת deployment, לפני כל "עובד".
+
+---
+
+## 2026-07-04 — Phase 20: הסימולטור והיועץ עלו ל-PREVIEW ציבורי ⚠️ (ריצת שבת אוטונומית — הרישום תוקן ב-5.7, ראה Phases 21-22 למעלה)
 
 **הפער שנסגר:** Phase 18-19 נבנו ואומתו אבל מעולם לא נפרסו — אי אפשר היה לחוות אותם. עכשיו:
 - **Preview חי:** https://haderech-preview.vercel.app (alias קבוע; feat/advanced-course-experience)

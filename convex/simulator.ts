@@ -1,8 +1,16 @@
-import { query, mutation, internalMutation, action } from "./_generated/server";
+import {
+  query,
+  mutation,
+  internalMutation,
+  internalQuery,
+  action,
+} from "./_generated/server";
 import { v } from "convex/values";
 import { internal, api } from "./_generated/api";
 import { readLlmKeys, hasLlmKey } from "./lib/llm";
-import { scoreConversationHeuristic } from "./lib/simulatorScoring";
+import { buildDeepDebrief, type DeepDebrief } from "./lib/simulatorScoring";
+import { updateConnection, buildDirectorNote } from "./lib/director";
+import { embedQuery, MIN_SCORE } from "./lib/retrieval";
 
 // ==========================================
 // Simulator - Phase 17
@@ -156,6 +164,27 @@ export const saveUserMessage = internalMutation({
   },
 });
 
+// Internal mutation (Phase 22): persist the director's emotional-arc state
+export const updateDirectorState = internalMutation({
+  args: {
+    sessionId: v.id("simulatorSessions"),
+    connection: v.number(),
+    turn: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) throw new Error("Session not found");
+    const log = session.connectionLog ?? [];
+    await ctx.db.patch(args.sessionId, {
+      currentConnection: args.connection,
+      connectionLog: [
+        ...log,
+        { turn: args.turn, connection: args.connection },
+      ],
+    });
+  },
+});
+
 // Internal mutation: save AI persona response
 export const savePersonaResponse = internalMutation({
   args: {
@@ -189,15 +218,58 @@ export const saveAnalysis = internalMutation({
     strengths: v.array(v.string()),
     improvements: v.array(v.string()),
     completedAt: v.number(),
+    // Phase 22 — deep debrief (all optional/additive)
+    keyMoments: v.optional(
+      v.array(
+        v.object({
+          quote: v.string(),
+          analysis: v.string(),
+          better: v.string(),
+        })
+      )
+    ),
+    skillRadar: v.optional(
+      v.object({
+        initiative: v.number(),
+        emotion: v.number(),
+        courage: v.number(),
+        depth: v.number(),
+        leading: v.number(),
+      })
+    ),
+    drill: v.optional(v.string()),
+    recommendedLesson: v.optional(
+      v.object({
+        lessonId: v.id("lessons"),
+        courseId: v.id("courses"),
+        title: v.string(),
+      })
+    ),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.sessionId, {
-      score: args.score,
-      feedback: args.feedback,
-      strengths: args.strengths,
-      improvements: args.improvements,
-      completedAt: args.completedAt,
-    });
+    const { sessionId, ...fields } = args;
+    await ctx.db.patch(sessionId, fields);
+  },
+});
+
+// Internal query (Phase 22): resolve a lesson by its order in the canonical
+// course — used to turn a RAG chunk (lessonOrder) into a deep link.
+export const getLessonByOrder = internalQuery({
+  args: { lessonOrder: v.number() },
+  handler: async (ctx, args) => {
+    const course = await ctx.db
+      .query("courses")
+      .filter((q) => q.eq(q.field("title"), "הדרך - אומנות הקשר"))
+      .first();
+    if (!course) return null;
+    const lesson = await ctx.db
+      .query("lessons")
+      .withIndex("by_course_order", (q) =>
+        q.eq("courseId", course._id).eq("order", args.lessonOrder)
+      )
+      .first();
+    if (!lesson) return null;
+    return { lessonId: lesson._id, courseId: course._id, title: lesson.title };
   },
 });
 
@@ -245,6 +317,26 @@ export const sendMessage = action({
         content: m.content,
       }));
 
+    // --- Director (Phase 22): move the connection meter for this turn ---
+    // Deterministic + free. The persona then ACTS the updated state.
+    const turn = conversationHistory.filter((m) => m.role === "user").length;
+    const prevConnection = session.currentConnection ?? 50;
+    const arc = updateConnection(
+      prevConnection,
+      trimmed,
+      context.scenario.triggers ?? []
+    );
+    await ctx.runMutation(internal.simulator.updateDirectorState, {
+      sessionId: args.sessionId,
+      connection: arc.connection,
+      turn,
+    });
+    const directorNote = buildDirectorNote(
+      arc.connection,
+      turn,
+      context.scenario.beats ?? []
+    );
+
     // Live AI (Gemini free-tier preferred, then Claude) when a provider
     // token is set; otherwise (or on failure) a persona-flavored template.
     const keys = readLlmKeys();
@@ -260,8 +352,13 @@ export const sendMessage = action({
             personaPersonality: context.scenario.personaPersonality,
             scenarioContext: context.scenario.scenarioContext,
             difficulty: context.scenario.difficulty,
+            personaArchetype: context.scenario.personaArchetype,
+            attractionProfile: context.scenario.attractionProfile,
+            openers: context.scenario.openers,
+            triggers: context.scenario.triggers,
           },
           conversationHistory,
+          directorNote,
         })
       : null;
 
@@ -269,10 +366,9 @@ export const sendMessage = action({
     if (aiResponse) {
       personaResponse = aiResponse;
     } else {
-      // Free-degradation: persona-flavored, turn-aware fallback.
-      // Keeps the practice loop usable for demos without any key.
+      // Free-degradation: persona-flavored, turn-aware fallback that now
+      // also reflects the director's connection meter (cool vs warm pools).
       const name = context.scenario.personaName;
-      const turn = conversationHistory.filter((m) => m.role === "user").length;
       const lastUser = trimmed;
       const askedQuestion = /\?|מה |איך |למה |איפה |מתי |האם /.test(lastUser);
       const opensWell = lastUser.length > 25;
@@ -281,12 +377,18 @@ export const sendMessage = action({
         `נעים מאוד, אני ${name}. אהבתי שפתחת ככה — ספר/י לי קצת עליך, מה מביא אותך לכאן?`,
         `היי! ${askedQuestion ? "שאלה טובה, " : ""}אני ${name}. אני סקרן/ית לשמוע עוד — מה התחביבים שלך?`,
       ];
-      const midTurn = [
+      const warmTurn = [
         `מעניין מה שאמרת. ${askedQuestion ? "ואצלך? " : "ומה גרם לך להתעניין בזה?"}`,
         `אהבתי את הכנות. ${opensWell ? "אתה/את נשמע/ת אמיתי/ת." : "ספר/י לי עוד, אני מקשיב/ה."}`,
         `${askedQuestion ? "כן, לגמרי — " : ""}זה אומר עליך משהו טוב. מה הכי חשוב לך בקשר?`,
       ];
-      const pool = turn <= 1 ? earlyTurn : midTurn;
+      const coolTurn = [
+        `המ... אוקיי. ${askedQuestion ? "כן." : ""} [${name} מציצה לרגע בטלפון]`,
+        `יכול להיות. תקשיב/י, אני קצת עייפ/ה היום... על מה עוד רצית לדבר?`,
+        `${askedQuestion ? "לא יודע/ת, לא חשבתי על זה. " : ""}נו, ספר/י אתה משהו.`,
+      ];
+      const pool =
+        turn <= 1 ? earlyTurn : arc.connection < 40 ? coolTurn : warmTurn;
       personaResponse = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
     }
 
@@ -301,10 +403,18 @@ export const sendMessage = action({
   },
 });
 
-// Action: end a session and get AI analysis
+// Action: end a session and get the coach's deep debrief (Phase 22)
 export const endSession = action({
   args: { sessionId: v.id("simulatorSessions") },
-  handler: async (ctx, args): Promise<{ score: number; feedback: string; strengths: string[]; improvements: string[] }> => {
+  handler: async (
+    ctx,
+    args
+  ): Promise<{
+    score: number;
+    feedback: string;
+    strengths: string[];
+    improvements: string[];
+  }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
@@ -350,11 +460,14 @@ export const endSession = action({
       return analysis;
     }
 
-    // Deterministic heuristic scorer — the free-degradation feedback loop,
-    // and the fallback if live-AI analysis is unavailable or unparseable.
-    const heuristic = scoreConversationHeuristic(
-      session.messages.filter((m: { role: string }) => m.role === "user")
+    const userMessages = session.messages.filter(
+      (m: { role: string }) => m.role === "user"
     );
+
+    // Deterministic deep debrief — the free-degradation feedback loop,
+    // and the fallback if live-AI analysis is unavailable or unparseable.
+    // Always computed: it also fills any field the AI analysis omits.
+    const heuristic: DeepDebrief = buildDeepDebrief(userMessages);
 
     // Live coach analysis when a provider (Gemini free / Claude) is set.
     const keys = readLlmKeys();
@@ -368,7 +481,52 @@ export const endSession = action({
         })
       : null;
 
-    const analysis = aiAnalysis ?? heuristic;
+    const analysis = {
+      score: aiAnalysis?.score ?? heuristic.score,
+      feedback: aiAnalysis?.feedback ?? heuristic.feedback,
+      strengths: aiAnalysis?.strengths?.length
+        ? aiAnalysis.strengths
+        : heuristic.strengths,
+      improvements: aiAnalysis?.improvements?.length
+        ? aiAnalysis.improvements
+        : heuristic.improvements,
+      keyMoments: aiAnalysis?.keyMoments?.length
+        ? aiAnalysis.keyMoments
+        : heuristic.keyMoments,
+      skillRadar: aiAnalysis?.skillRadar ?? heuristic.skillRadar,
+      drill: aiAnalysis?.drill ?? heuristic.drill,
+    };
+
+    // RAG bridge (Phase 22): find the ONE course lesson that teaches what
+    // the learner missed, and attach it as a deep link. Degrades silently.
+    let recommendedLesson:
+      | { lessonId: import("./_generated/dataModel").Id<"lessons">; courseId: import("./_generated/dataModel").Id<"courses">; title: string }
+      | undefined;
+    if (keys.geminiKey) {
+      const gapText = [analysis.drill, ...analysis.improvements].join(" · ");
+      const qVec = await embedQuery(keys.geminiKey, gapText);
+      if (qVec) {
+        const hits = await ctx.vectorSearch("knowledgeChunks", "by_embedding", {
+          vector: qVec,
+          limit: 4,
+          filter: (q) => q.eq("source", "lesson"),
+        });
+        const best = hits.find((h) => h._score >= MIN_SCORE);
+        if (best) {
+          const chunks = await ctx.runQuery(internal.knowledge.getChunksByIds, {
+            ids: [best._id],
+          });
+          const order = chunks[0]?.lessonOrder;
+          if (typeof order === "number") {
+            const lesson = await ctx.runQuery(
+              internal.simulator.getLessonByOrder,
+              { lessonOrder: order }
+            );
+            if (lesson) recommendedLesson = lesson;
+          }
+        }
+      }
+    }
 
     await ctx.runMutation(internal.simulator.saveAnalysis, {
       sessionId: args.sessionId,
@@ -376,10 +534,19 @@ export const endSession = action({
       feedback: analysis.feedback,
       strengths: analysis.strengths,
       improvements: analysis.improvements,
+      keyMoments: analysis.keyMoments,
+      skillRadar: analysis.skillRadar,
+      drill: analysis.drill,
+      ...(recommendedLesson ? { recommendedLesson } : {}),
       completedAt: now,
     });
 
-    return analysis;
+    return {
+      score: analysis.score,
+      feedback: analysis.feedback,
+      strengths: analysis.strengths,
+      improvements: analysis.improvements,
+    };
   },
 });
 
