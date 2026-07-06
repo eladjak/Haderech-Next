@@ -1,5 +1,19 @@
 # הדרך נקסט - מערכת לימודים - התקדמות
 
+## 2026-07-06 — מיזוג לפרודקשן: feat/advanced-course-experience → master, פריסה חיה ✅ (prod-push run)
+
+**מוזג ל-master (FF, ‏4 קומיטים מאומתים `8379cac` וקודמיו) ונדחף → Vercel פרס אוטומטית ל-Production.**
+- שער-אימות לפני מיזוג: `tsc --noEmit`=0 · `vitest run`=193/193 עוברים · ה-4 קומיטים עצמאיים (advisor/simulator/RAG/CSP), לא נשענים על ה-WIP הלא-מקומיט.
+- כולל את **תיקון ה-CSP ב-`next.config.ts`** (allowlist ל-`*.clerk.accounts.dev` + `wss://*.convex.cloud` + `challenges.cloudflare.com`) — תיקון פרוד-בטוח שמשחרר את clerk-js/Convex-WS/CAPTCHA לכל דפדפן אמיתי (השורש של "failed_to_load_clerk_js_timeout").
+- **אימות פרוד חי:** deploy `a7tovso4m` = ●Ready · build הריץ `npx convex deploy --cmd 'next build'` בהצלחה (פונקציות Convex-prod עודכנו) · `/`, `/courses`, `/simulator` → HTTP 200 עם תוכן אמיתי.
+- בטיחות: ענף-גיבוי `backup/master-pre-prod-push-20260706`; ה-WIP (Sumit/branding/admin) נשמר ב-working tree, לא מוזג (לפי החלטת התוכנית — לא חלק מהמאומת).
+
+**📋 נשאר לאלעד (חסמי-חוויית-AI מלאה בפרוד — לא ניתן אוטונומית):**
+1. **Clerk production instance** — כרגע פרוד עדיין `pk_test_` (dev-instance). לשדרג ל-prod Clerk (הרשמה חיה ליוזרים אמיתיים).
+2. **ייבוא אינדקס-הידע ל-Convex-prod** — 747 צ'אנקי RAG: להריץ `scripts/build-knowledge-index.mjs` מול deployment הפרוד ואז `npx convex import --table knowledgeChunks ... --replace -y` (דורש CONVEX_DEPLOY_KEY/CLI-auth). בלי זה היועץ עונה במצב-תבנית ולא מצטט מקורות.
+3. **וידוא `GEMINI_API_KEY` ב-סביבת Convex-prod** (`frugal-curlew-822`) — לא רק ב-Vercel; פונקציות ה-AI רצות בתוך Convex.
+4. החלטת דומיין (`haderech.ohlove.co.il`?).
+
 ## 2026-07-05 — Phases 21-22: יועץ-RAG + סימולטור שחקן/במאי/מאמן — חיים ומאומתי-עומק על ה-preview ✅ (ריצה אוטונומית, ענף feat/advanced-course-experience)
 
 **ההקשר:** ביצוע MASTERPIECE-PLAN.md (ראה בלוק ✅ סטטוס שם). הכל על Convex DEV + Vercel preview בלבד — **אפס נגיעה ב-prod**.
