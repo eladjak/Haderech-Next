@@ -1,7 +1,17 @@
 import { action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
-// Create checkout session
+/**
+ * @deprecated Phase 14 (2026-05-14): Migrated to Sumit (convex/sumit.ts).
+ * This file is retained ONLY to satisfy existing imports / generated types.
+ * All new payment work MUST use convex/sumit.ts. Will be removed once all
+ * references migrate (admin/billing/page.tsx still uses old type aliases).
+ *
+ * RED LINE: Do not re-enable Stripe. Israeli market needs Sumit for legal
+ * invoice generation (חשבונית מס) automatic per Israeli tax law.
+ */
+
+// Create checkout session (DEPRECATED — redirects to Sumit notice)
 export const createCheckoutSession = action({
   args: {
     plan: v.union(v.literal("basic"), v.literal("premium")),
@@ -10,11 +20,12 @@ export const createCheckoutSession = action({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    // In production, this would call Stripe API
-    // For now, return a placeholder
+    // Deprecated — point user back to pricing with a notice.
     return {
       url: `/pricing?checkout=pending&plan=${args.plan}`,
-      message: "Stripe integration pending - set STRIPE_SECRET_KEY to enable",
+      message:
+        "מערכת התשלומים בתהליך החלפה ל-Sumit (ספק תשלומים ישראלי). חזור בקרוב.",
+      status: "deprecated" as const,
     };
   },
 });
