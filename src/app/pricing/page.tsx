@@ -714,16 +714,29 @@ function FAQAccordion() {
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
   const { plan: currentPlan } = useSubscription();
-  // NOTE: Run `npx convex dev` to regenerate types after adding convex/stripe.ts
+  // Phase 14: Migrated Stripe → Sumit (Israeli payment processor + invoice generation).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const createCheckout = useAction((api as any).stripe.createCheckoutSession);
+  const createCheckout = useAction((api as any).sumit.createCheckoutSession);
 
   const handleCheckout = useCallback(
-    async (plan: "basic" | "premium") => {
+    async (plan: "basic" | "premium" | "vip") => {
       setIsCheckingOut(true);
+      setCheckoutNotice(null);
       try {
         const result = await createCheckout({ plan });
+        if (result.status === "credentials_pending") {
+          setCheckoutNotice(
+            result.message ??
+              "מעבד התשלומים בהקמה. נא לחזור בקרוב או ליצור קשר."
+          );
+          return;
+        }
+        if (result.status === "api_error") {
+          setCheckoutNotice(result.message ?? "שגיאה בתשלום. נסה שוב.");
+          return;
+        }
         if (result.url) {
           window.location.href = result.url;
         }

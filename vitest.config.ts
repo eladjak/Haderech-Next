@@ -8,6 +8,16 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/__tests__/setup.ts"],
+    // Phase 14 hardening: exclude Playwright e2e tests from vitest runs.
+    // Playwright is invoked separately via `npm run test:e2e`.
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.next/**",
+      "e2e/**",
+      "tests/**",
+    ],
   },
   resolve: {
     alias: {
