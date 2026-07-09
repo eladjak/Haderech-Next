@@ -2,6 +2,7 @@ import {
   query,
   mutation,
   internalMutation,
+  internalQuery,
   action,
 } from "./_generated/server";
 import { v } from "convex/values";
@@ -333,6 +334,11 @@ export const deleteSession = mutation({
 // Action - calls Claude API
 // -----------------------------------------------
 
+// Cost hardening (Phase 14, salvaged from worktree thirsty-blackwell-e44426):
+// per-user hourly rate limit + input size cap — prevent runaway AI cost.
+const HOURLY_MESSAGE_LIMIT = 60;
+const MAX_MESSAGE_CHARS = 4000;
+
 export const sendMessage = action({
   args: {
     sessionId: v.id("chatSessions"),
@@ -353,10 +359,29 @@ export const sendMessage = action({
       throw new Error("Not authorized to send messages in this session");
     }
 
+    // 0b. Input validation — reject empty / oversized messages.
+    const trimmed = args.userMessage.trim();
+    if (!trimmed) throw new Error("Empty message");
+    if (trimmed.length > MAX_MESSAGE_CHARS) {
+      throw new Error(`הודעה ארוכה מדי (מקסימום ${MAX_MESSAGE_CHARS} תווים)`);
+    }
+
+    // 0c. Rate-limit: count this user's messages in the last hour
+    // across all sessions (cost hardening — prevent runaway spend).
+    const recent = await ctx.runQuery(internal.chat.countRecentUserMessages, {
+      userId: identity.subject,
+      sinceMs: Date.now() - 60 * 60 * 1000,
+    });
+    if (recent >= HOURLY_MESSAGE_LIMIT) {
+      throw new Error(
+        `הגעת למגבלת ${HOURLY_MESSAGE_LIMIT} הודעות לשעה. נסה שוב בעוד שעה.`
+      );
+    }
+
     // 1. Save user message
     await ctx.runMutation(internal.chat.addUserMessage, {
       sessionId: args.sessionId,
-      content: args.userMessage,
+      content: trimmed,
     });
 
     // 3. Get all messages (including system) for API call
@@ -376,7 +401,7 @@ export const sendMessage = action({
           lessonId: session.lessonId,
         }).then((r) => r?.context ?? null)
       : null;
-    const templateReply = buildTemplateReply(args.userMessage, fallbackLessonCtx);
+    const templateReply = buildTemplateReply(trimmed, fallbackLessonCtx);
 
     const ai = await generateChat({
       system: allMessages.systemPrompt,
@@ -391,8 +416,8 @@ export const sendMessage = action({
     // 5. Auto-generate title from first exchange if no title yet
     let updateTitle: string | undefined;
     if (!session.title && session.messageCount <= 2) {
-      updateTitle = args.userMessage.slice(0, 50);
-      if (args.userMessage.length > 50) updateTitle += "...";
+      updateTitle = trimmed.slice(0, 50);
+      if (trimmed.length > 50) updateTitle += "...";
     }
 
     // 6. Save assistant response
@@ -403,6 +428,32 @@ export const sendMessage = action({
     });
 
     return assistantContent;
+  },
+});
+
+// Count user-role messages across all of a user's sessions since a
+// timestamp. Used by sendMessage for hourly rate-limiting (internal —
+// not exposed to clients).
+export const countRecentUserMessages = internalQuery({
+  args: { userId: v.string(), sinceMs: v.number() },
+  handler: async (ctx, args): Promise<number> => {
+    const sessions = await ctx.db
+      .query("chatSessions")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    let total = 0;
+    for (const s of sessions) {
+      const msgs = await ctx.db
+        .query("chatMessages")
+        .withIndex("by_session_created", (q) =>
+          q.eq("sessionId", s._id).gte("createdAt", args.sinceMs)
+        )
+        .collect();
+      total += msgs.filter((m) => m.role === "user").length;
+      if (total >= HOURLY_MESSAGE_LIMIT) return total; // short-circuit
+    }
+    return total;
   },
 });
 
