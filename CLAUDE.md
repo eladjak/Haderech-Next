@@ -8,6 +8,29 @@
 
 ---
 
+## 🎨 BRAND — חלק מאקוסיסטם אומנות הקשר
+
+> חוק קשיח (Sprint 2026-05-15): פלטפורמת הקורס חייבת להיראות ולהתנהג כחלק
+> מאותה משפחה של `omanut-hakesher-website`. לקוח שעובר בין הדומיינים צריך לחוש
+> שזה אותו מותג ואותו אלעד.
+
+**קרא לפני כל שינוי עיצוב:**
+1. `~/projects/omanut-hakesher-website/.claude/BRAND.md` — מקור האמת לטוקנים, Header, Footer, מערכת מוטיב
+2. `~/projects/omanut-hakesher-website/.claude/ECOSYSTEM-UNIFICATION-PLAN.md` — 7 פאזות איחוד, ~3.5h
+3. `~/projects/omanut-hakesher-website/.claude/scrape/HADERECH_ALIGNMENT.md` — 8 swaps קונקרטיים
+
+**אסור (off-brand):**
+- `#2563EB` royal blue · `#14B8A6` teal · `#F7F9FC` cool-gray bg
+- `rounded-xl` buttons (חייב pill `rounded-full`)
+- gradient text/buttons ללא אישור
+- `font-style: italic` על Hebrew serif
+
+**מותר ולא להעביר ל-omanut:** framer-motion stagger, `card-hover`, `shimmer-effect`,
+תצוגות LMS צפופות (`student/dashboard`, `admin/`), Clerk auth UI. אסור להעביר
+gender-themes ל-LMS — מעבר מצבי-מגדר באמצע שיעור עוין למשתמש.
+
+---
+
 ## 🔴 חובה בכל סשן:
 
 ### בהתחלה:
@@ -127,3 +150,35 @@ Before designing ANY UI component, page, or layout:
 - Framer Motion or CSS transforms only
 - Max 200ms for feedback animations
 - No width/height/top/left animations - use transform/opacity
+
+
+---
+
+## Iteration Protocol (MANDATORY)
+
+This project follows the global iteration protocol:
+- Reference: `~/.claude/rules/iteration-protocol.md`
+- Update `PROGRESS.md` every 10-15 exchanges
+- End every session with verification + HTML review
+- Non-negotiable: PROGRESS.md must be updated before session ends
+
+
+---
+
+## 🏭 AI Factory / Agent Network (Sprint 5, Apr 2026)
+
+See `~/.claude/AI_FACTORY_ARCHITECTURE.md` for full details.
+
+**Delegator API** (http://37.27.31.1:3900) — single entry point for content/research/messaging:
+- `/pipeline/full` — research + landing page + email + social post in 78s
+- `/content-studio/generate` — AI content pipeline (Sanity + 10 brands)
+- `/sms/send` — Rav Messer Israeli SMS
+- `/postiz/post` — multi-platform social publish
+- `/drive/search`, `/calendar/check` — Google (OAuth configured)
+
+**10 agents**: Kami (WA :3001), Kaylee (infra :18789), Claude Code, CrewAI (:8001), Dashboard, + Hermes / n8n / Ollama / Uptime Kuma / Coolify
+
+**Public URLs**: kami.eladjak.com · content-social.eladjak.com · pages.fullstack-eladjak.co.il · studio.fullstack-eladjak.co.il
+
+When building features that need content, publishing, messaging, or research — call the delegator instead of reimplementing.
+

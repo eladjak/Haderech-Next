@@ -89,9 +89,10 @@ export default function AdminQuizzesPage() {
   const updateQuiz = useMutation(api.adminQuizzes.update);
   const removeQuiz = useMutation(api.adminQuizzes.remove);
 
-  // Data
-  const quizzes = convexQuizzes ?? mockQuizzes;
-  const lessons = convexLessons ?? mockLessons;
+  // Phase 14: Real Convex data only — mock only retained for course title fallback.
+  const isLoadingQuizzes = convexQuizzes === undefined;
+  const quizzes = convexQuizzes ?? [];
+  const lessons = convexLessons ?? [];
   const course = convexCourse ?? mockCourse;
 
   // ─── State ──────────────────────────────────────────────────────────────────
@@ -261,7 +262,9 @@ export default function AdminQuizzesPage() {
               ניהול בחנים
             </h1>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              {quizzes.length} בחנים בקורס &quot;{course?.title}&quot;
+              {isLoadingQuizzes
+                ? "טוען בחנים..."
+                : `${quizzes.length} בחנים בקורס "${course?.title}"`}
             </p>
           </div>
           <button

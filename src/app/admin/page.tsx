@@ -4,78 +4,25 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 
-// Mock data - used when Convex backend is not connected
-const mockStats = {
-  totalStudents: 47,
-  totalCourses: 3,
-  totalEnrollments: 89,
-  totalCertificates: 12,
-  averageProgress: 64,
-  completionRate: 38,
+// Phase 14: Mock data REMOVED — all stats come from Convex.
+// During loading, show zeros + "טוען..." instead of fake numbers.
+const EMPTY_STATS = {
+  totalStudents: 0,
+  totalCourses: 0,
+  totalEnrollments: 0,
+  totalCertificates: 0,
+  averageProgress: 0,
+  completionRate: 0,
 };
 
-const mockRecentActivity = [
-  {
-    type: "enrollment" as const,
-    userName: "דנה כהן",
-    courseName: "אומנות ההקשבה",
-    timestamp: Date.now() - 1000 * 60 * 15,
-  },
-  {
-    type: "certificate" as const,
-    userName: "אבי לוי",
-    courseName: "תקשורת זוגית מתקדמת",
-    timestamp: Date.now() - 1000 * 60 * 45,
-  },
-  {
-    type: "enrollment" as const,
-    userName: "מיכל ברק",
-    courseName: "מפתחות לאינטימיות",
-    timestamp: Date.now() - 1000 * 60 * 90,
-  },
-  {
-    type: "enrollment" as const,
-    userName: "יוסי אברהם",
-    courseName: "אומנות ההקשבה",
-    timestamp: Date.now() - 1000 * 60 * 120,
-  },
-  {
-    type: "certificate" as const,
-    userName: "רונית שמש",
-    courseName: "אומנות ההקשבה",
-    timestamp: Date.now() - 1000 * 60 * 180,
-  },
-  {
-    type: "enrollment" as const,
-    userName: "עידו פרץ",
-    courseName: "תקשורת זוגית מתקדמת",
-    timestamp: Date.now() - 1000 * 60 * 240,
-  },
-  {
-    type: "enrollment" as const,
-    userName: "שרה גולד",
-    courseName: "מפתחות לאינטימיות",
-    timestamp: Date.now() - 1000 * 60 * 360,
-  },
-  {
-    type: "certificate" as const,
-    userName: "דוד חן",
-    courseName: "מפתחות לאינטימיות",
-    timestamp: Date.now() - 1000 * 60 * 480,
-  },
-  {
-    type: "enrollment" as const,
-    userName: "נועה רז",
-    courseName: "אומנות ההקשבה",
-    timestamp: Date.now() - 1000 * 60 * 600,
-  },
-  {
-    type: "enrollment" as const,
-    userName: "אלון מזרחי",
-    courseName: "תקשורת זוגית מתקדמת",
-    timestamp: Date.now() - 1000 * 60 * 720,
-  },
-];
+type ActivityItem = {
+  type: "enrollment" | "certificate";
+  userName: string;
+  courseName: string;
+  timestamp: number;
+};
+
+const EMPTY_ACTIVITY: ActivityItem[] = [];
 
 function formatRelativeTime(timestamp: number): string {
   const diff = Date.now() - timestamp;
@@ -90,12 +37,13 @@ function formatRelativeTime(timestamp: number): string {
 }
 
 export default function AdminDashboardPage() {
-  // Try to fetch real data from Convex; fall back to mock data
+  // Phase 14: Real Convex data only. Loading state shown when undefined.
   const convexStats = useQuery(api.admin.getStats);
   const convexActivity = useQuery(api.admin.getRecentActivity);
 
-  const stats = convexStats ?? mockStats;
-  const recentActivity = convexActivity ?? mockRecentActivity;
+  const isLoading = convexStats === undefined || convexActivity === undefined;
+  const stats = convexStats ?? EMPTY_STATS;
+  const recentActivity = convexActivity ?? EMPTY_ACTIVITY;
 
   return (
     <div>
@@ -105,6 +53,12 @@ export default function AdminDashboardPage() {
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           סקירה כללית של מערכת הלימודים
+          {isLoading && (
+            <span className="mr-2 inline-flex items-center gap-1 text-xs text-zinc-400">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400" />
+              טוען נתונים אמיתיים...
+            </span>
+          )}
         </p>
       </div>
 

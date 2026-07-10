@@ -1,32 +1,96 @@
 @import "tailwindcss";
 
+/* Omanut HaKesher canonical palette — see .claude/BRAND.md in omanut-hakesher-website */
 :root {
-  --background: #F7F9FC;
+  --radius: 0.75rem;
+
+  /* Core surface */
+  --background: #FFFAF7; /* warm cream — was cool blue-gray */
   --foreground: #1a1a2e;
-  /* HaDerekh Next - Educational platform brand colors */
-  --brand-50: #EFF6FF;
-  --brand-100: #DBEAFE;
-  --brand-200: #BFDBFE;
-  --brand-300: #60A5FA;
-  --brand-400: #3B82F6;
-  --brand-500: #2563EB;
-  --brand-600: #1D4ED8;
-  --brand-700: #1E40AF;
-  /* Deep Navy */
-  --blue-50: #EFF6FF;
-  --blue-100: #DBEAFE;
-  --blue-500: #1E3A5F;
-  --blue-600: #152B47;
-  --blue-700: #0f1f33;
-  /* Warm Teal accent */
-  --accent-300: #5EEAD4;
-  --accent-400: #2DD4BF;
-  --accent-500: #14B8A6;
+  --muted: #F5EDE8;
+  --muted-foreground: #5a5a6e;
+  --border: #E8DDD5;
+  --input: #E8DDD5;
+  --card: #ffffff;
+  --card-foreground: #1a1a2e;
+
+  /* Primary — rose/red (logo hearts) */
+  --primary: #E85D75;
+  --primary-light: #F08C9E;
+  --primary-dark: #C94A62;
+  --primary-foreground: #ffffff;
+
+  /* Secondary — deep navy (logo center heart) */
+  --secondary: #1E3A5F;
+  --secondary-light: #2C5280;
+  --secondary-dark: #152B47;
+  --secondary-foreground: #ffffff;
+
+  /* Accent — warm gold */
+  --accent: #D4A853;
+  --accent-light: #E8C97D;
+  --accent-dark: #B08A3A;
+  --accent-foreground: #1a1a2e;
+
+  --ring: #E85D75;
+  --destructive: #e74c3c;
+
+  /* Legacy token mapping — keep old NAMES alive, point at canonical values
+     so existing haderech components don't break during the rebrand. */
+  --brand-50:  #FFF1F4; /* tint of primary */
+  --brand-100: #FCE3E9;
+  --brand-200: #F7C4CE;
+  --brand-300: #F08C9E; /* primary-light */
+  --brand-400: #ED7388;
+  --brand-500: #E85D75; /* primary */
+  --brand-600: #C94A62; /* primary-dark */
+  --brand-700: #A93B50;
+
+  --blue-50:  #E7EEF6; /* tint of secondary */
+  --blue-100: #CDD9E8;
+  --blue-500: #1E3A5F; /* secondary */
+  --blue-600: #152B47; /* secondary-dark */
+  --blue-700: #0F1F33;
+
+  --accent-300: #E8C97D; /* accent-light — was teal */
+  --accent-400: #DCB868;
+  --accent-500: #D4A853; /* accent — was teal-500 */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+
+  /* Canonical brand tokens */
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-light: var(--secondary-light);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-foreground: var(--accent-foreground);
+
+  /* Radius scale */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Legacy token aliases — kept so existing components keep building */
   --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
   --color-brand-200: var(--brand-200);
@@ -43,17 +107,32 @@
   --color-accent-300: var(--accent-300);
   --color-accent-400: var(--accent-400);
   --color-accent-500: var(--accent-500);
+
   --font-sans: var(--font-heebo);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f1523;
-    --foreground: #ededed;
-    --brand-50: #1e2a3d;
-    --brand-100: #1e3a5f;
-    --blue-50: #1a2535;
-    --blue-100: #1e2d42;
+    --background: #0F1729;
+    --foreground: #f5f5f5;
+    --muted: #1A2438;
+    --muted-foreground: #b8b8c4;
+    --card: #15203A;
+    --card-foreground: #f5f5f5;
+    --border: #25324C;
+    --input: #25324C;
+
+    --primary: #F08C9E;
+    --primary-foreground: #0F1729;
+    --secondary: #4A7AB5;
+    --secondary-foreground: #0F1729;
+    --accent: #E8C97D;
+    --accent-foreground: #0F1729;
+
+    --brand-50: #2A1820;
+    --brand-100: #3D2530;
+    --blue-50: #1A2535;
+    --blue-100: #1E2D42;
   }
 }
 
@@ -61,11 +140,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-heebo), Arial, Helvetica, sans-serif;
+  line-height: 1.7; /* BRAND.md §2 — Hebrew body line-height */
+  font-variant-numeric: tabular-nums;
 }
 
-/* Accessible focus ring */
+/* Accessible focus ring — token-driven */
 :focus-visible {
-  outline: 2px solid #2563EB;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: 4px;
 }

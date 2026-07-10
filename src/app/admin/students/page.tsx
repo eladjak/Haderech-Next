@@ -160,8 +160,10 @@ function formatRelativeTime(timestamp: number): string {
 type Student = (typeof mockStudents)[number];
 
 export default function AdminStudentsPage() {
+  // Phase 14: Real Convex data only.
   const convexStudents = useQuery(api.admin.listStudents);
-  const students = (convexStudents ?? mockStudents) as Student[];
+  const isLoading = convexStudents === undefined;
+  const students = (convexStudents ?? []) as Student[];
 
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -182,7 +184,7 @@ export default function AdminStudentsPage() {
           ניהול סטודנטים
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {students.length} סטודנטים רשומים
+          {isLoading ? "טוען נתונים..." : `${students.length} סטודנטים רשומים`}
         </p>
       </div>
 

@@ -99,8 +99,9 @@ export default function AdminLessonsPage() {
   const removeLesson = useMutation(api.adminLessons.remove);
   const reorderLessons = useMutation(api.adminLessons.reorder);
 
-  // Use Convex data or mock
-  const lessons = convexLessons ?? mockLessons;
+  // Phase 14: Real Convex data only — mock only used in dev when course missing.
+  const isLoadingLessons = convexLessons === undefined;
+  const lessons = convexLessons ?? [];
   const course = convexCourse ?? mockCourse;
 
   // ─── State ──────────────────────────────────────────────────────────────────
@@ -248,7 +249,9 @@ export default function AdminLessonsPage() {
               ניהול שיעורים
             </h1>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              {lessons.length} שיעורים בקורס &quot;{course?.title}&quot;
+              {isLoadingLessons
+                ? "טוען שיעורים..."
+                : `${lessons.length} שיעורים בקורס "${course?.title}"`}
             </p>
           </div>
           <button

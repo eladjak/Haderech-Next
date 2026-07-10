@@ -61,12 +61,14 @@ const emptyForm: CourseFormData = {
 };
 
 export default function AdminCoursesPage() {
+  // Phase 14: Real Convex data only — no mock fallback in production view.
   const convexCourses = useQuery(api.admin.listAllCourses);
   const createCourse = useMutation(api.admin.createCourse);
   const updateCourse = useMutation(api.admin.updateCourse);
   const deleteCourse = useMutation(api.admin.deleteCourse);
 
-  const courses = convexCourses ?? mockCourses;
+  const isLoadingCourses = convexCourses === undefined;
+  const courses = convexCourses ?? [];
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -158,7 +160,7 @@ export default function AdminCoursesPage() {
             ניהול קורסים
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {courses.length} קורסים במערכת
+            {isLoadingCourses ? "טוען נתונים..." : `${courses.length} קורסים במערכת`}
           </p>
         </div>
         <button
