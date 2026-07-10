@@ -104,7 +104,6 @@ export function Footer() {
             <FooterLink href="/about">אודות</FooterLink>
             <FooterLink href="/help">עזרה</FooterLink>
             <FooterLink href="/contact">צרו קשר</FooterLink>
-            <FooterLink href="/cv-elad-yaakobovitch-he.pdf">קורות חיים — אלעד יעקובוביץ</FooterLink>
           </nav>
 
           {/* Social */}
