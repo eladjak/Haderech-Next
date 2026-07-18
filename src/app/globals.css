@@ -228,3 +228,62 @@ html {
   width: 1px;
   background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
+
+/* ─── wow-ui-standard: bidirectional scroll-reveal (principle 3) ──────────────
+   Base render ships VISIBLE (no-JS / crawler safe). The .wow-reveal class is
+   added at runtime by <ScrollReveal> only when motion is allowed. Motion diet:
+   transform + opacity only. */
+.wow-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.wow-reveal.in {
+  opacity: 1;
+  transform: none;
+}
+.wow-reveal.out-up {
+  opacity: 0;
+  transform: translateY(-16px);
+}
+
+/* ─── reduced-motion belt (triple-belt CSS layer) ────────────────────────────
+   Kills every duration/delay AND restores the final visible state of the new
+   reveal wrappers AND every pre-existing infinite decorative animation (float,
+   gradients, shimmer) which previously had no reduced-motion protection.
+   Placed at the END of the stylesheet so it wins the cascade. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+    transition-delay: 0s !important;
+  }
+
+  /* Scroll-reveal wrappers always land at their final visible state. */
+  .wow-reveal,
+  .wow-reveal.in,
+  .wow-reveal.out-up {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Silence the ambient/decorative loops (they added no information). */
+  .animate-gradient,
+  .animate-hero-gradient,
+  .animate-float,
+  .animate-float-slow,
+  .shimmer-effect::after,
+  .animate-pulse {
+    animation: none !important;
+  }
+}
