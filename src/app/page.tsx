@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CountUp } from "@/components/ui/count-up";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -94,7 +95,7 @@ export default function Home() {
               >
                 <Link
                   href="/courses"
-                  className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-base font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30 hover:brightness-110"
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-base font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30 hover:brightness-110 active:scale-[0.97]"
                 >
                   התחילו את המסע
                   <svg
@@ -115,7 +116,7 @@ export default function Home() {
               </motion.div>
               <Link
                 href="/sign-up"
-                className="inline-flex h-12 items-center justify-center rounded-xl border border-blue-500/20 bg-white px-8 text-base font-semibold text-blue-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-brand-200/30 dark:hover:bg-brand-50/20"
+                className="inline-flex h-12 items-center justify-center rounded-xl border border-blue-500/20 bg-white px-8 text-base font-semibold text-blue-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 active:scale-[0.97] dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-brand-200/30 dark:hover:bg-brand-50/20"
               >
                 התחל בחינם
               </Link>
@@ -627,13 +628,13 @@ function StatItem({ value, label, hasDivider }: { value: string; label: string; 
   return (
     <motion.div variants={fadeIn} className={`relative flex flex-col items-center gap-1.5 ${hasDivider ? "stat-divider" : ""}`}>
       <motion.span
-        className="text-4xl font-black text-white drop-shadow-sm md:text-5xl"
+        className="text-4xl font-black text-white drop-shadow-sm md:text-5xl [font-variant-numeric:tabular-nums]"
         initial={{ opacity: 0, scale: 0.5 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
       >
-        {value}
+        <CountUp>{value}</CountUp>
       </motion.span>
       <span className="text-sm font-medium tracking-wide text-white/70">{label}</span>
     </motion.div>

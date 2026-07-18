@@ -6,6 +6,8 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CourseCard } from "@/components/course/course-card";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { CountUp } from "@/components/ui/count-up";
 
 const LEVEL_LABELS: Record<string, string> = {
   beginner: "מתחילים",
@@ -55,7 +57,7 @@ export default function CoursesPage() {
           <div className="absolute -top-12 right-1/4 h-64 w-64 rounded-full bg-brand-100/30 blur-3xl dark:bg-brand-100/10" />
           <div className="absolute top-8 left-1/3 h-48 w-48 rounded-full bg-blue-50/20 blur-3xl dark:bg-blue-100/5" />
         </div>
-        <div className="container relative mx-auto px-4 pb-10 pt-16 text-center md:pt-20">
+        <ScrollReveal className="container relative mx-auto px-4 pb-10 pt-16 text-center md:pt-20">
           <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
             למידה שמשנה חיים
           </span>
@@ -70,10 +72,13 @@ export default function CoursesPage() {
               <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342" />
               </svg>
-              {filteredCourses.length} קורסים זמינים
+              <span className="[font-variant-numeric:tabular-nums]">
+                <CountUp>{`${filteredCourses.length}`}</CountUp>
+              </span>{" "}
+              קורסים זמינים
             </div>
           )}
-        </div>
+        </ScrollReveal>
       </section>
 
       <main id="main-content" className="container mx-auto px-4 py-10">
@@ -112,7 +117,7 @@ export default function CoursesPage() {
             <button
               type="button"
               onClick={() => { setSelectedCategory("all"); setSelectedLevel("all"); }}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 ${
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                 selectedCategory === "all" && selectedLevel === "all"
                   ? "bg-brand-500 text-white shadow-sm shadow-brand-500/20"
                   : "border border-brand-100/50 bg-white text-blue-500/70 hover:border-brand-200 hover:bg-brand-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
@@ -127,7 +132,7 @@ export default function CoursesPage() {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(selectedCategory === cat ? "all" : cat)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                   selectedCategory === cat
                     ? "bg-brand-500 text-white shadow-sm shadow-brand-500/20"
                     : "border border-brand-100/50 bg-white text-blue-500/70 hover:border-brand-200 hover:bg-brand-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
@@ -148,7 +153,7 @@ export default function CoursesPage() {
                 key={key}
                 type="button"
                 onClick={() => setSelectedLevel(selectedLevel === key ? "all" : key)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                   selectedLevel === key
                     ? "bg-blue-500 text-white shadow-sm shadow-blue-500/20"
                     : "border border-brand-100/50 bg-white text-blue-500/70 hover:border-blue-100 hover:bg-blue-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
