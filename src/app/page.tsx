@@ -443,6 +443,7 @@ export default function Home() {
               איך תוכנית "הדרך" עובדת?
             </h2>
           </motion.div>
+          <h4 className="sr-only">שישה שלבי התוכנית לפי שבועות</h4>
           <motion.div
             className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
             initial="hidden"
