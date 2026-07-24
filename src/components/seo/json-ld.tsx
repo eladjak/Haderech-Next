@@ -138,6 +138,7 @@ export function HomePageFallback() {
         </section>
         <section>
           <h2>מה בתוכנית?</h2>
+          <h4>רכיבי התוכנית המרכזיים</h4>
           <ul>
             <li>75 שיעורי וידאו בעברית</li>
             <li>צ&apos;אט AI חכם המבוסס על תכני אומנות הקשר</li>
