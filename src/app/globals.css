@@ -105,7 +105,9 @@ html {
 .card-hover {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
-.card-hover:hover {
+.card-hover:hover,
+.card-hover:focus-visible,
+.card-hover:focus-within {
   transform: translateY(-3px) scale(1.005);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(37, 99, 235, 0.06);
 }
