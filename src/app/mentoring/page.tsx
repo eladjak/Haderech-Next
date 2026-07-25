@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
+import { fallbackAvatar } from "@/lib/fallback-avatar";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import type { Id } from "@/../convex/_generated/dataModel";
@@ -36,14 +38,6 @@ const STATUS_COLORS: Record<string, string> = {
   completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
   cancelled: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
 };
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2);
-}
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -413,9 +407,13 @@ function MentorCard({ mentor }: { mentor: MentorData }) {
               className="h-14 w-14 rounded-full object-cover ring-2 ring-brand-100 dark:ring-zinc-700"
             />
           ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-lg font-bold text-white ring-2 ring-brand-100 dark:ring-zinc-700">
-              {getInitials(mentor.displayName)}
-            </div>
+            <Image
+              src={fallbackAvatar(mentor.displayName)}
+              alt=""
+              width={56}
+              height={56}
+              className="h-14 w-14 rounded-full object-cover ring-2 ring-brand-100 dark:ring-zinc-700"
+            />
           )}
           <div>
             <h3 className="text-lg font-bold text-zinc-900 dark:text-white">

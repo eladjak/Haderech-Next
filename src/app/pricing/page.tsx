@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAction } from "convex/react";
@@ -811,6 +812,17 @@ export default function PricingPage() {
               >
                 התחל בחינם, שדרג כשתרגיש מוכן. ביטול בכל עת.
               </motion.p>
+
+              <motion.div variants={fadeIn} className="mb-10">
+                <Image
+                  src="/images/illustrations/header-pricing.webp"
+                  alt="איור: שלושה פנסים זוהרים בגדלים עולים תלויים בגבהים שונים מעל נוף גבעות בשעת דמדומים, ולמטה שביל מתפתל"
+                  width={1536}
+                  height={1024}
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  className="mx-auto w-full max-w-xl rounded-3xl shadow-md ring-1 ring-black/5 dark:ring-white/10"
+                />
+              </motion.div>
 
               {/* Billing toggle */}
               <motion.div variants={fadeIn}>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
@@ -189,19 +190,14 @@ export default function ResourcesPage() {
                 </div>
               ) : allResources?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center text-zinc-400">
-                  <svg
-                    className="mb-4 h-12 w-12 opacity-30"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                    />
-                  </svg>
+                  <Image
+                    src="/images/illustrations/empty-resources.webp"
+                    alt="איור: ערימת ספרים סגורים ומפה מקופלת מונחות על גבעה בשעת דמדומים לצד פנס בעל אור חם"
+                    width={900}
+                    height={600}
+                    sizes="(max-width: 640px) 100vw, 380px"
+                    className="mb-5 w-full max-w-[380px] rounded-2xl"
+                  />
                   <p className="text-lg font-medium">לא נמצאו משאבים</p>
                   <p className="mt-1 text-sm">נסה לשנות את מילות החיפוש או הפילטרים</p>
                   <button

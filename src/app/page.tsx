@@ -291,9 +291,25 @@ export default function Home() {
             <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
               מה מחכה לך
             </span>
-            <h2 id="ecosystem-heading" className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
+            <h2 id="ecosystem-heading" className="mb-8 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               לא סתם קורס - אקוסיסטם שלם
             </h2>
+          </motion.div>
+          <motion.div
+            className="mx-auto mb-12 max-w-3xl"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <Image
+              src="/images/illustrations/home-ecosystem.webp"
+              alt="איור: כמה שבילים מתפתלים על פני גבעות בשעת דמדומים מתאחדים לדרך רחבה אחת שמובילה אל שמש זוהרת, ואנשים הולכים על השבילים השונים"
+              width={1536}
+              height={1024}
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="w-full rounded-3xl shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+            />
           </motion.div>
           <motion.div
             className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4"
@@ -451,12 +467,12 @@ export default function Home() {
             viewport={{ once: true }}
             variants={staggerContainer}
           >
-            <PhaseCard step="1" color="from-brand-500 to-brand-600" title="גישה" weeks="שבועות 1-3" description="עבודה פנימית, סיפורים, גבולות" />
-            <PhaseCard step="2" color="from-blue-500 to-blue-600" title="תקשורת" weeks="שבועות 4-5" description="היכרות עצמית, רגשות, צרכים" />
-            <PhaseCard step="3" color="from-accent-400 to-accent-500" title="משיכה" weeks="שבועות 6-9" description="אומץ, היכרויות, דייטים" />
-            <PhaseCard step="4" color="from-brand-400 to-blue-500" title="חיבור" weeks="שבוע 10" description="כימיה, הקשבה, יצירת הזדמנויות" />
-            <PhaseCard step="5" color="from-blue-400 to-brand-400" title="אינטימיות" weeks="שבוע 11" description="פגיעות, קרבה, 36 שאלות להתאהבות" />
-            <PhaseCard step="6" color="from-blue-500 to-brand-500" title="מחויבות" weeks="שבוע 12" description="החלטה, זוגיות רשמית, בניית עתיד" />
+            <PhaseCard step="1" color="from-brand-500 to-brand-600" title="גישה" weeks="שבועות 1-3" description="עבודה פנימית, סיפורים, גבולות" image="/images/illustrations/step-1.webp" imageAlt="איור: אדם יושב לבדו על גבעה בשעת דמדומים, פונה פנימה, ולמרגלותיו שתיל ושורשיו באדמה" />
+            <PhaseCard step="2" color="from-blue-500 to-blue-600" title="תקשורת" weeks="שבועות 4-5" description="היכרות עצמית, רגשות, צרכים" image="/images/illustrations/step-2.webp" imageAlt="איור: שני אנשים עומדים זה מול זה על גבעה, ובועת דיבור רכה וריקה מרחפת ביניהם" />
+            <PhaseCard step="3" color="from-accent-400 to-accent-500" title="משיכה" weeks="שבועות 6-9" description="אומץ, היכרויות, דייטים" image="/images/illustrations/step-3.webp" imageAlt="איור: שני שבילים מתפתלים על גבעות מתקרבים זה לזה, אדם הולך על כל אחד מהם, וזוהר חם במקום המפגש" />
+            <PhaseCard step="4" color="from-brand-400 to-blue-500" title="חיבור" weeks="שבוע 10" description="כימיה, הקשבה, יצירת הזדמנויות" image="/images/illustrations/step-4.webp" imageAlt="איור: שני אנשים עומדים זה לצד זה על גבעה, ידיהם כמעט נוגעות, ומטילים צל משותף אחד" />
+            <PhaseCard step="5" color="from-blue-400 to-brand-400" title="אינטימיות" weeks="שבוע 11" description="פגיעות, קרבה, 36 שאלות להתאהבות" image="/images/illustrations/step-5.webp" imageAlt="איור: שני אנשים יושבים קרוב זה לזה על גבעה, מוקפים במעגל אחד של אור חם" />
+            <PhaseCard step="6" color="from-blue-500 to-brand-500" title="מחויבות" weeks="שבוע 12" description="החלטה, זוגיות רשמית, בניית עתיד" image="/images/illustrations/step-6.webp" imageAlt="איור: שני אנשים הולכים יחד במעלה שביל מתפתל לעבר שמש עולה, ובראש הגבעה נראית קשת" />
           </motion.div>
         </div>
       </section>
@@ -751,19 +767,33 @@ function PhaseCard({
   title,
   weeks,
   description,
+  image,
+  imageAlt,
 }: {
   step: string;
   color: string;
   title: string;
   weeks: string;
   description: string;
+  image: string;
+  imageAlt: string;
 }) {
   return (
     <motion.div variants={fadeIn} className="group text-center">
-      <div
-        className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-lg font-bold text-white shadow-lg ring-1 ring-white/20 transition-transform duration-150 group-hover:scale-110`}
-      >
-        {step}
+      <div className="relative mx-auto mb-3 w-full max-w-[150px]">
+        <Image
+          src={image}
+          alt={imageAlt}
+          width={400}
+          height={400}
+          sizes="150px"
+          className="w-full rounded-2xl shadow-md ring-1 ring-black/5 dark:ring-white/10"
+        />
+        <span
+          className={`absolute -top-2 -start-2 flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${color} text-sm font-bold text-white shadow-lg ring-1 ring-white/20`}
+        >
+          {step}
+        </span>
       </div>
       <h3 className="mb-1 text-base font-semibold text-blue-500 dark:text-white">
         {title}

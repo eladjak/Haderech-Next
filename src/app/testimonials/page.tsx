@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
+import { fallbackAvatar } from "@/lib/fallback-avatar";
 import { Header } from "@/components/layout/header";
 import { StarRating } from "@/components/reviews/star-rating";
 import { RatingDistribution } from "@/components/reviews/rating-distribution";
@@ -112,6 +114,18 @@ export default function TestimonialsPage() {
               אומרים על החוויה שלהם.
             </p>
 
+            <div className="mx-auto mb-10 max-w-2xl">
+              <Image
+                src="/images/illustrations/testimonials-hero.webp"
+                alt="איור: חצי מעגל רחב של אנשים בגילים שונים עומדים יחד על גבעות בשעת דמדומים ופניהם אל שמש זוהרת באופק, חלקם בזוגות"
+                width={1536}
+                height={1024}
+                priority
+                sizes="(max-width: 672px) 100vw, 672px"
+                className="aspect-[2/1] w-full rounded-3xl object-cover shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+              />
+            </div>
+
             {/* Global Stats */}
             {isLoading ? (
               <div className="mx-auto grid max-w-xl grid-cols-3 gap-4">
@@ -200,12 +214,6 @@ export default function TestimonialsPage() {
           ) : testimonials && testimonials.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2">
               {testimonials.map((review) => {
-                const initials = review.userName
-                  .split(" ")
-                  .map((n) => n.charAt(0))
-                  .join("")
-                  .slice(0, 2);
-
                 return (
                   <article
                     key={review._id}
@@ -263,9 +271,13 @@ export default function TestimonialsPage() {
                             className="h-10 w-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-sm font-bold text-white">
-                            {initials}
-                          </div>
+                          <Image
+                            src={fallbackAvatar(review._id)}
+                            alt=""
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
                         )}
                         <div>
                           <div className="text-sm font-semibold text-zinc-900 dark:text-white">

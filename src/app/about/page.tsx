@@ -30,6 +30,15 @@ const scaleIn = {
 
 /* ─── Data ────────────────────────────────────────────────────────── */
 
+const PHASE_IMAGE_ALT = [
+  "איור: אדם יושב לבדו על גבעה בשעת דמדומים, פונה פנימה, ולמרגלותיו שתיל ושורשיו באדמה",
+  "איור: שני אנשים עומדים זה מול זה על גבעה, ובועת דיבור רכה וריקה מרחפת ביניהם",
+  "איור: שני שבילים מתפתלים על גבעות מתקרבים זה לזה, אדם הולך על כל אחד מהם, וזוהר חם במקום המפגש",
+  "איור: שני אנשים עומדים זה לצד זה על גבעה, ידיהם כמעט נוגעות, ומטילים צל משותף אחד",
+  "איור: שני אנשים יושבים קרוב זה לזה על גבעה, מוקפים במעגל אחד של אור חם",
+  "איור: שני אנשים הולכים יחד במעלה שביל מתפתל לעבר שמש עולה, ובראש הגבעה נראית קשת",
+];
+
 const PHASES = [
   {
     num: 1,
@@ -388,11 +397,21 @@ export default function AboutPage() {
                   variants={fadeIn}
                   className={`relative overflow-hidden rounded-2xl border p-6 ${phase.bg} ${phase.border} transition-shadow hover:shadow-md`}
                 >
-                  {/* Number badge */}
-                  <div
-                    className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${phase.color} text-sm font-bold text-white shadow-sm`}
-                  >
-                    {phase.num}
+                  {/* Phase illustration + number badge */}
+                  <div className="relative mb-4 w-20">
+                    <Image
+                      src={`/images/illustrations/step-${phase.num}.webp`}
+                      alt={PHASE_IMAGE_ALT[phase.num - 1]}
+                      width={400}
+                      height={400}
+                      sizes="80px"
+                      className="w-20 rounded-xl shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                    />
+                    <span
+                      className={`absolute -top-2 -start-2 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br ${phase.color} text-xs font-bold text-white shadow-sm`}
+                    >
+                      {phase.num}
+                    </span>
                   </div>
 
                   <div className={`mb-0.5 text-xs font-medium uppercase tracking-wider opacity-60 ${phase.text}`}>

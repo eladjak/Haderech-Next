@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -113,6 +114,14 @@ export default function ToolsPage() {
           <p className="mb-8 text-lg text-zinc-500 dark:text-zinc-400">
             כלים חכמים שעוזרים לך בכל שלב בדרך לזוגיות
           </p>
+          <Image
+            src="/images/illustrations/header-tools.webp"
+            alt="איור: נוף גבעות בשעת דמדומים ומעליו מרחפים בשורה מצפן, מפתח, פנס ואבן חלקה"
+            width={1536}
+            height={1024}
+            sizes="(max-width: 768px) 100vw, 640px"
+            className="mb-12 w-full max-w-2xl rounded-3xl shadow-md ring-1 ring-black/5 dark:ring-white/10"
+          />
 
           {/* Available tools */}
           <div className="mb-12">

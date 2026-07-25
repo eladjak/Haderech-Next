@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -211,9 +212,19 @@ export default function CoursesPage() {
                 </p>
               </>
             ) : (
-              <p className="text-lg text-zinc-600 dark:text-zinc-400">
-                עדיין אין קורסים זמינים. חזור בקרוב!
-              </p>
+              <>
+                <Image
+                  src="/images/illustrations/empty-courses.webp"
+                  alt="איור: שביל פתוח מתפתל בין גבעות רכות בשעת דמדומים לעבר שמש זוהרת, ואיש עדיין לא הולך בו"
+                  width={900}
+                  height={600}
+                  sizes="(max-width: 640px) 100vw, 420px"
+                  className="mx-auto mb-5 w-full max-w-[420px] rounded-2xl"
+                />
+                <p className="text-lg text-zinc-600 dark:text-zinc-400">
+                  עדיין אין קורסים זמינים. חזור בקרוב!
+                </p>
+              </>
             )}
           </div>
         )}

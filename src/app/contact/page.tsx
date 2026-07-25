@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation } from "convex/react";
@@ -107,9 +108,17 @@ export default function ContactPage() {
           <h1 className="mb-3 text-4xl font-bold text-zinc-900 dark:text-white">
             צרו קשר
           </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
+          <p className="mb-8 text-lg text-zinc-600 dark:text-zinc-400">
             יש לכם שאלה, הצעה או משוב? נשמח לשמוע מכם.
           </p>
+          <Image
+            src="/images/illustrations/header-contact.webp"
+            alt="איור: שתי גבעות בשעת דמדומים המחוברות בגשר של אור, ובכל קצה עומד אדם ופניו אל השני"
+            width={1536}
+            height={1024}
+            sizes="(max-width: 768px) 100vw, 640px"
+            className="mx-auto w-full max-w-2xl rounded-3xl shadow-md ring-1 ring-black/5 dark:ring-white/10"
+          />
         </motion.div>
 
         <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-5">

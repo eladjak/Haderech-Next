@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/header";
@@ -269,9 +270,17 @@ export default function FAQPage() {
               <h1 className="mb-3 text-4xl font-bold text-zinc-900 dark:text-white">
                 שאלות נפוצות
               </h1>
-              <p className="text-lg text-zinc-600 dark:text-zinc-400">
+              <p className="mb-8 text-lg text-zinc-600 dark:text-zinc-400">
                 מצאו תשובות לכל השאלות על הפלטפורמה, הקורסים וכלי ה-AI
               </p>
+              <Image
+                src="/images/illustrations/empty-faq.webp"
+                alt="איור: שלוש בועות דיבור רכות וריקות מרחפות מעל גבעה שקטה בשעת דמדומים, ושלושה אנשים יושבים למטה"
+                width={900}
+                height={600}
+                sizes="(max-width: 768px) 100vw, 560px"
+                className="mx-auto w-full max-w-xl rounded-3xl shadow-md ring-1 ring-black/5 dark:ring-white/10"
+              />
             </motion.div>
 
             {/* ── Search bar ──────────────────────────────────────────── */}

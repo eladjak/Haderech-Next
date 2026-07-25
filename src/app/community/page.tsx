@@ -5,7 +5,9 @@ import { useQuery, useMutation } from "convex/react";
 import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
+import { fallbackAvatar } from "@/lib/fallback-avatar";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -286,9 +288,13 @@ function TopicCard({ topic }: { topic: CommunityTopicView }) {
 
       <div className="flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500">
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-xs font-bold text-white">
-            {(topic.authorName ?? "מ").charAt(0)}
-          </div>
+          <Image
+            src={fallbackAvatar(topic.authorName ?? "משתמש")}
+            alt=""
+            width={24}
+            height={24}
+            className="h-6 w-6 rounded-full object-cover"
+          />
           <span className="font-medium text-zinc-500 dark:text-zinc-400">
             {topic.authorName ?? "משתמש"}
           </span>
