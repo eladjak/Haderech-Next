@@ -44,7 +44,7 @@ export function BarChart({
               style={{ height: "100%" }}
             >
               <div
-                className={`w-full rounded-t bg-gradient-to-t ${barColor} transition-all duration-300 hover:opacity-80`}
+                className={`w-full rounded-t bg-gradient-to-t ${barColor} transition-opacity duration-300 hover:opacity-80`}
                 style={{
                   height: `${Math.max(heightPercent, item.value > 0 ? 4 : 1)}%`,
                   minHeight: item.value > 0 ? 4 : 1,
@@ -149,7 +149,7 @@ export function HorizontalBarChart({
                 </div>
                 <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                   <div
-                    className={`h-full w-full origin-right rounded-full bg-gradient-to-l ${barColor} transition-transform duration-500`}
+                    className={`h-full w-full origin-right bg-gradient-to-l ${barColor} transition-transform duration-500`}
                     style={{ transform: `scaleX(${Math.max(widthPercent, 1) / 100})` }}
                   />
                 </div>

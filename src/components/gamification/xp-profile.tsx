@@ -84,7 +84,7 @@ export function XpProfile() {
         </div>
         <div className="h-2.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
           <div
-            className="h-full w-full origin-right rounded-full bg-gradient-to-l from-brand-500 to-accent-400 transition-transform duration-500"
+            className="h-full w-full origin-right bg-gradient-to-l from-brand-500 to-accent-400 transition-transform duration-500"
             style={{ transform: `scaleX(${stats.progressPercent / 100})` }}
           />
         </div>

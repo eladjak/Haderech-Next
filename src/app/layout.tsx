@@ -7,6 +7,7 @@ import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { GoogleAnalyticsScript } from "@/components/analytics/ga-script";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { MotionProvider } from "@/components/providers/motion-provider";
 import { ErrorTracker } from "@/components/analytics/error-tracker";
 import { WebsiteJsonLd, HomePageFallback } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
@@ -105,7 +106,9 @@ export default function RootLayout({
           </a>
           <ConvexClientProvider>
             <Suspense>
-              <AnalyticsProvider>{children}</AnalyticsProvider>
+              <AnalyticsProvider>
+                <MotionProvider>{children}</MotionProvider>
+              </AnalyticsProvider>
             </Suspense>
           </ConvexClientProvider>
           <ErrorTracker />

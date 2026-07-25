@@ -117,37 +117,49 @@ html {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(37, 99, 235, 0.06);
   }
 }
-/* Keyboard parity — outside the hover query so it always applies. */
+/* Keyboard parity — outside the hover query so it always applies.
+   `:has(:focus-visible)` rather than `:focus-within`: the latter also matches a
+   descendant focused by a TAP, which latches the lift on touch devices — the
+   very thing the hover media query above prevents.
+   The `a:focus-visible` rule covers the inverse nesting used on the dashboard,
+   where a focusable <Link> WRAPS the card and so is an ancestor, not a
+   descendant, of .card-hover. */
 .card-hover:focus-visible,
-.card-hover:focus-within {
+.card-hover:has(:focus-visible),
+a:focus-visible .card-hover,
+button:focus-visible .card-hover {
   transform: translateY(-3px) scale(1.005);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(37, 99, 235, 0.06);
 }
 
-/* Nav underline — grows on hover with scaleX.
+/* Nav underline — grows from its centre with scaleX.
    The previous implementation tweened `width` (0 -> 60%) and `left`, both
-   layout properties: every frame re-laid-out the pseudo-element. scaleX is a
-   compositor-only transform and is direction-agnostic, so it behaves the same
-   in RTL. The centering translate stays in the transform so the bar grows from
-   its middle. */
+   layout properties, re-laying-out the pseudo-element every frame.
+   NOTE: an earlier attempt used `inset-inline-start: 50%` + `translateX(-50%)`.
+   That is wrong in RTL: the logical start resolves to `right: 50%` while the
+   translate still moves physically left, so the bar landed off-centre and
+   spilled toward the neighbouring link. Offsetting by 20% with a 60% inline
+   size needs no translate at all and is correct in both directions. */
 .nav-underline::after {
   content: "";
   position: absolute;
   inset-block-end: 0.25rem;
-  inset-inline-start: 50%;
-  width: 60%;
-  height: 2px;
+  inset-inline-start: 20%;
+  inline-size: 60%;
+  block-size: 2px;
   border-radius: 9999px;
   background-color: var(--color-brand-500, #2563eb);
-  transform: translateX(-50%) scaleX(0);
+  transform: scaleX(0);
   transform-origin: center;
   transition: transform 150ms ease-out;
   pointer-events: none;
 }
 @media (hover: hover) {
-  .nav-underline:hover::after { transform: translateX(-50%) scaleX(1); }
+  .nav-underline:hover::after { transform: scaleX(1); }
 }
-.nav-underline:focus-visible::after { transform: translateX(-50%) scaleX(1); }
+/* Keyboard parity, plus a persistent underline for the current page. */
+.nav-underline:focus-visible::after,
+.nav-underline[aria-current="page"]::after { transform: scaleX(1); }
 
 /* Glass effect */
 .glass {
@@ -323,7 +335,27 @@ html {
   .card-hover,
   .card-hover:hover,
   .card-hover:focus-visible,
-  .card-hover:focus-within {
+  .card-hover:has(:focus-visible),
+  a:focus-visible .card-hover,
+  button:focus-visible .card-hover {
+    transform: none !important;
+    translate: none !important;
+    scale: none !important;
+  }
+
+  /* Tailwind v4 compiles `scale-*` / `translate-*` to the INDIVIDUAL `scale`
+     and `translate` properties, which `transform: none` cannot cancel — so a
+     `group-hover:scale-105` image still snapped to 105% with reduce-motion on.
+     Scoped to hover/focus state so STATIC utilities keep working: `scale-0` is
+     used to hide the video-player thumb (video-player.tsx:523) and a dashboard
+     element (student/dashboard/page.tsx:727), and blanking those would reveal
+     them at full size. */
+  .group:hover img,
+  .group:hover svg,
+  .group:has(:focus-visible) img,
+  .group:has(:focus-visible) svg {
+    scale: none !important;
+    translate: none !important;
     transform: none !important;
   }
 

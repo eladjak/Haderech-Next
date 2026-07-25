@@ -40,7 +40,7 @@ export function ContinueLearning() {
           <div className="mt-2 flex items-center gap-3">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-brand-100/30 dark:bg-zinc-700">
               <div
-                className="h-full w-full origin-right rounded-full bg-gradient-to-l from-brand-500 to-accent-400 transition-transform duration-500"
+                className="h-full w-full origin-right bg-gradient-to-l from-brand-500 to-accent-400 transition-transform duration-500"
                 style={{ transform: `scaleX(${data.progressPercent / 100})` }}
               />
             </div>
@@ -51,7 +51,7 @@ export function ContinueLearning() {
         </div>
         <Link
           href={`/courses/${data.courseId}/lessons/${data.lastLesson._id}`}
-          className="shrink-0 rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg hover:brightness-110"
+          className="shrink-0 rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:brightness-110"
         >
           המשך
         </Link>

@@ -36,7 +36,7 @@ export function Header() {
   const SignedOutWrapper = DEMO_MODE ? ({ children }: { children: React.ReactNode }) => <span className="hidden">{children}</span> : SignedOut;
 
   return (
-    <header className={`sticky top-0 z-50 w-full border-b transition-all duration-200 ${scrolled ? "border-brand-100/80 bg-white/90 shadow-sm shadow-brand-500/5 dark:border-zinc-700 dark:bg-zinc-950/90" : "border-brand-100/40 bg-white/70 dark:border-zinc-800/60 dark:bg-zinc-950/70"} glass`}>
+    <header className={`sticky top-0 z-50 w-full border-b ${scrolled ? "border-brand-100/80 bg-white/90 shadow-sm shadow-brand-500/5 dark:border-zinc-700 dark:bg-zinc-950/90" : "border-brand-100/40 bg-white/70 dark:border-zinc-800/60 dark:bg-zinc-950/70"} glass`}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-3">
           <Image
@@ -135,7 +135,7 @@ export function Header() {
         role="navigation"
         aria-label="תפריט ניווט נייד"
         aria-hidden={!mobileMenuOpen}
-        className={`border-t border-brand-100/40 bg-white/95 glass px-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 overflow-hidden transition-all duration-200 ease-out ${mobileMenuOpen ? "max-h-[80vh] py-4 opacity-100" : "max-h-0 py-0 opacity-0 pointer-events-none"}`}
+        className={`border-t border-brand-100/40 bg-white/95 glass px-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 overflow-hidden transition-opacity duration-200 ease-out ${mobileMenuOpen ? "max-h-[80vh] py-4 opacity-100" : "max-h-0 py-0 opacity-0 pointer-events-none"}`}
       >
           <nav className="flex flex-col gap-1">
             <MobileNavLink href="/search" onClick={closeMobileMenu}>חיפוש</MobileNavLink>
@@ -182,7 +182,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       aria-current={isActive ? "page" : undefined}
-      className={`nav-underline relative inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${isActive ? "bg-brand-50/80 text-brand-700 dark:bg-zinc-800 dark:text-white" : "text-zinc-600 hover:bg-brand-50/80 hover:text-brand-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"}`}
+      className={`nav-underline relative inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium ${isActive ? "bg-brand-50/80 text-brand-700 dark:bg-zinc-800 dark:text-white" : "text-zinc-600 hover:bg-brand-50/80 hover:text-brand-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"}`}
     >
       {children}
     </Link>

@@ -440,9 +440,9 @@ export default function ValuesQuizPage() {
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                     <motion.div
-                      className="h-full rounded-full bg-gradient-to-l from-pink-500 to-red-500"
-                      initial={{ width: `${progressPercent}%` }}
-                      animate={{ width: `${progressPercent}%` }}
+                      className="h-full w-full origin-right bg-gradient-to-l from-pink-500 to-red-500"
+                      initial={{ scaleX: progressPercent / 100 }}
+                      animate={{ scaleX: progressPercent / 100 }}
                       transition={{ duration: 0.4 }}
                     />
                   </div>
@@ -536,10 +536,10 @@ export default function ValuesQuizPage() {
                       </div>
                       <div className="mb-2 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                         <motion.div
-                          className="h-full rounded-full"
+                          className="h-full w-full origin-right"
                           style={{ backgroundColor: value.color }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(value.score / maxScore) * 100}%` }}
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: (value.score / maxScore) * 100 / 100 }}
                           transition={{ duration: 0.6, delay: i * 0.1 }}
                         />
                       </div>

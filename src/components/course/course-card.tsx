@@ -62,7 +62,7 @@ export function CourseCard({
             className="object-cover transition-transform duration-200 group-hover:scale-105"
           />
           {/* Overlay gradient for better text legibility of badges */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         </div>
       ) : (
         <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-brand-100 via-brand-50 to-blue-50 dark:from-blue-500/40 dark:via-brand-700/30 dark:to-brand-700/40">
@@ -166,7 +166,7 @@ export function CourseCard({
               aria-label={`התקדמות בקורס: ${progressPercent}%`}
             >
               <div
-                className="h-2 w-full origin-right rounded-full bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 shadow-sm shadow-brand-500/20 transition-transform duration-300"
+                className="h-2 w-full origin-right bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 transition-transform duration-300"
                 style={{ transform: `scaleX(${progressPercent / 100})` }}
               />
             </div>
