@@ -101,16 +101,53 @@ html {
   animation: float 4s ease-in-out infinite;
 }
 
-/* Card hover lift */
+/* Card hover lift.
+   Only `transform` is transitioned. box-shadow and border-color are paint
+   properties: transitioning them repaints every card in a grid on every frame
+   of the lift. The shadow still appears on hover — it just arrives with the
+   gesture instead of being tweened. It stays on the element itself (not a
+   pseudo-layer) so an `overflow-hidden` card cannot clip it. */
 .card-hover {
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.18s ease;
 }
-.card-hover:hover,
+/* Touch devices must not latch into a stuck hover state. */
+@media (hover: hover) {
+  .card-hover:hover {
+    transform: translateY(-3px) scale(1.005);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(37, 99, 235, 0.06);
+  }
+}
+/* Keyboard parity — outside the hover query so it always applies. */
 .card-hover:focus-visible,
 .card-hover:focus-within {
   transform: translateY(-3px) scale(1.005);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(37, 99, 235, 0.06);
 }
+
+/* Nav underline — grows on hover with scaleX.
+   The previous implementation tweened `width` (0 -> 60%) and `left`, both
+   layout properties: every frame re-laid-out the pseudo-element. scaleX is a
+   compositor-only transform and is direction-agnostic, so it behaves the same
+   in RTL. The centering translate stays in the transform so the bar grows from
+   its middle. */
+.nav-underline::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0.25rem;
+  inset-inline-start: 50%;
+  width: 60%;
+  height: 2px;
+  border-radius: 9999px;
+  background-color: var(--color-brand-500, #2563eb);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  transition: transform 150ms ease-out;
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .nav-underline:hover::after { transform: translateX(-50%) scaleX(1); }
+}
+.nav-underline:focus-visible::after { transform: translateX(-50%) scaleX(1); }
 
 /* Glass effect */
 .glass {
@@ -276,6 +313,17 @@ html {
   .wow-reveal.in,
   .wow-reveal.out-up {
     opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Zeroing the duration is NOT enough: a hover/focus rule of equal specificity
+     still APPLIES its transform, it just snaps there instantly. These reset the
+     transforms themselves so reduced-motion users get no movement at all.
+     The box-shadow affordance is deliberately kept — only motion is removed. */
+  .card-hover,
+  .card-hover:hover,
+  .card-hover:focus-visible,
+  .card-hover:focus-within {
     transform: none !important;
   }
 

@@ -87,8 +87,8 @@ function SectionBar({
       aria-label={label}
     >
       <div
-        className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
-        style={{ width: `${value}%` }}
+        className="h-2 w-full origin-right rounded-full bg-emerald-500 transition-transform duration-300"
+        style={{ transform: `scaleX(${value / 100})` }}
       />
     </div>
   );

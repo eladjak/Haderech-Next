@@ -166,8 +166,8 @@ export function CourseCard({
               aria-label={`התקדמות בקורס: ${progressPercent}%`}
             >
               <div
-                className="h-2 rounded-full bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 shadow-sm shadow-brand-500/20 transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
+                className="h-2 w-full origin-right rounded-full bg-gradient-to-l from-brand-500 via-brand-400 to-accent-400 shadow-sm shadow-brand-500/20 transition-transform duration-300"
+                style={{ transform: `scaleX(${progressPercent / 100})` }}
               />
             </div>
           </div>

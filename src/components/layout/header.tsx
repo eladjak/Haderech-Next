@@ -182,7 +182,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       aria-current={isActive ? "page" : undefined}
-      className={`relative inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 after:absolute after:bottom-1 after:left-1/2 after:h-0.5 after:w-0 after:rounded-full after:bg-brand-500 after:transition-all after:duration-150 hover:after:left-[20%] hover:after:w-[60%] ${isActive ? "bg-brand-50/80 text-brand-700 dark:bg-zinc-800 dark:text-white" : "text-zinc-600 hover:bg-brand-50/80 hover:text-brand-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"}`}
+      className={`nav-underline relative inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${isActive ? "bg-brand-50/80 text-brand-700 dark:bg-zinc-800 dark:text-white" : "text-zinc-600 hover:bg-brand-50/80 hover:text-brand-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"}`}
     >
       {children}
     </Link>

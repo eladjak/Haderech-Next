@@ -149,8 +149,8 @@ export function HorizontalBarChart({
                 </div>
                 <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                   <div
-                    className={`h-full rounded-full bg-gradient-to-l ${barColor} transition-all duration-500`}
-                    style={{ width: `${Math.max(widthPercent, 1)}%` }}
+                    className={`h-full w-full origin-right rounded-full bg-gradient-to-l ${barColor} transition-transform duration-500`}
+                    style={{ transform: `scaleX(${Math.max(widthPercent, 1) / 100})` }}
                   />
                 </div>
               </div>

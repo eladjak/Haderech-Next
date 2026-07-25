@@ -40,8 +40,8 @@ export function ContinueLearning() {
           <div className="mt-2 flex items-center gap-3">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-brand-100/30 dark:bg-zinc-700">
               <div
-                className="h-full rounded-full bg-gradient-to-l from-brand-500 to-accent-400 transition-all duration-500"
-                style={{ width: `${data.progressPercent}%` }}
+                className="h-full w-full origin-right rounded-full bg-gradient-to-l from-brand-500 to-accent-400 transition-transform duration-500"
+                style={{ transform: `scaleX(${data.progressPercent / 100})` }}
               />
             </div>
             <span className="text-xs font-medium text-brand-500">
