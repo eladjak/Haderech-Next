@@ -339,8 +339,11 @@ button:focus-visible .card-hover {
   a:focus-visible .card-hover,
   button:focus-visible .card-hover {
     transform: none !important;
-    translate: none !important;
-    scale: none !important;
+    --tw-translate-x: 0 !important;
+    --tw-translate-y: 0 !important;
+    --tw-scale-x: 1 !important;
+    --tw-scale-y: 1 !important;
+    --tw-scale-z: 1 !important;
   }
 
   /* Tailwind v4 compiles `scale-*` / `translate-*` to the INDIVIDUAL `scale`
@@ -354,9 +357,19 @@ button:focus-visible .card-hover {
   .group:hover svg,
   .group:has(:focus-visible) img,
   .group:has(:focus-visible) svg {
-    scale: none !important;
-    translate: none !important;
+    /* Reset Tailwind's OWN custom properties rather than the `scale` /
+       `translate` properties directly. Tailwind v4 compiles `scale-105` to
+       `scale: var(--tw-scale-x) var(--tw-scale-y)` — an individual property
+       that `transform: none` cannot cancel — and lightningcss MERGES a
+       `transform`+`scale`+`translate` triple down to a single `transform`
+       declaration during minification, silently dropping the reset. Setting
+       the variables survives minification and beats the utility either way. */
     transform: none !important;
+    --tw-translate-x: 0 !important;
+    --tw-translate-y: 0 !important;
+    --tw-scale-x: 1 !important;
+    --tw-scale-y: 1 !important;
+    --tw-scale-z: 1 !important;
   }
 
   /* Silence the ambient/decorative loops (they added no information). */
