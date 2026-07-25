@@ -656,8 +656,10 @@ function FeatureCard({
   return (
     <motion.div
       variants={fadeIn}
-      className="card-hover gradient-border-hover rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
+      className="rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
     >
+      {/* L7: no interactive descendant in this card — hover-lift removed (was a
+          visual lie with no keyboard equivalent possible). */}
       <div
         className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${iconBg} shadow-md shadow-brand-500/10 ring-1 ring-white/20`}
       >
@@ -687,8 +689,9 @@ function EcosystemCard({
   return (
     <motion.div
       variants={fadeIn}
-      className="card-hover gradient-border-hover flex flex-col items-center rounded-2xl border border-brand-100/30 bg-white p-5 text-center dark:border-blue-100/10 dark:bg-blue-50/5"
+      className="flex flex-col items-center rounded-2xl border border-brand-100/30 bg-white p-5 text-center dark:border-blue-100/10 dark:bg-blue-50/5"
     >
+      {/* L7: no interactive descendant — hover-lift removed. */}
       <div className="mb-3 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100/50 text-2xl shadow-sm dark:from-brand-50/50 dark:to-brand-100/20">
         {emoji}
       </div>
@@ -895,8 +898,9 @@ function SuccessStoriesSection() {
             <motion.div
               key={story._id}
               variants={fadeIn}
-              className="card-hover relative rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
+              className="relative rounded-2xl border border-brand-100/30 bg-white p-6 dark:border-blue-100/10 dark:bg-blue-50/5"
             >
+              {/* L7: testimonial card has no interactive descendant — hover-lift removed. */}
               {/* Quote icon */}
               <svg
                 className="mb-4 h-8 w-8 text-brand-200 dark:text-brand-200/30"

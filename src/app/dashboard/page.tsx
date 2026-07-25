@@ -441,8 +441,12 @@ function DashboardCard({
   description: string;
   href?: string;
 }) {
+  // L7: hover-lift only makes sense when this card is actually a link — without
+  // `href` it renders a bare div with no interactive descendant at all.
   const content = (
-    <div className="card-hover rounded-2xl border border-zinc-100 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+    <div
+      className={`rounded-2xl border border-zinc-100 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 ${href ? "card-hover" : ""}`}
+    >
       <p className="mb-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">
         {title}
       </p>

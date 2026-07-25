@@ -694,12 +694,15 @@ export default function CourseDetailPage() {
                           return (
                             <div
                               key={lesson._id}
-                              className={`card-hover gradient-border-hover group relative flex items-center gap-4 rounded-xl border border-zinc-100 bg-white p-4 transition-colors dark:border-zinc-800 dark:bg-zinc-900/50 ${
+                              className={`group relative flex items-center gap-4 rounded-xl border border-zinc-100 bg-white p-4 transition-colors dark:border-zinc-800 dark:bg-zinc-900/50 ${
                                 isLocked
                                   ? "opacity-60"
-                                  : "hover:border-brand-200 dark:hover:border-zinc-700"
+                                  : "card-hover gradient-border-hover hover:border-brand-200 dark:hover:border-zinc-700"
                               }`}
                             >
+                              {/* L7: card-hover/gradient-border-hover only apply when the
+                                  absolute Link overlay below exists (i.e. not locked) —
+                                  a locked row has no interactive descendant. */}
                               {isEnrolled || !clerkUser ? (
                                 <Link
                                   href={lessonHref}

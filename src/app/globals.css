@@ -243,7 +243,16 @@ button:focus-visible .card-hover {
   transition: opacity 0.18s ease;
   pointer-events: none;
 }
-.gradient-border-hover:hover::before {
+/* L8: this used to be :hover-only, so a keyboard user tabbing to the same
+   card's Link/button descendant never saw the affordance mouse users get.
+   `:has(:focus-visible)` covers the courses-page row where the Link is an
+   absolute-positioned DESCENDANT; the `a`/`button` ancestor selectors cover
+   card-hover's inverse-nesting cases elsewhere. */
+.gradient-border-hover:hover::before,
+.gradient-border-hover:focus-visible::before,
+.gradient-border-hover:has(:focus-visible)::before,
+a:focus-visible .gradient-border-hover::before,
+button:focus-visible .gradient-border-hover::before {
   opacity: 1;
 }
 
@@ -273,7 +282,9 @@ button:focus-visible .card-hover {
 .stat-divider::after {
   content: "";
   position: absolute;
-  left: 0;
+  /* L12: logical, not physical — this divider sits between adjacent stat
+     blocks in a row; a physical `left` would land on the wrong edge in RTL. */
+  inset-inline-start: 0;
   top: 25%;
   height: 50%;
   width: 1px;
