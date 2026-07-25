@@ -514,9 +514,17 @@ export default function MentoringPage() {
           <h1 className="mb-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl dark:text-white">
             ייעוץ אישי 1-על-1
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
             קבלו הכוונה אישית ממאמנים מנוסים בתחום הדייטינג והזוגיות
           </p>
+          <Image
+            src="/images/illustrations/home-cta.webp"
+            alt="איור: אדם עומד בתחילתו של שביל רחב ופתוח על גבעות בשעת דמדומים, השמש עולה מולו והדרך נמשכת למרחק"
+            width={1536}
+            height={1024}
+            sizes="(max-width: 672px) 100vw, 672px"
+            className="mx-auto mb-8 aspect-[2/1] w-full max-w-2xl rounded-3xl object-cover shadow-md ring-1 ring-black/5 dark:ring-white/10"
+          />
           <SignedIn>
             <Link
               href="/mentoring/sessions"
