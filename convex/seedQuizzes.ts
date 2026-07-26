@@ -11,6 +11,7 @@
  */
 
 import { internalMutation } from "./_generated/server";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 interface QuizSeedData {
   titleMatch: string; // partial lesson title to match against
@@ -392,6 +393,7 @@ const QUIZ_DATA: QuizSeedData[] = [
 export const seedRelationshipQuizzes = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedRelationshipQuizzes");
     // בדוק אם כבר יש בחנים
     const existingQuizzes = await ctx.db.query("quizzes").collect();
     if (existingQuizzes.length > 0) {

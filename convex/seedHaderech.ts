@@ -13,6 +13,7 @@
 
 import { internalMutation, mutation } from "./_generated/server";
 import { SEED_COURSES } from "./seedCourseData";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ---------------------------------------------------------------------------
 // Main seed mutation — public so it can be called from the Convex dashboard
@@ -21,6 +22,7 @@ import { SEED_COURSES } from "./seedCourseData";
 export const seedHaderechCourse = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedHaderechCourse");
     const now = Date.now();
     const results: {
       courses: string[];

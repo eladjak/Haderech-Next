@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authGuard";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ─── Category Type ──────────────────────────────────────────────────────────
 
@@ -334,6 +335,7 @@ export const deletePost = mutation({
 export const seedBlogPosts = mutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedBlogPosts");
     const user = await requireAdmin(ctx);
 
     // Check if posts already exist

@@ -12,6 +12,7 @@
  */
 
 import { internalMutation } from "./_generated/server";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ---------------------------------------------------------------------------
 // Main Course: 12 Weeks, 51 Lessons, 5 Stages
@@ -545,6 +546,7 @@ const DATING_COURSE_LESSONS: LessonData[] = [
 export const seedCourseContent = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedCourseContent");
     // Check if courses already exist
     const existingCourses = await ctx.db.query("courses").collect();
     if (existingCourses.length > 0) {

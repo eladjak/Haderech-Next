@@ -1,6 +1,5 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAdmin } from "./lib/authGuard";
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
@@ -238,69 +237,9 @@ export const toggleFeatured = mutation({
   },
 });
 
-// Seed sample stories (admin only)
-export const seedStories = mutation({
-  args: {},
-  handler: async (ctx) => {
-    await requireAdmin(ctx);
-    const sampleStories = [
-      {
-        name: "דני, 34",
-        story: "אחרי שנים של דייטים כושלים, הקורס של הדרך שינה לי את הגישה לגמרי. היום אני בזוגיות מדהימה.",
-        rating: 5,
-        category: "dating" as const,
-        featured: true,
-      },
-      {
-        name: "מיכל, 28",
-        story: "למדתי לתקשר טוב יותר עם בן הזוג שלי. הכלים שקיבלתי פה שינו את הדינמיקה שלנו.",
-        rating: 5,
-        category: "relationship" as const,
-        featured: true,
-      },
-      {
-        name: "יונתן, 31",
-        story: "הסימולטור עזר לי להבין מה אני עושה לא בסדר בדייטים. מומלץ בחום!",
-        rating: 4,
-        category: "self-growth" as const,
-        featured: true,
-      },
-      {
-        name: "נועה, 26",
-        story: "המאמן AI נתן לי ביטחון לפנות לאנשים חדשים. תוך חודשיים מצאתי את הבן אדם שלי.",
-        rating: 5,
-        category: "dating" as const,
-        featured: false,
-      },
-      {
-        name: "אורי, 37",
-        story: "אחרי גירושין, חשבתי שנגמר לי. הדרך עזרה לי לחזור לעצמי ולמצוא אהבה מחדש.",
-        rating: 5,
-        category: "marriage" as const,
-        featured: false,
-      },
-      {
-        name: "שירה, 29",
-        story: "הקהילה פה מדהימה. הרגשתי שאני לא לבד בתהליך.",
-        rating: 4,
-        category: "self-growth" as const,
-        featured: false,
-      },
-    ];
 
-    const now = Date.now();
-    for (let i = 0; i < sampleStories.length; i++) {
-      const s = sampleStories[i];
-      await ctx.db.insert("successStories", {
-        name: s.name,
-        story: s.story,
-        rating: s.rating,
-        isAnonymous: false,
-        approved: true,
-        featured: s.featured,
-        category: s.category,
-        createdAt: now - i * 86400000, // each one day apart
-      });
-    }
-  },
-});
+// NOTE: a `seedStories` mutation used to live here. It inserted six invented
+// "success stories" (fictional named people with ages) as approved+featured
+// content shown publicly under the heading "סיפורי הצלחה אמיתיים".
+// It was removed deliberately: real success stories must come from real users
+// via `submitStory` + admin approval. Do not re-add fabricated testimonials.

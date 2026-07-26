@@ -1,6 +1,7 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authGuard";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -366,6 +367,7 @@ export const addContent = mutation({
 export const seedDailyContent = mutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedDailyContent");
     await requireAdmin(ctx);
     const existing = await ctx.db.query("dailyContent").first();
     if (existing) return { message: "תוכן יומי כבר קיים במערכת", count: 0 };
@@ -976,6 +978,7 @@ export const seedDailyContent = mutation({
 export const seedDailyContentInternal = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedDailyContentInternal");
     const existing = await ctx.db.query("dailyContent").first();
     if (existing) return { message: "תוכן יומי כבר קיים", count: 0 };
     // Delegate to seed logic

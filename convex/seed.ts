@@ -1,5 +1,6 @@
 import { internalMutation, mutation } from "./_generated/server";
 import { requireAdmin } from "./lib/authGuard";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // Seed data: 3 starter courses with Hebrew content
 const SEED_COURSES = [
@@ -144,6 +145,7 @@ const SEED_COURSES = [
 export const seedCourses = mutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedCourses");
     await requireAdmin(ctx);
     // Check if courses already exist
     const existingCourses = await ctx.db.query("courses").collect();
@@ -414,6 +416,7 @@ const SEED_COMMUNITY_TOPICS = [
 export const seedCommunity = mutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedCommunity");
     await requireAdmin(ctx);
     // Check if community topics already exist
     const existingTopics = await ctx.db.query("communityTopics").take(1);
@@ -475,6 +478,7 @@ export const seedCommunity = mutation({
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedAll");
     await requireAdmin(ctx);
     const results: { courses?: string; simulator?: string; community?: string } = {};
 

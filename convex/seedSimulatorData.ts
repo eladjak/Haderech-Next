@@ -1,4 +1,5 @@
 import { internalMutation } from "./_generated/server";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ==========================================
 // Seed Simulator Scenarios - Phase 17
@@ -119,6 +120,7 @@ const SIMULATOR_SCENARIOS = [
 export const seedSimulatorScenarios = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedSimulatorScenarios");
     // Check if scenarios already exist
     const existing = await ctx.db.query("simulatorScenarios").collect();
     if (existing.length > 0) {

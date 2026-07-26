@@ -1,4 +1,5 @@
 import { internalMutation } from "./_generated/server";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ==========================================
 // Seed Structured Dialogue Scenarios - Phase 68
@@ -712,6 +713,7 @@ const DIALOGUE_SCENARIOS = [
 export const seedDatingScenarios = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedDatingScenarios");
     const existing = await ctx.db.query("dialogueScenarios").collect();
     if (existing.length > 0) {
       return {
@@ -762,6 +764,7 @@ export const seedDatingScenarios = internalMutation({
 export const runSeedDatingScenarios = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("runSeedDatingScenarios");
     const existing = await ctx.db.query("dialogueScenarios").collect();
     if (existing.length > 0) {
       return {

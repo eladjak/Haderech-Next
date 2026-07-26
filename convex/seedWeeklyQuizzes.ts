@@ -12,6 +12,7 @@
  */
 
 import { internalMutation } from "./_generated/server";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 const COURSE_TITLE = "הדרך - אומנות הקשר";
 
@@ -712,6 +713,7 @@ export const WEEKLY_QUIZZES: WeeklyQuiz[] = [
 export const seedWeeklyQuizzes = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedWeeklyQuizzes");
     const course = await ctx.db
       .query("courses")
       .filter((q) => q.eq(q.field("title"), COURSE_TITLE))

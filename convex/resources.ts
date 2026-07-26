@@ -1,5 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ─── Category validator ──────────────────────────────────────────────────────
 
@@ -217,6 +218,7 @@ export const bookmarkResource = mutation({
 export const seedResources = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedResources");
     const existing = await ctx.db.query("resources").first();
     if (existing) {
       console.log("Resources already seeded, skipping.");

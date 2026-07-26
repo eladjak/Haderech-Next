@@ -1,4 +1,4 @@
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // שליפת כל המנטורים הזמינים
@@ -257,73 +257,8 @@ export const rateSession = mutation({
   },
 });
 
-// Seed 3 sample mentors
-export const seedMentors = internalMutation({
-  handler: async (ctx) => {
-    // Check if mentors already exist
-    const existing = await ctx.db.query("mentors").collect();
-    if (existing.length > 0) {
-      return { message: "Mentors already seeded", count: existing.length };
-    }
-
-    // Try to find admin user
-    const adminUser = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("role"), "admin"))
-      .first();
-
-    // If no admin, find any user
-    const anyUser = adminUser ?? (await ctx.db.query("users").first());
-
-    if (!anyUser) {
-      throw new Error("No users in database. Please sign in first.");
-    }
-
-    const mentorsData = [
-      {
-        userId: anyUser._id,
-        displayName: "דר׳ רונית כהן",
-        bio: "פסיכולוגית קלינית עם 15 שנות ניסיון בייעוץ זוגי ודייטינג. מומחית בתקשורת בין-אישית, בניית ביטחון עצמי וניהול ציפיות בזוגיות. מלווה מאות רווקים ורווקות במציאת הזוגיות הנכונה.",
-        specialties: ["תקשורת זוגית", "ביטחון עצמי", "ניהול ציפיות", "דייט ראשון"],
-        pricePerSession: 350,
-        sessionDuration: 60,
-        available: true,
-        rating: 4.8,
-        totalSessions: 127,
-        createdAt: Date.now(),
-      },
-      {
-        userId: anyUser._id,
-        displayName: "אבי לוי",
-        bio: "מאמן דייטינג מוסמך וכותב תוכן בתחום הזוגיות. מתמחה בעזרה לגברים ונשים לבנות פרופיל דייטינג מנצח, לשפר את כישורי השיחה ולהפוך דייטים לזוגיות אמיתית.",
-        specialties: ["פרופיל דייטינג", "שיחות ראשונות", "אפליקציות הכרויות", "משיכה"],
-        pricePerSession: 250,
-        sessionDuration: 45,
-        available: true,
-        rating: 4.6,
-        totalSessions: 89,
-        createdAt: Date.now(),
-      },
-      {
-        userId: anyUser._id,
-        displayName: "מיכל ברק",
-        bio: "יועצת זוגיות ומאמנת אישית. בעלת תואר שני בפסיכולוגיה חברתית. מתמחית בעבודה עם אנשים שמרגישים תקועים בדייטינג ורוצים לפרוץ דרך. גישה חמה, ישירה ואפקטיבית.",
-        specialties: ["פריצת דרך", "מודעות עצמית", "דפוסים חוזרים", "בחירת פרטנר"],
-        pricePerSession: 300,
-        sessionDuration: 50,
-        available: true,
-        rating: 4.9,
-        totalSessions: 203,
-        createdAt: Date.now(),
-      },
-    ];
-
-    const ids = [];
-    for (const data of mentorsData) {
-      const id = await ctx.db.insert("mentors", data);
-      ids.push(id);
-    }
-
-    return { message: "Seeded 3 mentors successfully", ids };
-  },
-});
+// NOTE: a `seedMentors` mutation used to live here. It inserted three invented
+// coaches with fabricated professional credentials (e.g. a "clinical
+// psychologist with 15 years of experience"), fake ratings and session counts,
+// on a page where visitors can book and pay for sessions. It was removed
+// deliberately. Mentors must be created from real, verified people only.

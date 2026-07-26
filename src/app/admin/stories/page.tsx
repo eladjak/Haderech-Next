@@ -63,13 +63,11 @@ export default function AdminStoriesPage() {
   const approveStory = useMutation(api.stories.approveStory);
   const toggleFeatured = useMutation(api.stories.toggleFeatured);
   const deleteStory = useMutation(api.stories.deleteStory);
-  const seedStories = useMutation(api.stories.seedStories);
 
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [featuringId, setFeaturingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [seeding, setSeeding] = useState(false);
 
   const handleApprove = async (
     storyId: Id<"successStories">,
@@ -112,17 +110,6 @@ export default function AdminStoriesPage() {
     }
   };
 
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      await seedStories();
-    } catch (err) {
-      console.error("Seed error:", err);
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   return (
     <div>
       {/* Page Header */}
@@ -135,18 +122,6 @@ export default function AdminStoriesPage() {
             אישור, הצגה בראשי ומחיקת סיפורים
           </p>
         </div>
-
-        {/* Seed Button */}
-        {data && data.totalCount === 0 && (
-          <button
-            type="button"
-            onClick={handleSeed}
-            disabled={seeding}
-            className="inline-flex h-9 items-center rounded-lg bg-[#E85D75] px-4 text-sm font-medium text-white transition-colors hover:bg-[#d64d65] disabled:opacity-50"
-          >
-            {seeding ? "יוצר..." : "צור סיפורים לדוגמה"}
-          </button>
-        )}
       </div>
 
       {/* Stats Cards */}

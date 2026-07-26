@@ -1,5 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ==========================================
 // Gamification Module - Phase 5
@@ -1064,6 +1065,7 @@ export const checkAndAwardBadges = internalMutation({
 export const seedBadges = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("seedBadges");
     // Check if badges already seeded
     const existing = await ctx.db.query("badges").first();
     if (existing) {

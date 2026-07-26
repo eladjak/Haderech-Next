@@ -1,4 +1,5 @@
 import { internalMutation } from "./_generated/server";
+import { assertSeedAllowed } from "./lib/seedGuard";
 
 // ============================================================
 // Simulator Scenarios V2 - Phase 22
@@ -322,6 +323,7 @@ const NEW_SCENARIOS = [
 export const applyScenariosV2 = internalMutation({
   args: {},
   handler: async (ctx) => {
+    assertSeedAllowed("applyScenariosV2");
     const all = await ctx.db.query("simulatorScenarios").collect();
     const byTitle = new Map(all.map((s) => [s.title, s]));
 
