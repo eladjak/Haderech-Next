@@ -9,39 +9,6 @@ import { Header } from "@/components/layout/header";
 import { StarRating } from "@/components/reviews/star-rating";
 import { RatingDistribution } from "@/components/reviews/rating-distribution";
 
-// ─── Video Testimonial Placeholder Cards ────────────────────────────────────
-
-const VIDEO_PLACEHOLDERS = [
-  {
-    name: "אורי מ.",
-    course: "אומנות הקשר",
-    quote: "הקורס נתן לי את הביטחון שחיפשתי שנים. היום יש לי מערכת יחסים מדהימה.",
-    emoji: "💬",
-    bgColor: "from-brand-500/10 to-blue-500/10",
-  },
-  {
-    name: "מיכל ב.",
-    course: "מסע אל הלב",
-    quote: "בזכות הכלים שלמדתי, אני מבינה עכשיו מה אני מחפשת בבן זוג.",
-    emoji: "💬",
-    bgColor: "from-emerald-500/10 to-brand-500/10",
-  },
-  {
-    name: "דוד ש.",
-    course: "בנין הקשר",
-    quote: "מהפכה אמיתית בחיי הדייטינג. מומלץ לכל גבר שמחפש קשר אמיתי.",
-    emoji: "💬",
-    bgColor: "from-blue-500/10 to-purple-500/10",
-  },
-  {
-    name: "שרה כ.",
-    course: "אומנות הקשר",
-    quote: "אחרי הקורס פגשתי את האיש של חיי. הכלים פשוט עובדים.",
-    emoji: "💬",
-    bgColor: "from-pink-500/10 to-brand-500/10",
-  },
-];
-
 // ─── Star display helper ─────────────────────────────────────────────────────
 
 function StarDisplay({ count }: { count: number }) {
@@ -356,61 +323,6 @@ export default function TestimonialsPage() {
             </div>
           </section>
         )}
-
-        {/* ═══════════════════════════════════════════════════════════════════
-            VIDEO TESTIMONIALS (PLACEHOLDER)
-        ═══════════════════════════════════════════════════════════════════ */}
-        <section className="container mx-auto px-4 py-16">
-          <div className="mb-10 text-center">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
-              סיפורי הצלחה
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              עדויות וידאו מסטודנטים שסיימו את התוכנית
-            </p>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {VIDEO_PLACEHOLDERS.map((item, i) => (
-              <div
-                key={i}
-                className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.bgColor} border border-zinc-100 p-6 dark:border-zinc-800`}
-              >
-                {/* Play button placeholder */}
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm dark:bg-zinc-900/80">
-                  <svg
-                    className="h-6 w-6 translate-x-0.5 text-brand-500"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path d="M8 5.14v14l11-7-11-7z" />
-                  </svg>
-                </div>
-
-                {/* Quote */}
-                <blockquote className="mb-4 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                  "{item.quote}"
-                </blockquote>
-
-                {/* Author info */}
-                <div className="mt-auto">
-                  <div className="text-sm font-semibold text-zinc-900 dark:text-white">
-                    {item.name}
-                  </div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {item.course}
-                  </div>
-                </div>
-
-                {/* Coming soon badge */}
-                <div className="absolute top-4 left-4 rounded-full bg-white/80 px-2 py-0.5 text-xs font-medium text-zinc-500 backdrop-blur-sm dark:bg-zinc-900/80">
-                  בקרוב
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* ═══════════════════════════════════════════════════════════════════
             CTA SECTION
