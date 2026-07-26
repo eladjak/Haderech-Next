@@ -77,8 +77,8 @@ export default function TestimonialsPage() {
             </h1>
 
             <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-              אלפי גברים ונשים שינו את חיי הדייטינג שלהם עם הדרך. הנה מה שהם
-              אומרים על החוויה שלהם.
+              כל ביקורת כאן נכתבה בידי תלמיד שסיים קורס בהדרך. הנה מה שהם אומרים
+              על החוויה שלהם.
             </p>
 
             <div className="mx-auto mb-10 max-w-2xl">
@@ -106,11 +106,11 @@ export default function TestimonialsPage() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : globalStats.totalReviews > 0 ? (
               <div className="mx-auto grid max-w-xl grid-cols-3 gap-4">
                 <div className="rounded-2xl border border-zinc-100 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80">
                   <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
-                    {globalStats.totalReviews}+
+                    {globalStats.totalReviews}
                   </div>
                   <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                     ביקורות
@@ -143,7 +143,7 @@ export default function TestimonialsPage() {
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </section>
 
