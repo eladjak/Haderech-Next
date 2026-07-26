@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { aiGuard } from "@/lib/ai-guard";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 // Latest GA Hebrew-strong model. WHY thinkingBudget:0 — without it, Gemini's hidden
@@ -69,6 +70,13 @@ export async function POST(req: NextRequest) {
   const fullPrompt = `${SYSTEM_PROMPT}\n\nשיחה עד כה:\n${conversationText}\n\nאסיסטנט:`;
 
   try {
+    // Spend guard: public unauthenticated endpoint on Elad's own Gemini key.
+    // Per-IP window plus a SHARED per-site daily ceiling, so the cap holds
+    // across serverless instances rather than resetting on every cold start.
+    const _guard = await aiGuard(req, "haderech-next");
+    if (!_guard.ok) {
+      return NextResponse.json({ content: "העוזר עמוס כרגע — אפשר לנסות שוב מאוחר יותר, או להשאיר פרטים בטופס ונחזור אליכם." });
+    }
     const r = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
