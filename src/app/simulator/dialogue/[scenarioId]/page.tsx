@@ -12,6 +12,8 @@ import { DialogueScene } from "@/components/simulator/dialogue-scene";
 import { ScoreSummary } from "@/components/simulator/score-summary";
 import Link from "next/link";
 
+const STRUCTURED_DIALOGUE_AVAILABLE = false;
+
 type SessionPhase =
   | "intro"
   | "playing"
@@ -33,7 +35,10 @@ export default function DialogueScenarioPage() {
   const fromLesson = searchParams.get("from") === "lesson";
   const fromLessonId = searchParams.get("lessonId") as Id<"lessons"> | null;
 
-  const scenario = useQuery(api.simulator.getDialogueScenario, { scenarioId });
+  const scenario = useQuery(
+    api.simulator.getDialogueScenario,
+    STRUCTURED_DIALOGUE_AVAILABLE ? { scenarioId } : "skip"
+  );
 
   const startSimulation = useMutation(api.simulator.startSimulation);
   const submitChoice = useMutation(api.simulator.submitChoice);
@@ -132,6 +137,27 @@ export default function DialogueScenarioPage() {
     setCompletionData(null);
     setError(null);
   };
+
+  if (!STRUCTURED_DIALOGUE_AVAILABLE) {
+    return (
+      <div className="min-h-dvh bg-white dark:bg-zinc-950">
+        <Header />
+        <main id="main-content" className="container mx-auto px-4 py-20" tabIndex={-1}>
+          <div className="mx-auto max-w-2xl rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-900/60 dark:bg-amber-950/30">
+            <h1 className="text-2xl font-bold text-amber-950 dark:text-amber-100">
+              התרחיש המובנה אינו זמין
+            </h1>
+            <p className="mt-3 leading-7 text-amber-900/80 dark:text-amber-200/80">
+              המסלול חסום עד שהתגובות, המשוב והציונים הישנים יוחלפו במודל שמכבד בחירה, גבולות והקשר.
+            </p>
+            <Link href="/simulator" className="mt-6 inline-flex h-11 items-center rounded-xl bg-brand-500 px-6 text-sm font-semibold text-white hover:bg-brand-600">
+              חזרה לסימולטור
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (scenario === undefined) {
     return (

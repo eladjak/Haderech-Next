@@ -141,6 +141,9 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
               <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                 {scenario.title}
               </p>
+              <p className="mt-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                דמות AI בדיונית · אין כאן מדד למשיכה, התאמה או הסכמה
+              </p>
             </div>
             {session.status === "active" && (
               <button
@@ -153,40 +156,6 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
               </button>
             )}
           </div>
-          {/* Live connection meter (Phase 22) — the director's emotional arc */}
-          {session.status === "active" &&
-            typeof session.currentConnection === "number" && (
-              <div className="mt-2 flex items-center gap-2">
-                <span
-                  className="text-xs text-zinc-500 dark:text-zinc-400"
-                  id="connection-meter-label"
-                >
-                  💗 חיבור
-                </span>
-                <div
-                  className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
-                  role="meter"
-                  aria-labelledby="connection-meter-label"
-                  aria-valuenow={session.currentConnection}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                >
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      session.currentConnection >= 65
-                        ? "bg-emerald-500"
-                        : session.currentConnection >= 40
-                          ? "bg-amber-500"
-                          : "bg-orange-500"
-                    }`}
-                    style={{ width: `${session.currentConnection}%` }}
-                  />
-                </div>
-                <span className="text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
-                  {session.currentConnection}
-                </span>
-              </div>
-            )}
         </div>
       )}
 

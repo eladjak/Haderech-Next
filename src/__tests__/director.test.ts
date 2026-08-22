@@ -21,22 +21,27 @@ describe("director — updateConnection", () => {
     expect(r.reasons.length).toBeGreaterThan(0);
   });
 
-  it("punishes a one-word answer", () => {
+  it("does not punish a one-word answer", () => {
     const r = updateConnection(50, "סבבה");
-    expect(r.connection).toBeLessThan(50);
+    expect(r.connection).toBe(50);
   });
 
-  it("punishes negativity", () => {
+  it("does not punish a negative feeling", () => {
     const r = updateConnection(50, "היה נורא, המסעדה גרועה והמלצר מעצבן");
-    expect(r.connection).toBeLessThan(50);
+    expect(r.connection).toBe(50);
   });
 
-  it("punishes touching a persona trigger", () => {
+  it("does not turn persona triggers into targets or penalties", () => {
     const base = updateConnection(50, "ספרי לי על העבודה שלך?");
     const withTrigger = updateConnection(50, "ספרי לי על העבודה שלך?", [
       "העבודה",
     ]);
-    expect(withTrigger.connection).toBeLessThan(base.connection);
+    expect(withTrigger.connection).toBe(base.connection);
+  });
+
+  it("credits a clear boundary and penalizes coercion", () => {
+    expect(updateConnection(50, "אני מעדיף לא להיכנס לזה").connection).toBeGreaterThan(50);
+    expect(updateConnection(50, "את חייבת לענות לי").connection).toBeLessThan(50);
   });
 
   it("stays within 5..95 bounds", () => {
@@ -56,7 +61,8 @@ describe("director — moodFor / buildDirectorNote", () => {
     ]);
     expect(note).toContain("62/100");
     expect(note).toContain("בדקי את הגבול שלו");
-    expect(note).toContain("הנחיית במאי");
+    expect(note).toContain("הנחיית תרחיש");
+    expect(note).toContain("אינו מדד למשיכה");
   });
 
   it("omits beat when none matches the turn", () => {
@@ -100,7 +106,7 @@ describe("coach — deep debrief heuristics", () => {
       depth: 70,
       leading: 60,
     });
-    expect(drill).toContain("אני מרגיש");
+    expect(drill).toContain("אם נוח לך");
   });
 
   it("buildDeepDebrief returns score + moments + radar + drill", () => {

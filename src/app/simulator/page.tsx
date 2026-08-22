@@ -7,7 +7,6 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ScenarioCard } from "@/components/simulator/scenario-card";
-import { DifficultyBadge } from "@/components/simulator/difficulty-badge";
 import Link from "next/link";
 
 const DIFFICULTY_FILTERS = [
@@ -16,6 +15,9 @@ const DIFFICULTY_FILTERS = [
   { value: "medium", label: "בינוני" },
   { value: "hard", label: "קשה" },
 ] as const;
+
+// Must match the fail-closed server policy in convex/simulator.ts.
+const STRUCTURED_DIALOGUE_AVAILABLE: boolean = false;
 
 export default function SimulatorPage() {
   const scenarios = useQuery(api.simulator.listScenarios);
@@ -68,8 +70,8 @@ export default function SimulatorPage() {
             תרגל שיחות דייט
           </h1>
           <p className="max-w-xl text-zinc-600 dark:text-zinc-400">
-            תרגל שיחות דייט עם דמויות AI ריאליסטיות. קבל ציון ומשוב אישי
-            בסוף כל סשן.
+            תרגל ניסוחים עם דמויות AI בדיוניות וקבל משוב אוטומטי מוגבל.
+            המשוב עלול לטעות ואינו מדד למשיכה, התאמה או יכולת זוגית.
           </p>
         </div>
 
@@ -229,6 +231,7 @@ export default function SimulatorPage() {
         )}
 
         {/* Dialogue Scenarios Banner */}
+        {STRUCTURED_DIALOGUE_AVAILABLE && (
         <div className="mt-12 rounded-2xl border border-brand-100 bg-gradient-to-l from-brand-50 to-white p-6 dark:border-blue-500/20 dark:from-blue-500/10 dark:to-zinc-900/50">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -242,7 +245,8 @@ export default function SimulatorPage() {
                 סימולציות דיאלוג מובנה
               </h2>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                4 תרחישים עם ניקוד, משוב מיידי, וציון אישי A-F. ללא AI נדרש.
+                ארבעה תרגילי בחירה עם הסבר מיידי. הניקוד מתייחס לבחירות
+                בתרגיל בלבד, לא לאישיות או לסיכויי הצלחה בעולם האמיתי.
               </p>
             </div>
             <Link
@@ -253,6 +257,7 @@ export default function SimulatorPage() {
             </Link>
           </div>
         </div>
+        )}
 
         {/* How it works */}
         <div className="mt-16">
@@ -269,12 +274,12 @@ export default function SimulatorPage() {
               {
                 step: "2",
                 title: "שוחח עם הדמות",
-                desc: "תרגל שיחה טבעית עם דמות AI ריאליסטית בעברית",
+                desc: "תרגל ניסוחים בעברית עם דמות AI בדיונית",
               },
               {
                 step: "3",
                 title: "קבל משוב",
-                desc: "בסוף הסשן קבל ציון וטיפים לשיפור",
+                desc: "קבל משוב אוטומטי מוגבל והצעות אופציונליות",
               },
             ].map((item) => (
               <div

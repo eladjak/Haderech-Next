@@ -6,11 +6,16 @@ import {
   action,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { internal, api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { readLlmKeys, hasLlmKey } from "./lib/llm";
 import { buildDeepDebrief, type DeepDebrief } from "./lib/simulatorScoring";
 import { updateConnection, buildDirectorNote } from "./lib/director";
 import { embedQuery, MIN_SCORE } from "./lib/retrieval";
+import {
+  requireIdentity,
+  requireOwnedClerkResource,
+  requireUser,
+} from "./lib/authGuard";
 
 // ==========================================
 // Simulator - Phase 17
@@ -21,11 +26,19 @@ import { embedQuery, MIN_SCORE } from "./lib/retrieval";
 export const listScenarios = query({
   args: {},
   handler: async (ctx) => {
+    await requireUser(ctx);
     const scenarios = await ctx.db
       .query("simulatorScenarios")
       .withIndex("by_published", (q) => q.eq("published", true))
       .collect();
-    return scenarios.sort((a, b) => a.order - b.order);
+    return scenarios
+      .filter(
+        (scenario) =>
+          Number.isInteger(scenario.personaAge) &&
+          scenario.personaAge >= 18 &&
+          scenario.personaAge <= 100
+      )
+      .sort((a, b) => a.order - b.order);
   },
 });
 
@@ -33,7 +46,17 @@ export const listScenarios = query({
 export const getScenario = query({
   args: { scenarioId: v.id("simulatorScenarios") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.scenarioId);
+    await requireUser(ctx);
+    const scenario = await ctx.db.get(args.scenarioId);
+    if (!scenario?.published) return null;
+    if (
+      !Number.isInteger(scenario.personaAge) ||
+      scenario.personaAge < 18 ||
+      scenario.personaAge > 100
+    ) {
+      return null;
+    }
+    return scenario;
   },
 });
 
@@ -43,6 +66,7 @@ export const getSession = query({
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId);
     if (!session) return null;
+    await requireOwnedClerkResource(ctx, session.userId);
 
     const messages = await ctx.db
       .query("simulatorMessages")
@@ -60,12 +84,36 @@ export const getSession = query({
   },
 });
 
+// Internal equivalent for actions. The owner subject comes from the action's
+// authenticated identity; clients cannot call this function directly.
+export const getOwnedSessionForAction = internalQuery({
+  args: {
+    sessionId: v.id("simulatorSessions"),
+    ownerUserId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) return null;
+    if (session.userId !== args.ownerUserId) {
+      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+    }
+    const messages = await ctx.db
+      .query("simulatorMessages")
+      .withIndex("by_session", (q) => q.eq("sessionId", args.sessionId))
+      .collect();
+    return {
+      ...session,
+      messages: messages.sort((a, b) => a.createdAt - b.createdAt),
+      scenario: await ctx.db.get(session.scenarioId),
+    };
+  },
+});
+
 // List all sessions for the current user
 export const listUserSessions = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+    const identity = await requireIdentity(ctx);
 
     const sessions = await ctx.db
       .query("simulatorSessions")
@@ -97,17 +145,23 @@ export const startSession = mutation({
     lessonId: v.optional(v.id("lessons")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await requireUser(ctx);
 
     const scenario = await ctx.db.get(args.scenarioId);
     if (!scenario) throw new Error("Scenario not found");
     if (!scenario.published) throw new Error("Scenario is not published");
+    if (
+      !Number.isInteger(scenario.personaAge) ||
+      scenario.personaAge < 18 ||
+      scenario.personaAge > 100
+    ) {
+      throw new Error("Simulator personas must be adults");
+    }
 
     const now = Date.now();
 
     const sessionId = await ctx.db.insert("simulatorSessions", {
-      userId: identity.subject,
+      userId: user.clerkId,
       scenarioId: args.scenarioId,
       lessonId: args.lessonId,
       status: "active",
@@ -280,19 +334,18 @@ export const sendMessage = action({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const identity = await requireIdentity(ctx);
 
     // Validate
     const trimmed = args.content.trim();
     if (!trimmed) throw new Error("Message cannot be empty");
     if (trimmed.length > 1000) throw new Error("Message too long");
 
-    const session = await ctx.runQuery(api.simulator.getSession, {
+    const session = await ctx.runQuery(internal.simulator.getOwnedSessionForAction, {
       sessionId: args.sessionId,
+      ownerUserId: identity.subject,
     });
     if (!session) throw new Error("Session not found");
-    if (session.userId !== identity.subject) throw new Error("Not authorized");
     if (session.status !== "active") throw new Error("Session is not active");
 
     const now = Date.now();
@@ -308,6 +361,13 @@ export const sendMessage = action({
     );
 
     if (!context.scenario) throw new Error("Scenario not found");
+    if (
+      !Number.isInteger(context.scenario.personaAge) ||
+      context.scenario.personaAge < 18 ||
+      context.scenario.personaAge > 100
+    ) {
+      throw new Error("Simulator personas must be adults");
+    }
 
     // Build conversation history (exclude narrator messages)
     const conversationHistory = context.messages
@@ -371,25 +431,32 @@ export const sendMessage = action({
       const name = context.scenario.personaName;
       const lastUser = trimmed;
       const askedQuestion = /\?|מה |איך |למה |איפה |מתי |האם /.test(lastUser);
-      const opensWell = lastUser.length > 25;
+      const wantsToStop =
+        /רוצה לעצור|בוא נעצור|בואי נעצור|לא מתאים לי להמשיך|לא רוצה להמשיך/.test(
+          lastUser
+        );
 
       const earlyTurn = [
-        `נעים מאוד, אני ${name}. אהבתי שפתחת ככה — ספר/י לי קצת עליך, מה מביא אותך לכאן?`,
-        `היי! ${askedQuestion ? "שאלה טובה, " : ""}אני ${name}. אני סקרן/ית לשמוע עוד — מה התחביבים שלך?`,
+        `נעים מאוד, אני ${name}. זה תרחיש AI בדיוני; אפשר לבחור נושא שנוח לך ולשנות או לעצור בכל רגע.`,
+        `היי, אני ${name}. ${askedQuestion ? "אפשר לענות על זה בקצרה, " : ""}ואפשר גם לבחור נושא אחר לתרגול.`,
       ];
       const warmTurn = [
-        `מעניין מה שאמרת. ${askedQuestion ? "ואצלך? " : "ומה גרם לך להתעניין בזה?"}`,
-        `אהבתי את הכנות. ${opensWell ? "אתה/את נשמע/ת אמיתי/ת." : "ספר/י לי עוד, אני מקשיב/ה."}`,
-        `${askedQuestion ? "כן, לגמרי — " : ""}זה אומר עליך משהו טוב. מה הכי חשוב לך בקשר?`,
+        `שמעתי את מה שאמרת. ${askedQuestion ? "אענה לפי ההקשר הבדיוני, " : ""}ואפשר להמשיך רק אם מתאים לך.`,
+        `תודה על הניסוח הברור. אפשר להישאר בנושא הזה, להחליף נושא או לעצור.`,
+        `${askedQuestion ? "זו שאלה שאפשר לתרגל כאן. " : ""}אין צורך לשתף יותר ממה שנוח לך.`,
       ];
       const coolTurn = [
-        `המ... אוקיי. ${askedQuestion ? "כן." : ""} [${name} מציצה לרגע בטלפון]`,
-        `יכול להיות. תקשיב/י, אני קצת עייפ/ה היום... על מה עוד רצית לדבר?`,
-        `${askedQuestion ? "לא יודע/ת, לא חשבתי על זה. " : ""}נו, ספר/י אתה משהו.`,
+        `אני מעדיפ/ה לא להיכנס לנושא הזה. אפשר לבחור נושא אחר או לסיים כאן.`,
+        `לא בטוח/ה שמתאים לי להמשיך בכיוון הזה. אין צורך לשכנע אותי.`,
+        `${askedQuestion ? "אני בוחר/ת לא לענות על זה. " : ""}אפשר לכבד את הגבול ולהמשיך רק אם שני הצדדים רוצים.`,
       ];
-      const pool =
-        turn <= 1 ? earlyTurn : arc.connection < 40 ? coolTurn : warmTurn;
-      personaResponse = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
+      if (wantsToStop) {
+        personaResponse = "ברור, נעצור כאן. אין צורך להסביר או להמשיך את התרגול.";
+      } else {
+        const pool =
+          turn <= 1 ? earlyTurn : arc.connection < 40 ? coolTurn : warmTurn;
+        personaResponse = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
+      }
     }
 
     // Save persona response
@@ -415,14 +482,13 @@ export const endSession = action({
     strengths: string[];
     improvements: string[];
   }> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const identity = await requireIdentity(ctx);
 
-    const session = await ctx.runQuery(api.simulator.getSession, {
+    const session = await ctx.runQuery(internal.simulator.getOwnedSessionForAction, {
       sessionId: args.sessionId,
+      ownerUserId: identity.subject,
     });
     if (!session) throw new Error("Session not found");
-    if (session.userId !== identity.subject) throw new Error("Not authorized");
     if (session.status !== "active") throw new Error("Session is not active");
 
     const now = Date.now();
@@ -443,13 +509,12 @@ export const endSession = action({
     // If very short session, return minimal analysis
     if (conversationHistory.filter((m: { role: string }) => m.role === "user").length < 2) {
       const analysis = {
-        score: 30,
-        feedback: "השיחה הייתה קצרה מדי לניתוח מלא. נסה/י לנהל שיחה ארוכה יותר.",
-        strengths: ["התחלת את הסימולציה"],
+        score: 50,
+        feedback:
+          "אין מספיק טקסט למשוב מפורט. עצירה מוקדמת או תשובה קצרה אינן כישלון, והמספר כאן אינו ציון ליכולת זוגית.",
+        strengths: ["בחרת את אורך התרגול שמתאים לך"],
         improvements: [
-          "שאל/י יותר שאלות",
-          "נהל/י שיחה ארוכה יותר",
-          "הראה/י עניין בפרסונה",
+          "אם מתאים לך, אפשר לנסות ניסוח חלופי בתרחיש בדיוני נוסף",
         ],
       };
       await ctx.runMutation(internal.simulator.saveAnalysis, {
@@ -554,10 +619,24 @@ export const endSession = action({
 // Structured Dialogue Simulator (Phase 68)
 // ==========================================
 
+// Legacy choice-and-grade scenarios still contain unreviewed normative and
+// coercive feedback. Keep every read/write path fail-closed until the scenario
+// contract, copy and historical data have passed the same consent review as the
+// free-chat simulator. This is deliberately not controlled by environment data.
+const STRUCTURED_DIALOGUE_AVAILABLE: boolean = false;
+
+function requireStructuredDialogueAvailable(): void {
+  if (!STRUCTURED_DIALOGUE_AVAILABLE) {
+    throw new Error("Structured dialogue simulator is unavailable");
+  }
+}
+
 // List all published dialogue scenarios
 export const listDialogueScenarios = query({
   args: {},
   handler: async (ctx) => {
+    await requireUser(ctx);
+    if (!STRUCTURED_DIALOGUE_AVAILABLE) return [];
     const scenarios = await ctx.db
       .query("dialogueScenarios")
       .withIndex("by_published", (q) => q.eq("published", true))
@@ -570,7 +649,10 @@ export const listDialogueScenarios = query({
 export const getDialogueScenario = query({
   args: { scenarioId: v.id("dialogueScenarios") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.scenarioId);
+    await requireUser(ctx);
+    if (!STRUCTURED_DIALOGUE_AVAILABLE) return null;
+    const scenario = await ctx.db.get(args.scenarioId);
+    return scenario?.published ? scenario : null;
   },
 });
 
@@ -583,15 +665,15 @@ export const startSimulation = mutation({
     lessonId: v.optional(v.id("lessons")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await requireUser(ctx);
+    requireStructuredDialogueAvailable();
 
     const scenario = await ctx.db.get(args.scenarioId);
     if (!scenario) throw new Error("Scenario not found");
     if (!scenario.published) throw new Error("Scenario is not published");
 
     const sessionId = await ctx.db.insert("dialogueSessions", {
-      userId: identity.subject,
+      userId: user.clerkId,
       scenarioId: args.scenarioId,
       lessonId: args.lessonId,
       status: "active",
@@ -605,48 +687,26 @@ export const startSimulation = mutation({
 });
 
 // Phase 19: how many practice sessions this user ran from a given lesson
-// (both simulator types), and the best structured-dialogue score. Surfaced
+// (free-chat simulator only while the structured legacy path is contained).
 // on the lesson's Smart Advisor to close the lesson <-> simulator loop.
 export const getLessonPracticeStats = query({
   args: { lessonId: v.id("lessons") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return { total: 0, completed: 0, bestScore: null as number | null };
-    }
+    const identity = await requireIdentity(ctx);
 
     const chatSessions = await ctx.db
       .query("simulatorSessions")
       .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .collect();
-    const dialogueSessions = await ctx.db
-      .query("dialogueSessions")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
-      .collect();
-
     const chatForLesson = chatSessions.filter(
       (s) => s.lessonId === args.lessonId
     );
-    const dialogueForLesson = dialogueSessions.filter(
-      (s) => s.lessonId === args.lessonId
-    );
 
-    const total = chatForLesson.length + dialogueForLesson.length;
-    const completed =
-      chatForLesson.filter((s) => s.status === "completed").length +
-      dialogueForLesson.filter((s) => s.status === "completed").length;
-
-    const scores: number[] = [
-      ...chatForLesson
-        .map((s) => s.score)
-        .filter((n): n is number => typeof n === "number"),
-      ...dialogueForLesson
-        .map((s) => s.totalScore)
-        .filter((n): n is number => typeof n === "number"),
-    ];
-    const bestScore = scores.length > 0 ? Math.max(...scores) : null;
-
-    return { total, completed, bestScore };
+    return {
+      total: chatForLesson.length,
+      completed: chatForLesson.filter((s) => s.status === "completed").length,
+      bestScore: null,
+    };
   },
 });
 
@@ -654,8 +714,11 @@ export const getLessonPracticeStats = query({
 export const getDialogueSession = query({
   args: { sessionId: v.id("dialogueSessions") },
   handler: async (ctx, args) => {
+    await requireIdentity(ctx);
+    if (!STRUCTURED_DIALOGUE_AVAILABLE) return null;
     const session = await ctx.db.get(args.sessionId);
     if (!session) return null;
+    await requireOwnedClerkResource(ctx, session.userId);
     const scenario = await ctx.db.get(session.scenarioId);
     return { ...session, scenario };
   },
@@ -669,8 +732,8 @@ export const submitChoice = mutation({
     choiceIndex: v.number(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const identity = await requireIdentity(ctx);
+    requireStructuredDialogueAvailable();
 
     const session = await ctx.db.get(args.sessionId);
     if (!session) throw new Error("Session not found");
@@ -716,8 +779,8 @@ export const submitChoice = mutation({
 export const completeSimulation = mutation({
   args: { sessionId: v.id("dialogueSessions") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const identity = await requireIdentity(ctx);
+    requireStructuredDialogueAvailable();
 
     const session = await ctx.db.get(args.sessionId);
     if (!session) throw new Error("Session not found");
@@ -778,8 +841,8 @@ export const completeSimulation = mutation({
 export const getSimulationHistory = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+    const identity = await requireIdentity(ctx);
+    if (!STRUCTURED_DIALOGUE_AVAILABLE) return [];
 
     const sessions = await ctx.db
       .query("dialogueSessions")
@@ -807,8 +870,8 @@ export const getSimulationHistory = query({
 export const getUserBestScores = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return {};
+    const identity = await requireIdentity(ctx);
+    if (!STRUCTURED_DIALOGUE_AVAILABLE) return {};
 
     const sessions = await ctx.db
       .query("dialogueSessions")
@@ -834,6 +897,10 @@ export const getUserBestScores = query({
 export const getLeaderboard = query({
   args: { scenarioId: v.id("dialogueScenarios") },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
+    if (!STRUCTURED_DIALOGUE_AVAILABLE) return [];
+    const scenario = await ctx.db.get(args.scenarioId);
+    if (!scenario?.published) return [];
     const sessions = await ctx.db
       .query("dialogueSessions")
       .withIndex("by_scenario", (q) => q.eq("scenarioId", args.scenarioId))
@@ -861,7 +928,6 @@ export const getLeaderboard = query({
       .map((entry, index) => ({
         rank: index + 1,
         score: entry.score,
-        userId: entry.userId,
       }));
   },
 });

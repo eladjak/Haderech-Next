@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
@@ -13,7 +13,6 @@ import Link from "next/link";
 
 export default function ScenarioPage() {
   const params = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const scenarioId = params.scenarioId as Id<"simulatorScenarios">;
   // Sync: lesson the learner came from (advisor/course -> simulator)
@@ -171,26 +170,32 @@ export default function ScenarioPage() {
         {/* Tips */}
         <div className="mb-8 rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900">
           <h3 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-            טיפים לסשן מוצלח
+            לפני שמתחילים
           </h3>
           <ul className="flex flex-col gap-2 text-sm text-zinc-500 dark:text-zinc-400">
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-brand-400">•</span>
-              שאל שאלות פתוחות שמאפשרות לשיחה להתפתח
+              זו דמות AI בדיונית, לא אדם אמיתי ולא סימולציה של הסכמה או משיכה
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-brand-400">•</span>
-              הראה עניין אמיתי בדמות ובמה שהיא אומרת
+              השיחה עשויה להישלח ל-Gemini או Anthropic; אל תכתוב/י פרטים מזהים או מידע רגיש
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-brand-400">•</span>
-              אל תמהר - שמור על שיחה טבעית וזורמת
+              מותר לענות בקצרה, לדלג, להציב גבול, להחליף נושא או לעצור בכל רגע
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-brand-400">•</span>
-              הסשן ינותח בסוף - נסה לנהל שיחה של לפחות 5-6 הודעות
+              המשוב האוטומטי עלול לטעות ואינו טיפול, אבחון או תחזית לדייט אמיתי
             </li>
           </ul>
+          <Link
+            href="/course-safety"
+            className="mt-4 inline-flex text-sm font-medium text-brand-600 underline underline-offset-4 hover:text-brand-700 dark:text-brand-400"
+          >
+            מידע, גבולות ומשאבי סיוע
+          </Link>
         </div>
 
         {/* CTA */}

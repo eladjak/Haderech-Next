@@ -20,7 +20,7 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
       "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   },
   abandoned: {
-    label: "נזנח",
+    label: "הופסק",
     className:
       "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
   },
@@ -32,31 +32,6 @@ function formatDate(ts: number): string {
     month: "long",
     year: "numeric",
   });
-}
-
-function ScoreBar({ score }: { score: number }) {
-  const color =
-    score >= 80
-      ? "bg-emerald-500"
-      : score >= 60
-        ? "bg-amber-500"
-        : score >= 40
-          ? "bg-orange-500"
-          : "bg-rose-500";
-
-  return (
-    <div className="flex items-center gap-2">
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-        <div
-          className={`h-1.5 rounded-full transition-all duration-300 ${color}`}
-          style={{ width: `${score}%` }}
-        />
-      </div>
-      <span className="w-8 text-left text-xs font-medium tabular-nums text-zinc-600 dark:text-zinc-400">
-        {score}
-      </span>
-    </div>
-  );
 }
 
 function HistoryContent() {
@@ -105,24 +80,16 @@ function HistoryContent() {
 
   // Stats summary
   const completed = sessions.filter((s) => s.status === "completed");
-  const withScore = completed.filter((s) => s.score !== undefined);
-  const avgScore =
-    withScore.length > 0
-      ? Math.round(
-          withScore.reduce((sum, s) => sum + (s.score ?? 0), 0) /
-            withScore.length
-        )
-      : null;
 
   return (
     <div className="flex flex-col gap-6">
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900">
           <p className="text-2xl font-bold text-zinc-900 dark:text-white">
             {sessions.length}
           </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">סה"כ סשנים</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">סה&quot;כ סשנים</p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900">
           <p className="text-2xl font-bold text-zinc-900 dark:text-white">
@@ -130,13 +97,12 @@ function HistoryContent() {
           </p>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">הושלמו</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900">
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-            {avgScore !== null ? avgScore : "—"}
-          </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">ציון ממוצע</p>
-        </div>
       </div>
+
+      <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+        ההיסטוריה נועדה לעזור לך לחזור לניסוחים ולמשוב. אין כאן ציון אישי:
+        המשוב אוטומטי, מוגבל לתרחיש בדיוני ואינו מדד ליכולת זוגית.
+      </p>
 
       {/* Session list */}
       <div className="flex flex-col gap-3">
@@ -177,19 +143,6 @@ function HistoryContent() {
                   </span>
                 </div>
               </div>
-
-              {/* Score */}
-              {session.status === "completed" &&
-                session.score !== undefined && (
-                  <div className="mb-3">
-                    <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                        ציון
-                      </span>
-                    </div>
-                    <ScoreBar score={session.score} />
-                  </div>
-                )}
 
               {/* Feedback preview */}
               {session.feedback && (
