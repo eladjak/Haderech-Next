@@ -17,9 +17,9 @@
  * not share memory: a local counter resets on cold start and each concurrent instance
  * gets a fresh budget, so it looks like a cap while capping nothing.
  *
- * FAIL-OPEN on infrastructure trouble, FAIL-CLOSED on the ceiling. If Supabase is
- * unreachable the answer still goes out — these are visitor-facing widgets and a
- * database blip must not take them down. The ceiling itself is enforced strictly.
+ * FAIL-CLOSED when the shared ceiling cannot be consulted. This endpoint spends
+ * from a personal provider budget, so an unavailable counter must not become an
+ * invisible unlimited mode.
  *
  * Requires AI_GUARD_SUPABASE_URL and AI_GUARD_SUPABASE_KEY. The key is publishable by
  * design: RLS gives anon no access to the counter table, and the RPC can only ever
@@ -53,7 +53,7 @@ const SUPABASE_ANON = process.env.AI_GUARD_SUPABASE_KEY || "";
 
 export type GuardVerdict = {
   ok: boolean;
-  reason?: "rate" | "daily";
+  reason?: "rate" | "daily" | "unavailable";
   used?: number;
   limit?: number;
   /** true when the daily ceiling could not be consulted (no shared store configured). */
@@ -92,8 +92,7 @@ export async function aiGuard(req: Request, site: string): Promise<GuardVerdict>
   }
 
   if (!SUPABASE_URL || !SUPABASE_ANON) {
-    // No shared store configured. Say so rather than pretending there is a cap.
-    return { ok: true, degraded: true };
+    return { ok: false, reason: "unavailable", degraded: true };
   }
 
   try {
@@ -108,13 +107,15 @@ export async function aiGuard(req: Request, site: string): Promise<GuardVerdict>
       // Never let the counter become the slowest part of answering a visitor.
       signal: AbortSignal.timeout(3000),
     });
-    if (!res.ok) return { ok: true, degraded: true };
+    if (!res.ok) return { ok: false, reason: "unavailable", degraded: true };
     const d = (await res.json()) as { allowed?: boolean; used?: number; limit?: number };
-    if (typeof d?.allowed !== "boolean") return { ok: true, degraded: true };
+    if (typeof d?.allowed !== "boolean") {
+      return { ok: false, reason: "unavailable", degraded: true };
+    }
     return d.allowed
       ? { ok: true, used: d.used, limit: d.limit }
       : { ok: false, reason: "daily", used: d.used, limit: d.limit };
   } catch {
-    return { ok: true, degraded: true };
+    return { ok: false, reason: "unavailable", degraded: true };
   }
 }

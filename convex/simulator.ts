@@ -11,6 +11,14 @@ import { readLlmKeys, hasLlmKey } from "./lib/llm";
 import { buildDeepDebrief, type DeepDebrief } from "./lib/simulatorScoring";
 import { updateConnection, buildDirectorNote } from "./lib/director";
 import { embedQuery, MIN_SCORE } from "./lib/retrieval";
+import { detectHighRisk, HIGH_RISK_RESPONSE } from "./lib/aiSafety";
+import {
+  limitSimulatorHistory,
+  SIMULATOR_HOURLY_USER_MESSAGE_LIMIT,
+  SIMULATOR_HOURLY_SESSION_LIMIT,
+  SIMULATOR_MAX_HISTORY_TURNS,
+  SIMULATOR_MAX_USER_TURNS_PER_SESSION,
+} from "./lib/simulatorLimits";
 import {
   requireIdentity,
   requireOwnedClerkResource,
@@ -64,9 +72,10 @@ export const getScenario = query({
 export const getSession = query({
   args: { sessionId: v.id("simulatorSessions") },
   handler: async (ctx, args) => {
+    const identity = await requireIdentity(ctx);
     const session = await ctx.db.get(args.sessionId);
     if (!session) return null;
-    await requireOwnedClerkResource(ctx, session.userId);
+    if (session.userId !== identity.subject) return null;
 
     const messages = await ctx.db
       .query("simulatorMessages")
@@ -95,15 +104,16 @@ export const getOwnedSessionForAction = internalQuery({
     const session = await ctx.db.get(args.sessionId);
     if (!session) return null;
     if (session.userId !== args.ownerUserId) {
-      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+      return null;
     }
     const messages = await ctx.db
       .query("simulatorMessages")
       .withIndex("by_session", (q) => q.eq("sessionId", args.sessionId))
-      .collect();
+      .order("desc")
+      .take(SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2 + 1);
     return {
       ...session,
-      messages: messages.sort((a, b) => a.createdAt - b.createdAt),
+      messages: messages.reverse(),
       scenario: await ctx.db.get(session.scenarioId),
     };
   },
@@ -147,6 +157,29 @@ export const startSession = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
+    const activeSessions = await ctx.db
+      .query("simulatorSessions")
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", user.clerkId).eq("status", "active")
+      )
+      .take(3);
+    if (activeSessions.length >= 3) {
+      throw new Error("אפשר להפעיל עד שלושה תרגולים במקביל. סיימו תרגול פתוח לפני שמתחילים חדש.");
+    }
+    const recentSessions = await ctx.db
+      .query("simulatorSessions")
+      .withIndex("by_user", (q) => q.eq("userId", user.clerkId))
+      .order("desc")
+      .take(SIMULATOR_HOURLY_SESSION_LIMIT);
+    if (
+      recentSessions.length >= SIMULATOR_HOURLY_SESSION_LIMIT &&
+      recentSessions.every((session) => session.createdAt >= Date.now() - 60 * 60 * 1000)
+    ) {
+      throw new Error(
+        `אפשר לפתוח עד ${SIMULATOR_HOURLY_SESSION_LIMIT} תרגולים בשעה. אפשר לחזור בעוד שעה.`
+      );
+    }
+
     const scenario = await ctx.db.get(args.scenarioId);
     if (!scenario) throw new Error("Scenario not found");
     if (!scenario.published) throw new Error("Scenario is not published");
@@ -187,10 +220,18 @@ export const saveUserMessage = internalMutation({
     sessionId: v.id("simulatorSessions"),
     content: v.string(),
     createdAt: v.number(),
+    ownerUserId: v.string(),
   },
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId);
     if (!session) throw new Error("Session not found");
+    if (session.userId !== args.ownerUserId) {
+      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+    }
+    if (session.status !== "active") throw new Error("Session is not active");
+    if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2 - 1) {
+      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+    }
 
     await ctx.db.insert("simulatorMessages", {
       sessionId: args.sessionId,
@@ -203,17 +244,16 @@ export const saveUserMessage = internalMutation({
       messageCount: session.messageCount + 1,
     });
 
-    // Return all messages for conversation history
-    const allMessages = await ctx.db
+    // Return only a bounded recent window for the provider context.
+    const recentMessages = await ctx.db
       .query("simulatorMessages")
       .withIndex("by_session", (q) => q.eq("sessionId", args.sessionId))
-      .collect();
-
-    const sorted = allMessages.sort((a, b) => a.createdAt - b.createdAt);
+      .order("desc")
+      .take(SIMULATOR_MAX_HISTORY_TURNS + 2);
 
     return {
       scenario: await ctx.db.get(session.scenarioId),
-      messages: sorted,
+      messages: recentMessages.reverse(),
     };
   },
 });
@@ -224,11 +264,21 @@ export const updateDirectorState = internalMutation({
     sessionId: v.id("simulatorSessions"),
     connection: v.number(),
     turn: v.number(),
+    ownerUserId: v.string(),
   },
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId);
     if (!session) throw new Error("Session not found");
-    const log = session.connectionLog ?? [];
+    if (session.userId !== args.ownerUserId) {
+      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+    }
+    if (session.status !== "active") throw new Error("Session is not active");
+    if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2) {
+      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+    }
+    const log = (session.connectionLog ?? []).slice(
+      -(SIMULATOR_MAX_USER_TURNS_PER_SESSION - 1)
+    );
     await ctx.db.patch(args.sessionId, {
       currentConnection: args.connection,
       connectionLog: [
@@ -245,10 +295,18 @@ export const savePersonaResponse = internalMutation({
     sessionId: v.id("simulatorSessions"),
     content: v.string(),
     createdAt: v.number(),
+    ownerUserId: v.string(),
   },
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId);
     if (!session) throw new Error("Session not found");
+    if (session.userId !== args.ownerUserId) {
+      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+    }
+    if (session.status !== "active") throw new Error("Session is not active");
+    if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2) {
+      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+    }
 
     await ctx.db.insert("simulatorMessages", {
       sessionId: args.sessionId,
@@ -272,6 +330,7 @@ export const saveAnalysis = internalMutation({
     strengths: v.array(v.string()),
     improvements: v.array(v.string()),
     completedAt: v.number(),
+    ownerUserId: v.string(),
     // Phase 22 — deep debrief (all optional/additive)
     keyMoments: v.optional(
       v.array(
@@ -301,8 +360,49 @@ export const saveAnalysis = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
-    const { sessionId, ...fields } = args;
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) throw new Error("Session not found");
+    if (session.userId !== args.ownerUserId) {
+      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+    }
+    if (session.status !== "completed") throw new Error("Session is not completed");
+    const { sessionId, ownerUserId: _ownerUserId, ...fields } = args;
+    void _ownerUserId;
     await ctx.db.patch(sessionId, fields);
+  },
+});
+
+// Bounded durable guard without adding a counter table: inspect only the newest
+// sessions and a capped message window from each one.
+export const countRecentUserMessages = internalQuery({
+  args: { ownerUserId: v.string(), sinceMs: v.number() },
+  handler: async (ctx, args) => {
+    const newest = await ctx.db
+      .query("simulatorSessions")
+      .withIndex("by_user", (q) => q.eq("userId", args.ownerUserId))
+      .order("desc")
+      .take(SIMULATOR_HOURLY_SESSION_LIMIT);
+    const active = await ctx.db
+      .query("simulatorSessions")
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", args.ownerUserId).eq("status", "active")
+      )
+      .take(20);
+    const sessions = [...new Map([...active, ...newest].map((s) => [s._id, s])).values()];
+
+    let count = 0;
+    for (const session of sessions) {
+      const messages = await ctx.db
+        .query("simulatorMessages")
+        .withIndex("by_session", (q) => q.eq("sessionId", session._id))
+        .order("desc")
+        .take(SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2 + 1);
+      count += messages.filter(
+        (message) => message.role === "user" && message.createdAt >= args.sinceMs
+      ).length;
+      if (count >= SIMULATOR_HOURLY_USER_MESSAGE_LIMIT) break;
+    }
+    return count;
   },
 });
 
@@ -348,6 +448,32 @@ export const sendMessage = action({
     if (!session) throw new Error("Session not found");
     if (session.status !== "active") throw new Error("Session is not active");
 
+    if (detectHighRisk(trimmed)) {
+      await ctx.runMutation(internal.simulator.savePersonaResponse, {
+        sessionId: args.sessionId,
+        ownerUserId: identity.subject,
+        content: HIGH_RISK_RESPONSE,
+        createdAt: Date.now(),
+      });
+      return HIGH_RISK_RESPONSE;
+    }
+
+    const recentUserMessages = await ctx.runQuery(
+      internal.simulator.countRecentUserMessages,
+      {
+        ownerUserId: identity.subject,
+        sinceMs: Date.now() - 60 * 60 * 1000,
+      }
+    );
+    if (recentUserMessages >= SIMULATOR_HOURLY_USER_MESSAGE_LIMIT) {
+      throw new Error(
+        `הגעת למגבלת ${SIMULATOR_HOURLY_USER_MESSAGE_LIMIT} הודעות תרגול לשעה. אפשר לחזור בעוד שעה.`
+      );
+    }
+    if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2 - 1) {
+      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+    }
+
     const now = Date.now();
 
     // Save user message and get updated context
@@ -357,6 +483,7 @@ export const sendMessage = action({
         sessionId: args.sessionId,
         content: trimmed,
         createdAt: now,
+        ownerUserId: identity.subject,
       }
     );
 
@@ -370,12 +497,12 @@ export const sendMessage = action({
     }
 
     // Build conversation history (exclude narrator messages)
-    const conversationHistory = context.messages
+    const conversationHistory = limitSimulatorHistory(context.messages
       .filter((m: { role: string; content: string }) => m.role !== "narrator")
       .map((m: { role: string; content: string }) => ({
         role: m.role === "user" ? ("user" as const) : ("assistant" as const),
         content: m.content,
-      }));
+      })));
 
     // --- Director (Phase 22): move the connection meter for this turn ---
     // Deterministic + free. The persona then ACTS the updated state.
@@ -390,6 +517,7 @@ export const sendMessage = action({
       sessionId: args.sessionId,
       connection: arc.connection,
       turn,
+      ownerUserId: identity.subject,
     });
     const directorNote = buildDirectorNote(
       arc.connection,
@@ -457,6 +585,7 @@ export const sendMessage = action({
           turn <= 1 ? earlyTurn : arc.connection < 40 ? coolTurn : warmTurn;
         personaResponse = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
       }
+      personaResponse = `תגובה אוטומטית בסיסית: ${personaResponse}`;
     }
 
     // Save persona response
@@ -464,6 +593,7 @@ export const sendMessage = action({
       sessionId: args.sessionId,
       content: personaResponse,
       createdAt: Date.now(),
+      ownerUserId: identity.subject,
     });
 
     return personaResponse;
@@ -497,14 +627,15 @@ export const endSession = action({
     await ctx.runMutation(internal.simulator.markCompleted, {
       sessionId: args.sessionId,
       completedAt: now,
+      ownerUserId: identity.subject,
     });
 
-    const conversationHistory = session.messages
+    const conversationHistory = limitSimulatorHistory(session.messages
       .filter((m: { role: string; content: string }) => m.role !== "narrator")
       .map((m: { role: string; content: string }) => ({
         role: m.role === "user" ? ("user" as const) : ("assistant" as const),
         content: m.content,
-      }));
+      })));
 
     // If very short session, return minimal analysis
     if (conversationHistory.filter((m: { role: string }) => m.role === "user").length < 2) {
@@ -521,6 +652,7 @@ export const endSession = action({
         sessionId: args.sessionId,
         ...analysis,
         completedAt: now,
+        ownerUserId: identity.subject,
       });
       return analysis;
     }
@@ -548,7 +680,8 @@ export const endSession = action({
 
     const analysis = {
       score: aiAnalysis?.score ?? heuristic.score,
-      feedback: aiAnalysis?.feedback ?? heuristic.feedback,
+      feedback:
+        aiAnalysis?.feedback ?? `משוב אוטומטי בסיסי: ${heuristic.feedback}`,
       strengths: aiAnalysis?.strengths?.length
         ? aiAnalysis.strengths
         : heuristic.strengths,
@@ -604,6 +737,7 @@ export const endSession = action({
       drill: analysis.drill,
       ...(recommendedLesson ? { recommendedLesson } : {}),
       completedAt: now,
+      ownerUserId: identity.subject,
     });
 
     return {
@@ -937,8 +1071,15 @@ export const markCompleted = internalMutation({
   args: {
     sessionId: v.id("simulatorSessions"),
     completedAt: v.number(),
+    ownerUserId: v.string(),
   },
   handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) throw new Error("Session not found");
+    if (session.userId !== args.ownerUserId) {
+      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+    }
+    if (session.status !== "active") throw new Error("Session is not active");
     await ctx.db.patch(args.sessionId, {
       status: "completed",
       completedAt: args.completedAt,

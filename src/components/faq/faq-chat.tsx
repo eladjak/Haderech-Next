@@ -48,17 +48,13 @@ export function FAQChat() {
       const r = await fetch("/api/chat-faq", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: newHistory
-            .filter((m) => m.id !== "welcome")
-            .map((m) => ({ role: m.role, content: m.text })),
-        }),
+        body: JSON.stringify({ message: clean }),
       });
-      const data: { content?: string; error?: string } = await r.json();
+      const data: { content?: string; message?: string; error?: string } = await r.json();
       const reply: ChatMessage = {
         id: genId(),
         role: "assistant",
-        text: data.content || data.error || "סליחה, נסה שוב.",
+        text: data.content || data.message || "סליחה, נסה שוב.",
       };
       setMessages((prev) => [...prev, reply]);
     } catch {
@@ -75,7 +71,7 @@ export function FAQChat() {
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-5 py-3">
         <h3 className="text-base font-bold text-slate-900">שאל בצ&apos;אט</h3>
-        <p className="text-xs text-slate-500">תשובות מהירות על &quot;הדרך&quot; — בלי לדפדף בקטגוריות</p>
+        <p className="text-xs text-slate-500">תשובות מהירות על &quot;הדרך&quot; — כל שאלה נענית בנפרד</p>
       </div>
 
       <div
@@ -158,6 +154,7 @@ export function FAQChat() {
           placeholder="כתוב שאלה..."
           disabled={loading}
           aria-label="הקלד שאלה"
+          maxLength={1500}
           className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
         />
         <button

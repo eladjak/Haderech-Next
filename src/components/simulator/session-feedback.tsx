@@ -308,7 +308,7 @@ export function SessionFeedback({
             >
               <span aria-hidden="true">📖</span>
               <span className="min-w-0 flex-1">
-                השיעור שמלמד בדיוק את זה: {recommendedLesson.title}
+                שיעור קשור שכדאי לעיין בו: {recommendedLesson.title}
               </span>
               <svg
                 className="h-4 w-4 flex-shrink-0 -scale-x-100"

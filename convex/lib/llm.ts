@@ -61,21 +61,29 @@ export function hasLlmKey(keys: LlmKeys): boolean {
   return selectLlmProvider(keys) !== null;
 }
 
+export type GeminiRequest = {
+  systemInstruction: { parts: Array<{ text: string }> };
+  contents: Array<{
+    role: "user" | "model";
+    parts: Array<{ text: string }>;
+  }>;
+};
+
 /**
- * Flatten a system prompt + conversation turns into a single Gemini prompt.
- * Mirrors the proven FAQ-chat flattening (avoids Gemini multi-turn role edge
- * cases and keeps Hebrew ordering natural).
+ * Keep trusted instructions in Gemini's system channel and conversation turns
+ * in their native roles. User text is data, never concatenated into policy.
  */
-export function buildGeminiPrompt(
+export function buildGeminiRequest(
   system: string,
   messages: LlmMessage[]
-): string {
-  const convo = messages
-    .map((m) => `${m.role === "user" ? "משתמש" : "אסיסטנט"}: ${m.content}`)
-    .join("\n");
-  return convo
-    ? `${system}\n\nשיחה עד כה:\n${convo}\n\nאסיסטנט:`
-    : `${system}\n\nאסיסטנט:`;
+): GeminiRequest {
+  return {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: messages.map((message) => ({
+      role: message.role === "assistant" ? "model" : "user",
+      parts: [{ text: message.content }],
+    })),
+  };
 }
 
 // --- Network callers (thin): each returns the text or null on failure ---
@@ -87,7 +95,7 @@ async function callGemini(
   maxTokens: number,
   temperature: number
 ): Promise<string | null> {
-  const prompt = buildGeminiPrompt(system, messages);
+  const request = buildGeminiRequest(system, messages);
   const r = await fetch(GEMINI_URL, {
     method: "POST",
     headers: {
@@ -95,7 +103,7 @@ async function callGemini(
       "x-goog-api-key": token,
     },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
+      ...request,
       generationConfig: {
         temperature,
         maxOutputTokens: maxTokens,

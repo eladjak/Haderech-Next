@@ -15,6 +15,7 @@ import {
   type LessonContext,
 } from "./lib/advisorTemplates";
 import { generateChat } from "./lib/llm";
+import { detectHighRisk, HIGH_RISK_RESPONSE } from "./lib/aiSafety";
 import {
   requireClerkSubject,
   requireCourseContentAccess,
@@ -420,6 +421,14 @@ export const sendMessage = action({
       sessionId: args.sessionId,
       content: trimmed,
     });
+
+    if (detectHighRisk(trimmed)) {
+      await ctx.runMutation(internal.chat.addAssistantMessage, {
+        sessionId: args.sessionId,
+        content: HIGH_RISK_RESPONSE,
+      });
+      return HIGH_RISK_RESPONSE;
+    }
 
     // 3. Get all messages (including system) for API call
     const allMessages = await ctx.runQuery(
