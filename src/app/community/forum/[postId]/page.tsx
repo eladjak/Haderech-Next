@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
@@ -38,9 +39,12 @@ function AuthorAvatar({
 
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
         alt={name}
+        width={56}
+        height={56}
+        unoptimized
         className={`${cls} rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900`}
       />
     );
@@ -138,7 +142,6 @@ function PageSkeleton() {
 
 export default function PostDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { user } = useUser();
   const postId = params.postId as Id<"communityTopics">;
 

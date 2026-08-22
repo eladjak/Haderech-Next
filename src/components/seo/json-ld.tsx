@@ -1,31 +1,27 @@
 import { siteConfig } from "@/lib/site-config";
 
+const COURSE_FACTS = {
+  duration: "12 שבועות",
+  phases: 6,
+  lessons: 75,
+  documents: 8,
+} as const;
+
 export function WebsiteJsonLd() {
   const graph = [
     {
-      "@type": "EducationalOrganization",
+      "@type": "Organization",
       "@id": `${siteConfig.url}#org`,
       name: "הדרך - אומנות הקשר",
       alternateName: "Haderech",
-      description: "תוכנית 12 שבועות לזוגיות עם צ'אט AI, סימולטור דייטים, קהילה ו-75 שיעורי וידאו.",
+      description:
+        `פלטפורמת למידה בעברית הכוללת תוכנית בת ${COURSE_FACTS.duration}, ${COURSE_FACTS.phases} שלבים, ${COURSE_FACTS.lessons} שיעורים ו-${COURSE_FACTS.documents} מסמכי PDF לתרגול.`,
       url: siteConfig.url,
       logo: `${siteConfig.url}/images/haderech-logo-square.jpg`,
-      sameAs: ["https://ohlove.co.il"],
+      sameAs: ["https://www.ohlove.co.il"],
       email: "haderech@ohlove.co.il",
       areaServed: "ישראל",
-      knowsLanguage: ["he", "en"],
-    },
-    {
-      "@type": "ProfessionalService",
-      "@id": `${siteConfig.url}#service`,
-      name: "הדרך - תוכנית זוגיות 12 שבועות",
-      description: "ליווי זוגי דיגיטלי המבוסס על תכני אומנות הקשר. שיעורי וידאו, צ'אט AI, סימולטור דייטים וקהילה תומכת.",
-      url: siteConfig.url,
-      image: `${siteConfig.url}/images/haderech-banner.jpg`,
-      areaServed: "ישראל",
-      knowsLanguage: ["he", "en"],
-      priceRange: "$$",
-      provider: { "@id": `${siteConfig.url}#org` },
+      knowsLanguage: ["he"],
     },
     {
       "@type": "WebSite",
@@ -36,64 +32,29 @@ export function WebsiteJsonLd() {
       publisher: { "@id": `${siteConfig.url}#org` },
     },
     {
+      "@type": "Course",
+      "@id": `${siteConfig.url}#course`,
+      name: "הדרך - תוכנית למידה בת 12 שבועות",
+      description:
+        `תוכנית למידה בעברית בת ${COURSE_FACTS.duration} וב-${COURSE_FACTS.phases} שלבים, הכוללת ${COURSE_FACTS.lessons} שיעורים ו-${COURSE_FACTS.documents} מסמכי PDF לתרגול.`,
+      url: `${siteConfig.url}/courses`,
+      inLanguage: "he-IL",
+      provider: { "@id": `${siteConfig.url}#org` },
+    },
+    {
       "@type": "WebPage",
       "@id": `${siteConfig.url}#webpage`,
-      name: "הדרך - תוכנית 12 שבועות לזוגיות | אומנות הקשר",
+      name: "הדרך - תוכנית למידה בת 12 שבועות | אומנות הקשר",
+      description:
+        `תוכנית בת ${COURSE_FACTS.duration}, ${COURSE_FACTS.phases} שלבים, ${COURSE_FACTS.lessons} שיעורים ו-${COURSE_FACTS.documents} מסמכי PDF לתרגול.`,
       url: siteConfig.url,
       inLanguage: "he-IL",
-      datePublished: "2026-01-01",
-      dateModified: "2026-05-12",
       isPartOf: { "@id": `${siteConfig.url}#website` },
-      about: { "@id": `${siteConfig.url}#service` },
+      about: { "@id": `${siteConfig.url}#course` },
       primaryImageOfPage: {
         "@type": "ImageObject",
         url: `${siteConfig.url}/images/haderech-banner.jpg`,
       },
-    },
-    {
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: "מה זה תוכנית 'הדרך'?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "הדרך היא תוכנית דיגיטלית של 12 שבועות לזוגיות, מבוססת על שיטת 'אומנות הקשר'. כוללת שיעורי וידאו, צ'אט AI חכם, סימולטור דייטים וקהילה תומכת.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "למי התוכנית מתאימה?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "התוכנית מתאימה לרווקים/ות שמחפשים זוגיות, וגם לזוגות שרוצים להעמיק את הקשר. כל שיעור בנוי משלבים מעשיים שניתן ליישם מיד.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "מה כוללת התוכנית?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "75 שיעורי וידאו, צ'אט AI חכם 24/7, סימולטור דייטים אינטראקטיבי, קהילה תומכת, תעודת סיום, ומעקב התקדמות אישי.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "האם ניתן ללמוד בקצב אישי?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "כן. התוכנית גמישה — אפשר ללמוד בקצב שלך. המערכת זוכרת איפה הפסקת ומחזירה אותך בדיוק לשם.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "איך יוצרים קשר?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "אפשר ליצור קשר דרך טופס יצירת הקשר באתר haderech-next.vercel.app/contact, או במייל haderech@ohlove.co.il.",
-          },
-        },
-      ],
     },
   ];
 
@@ -115,48 +76,32 @@ export function HomePageFallback() {
     <noscript>
       <article style={{ direction: "rtl", padding: 40, fontFamily: "sans-serif" }}>
         <header>
-          <h1>הדרך - תוכנית 12 שבועות לזוגיות | אומנות הקשר</h1>
+          <h1>הדרך - תוכנית למידה בת 12 שבועות | אומנות הקשר</h1>
           <p>
-            <strong>
-              תוכנית דיגיטלית מקיפה לזוגיות, מבוססת על שיטת אומנות הקשר.
-            </strong>
+            תוכנית בעברית העוסקת בתקשורת, היכרות וקשרים. התוכנית אינה מבטיחה
+            תוצאה זוגית ואינה תחליף לטיפול או לייעוץ מקצועי.
           </p>
         </header>
         <section>
-          <h2>מה זה הדרך?</h2>
-          <p>
-            תוכנית 12 שבועות שמשלבת 75 שיעורי וידאו, צ&apos;אט AI חכם 24/7,
-            סימולטור דייטים אינטראקטיבי וקהילה תומכת — הכל במקום אחד.
-          </p>
-        </section>
-        <section>
-          <h2>למי זה מתאים?</h2>
-          <p>
-            רווקים ורווקות שמחפשים זוגיות עמוקה, וזוגות שרוצים להעמיק את
-            התקשורת והקשר ביניהם.
-          </p>
-        </section>
-        <section>
-          <h2>מה בתוכנית?</h2>
-          <h4>רכיבי התוכנית המרכזיים</h4>
+          <h2>מה כוללת התוכנית?</h2>
           <ul>
-            <li>75 שיעורי וידאו בעברית</li>
-            <li>צ&apos;אט AI חכם המבוסס על תכני אומנות הקשר</li>
-            <li>סימולטור דייטים אינטראקטיבי</li>
-            <li>קהילה תומכת של לומדים</li>
-            <li>תעודת סיום</li>
-            <li>מעקב התקדמות אישי</li>
+            <li>12 שבועות המחולקים ל-6 שלבים</li>
+            <li>75 שיעורים בעברית</li>
+            <li>8 מסמכי PDF לתרגול</li>
+            <li>כלי AI וסימולטור לתרגול, בכפוף לזמינות השירות</li>
           </ul>
+          <p>
+            כלי ה-AI עלולים לטעות. אין להזין בהם מידע שלא תרצו שיעובד אצל ספק
+            חיצוני, ואין להסתמך עליהם במצב חירום או במקום איש מקצוע.
+          </p>
         </section>
         <section>
-          <h2>אודות אומנות הקשר</h2>
+          <h2>בחירה ובטיחות</h2>
           <p>
-            <a href="https://ohlove.co.il">אומנות הקשר</a> — תוכנית ליווי זוגי
-            שליוותה למעלה מ-450 זוגות. הדרך היא הגרסה הדיגיטלית של אותה שיטה.
+            התרגילים הם הצעות בלבד. מותר לדלג, לעצור או להתאים כל תרגיל, והסכמה
+            נדרשת בכל מגע, שיתוף או תרגול משותף.
           </p>
-          <p>
-            <a href="/about">למידע נוסף ולעמוד האודות המלא</a>
-          </p>
+          <p><a href="/course-safety">מידע בטיחות ומשאבי סיוע</a></p>
         </section>
         <section>
           <h2>יצירת קשר</h2>
@@ -166,7 +111,7 @@ export function HomePageFallback() {
           </address>
         </section>
         <footer>
-          <p>כדי להשתמש בפלטפורמה המלאה (וידאו, AI, קהילה) — יש להפעיל JavaScript.</p>
+          <p>כדי להשתמש בווידאו, בכלי ה-AI ובשאר הממשק יש להפעיל JavaScript.</p>
         </footer>
       </article>
     </noscript>
@@ -188,9 +133,9 @@ export function CourseJsonLd({
     provider: {
       "@type": "Organization",
       name: "אומנות הקשר",
-      url: "https://ohlove.co.il",
+      url: "https://www.ohlove.co.il",
     },
-    inLanguage: "he",
+    inLanguage: "he-IL",
   };
 
   return (

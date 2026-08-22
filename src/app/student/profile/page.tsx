@@ -3,6 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
@@ -11,6 +12,7 @@ import {
   BadgeCard,
   StreakDisplay,
 } from "@/components/gamification/badge-icon";
+import { CERTIFICATE_SCOPE_NOTICE } from "@/lib/certificate-truth";
 
 export default function StudentProfilePage() {
   const { user: clerkUser } = useUser();
@@ -79,9 +81,12 @@ export default function StudentProfilePage() {
                   {/* Avatar */}
                   <div className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-200 text-2xl font-bold text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
                     {profile.imageUrl ? (
-                      <img
+                      <Image
                         src={profile.imageUrl}
                         alt=""
+                        width={80}
+                        height={80}
+                        unoptimized
                         className="h-20 w-20 rounded-full object-cover"
                       />
                     ) : (
@@ -143,10 +148,10 @@ export default function StudentProfilePage() {
                   {/* Quick links */}
                   <div className="flex flex-col gap-2">
                     <Link
-                      href="/student/leaderboard"
+                      href="/community/leaderboard"
                       className="rounded-full border border-zinc-300 px-4 py-2 text-center text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
                     >
-                      לוח מובילים
+                      התקדמות אישית
                     </Link>
                     <Link
                       href="/student/analytics"
@@ -241,9 +246,12 @@ export default function StudentProfilePage() {
                       <div className="mb-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {course.courseImage && (
-                            <img
+                            <Image
                               src={course.courseImage}
                               alt=""
+                              width={40}
+                              height={40}
+                              unoptimized
                               className="h-10 w-10 rounded-lg object-cover"
                             />
                           )}
@@ -312,7 +320,6 @@ export default function StudentProfilePage() {
                     <CertificateShareCard
                       key={cert.certificateNumber}
                       certificate={cert}
-                      userName={profile.name}
                     />
                   ))}
                 </div>
@@ -340,7 +347,6 @@ export default function StudentProfilePage() {
 // Certificate card with share button
 function CertificateShareCard({
   certificate,
-  userName,
 }: {
   certificate: {
     courseId: string;
@@ -349,41 +355,25 @@ function CertificateShareCard({
     issuedAt: number;
     completionPercent: number;
   };
-  userName: string;
 }) {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const shareUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/certificates?verify=${certificate.certificateNumber}`
-      : "";
+  const shareText = `השלמתי את מסלול הלמידה בקורס "${certificate.courseName}" בפלטפורמת הדרך. ${CERTIFICATE_SCOPE_NOTICE}`;
 
-  const shareText = `סיימתי את הקורס "${certificate.courseName}" בפלטפורמת הדרך! תעודה מספר ${certificate.certificateNumber}`;
-
-  const ogImageUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/api/og?name=${encodeURIComponent(userName)}&course=${encodeURIComponent(certificate.courseName)}&cert=${encodeURIComponent(certificate.certificateNumber)}&date=${encodeURIComponent(new Intl.DateTimeFormat("he-IL").format(new Date(certificate.issuedAt)))}`
-      : "";
-
-  function handleCopyLink() {
-    navigator.clipboard.writeText(shareUrl);
+  function handleCopySummary() {
+    navigator.clipboard.writeText(shareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   function handleShareTwitter() {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
   function handleShareWhatsApp() {
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText + "\n" + shareUrl)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
-
-  function handleShareLinkedIn() {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
@@ -447,7 +437,7 @@ function CertificateShareCard({
               d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
             />
           </svg>
-          שתף תעודה
+          שתף סיכום השלמה
         </button>
 
         {/* Share menu dropdown */}
@@ -455,7 +445,7 @@ function CertificateShareCard({
           <div className="absolute bottom-full left-0 right-0 z-10 mb-2 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
             <button
               type="button"
-              onClick={handleCopyLink}
+              onClick={handleCopySummary}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700"
             >
               <svg
@@ -471,7 +461,7 @@ function CertificateShareCard({
                   d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-6.07a4.5 4.5 0 00-6.364 0l-4.5 4.5a4.5 4.5 0 001.242 7.244"
                 />
               </svg>
-              {copied ? "הועתק!" : "העתק קישור"}
+              {copied ? "הועתק!" : "העתק סיכום"}
             </button>
             <button
               type="button"
@@ -493,41 +483,7 @@ function CertificateShareCard({
               </svg>
               X (Twitter)
             </button>
-            <button
-              type="button"
-              onClick={handleShareLinkedIn}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-              </svg>
-              LinkedIn
-            </button>
 
-            {/* OG Image Preview Link */}
-            {ogImageUrl && (
-              <a
-                href={ogImageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700"
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v13.5a1.5 1.5 0 001.5 1.5z"
-                  />
-                </svg>
-                צפה בתמונת שיתוף
-              </a>
-            )}
           </div>
         )}
       </div>

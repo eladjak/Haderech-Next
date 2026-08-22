@@ -7,7 +7,7 @@ import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 interface Challenge {
   slug: string;
@@ -191,7 +191,6 @@ function ChallengesStats({ challenges }: { challenges: Challenge[] }) {
 }
 
 export default function ChallengesPage() {
-  const { user } = useUser();
   const challenges = useQuery(api.leaderboard.getWeeklyChallenges);
   const completeChallenge = useMutation(api.leaderboard.completeWeeklyChallenge);
   const [filter, setFilter] = useState<"all" | "active" | "done">("all");
@@ -227,7 +226,7 @@ export default function ChallengesPage() {
             אתגרים שבועיים
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400">
-            השלם אתגרים, הרווח XP וטפס בדירוגים
+            בחר תרגול שבועי קטן ועקוב אחרי הפעילות שלך בקצב אישי
           </p>
         </motion.div>
 
@@ -246,7 +245,7 @@ export default function ChallengesPage() {
             href="/community/leaderboard"
             className="rounded-full px-4 py-2 text-sm font-medium text-zinc-600 shadow-sm bg-white hover:bg-brand-50 hover:text-brand-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
-            לוח דירוגים
+            התקדמות אישית
           </Link>
           <Link
             href="/community/rewards"
@@ -356,8 +355,8 @@ export default function ChallengesPage() {
           </h3>
           <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-400">
             <li>• האתגרים מתחדשים כל שבוע ביום ראשון</li>
-            <li>• השלם אתגר ולחץ "השלמתי!" כדי לקבל את ה-XP</li>
-            <li>• XP שנצבר מופיע בלוח הדירוגים</li>
+            <li>• השלם אתגר ולחץ &quot;השלמתי!&quot; כדי לקבל את ה-XP</li>
+            <li>• XP שנצבר מופיע רק בתמונת ההתקדמות האישית שלך</li>
             <li>• צבור XP כדי לממש פרסים בחנות</li>
           </ul>
         </motion.div>

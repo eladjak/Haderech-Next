@@ -47,6 +47,11 @@ export default function StudentAnalyticsPage() {
     quizHistory === undefined ||
     streak === undefined ||
     achievements === undefined;
+  const scoredQuizHistory =
+    quizHistory?.filter(
+      (attempt): attempt is typeof attempt & { score: number } =>
+        attempt.score !== null
+    ) ?? [];
 
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
@@ -235,18 +240,18 @@ export default function StudentAnalyticsPage() {
               <h2 className="mb-4 text-xl font-semibold text-zinc-900 dark:text-white">
                 היסטוריית ציוני בחנים
               </h2>
-              {quizHistory && quizHistory.length > 0 ? (
+              {scoredQuizHistory.length > 0 ? (
                 <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
                   {/* SVG Bar Chart */}
                   <div className="mb-4 overflow-x-auto">
                     <QuizScoreChart
-                      data={quizHistory.slice(0, 10).reverse()}
+                       data={scoredQuizHistory.slice(0, 10).reverse()}
                     />
                   </div>
 
                   {/* Recent quizzes list */}
                   <div className="space-y-2">
-                    {quizHistory.slice(0, 5).map((attempt) => (
+                    {scoredQuizHistory.slice(0, 5).map((attempt) => (
                       <div
                         key={attempt.attemptId}
                         className="flex items-center justify-between rounded-xl bg-zinc-100 p-3 dark:bg-zinc-800"

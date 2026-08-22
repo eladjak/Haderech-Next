@@ -21,11 +21,11 @@ const heebo = Heebo({
 
 export const metadata: Metadata = {
   title: {
-    default: "הדרך - אומנות הקשר | תוכנית 12 שבועות לזוגיות",
+    default: "הדרך - אומנות הקשר | תוכנית למידה בת 12 שבועות",
     template: "%s | הדרך - אומנות הקשר",
   },
   description:
-    "תוכנית הדרך של אומנות הקשר - 12 שבועות שישנו לך את חיי הזוגיות. עם צ'אט AI חכם, סימולטור דייטים, קהילה תומכת ו-75 שיעורי וידאו.",
+    "תוכנית למידה בעברית בת 12 שבועות וב-6 שלבים, עם 75 שיעורים ו-8 מסמכי PDF לתרגול. כלי ה-AI והסימולטור מיועדים לתרגול בלבד ועלולים לטעות.",
   keywords: [
     "זוגיות",
     "דייטינג",
@@ -49,9 +49,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "he_IL",
     siteName: "הדרך - אומנות הקשר",
-    title: "הדרך - תוכנית 12 שבועות לזוגיות | אומנות הקשר",
+    title: "הדרך - תוכנית למידה בת 12 שבועות | אומנות הקשר",
     description:
-      "תוכנית הדרך של אומנות הקשר - 12 שבועות שישנו לך את חיי הזוגיות.",
+      "תוכנית למידה בעברית בת 12 שבועות וב-6 שלבים, עם 75 שיעורים ו-8 מסמכי PDF לתרגול.",
     images: [
       {
         url: "/images/haderech-banner.jpg",
@@ -63,9 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "הדרך - תוכנית 12 שבועות לזוגיות",
+    title: "הדרך - תוכנית למידה בת 12 שבועות",
     description:
-      "תוכנית הדרך של אומנות הקשר - 12 שבועות שישנו לך את חיי הזוגיות.",
+      "תוכנית למידה בעברית בת 12 שבועות וב-6 שלבים, עם 75 שיעורים ו-8 מסמכי PDF לתרגול.",
     images: ["/images/haderech-banner.jpg"],
   },
   robots: {
@@ -91,7 +91,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider localization={heIL}>
-      <html lang="he" dir="rtl">
+      <html lang="he" dir="rtl" data-scroll-behavior="smooth">
         <head>
           <WebsiteJsonLd />
         </head>
@@ -100,7 +100,7 @@ export default function RootLayout({
           <HomePageFallback />
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:right-4 focus:z-[100] focus:rounded-lg focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[100] focus:rounded-lg focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
           >
             דלג לתוכן הראשי
           </a>

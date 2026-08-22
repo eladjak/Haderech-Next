@@ -5,15 +5,50 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import Link from "next/link";
+import {
+  CANONICAL_COURSE_SCOPE,
+  chooseOnboardingNextStep,
+  type OnboardingInterest,
+} from "@/lib/learner-journey";
 
 const STORAGE_KEY = "haderech_onboarding_dismissed";
 
-const INTEREST_OPTIONS = [
-  { id: "course", label: "קורס מלא", icon: "📚", description: "תכנית לימודים מובנית" },
-  { id: "ai-coach", label: "מאמן AI", icon: "🤖", description: "שיחות אישיות עם מאמן" },
-  { id: "simulator", label: "סימולטור דייטים", icon: "🎭", description: "תרגול תרחישי דייטינג" },
-  { id: "community", label: "קהילה", icon: "👥", description: "שיתוף וקבלת עצות" },
-  { id: "tools", label: "כלי דייטינג", icon: "🛠️", description: "בניית פרופיל ועוד" },
+const INTEREST_OPTIONS: Array<{
+  id: OnboardingInterest;
+  label: string;
+  icon: string;
+  description: string;
+}> = [
+  {
+    id: "course",
+    label: "מסלול הלימוד המלא",
+    icon: "📚",
+    description: "12 שבועות ו־6 שלבים בקצב שלך",
+  },
+  {
+    id: "conversation",
+    label: "תרגול שיחה קצר",
+    icon: "💬",
+    description: "לבחור מצב, טון וניסוח לעריכה",
+  },
+  {
+    id: "profile",
+    label: "טיוטת פרופיל",
+    icon: "✍️",
+    description: "לנסח כמה גרסאות מקומיות בדפדפן",
+  },
+  {
+    id: "values",
+    label: "רפלקציה על ערכים",
+    icon: "🧭",
+    description: "לחדד מה חשוב כרגע, בלי אבחון",
+  },
+  {
+    id: "community",
+    label: "מרחב הקהילה",
+    icon: "👥",
+    description: "להכיר את הכללים ולבחור אם להשתתף",
+  },
 ];
 
 interface WelcomeModalProps {
@@ -23,7 +58,9 @@ interface WelcomeModalProps {
 export function WelcomeModal({ userName }: WelcomeModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<
+    OnboardingInterest[]
+  >([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const preferences = useQuery(api.users.getPreferences);
@@ -62,7 +99,7 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
     handleDismiss();
   };
 
-  const toggleInterest = (id: string) => {
+  const toggleInterest = (id: OnboardingInterest) => {
     setSelectedInterests((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
@@ -83,6 +120,22 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
     setStep(2);
   };
 
+  const suggestedNextStep = chooseOnboardingNextStep(selectedInterests);
+  const alternateNextStep =
+    suggestedNextStep.href === "/courses"
+      ? {
+          href: "/tools/conversation-starters",
+          label: "לתרגל ניסוח קצר",
+          description: "לבחור מצב וטון ולערוך ניסוח אחד",
+          icon: "💬",
+        }
+      : {
+          href: "/courses",
+          label: "לראות את מסלול הלימוד",
+          description: "12 שבועות, 6 שלבים ו־75 שיעורים",
+          icon: "📚",
+        };
+
   const STEPS = [
     {
       key: "welcome",
@@ -97,29 +150,39 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
           <p className="mb-2 text-zinc-600 dark:text-zinc-400">
             {userName ? `שמחים שהצטרפת אלינו, ${userName}!` : "שמחים שהצטרפת אלינו!"}
           </p>
-          <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-            פלטפורמת הלמידה המובילה לדייטינג ומציאת אהבה אמיתית
+          <p className="mb-6 text-pretty text-sm text-zinc-500 dark:text-zinc-400">
+            סביבת למידה בעברית שמחברת בין שיעורים, תרגול קצר וחזרה מסודרת
+            למה שכבר למדת.
           </p>
 
-          {/* Social proof */}
-          <div className="mb-8 rounded-2xl bg-brand-50 px-6 py-4 dark:bg-brand-900/20">
-            <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">
-              461
-            </p>
-            <p className="text-sm text-brand-700 dark:text-brand-300">
-              זוגות כבר מצאו אהבה דרכנו
-            </p>
+          {/* Canonical course scope */}
+          <div className="mb-8 grid grid-cols-4 gap-2 rounded-2xl bg-brand-50 p-3 dark:bg-brand-900/20">
+            {[
+              [CANONICAL_COURSE_SCOPE.weeks, "שבועות"],
+              [CANONICAL_COURSE_SCOPE.phases, "שלבים"],
+              [CANONICAL_COURSE_SCOPE.lessons, "שיעורים"],
+              [CANONICAL_COURSE_SCOPE.practicePdfs, "קובצי PDF"],
+            ].map(([value, label]) => (
+              <div key={label} className="rounded-xl bg-white/70 px-2 py-3 dark:bg-zinc-900/40">
+                <p className="tabular-nums text-xl font-bold text-brand-700 dark:text-brand-300">
+                  {value}
+                </p>
+                <p className="mt-0.5 text-[11px] text-brand-700/80 dark:text-brand-300/80">
+                  {label}
+                </p>
+              </div>
+            ))}
           </div>
 
           <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-            כדי להתאים לך את החוויה הטובה ביותר, ספר לנו מה מעניין אותך
+            עכשיו בוחרים נקודת פתיחה. אפשר לשנות כיוון בכל רגע.
           </p>
 
           <button
             onClick={() => setStep(1)}
             className="w-full rounded-xl bg-gradient-to-l from-brand-600 to-brand-500 py-3 text-sm font-semibold text-white transition-all hover:brightness-110"
           >
-            בוא נתחיל!
+            לבחור נקודת פתיחה
           </button>
         </div>
       ),
@@ -129,10 +192,11 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
       content: (
         <div>
           <h2 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white text-center">
-            מה מעניין אותך?
+            מאיפה מתאים להתחיל?
           </h2>
           <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400 text-center">
-            בחר את האזורים שמושכים אותך (ניתן לבחור כמה)
+            אפשר לבחור כמה אפשרויות. הבחירה רק מסדרת את הצעד הבא ואינה
+            מסווגת אותך.
           </p>
 
           <div className="mb-6 grid gap-3">
@@ -192,7 +256,11 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
             disabled={isSaving}
             className="w-full rounded-xl bg-gradient-to-l from-brand-600 to-brand-500 py-3 text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-60"
           >
-            {isSaving ? "שומר..." : "המשך"}
+            {isSaving
+              ? "שומר..."
+              : selectedInterests.length > 0
+                ? "להכין את הצעד הבא"
+                : "להמשיך עם מסלול הלימוד"}
           </button>
         </div>
       ),
@@ -202,60 +270,61 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
       content: (
         <div className="text-center">
           <div className="mb-6 text-6xl" aria-hidden="true">
-            🚀
+            🧭
           </div>
           <h2 className="mb-3 text-2xl font-bold text-zinc-900 dark:text-white">
-            מוכן להתחיל!
+            הצעד הראשון מוכן
           </h2>
-          <p className="mb-8 text-zinc-500 dark:text-zinc-400">
-            כל הכלים שלך מוכנים. מאיפה תרצה להתחיל?
+          <p className="mb-6 text-pretty text-zinc-500 dark:text-zinc-400">
+            בעשר הדקות הראשונות מספיק לפתוח יחידה אחת, לבחור מתוכה פעולה
+            אחת ולשמור נקודה לחזרה.
           </p>
 
           <div className="mb-6 grid gap-3">
             <Link
-              href="/courses"
+              href={suggestedNextStep.href}
               onClick={handleDismiss}
               className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-right transition-all hover:border-blue-300 hover:bg-blue-100 dark:border-blue-700/50 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
             >
-              <span className="text-2xl" aria-hidden="true">📚</span>
+              <span className="text-2xl" aria-hidden="true">←</span>
               <div>
                 <p className="font-semibold text-blue-900 dark:text-blue-200">
-                  התחל את הקורס
+                  {suggestedNextStep.label}
                 </p>
                 <p className="text-xs text-blue-700 dark:text-blue-400">
-                  למד מתודולוגיה מוכחת לדייטינג
+                  {suggestedNextStep.description}
                 </p>
               </div>
             </Link>
 
             <Link
-              href="/chat"
+              href={alternateNextStep.href}
               onClick={handleDismiss}
               className="flex items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 p-4 text-right transition-all hover:border-brand-300 hover:bg-brand-100 dark:border-brand-700/50 dark:bg-brand-900/20 dark:hover:bg-brand-900/30"
             >
-              <span className="text-2xl" aria-hidden="true">🤖</span>
+              <span className="text-2xl" aria-hidden="true">{alternateNextStep.icon}</span>
               <div>
                 <p className="font-semibold text-brand-900 dark:text-brand-200">
-                  דבר עם המאמן
+                  {alternateNextStep.label}
                 </p>
                 <p className="text-xs text-brand-700 dark:text-brand-400">
-                  קבל עצות אישיות מ-AI מאמן
+                  {alternateNextStep.description}
                 </p>
               </div>
             </Link>
 
             <Link
-              href="/simulator"
+              href="/tools"
               onClick={handleDismiss}
               className="flex items-center gap-3 rounded-xl border border-purple-200 bg-purple-50 p-4 text-right transition-all hover:border-purple-300 hover:bg-purple-100 dark:border-purple-700/50 dark:bg-purple-900/20 dark:hover:bg-purple-900/30"
             >
-              <span className="text-2xl" aria-hidden="true">🎭</span>
+              <span className="text-2xl" aria-hidden="true">🛠️</span>
               <div>
                 <p className="font-semibold text-purple-900 dark:text-purple-200">
-                  נסה סימולציה
+                  לבחור תרגול קצר אחר
                 </p>
                 <p className="text-xs text-purple-700 dark:text-purple-400">
-                  תרגל דייטינג עם AI פרסונה
+                  שיחה, ערכים או טיוטת פרופיל
                 </p>
               </div>
             </Link>
@@ -275,7 +344,7 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
   const currentStep = STEPS[step];
 
   return (
-    <AnimatePresence>
+    <AnimatePresence initial={false}>
       {isOpen && (
         <>
           {/* Backdrop */}
@@ -300,14 +369,14 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ duration: 0.25, type: "spring", stiffness: 300, damping: 25 }}
+              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
               className="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl dark:bg-zinc-900"
             >
               {/* Skip button */}
               {step < 2 && (
                 <button
                   onClick={handleSkip}
-                  className="absolute left-4 top-4 rounded-lg px-2 py-1 text-xs text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                  className="absolute left-4 top-4 inline-flex min-h-10 items-center rounded-lg px-3 py-2 text-xs text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                   aria-label="דלג על ההדרכה"
                 >
                   דלג
@@ -332,7 +401,7 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
               </div>
 
               {/* Step content with slide animation */}
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={currentStep.key}
                   initial={{ opacity: 0, x: -20 }}

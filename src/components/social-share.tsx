@@ -8,13 +8,11 @@ interface SocialShareProps {
   description?: string;
 }
 
-export function SocialShare({ url, title, description }: SocialShareProps) {
+export function SocialShare({ url, title }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
 
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
-  const encodedDesc = encodeURIComponent(description ?? "");
-
   const whatsappUrl = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;

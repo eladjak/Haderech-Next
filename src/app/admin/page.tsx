@@ -271,10 +271,10 @@ export default function AdminDashboardPage() {
               </svg>
             </div>
             <h3 className="font-semibold text-zinc-900 dark:text-white">
-              סיפורי הצלחה
+              עדויות משתתפים
             </h3>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              אישור והצגת סיפורי הצלחה
+              אימות מקור, הסכמה ואישור לפרסום עדויות
             </p>
           </Link>
 

@@ -250,8 +250,10 @@ function RewardCard({
 }
 
 function RedeemedRewardItem({ reward }: { reward: RedeemedReward }) {
+  const [referenceTime] = useState(Date.now);
+
   function timeAgo(ts: number) {
-    const days = Math.floor((Date.now() - ts) / 86400000);
+    const days = Math.floor((referenceTime - ts) / 86400000);
     if (days === 0) return "היום";
     if (days === 1) return "אתמול";
     return `לפני ${days} ימים`;
@@ -355,7 +357,7 @@ export default function RewardsPage() {
             href="/community/leaderboard"
             className="rounded-full px-4 py-2 text-sm font-medium text-zinc-600 shadow-sm bg-white hover:bg-brand-50 hover:text-brand-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
-            לוח דירוגים
+            התקדמות אישית
           </Link>
           <span className="rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-sm">
             חנות פרסים

@@ -10,6 +10,8 @@ import { CourseCard } from "@/components/course/course-card";
 import { CourseProgressTracker } from "@/components/course/course-progress-tracker";
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
 import { DailyWidget } from "@/components/daily/daily-widget";
+import { PrivateWeeklyReflection } from "@/components/dashboard/private-weekly-reflection";
+import { CANONICAL_COURSE_SCOPE } from "@/lib/learner-journey";
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -57,7 +59,11 @@ export default function DashboardPage() {
     convexUser?._id ? { userId: convexUser._id } : "skip"
   );
 
-  const enrolledCount = enrolledCourses?.length ?? 0;
+  const accessibleCourses =
+    enrolledCourses?.filter((course) => course.hasContentAccess) ?? [];
+  const savedWithoutAccess =
+    enrolledCourses?.filter((course) => !course.hasContentAccess) ?? [];
+  const enrolledCount = accessibleCourses.length;
   const certificateCount = certificates?.length ?? 0;
   const completedLessonsCount = overview?.completedLessons ?? 0;
   const avgQuizScore = overview?.averageQuizScore ?? 0;
@@ -108,15 +114,63 @@ export default function DashboardPage() {
           {user?.firstName ? `שלום, ${user.firstName}!` : "שלום!"}
         </h1>
         <p className="mb-8 text-zinc-600 dark:text-zinc-400">
-          ברוך הבא לאזור האישי שלך
+          כאן ממשיכים ללמוד, בקצב שלך
         </p>
+
+        {/* Primary learner action: shown before stats and secondary features. */}
+        <section className="mb-8" aria-label="הצעד הבא בלמידה">
+          {enrolledCourses === undefined ? (
+            <div
+              className="h-48 animate-pulse rounded-3xl bg-zinc-100 dark:bg-zinc-900"
+              aria-label="טוען את הצעד הבא"
+            />
+          ) : enrolledCount > 0 ? (
+            continueData === undefined || courseProgress === undefined ? (
+              <div
+                className="h-48 animate-pulse rounded-3xl bg-zinc-100 dark:bg-zinc-900"
+                aria-label="טוען את השיעור הבא"
+              />
+            ) : continueData?.primary ? (
+              <ContinueLearningCardEnhanced
+                courseId={continueData.primary.courseId}
+                courseTitle={continueData.primary.courseTitle}
+                completionPercent={continueData.primary.completionPercent}
+                completedLessons={continueData.primary.completedLessons}
+                totalLessons={continueData.primary.totalLessons}
+                nextLessonId={continueData.primary.nextLessonId}
+                nextLessonTitle={continueData.primary.nextLessonTitle}
+                nextLessonNumber={continueData.primary.nextLessonNumber}
+              />
+            ) : continueCourse ? (
+              <ContinueLearningCard
+                courseId={continueCourse.courseId}
+                courseTitle={continueCourse.courseTitle}
+                completionPercent={continueCourse.completionPercent}
+                completedLessons={continueCourse.completedLessons}
+                totalLessons={continueCourse.totalLessons}
+              />
+            ) : lastActiveCourse ? (
+              <ContinueLearningCard
+                courseId={lastActiveCourse.courseId}
+                courseTitle={lastActiveCourse.courseTitle}
+                completionPercent={lastActiveCourse.completionPercent}
+                completedLessons={lastActiveCourse.completedLessons}
+                totalLessons={lastActiveCourse.totalLessons}
+              />
+            ) : (
+              <ReturnToPracticeCard />
+            )
+          ) : (
+            <FirstMinutesCard />
+          )}
+        </section>
 
         {/* Quick Stats Cards */}
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
           <DashboardCard
-            title="קורסים רשומים"
+            title="קורסים עם גישה"
             value={String(enrolledCount)}
-            description="קורסים שנרשמת אליהם"
+            description="מסלולים שהגישה אליהם פעילה"
             href="/courses"
           />
           <DashboardCard
@@ -200,55 +254,17 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* "Continue where you left off" + Streak + Achievements row */}
+        {/* Streak + Achievements are secondary context, after the next action. */}
         {enrolledCount > 0 && (
-          <div className="mt-8 grid gap-6 lg:grid-cols-3">
-            {/* Continue card */}
-            <div className="lg:col-span-2">
-              {continueData?.primary ? (
-                <ContinueLearningCardEnhanced
-                  courseId={continueData.primary.courseId}
-                  courseTitle={continueData.primary.courseTitle}
-                  completionPercent={continueData.primary.completionPercent}
-                  completedLessons={continueData.primary.completedLessons}
-                  totalLessons={continueData.primary.totalLessons}
-                  nextLessonId={continueData.primary.nextLessonId}
-                  nextLessonTitle={continueData.primary.nextLessonTitle}
-                  nextLessonNumber={continueData.primary.nextLessonNumber}
-                />
-              ) : continueCourse ? (
-                <ContinueLearningCard
-                  courseId={continueCourse.courseId}
-                  courseTitle={continueCourse.courseTitle}
-                  completionPercent={continueCourse.completionPercent}
-                  completedLessons={continueCourse.completedLessons}
-                  totalLessons={continueCourse.totalLessons}
-                />
-              ) : lastActiveCourse ? (
-                <ContinueLearningCard
-                  courseId={lastActiveCourse.courseId}
-                  courseTitle={lastActiveCourse.courseTitle}
-                  completionPercent={lastActiveCourse.completionPercent}
-                  completedLessons={lastActiveCourse.completedLessons}
-                  totalLessons={lastActiveCourse.totalLessons}
-                />
-              ) : null}
-            </div>
-
-            {/* Streak + Achievements summary */}
-            <div className="flex flex-col gap-4">
-              {/* Streak Counter */}
-              <StreakCard streak={currentStreak} />
-
-              {/* Achievements summary */}
-              {earnedAchievements.length > 0 && (
-                <AchievementsSummaryCard
-                  earnedCount={earnedAchievements.length}
-                  totalCount={achievements?.length ?? 0}
-                  icons={earnedAchievements.slice(0, 4).map((a) => a.icon)}
-                />
-              )}
-            </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <StreakCard streak={currentStreak} />
+            {earnedAchievements.length > 0 && (
+              <AchievementsSummaryCard
+                earnedCount={earnedAchievements.length}
+                totalCount={achievements?.length ?? 0}
+                icons={earnedAchievements.slice(0, 4).map((a) => a.icon)}
+              />
+            )}
           </div>
         )}
 
@@ -268,8 +284,10 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {enrolledCount > 0 && <PrivateWeeklyReflection />}
+
         {/* Enrolled Courses Section */}
-        {enrolledCourses && enrolledCourses.length > 0 && (
+        {accessibleCourses.length > 0 && (
           <section className="mt-12">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
@@ -283,7 +301,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {enrolledCourses.map((course) => {
+              {accessibleCourses.map((course) => {
                 const progress = courseProgress?.find(
                   (p) => p.courseId === course._id
                 );
@@ -303,6 +321,32 @@ export default function DashboardPage() {
           </section>
         )}
 
+        {savedWithoutAccess.length > 0 && (
+          <section className="mt-10 rounded-3xl border border-amber-200 bg-amber-50/70 p-6 dark:border-amber-800 dark:bg-amber-950/20">
+            <h2 className="text-xl font-semibold text-amber-950 dark:text-amber-100">
+              קורסים ששמרת — ללא גישה פעילה
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-amber-800 dark:text-amber-200">
+              שמירת קורס בחשבון אינה רכישה ואינה הרשאה לתוכן. אפשר לפתוח את
+              עמוד הקורס כדי לראות את המבנה, להסיר אותו מהחשבון או לברר על
+              זמינות.
+            </p>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {savedWithoutAccess.map((course) => (
+                <li key={course._id}>
+                  <Link
+                    href={`/courses/${course._id}`}
+                    className="flex min-h-11 items-center justify-between rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm font-semibold text-amber-950 hover:bg-amber-100 dark:border-amber-800 dark:bg-zinc-900 dark:text-amber-100 dark:hover:bg-amber-950/40"
+                  >
+                    <span>{course.title}</span>
+                    <span aria-hidden="true">←</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* כלים חדשים - New Features Section */}
         <NewFeaturesSection />
 
@@ -310,7 +354,7 @@ export default function DashboardPage() {
         <section className="mt-12">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-              {enrolledCourses && enrolledCourses.length > 0
+              {accessibleCourses.length > 0
                 ? "קורסים נוספים"
                 : "הקורסים שלנו"}
             </h2>
@@ -347,37 +391,6 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
-
-        {/* Continue Learning / CTA */}
-        {enrolledCount === 0 && (
-          <section className="mt-12">
-            <div className="rounded-2xl bg-zinc-50 p-8 text-center dark:bg-zinc-900">
-              <svg
-                className="mx-auto mb-3 h-10 w-10 text-zinc-300 dark:text-zinc-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"
-                />
-              </svg>
-              <p className="mb-4 text-zinc-600 dark:text-zinc-400">
-                הירשם לקורס והתחל את מסע הלמידה שלך!
-              </p>
-              <Link
-                href="/courses"
-                className="inline-flex h-10 items-center rounded-xl bg-gradient-to-l from-brand-600 to-brand-500 px-6 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
-              >
-                גלה קורסים
-              </Link>
-            </div>
-          </section>
-        )}
 
         {/* Certificates preview */}
         {certificateCount > 0 && (
@@ -429,6 +442,109 @@ export default function DashboardPage() {
 }
 
 // ---- Sub-components ----
+
+function FirstMinutesCard() {
+  const scope = [
+    [CANONICAL_COURSE_SCOPE.weeks, "שבועות"],
+    [CANONICAL_COURSE_SCOPE.phases, "שלבים"],
+    [CANONICAL_COURSE_SCOPE.lessons, "שיעורים"],
+    [CANONICAL_COURSE_SCOPE.practicePdfs, "קובצי PDF"],
+  ] as const;
+
+  return (
+    <div className="overflow-hidden rounded-3xl bg-gradient-to-l from-brand-50 via-white to-blue-50 p-6 shadow-[0_0_0_1px_rgba(30,58,95,0.08),0_12px_35px_rgba(30,58,95,0.08)] sm:p-8 dark:from-blue-950/30 dark:via-zinc-900 dark:to-brand-950/20 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+      <div className="grid gap-7 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+        <div>
+          <p className="text-sm font-semibold text-brand-700 dark:text-brand-300">
+            מתחילים בלי להציף
+          </p>
+          <h2 className="mt-2 text-balance text-2xl font-bold text-zinc-900 sm:text-3xl dark:text-white">
+            הצעד הראשון יכול לקחת עשר דקות
+          </h2>
+          <p className="mt-3 max-w-2xl text-pretty leading-relaxed text-zinc-600 dark:text-zinc-400">
+            בוחרים את מסלול אומנות הקשר, פותחים שיעור אחד ושומרים נקודה אחת
+            לחזרה. אפשר לעצור שם ולהמשיך בזמן שמתאים.
+          </p>
+
+          <ol className="mt-5 grid gap-3 sm:grid-cols-3">
+            {["פותחים שיעור", "בוחרים תרגול אחד", "שומרים נקודה וחוזרים"].map(
+              (step, index) => (
+                <li key={step} className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white font-bold text-brand-700 shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-zinc-800 dark:text-brand-300 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+                    {index + 1}
+                  </span>
+                  {step}
+                </li>
+              )
+            )}
+          </ol>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/courses"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-[transform,box-shadow,background-color] hover:bg-zinc-800 hover:shadow-md active:scale-[0.96] dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+            >
+              לבחור את מסלול הלימוד
+            </Link>
+            <Link
+              href="/tools/conversation-starters"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-800 shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96] dark:bg-zinc-800 dark:text-zinc-100 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+            >
+              לנסות קודם תרגול קצר
+            </Link>
+          </div>
+        </div>
+
+        <dl className="grid grid-cols-2 gap-3">
+          {scope.map(([value, label]) => (
+            <div
+              key={label}
+              className="flex min-h-24 flex-col justify-center rounded-2xl bg-white/80 p-4 text-center shadow-[0_0_0_1px_rgba(0,0,0,0.05)] dark:bg-zinc-900/70 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+            >
+              <dt className="text-xs text-zinc-500 dark:text-zinc-400">
+                {label}
+              </dt>
+              <dd className="tabular-nums mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
+                {value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  );
+}
+
+function ReturnToPracticeCard() {
+  return (
+    <div className="rounded-3xl bg-emerald-50 p-6 shadow-[0_0_0_1px_rgba(16,185,129,0.16)] sm:p-8 dark:bg-emerald-950/20 dark:shadow-[0_0_0_1px_rgba(52,211,153,0.18)]">
+      <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+        אין כרגע שיעור שממתין להשלמה
+      </p>
+      <h2 className="mt-2 text-balance text-2xl font-bold text-zinc-900 dark:text-white">
+        אפשר לבחור במה לחזור ולתרגל
+      </h2>
+      <p className="mt-2 max-w-2xl text-pretty text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        חזרה לשיעור מוכר היא חלק מהמסלול. אפשר לפתוח את תוכנית הקורס או לבחור
+        תרגול קצר בלי להתחיל משהו חדש.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link
+          href="/courses"
+          className="inline-flex min-h-11 items-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition-[transform,background-color] hover:bg-emerald-800 active:scale-[0.96]"
+        >
+          לחזרה לתוכנית הקורס
+        </Link>
+        <Link
+          href="/tools"
+          className="inline-flex min-h-11 items-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-800 shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96] dark:bg-zinc-900 dark:text-zinc-100 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+        >
+          לבחור תרגול קצר
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 function DashboardCard({
   title,
@@ -484,13 +600,16 @@ function ContinueLearningCardEnhanced({
   nextLessonNumber: number;
 }) {
   return (
-    <div className="rounded-2xl bg-emerald-50 p-6 dark:bg-emerald-950/30">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
-        המשך מאיפה שעצרת
+    <div className="rounded-3xl bg-emerald-50 p-6 shadow-[0_0_0_1px_rgba(16,185,129,0.16)] sm:p-8 dark:bg-emerald-950/20 dark:shadow-[0_0_0_1px_rgba(52,211,153,0.18)]">
+      <p className="mb-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+        הצעד הבא שלך
       </p>
-      <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">
+      <h2 className="mb-2 text-balance text-xl font-bold text-zinc-900 dark:text-white">
         {courseTitle}
-      </h3>
+      </h2>
+      <p className="mb-4 text-pretty text-sm text-zinc-600 dark:text-zinc-400">
+        פותחים שיעור אחד, בוחרים ממנו תרגול אחד ושומרים נקודה קצרה לחזרה.
+      </p>
 
       {/* Next lesson highlight */}
       <div className="mb-3 flex items-center gap-2 rounded-xl bg-white/60 px-3 py-2 dark:bg-zinc-800/40">
@@ -509,7 +628,7 @@ function ContinueLearningCardEnhanced({
           />
         </svg>
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
             שיעור הבא ({nextLessonNumber} מתוך {totalLessons})
           </p>
           <p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
@@ -524,7 +643,7 @@ function ContinueLearningCardEnhanced({
           <span className="text-zinc-600 dark:text-zinc-400">
             {completedLessons} מתוך {totalLessons} שיעורים
           </span>
-          <span className="font-medium text-zinc-900 dark:text-white">
+          <span className="tabular-nums font-medium text-zinc-900 dark:text-white">
             {completionPercent}%
           </span>
         </div>
@@ -537,15 +656,15 @@ function ContinueLearningCardEnhanced({
           aria-label={`התקדמות: ${completionPercent}%`}
         >
           <div
-            className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
-            style={{ width: `${completionPercent}%` }}
+            className="h-2 w-full origin-right rounded-full bg-emerald-500 transition-transform duration-300"
+            style={{ transform: `scaleX(${completionPercent / 100})` }}
           />
         </div>
       </div>
 
       <Link
-        href={`/course/${courseId}/lesson/${nextLessonId}`}
-        className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600"
+        href={`/courses/${courseId}/learn?lesson=${nextLessonId}`}
+        className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-[transform,background-color,box-shadow] hover:bg-emerald-800 hover:shadow-md active:scale-[0.96] dark:bg-emerald-600 dark:hover:bg-emerald-500"
       >
         <svg
           className="h-3.5 w-3.5"
@@ -561,7 +680,7 @@ function ContinueLearningCardEnhanced({
             d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
           />
         </svg>
-        המשך ללמוד
+        לפתוח את השיעור
       </Link>
     </div>
   );
@@ -581,13 +700,16 @@ function ContinueLearningCard({
   totalLessons: number;
 }) {
   return (
-    <div className="rounded-2xl bg-emerald-50 p-6 dark:bg-emerald-950/30">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
-        המשך מאיפה שעצרת
+    <div className="rounded-3xl bg-emerald-50 p-6 shadow-[0_0_0_1px_rgba(16,185,129,0.16)] sm:p-8 dark:bg-emerald-950/20 dark:shadow-[0_0_0_1px_rgba(52,211,153,0.18)]">
+      <p className="mb-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+        הצעד הבא שלך
       </p>
-      <h3 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-white">
+      <h2 className="mb-2 text-balance text-xl font-bold text-zinc-900 dark:text-white">
         {courseTitle}
-      </h3>
+      </h2>
+      <p className="mb-4 text-pretty text-sm text-zinc-600 dark:text-zinc-400">
+        אפשר לפתוח את רשימת השיעורים ולבחור את היחידה הבאה שמתאימה עכשיו.
+      </p>
 
       {/* Mini progress bar */}
       <div className="mb-2">
@@ -595,7 +717,7 @@ function ContinueLearningCard({
           <span className="text-zinc-600 dark:text-zinc-400">
             {completedLessons} מתוך {totalLessons} שיעורים
           </span>
-          <span className="font-medium text-zinc-900 dark:text-white">
+          <span className="tabular-nums font-medium text-zinc-900 dark:text-white">
             {completionPercent}%
           </span>
         </div>
@@ -608,17 +730,17 @@ function ContinueLearningCard({
           aria-label={`התקדמות: ${completionPercent}%`}
         >
           <div
-            className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
-            style={{ width: `${completionPercent}%` }}
+            className="h-2 w-full origin-right rounded-full bg-emerald-500 transition-transform duration-300"
+            style={{ transform: `scaleX(${completionPercent / 100})` }}
           />
         </div>
       </div>
 
       <Link
         href={`/courses/${courseId}/learn`}
-        className="mt-4 inline-flex h-9 items-center rounded-lg bg-emerald-600 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600"
+        className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-[transform,background-color,box-shadow] hover:bg-emerald-800 hover:shadow-md active:scale-[0.96] dark:bg-emerald-600 dark:hover:bg-emerald-500"
       >
-        המשך ללמוד
+        לפתוח את רשימת השיעורים
       </Link>
     </div>
   );
@@ -634,15 +756,15 @@ function StreakCard({ streak }: { streak: number }) {
 
   return (
     <div className="rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        Streak יומי
+      <p className="mb-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+        ימים עם פעילות למידה
       </p>
       <div className="flex items-center gap-3">
         <span className="text-3xl" aria-hidden="true">
           🔥
         </span>
         <div>
-          <p className={`text-2xl font-bold ${streakColor}`}>
+          <p className={`tabular-nums text-2xl font-bold ${streakColor}`}>
             {streak}{" "}
             <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">
               {streak === 1 ? "יום" : "ימים"}
@@ -650,10 +772,10 @@ function StreakCard({ streak }: { streak: number }) {
           </p>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             {streak === 0
-              ? "למד היום כדי להתחיל streak!"
-              : streak >= 7
-                ? "מדהים! שמור על הקצב"
-                : "כל הכבוד, המשך כך!"}
+              ? "גם תרגול קצר יכול להיות נקודת חזרה"
+              : streak === 1
+                ? "חזרת ללמידה היום"
+                : "זה מספר הימים הרצופים שבהם חזרת ללמידה"}
           </p>
         </div>
       </div>
@@ -661,7 +783,7 @@ function StreakCard({ streak }: { streak: number }) {
         href="/student/analytics"
         className="mt-3 block text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
       >
-        הצג אנליטיקס &rarr;
+        לסקירת הלמידה &rarr;
       </Link>
     </div>
   );
@@ -726,15 +848,15 @@ function AchievementsSummaryCard({
 const NEW_FEATURES = [
   {
     href: "/chat",
-    label: "מאמן AI",
-    description: "שיחה אישית עם מאמן דייטינג AI",
+    label: "כלי AI לרפלקציה",
+    description: "משוב אוטומטי מוגבל המבוסס על תכני הקורס",
     icon: "🤖",
     color: "brand",
   },
   {
     href: "/simulator",
-    label: "סימולטור",
-    description: "תרגול תרחישי דייט עם פרסונה AI",
+    label: "תרגול שיחה בדיוני",
+    description: "תרחישים עם דמות AI ומשוב שאינו מנבא תגובה אמיתית",
     icon: "🎭",
     color: "purple",
   },
@@ -748,7 +870,7 @@ const NEW_FEATURES = [
   {
     href: "/community",
     label: "קהילה",
-    description: "שיתוף, עצות וסיפורי הצלחה",
+    description: "שיתוף ושיחה עם לומדים, בכפוף לכללי הקהילה",
     icon: "👥",
     color: "emerald",
   },

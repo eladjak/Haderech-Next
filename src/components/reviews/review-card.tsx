@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { StarRating } from "./star-rating";
 import type { Id } from "@/../convex/_generated/dataModel";
 
@@ -64,9 +65,12 @@ export function ReviewCard({
       <div className="mb-3 flex items-start gap-3">
         {/* Avatar */}
         {review.userImage ? (
-          <img
+          <Image
             src={review.userImage}
             alt=""
+            width={40}
+            height={40}
+            unoptimized
             className="h-10 w-10 shrink-0 rounded-full object-cover"
           />
         ) : (

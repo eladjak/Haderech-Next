@@ -65,20 +65,19 @@ export default function TestimonialsPage() {
             {/* Badge */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#D4A853]/10 px-4 py-2 text-sm font-medium text-[#B8912E]">
               <StarDisplay count={5} />
-              <span>מה אומרים הסטודנטים שלנו</span>
+              <span>ביקורות משתתפים</span>
             </div>
 
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl dark:text-white">
-              סיפורי הצלחה
+              ביקורות פומביות
               <br />
               <span className="bg-gradient-to-l from-brand-600 to-[#D4A853] bg-clip-text text-transparent">
-                אמיתיים
+                בבדיקה
               </span>
             </h1>
 
             <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-              כל ביקורת כאן נכתבה בידי תלמיד שסיים קורס בהדרך. הנה מה שהם אומרים
-              על החוויה שלהם.
+              נציג כאן ביקורות רק לאחר שנוכל לאמת השתתפות, מקור והסכמה מפורשת לפרסום.
             </p>
 
             <div className="mx-auto mb-10 max-w-2xl">
@@ -152,7 +151,7 @@ export default function TestimonialsPage() {
         ═══════════════════════════════════════════════════════════════════ */}
         <section className="container mx-auto px-4 py-16">
           <h2 className="mb-10 text-center text-2xl font-bold text-zinc-900 dark:text-white">
-            ביקורות נבחרות
+            ביקורות לפרסום
           </h2>
 
           {isLoading ? (
@@ -193,9 +192,9 @@ export default function TestimonialsPage() {
 
                     {/* Quote */}
                     <blockquote className="mb-6 flex-1 text-base leading-relaxed text-zinc-700 dark:text-zinc-300">
-                      <span className="mr-1 text-2xl leading-none text-[#D4A853]">"</span>
+                      <span className="mr-1 text-2xl leading-none text-[#D4A853]">&ldquo;</span>
                       {review.content}
-                      <span className="ml-1 text-2xl leading-none text-[#D4A853]">"</span>
+                      <span className="ml-1 text-2xl leading-none text-[#D4A853]">&rdquo;</span>
                     </blockquote>
 
                     {/* Footer */}
@@ -232,9 +231,12 @@ export default function TestimonialsPage() {
                       {/* Author */}
                       <div className="flex items-center gap-3">
                         {review.userImage ? (
-                          <img
+                          <Image
                             src={review.userImage}
                             alt=""
+                            width={40}
+                            height={40}
+                            unoptimized
                             className="h-10 w-10 rounded-full object-cover"
                           />
                         ) : (
@@ -267,13 +269,13 @@ export default function TestimonialsPage() {
             /* No reviews yet */
             <div className="rounded-2xl border border-dashed border-zinc-200 p-16 text-center dark:border-zinc-700">
               <p className="text-zinc-500 dark:text-zinc-400">
-                עדיין אין ביקורות. היה הראשון!
+                הביקורות הפומביות אינן מוצגות כרגע. אנחנו משלימים מנגנון אימות והסכמה לפני פרסום.
               </p>
               <Link
                 href="/courses"
                 className="mt-4 inline-flex h-10 items-center rounded-full bg-brand-500 px-6 text-sm font-medium text-white transition-colors hover:bg-brand-600"
               >
-                עבור לקורסים
+                להכיר את מבנה הקורס
               </Link>
             </div>
           )}
@@ -334,11 +336,10 @@ export default function TestimonialsPage() {
                 <StarDisplay count={5} />
               </div>
               <h2 className="mb-4 text-3xl font-extrabold text-zinc-900 dark:text-white">
-                הצטרף לאלפי הסטודנטים המרוצים
+                רוצה להכיר את התוכנית?
               </h2>
               <p className="mb-8 text-base text-zinc-600 dark:text-zinc-400">
-                התחל את המסע שלך לקשרים עמוקים ומשמעותיים יותר. הקורסים
-                שלנו זמינים לצפייה מיידית.
+                אפשר לעיין במבנה הקורס ובתכני המבוא. פתיחת גישה ורכישה מקוונת יפורסמו רק לאחר השלמת מערך ההרשאות והתשלום.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
@@ -362,10 +363,10 @@ export default function TestimonialsPage() {
                   עיין בקורסים
                 </Link>
                 <Link
-                  href="/sign-up"
+                  href="/contact"
                   className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 px-8 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
                 >
-                  הרשם חינם
+                  יצירת קשר
                 </Link>
               </div>
             </div>

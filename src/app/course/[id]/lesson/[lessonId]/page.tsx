@@ -9,8 +9,10 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
+import { CourseSafetyNotice } from "@/components/course/course-safety-notice";
 import { YouTubePlayer } from "@/components/video/youtube-player";
 import { VideoPlayer } from "@/components/lesson/video-player";
+import { LessonPdfResource } from "@/components/lesson/lesson-pdf-resource";
 import { CommentsSection } from "@/components/lesson/comments-section";
 import { LessonNotes } from "@/components/lesson/lesson-notes";
 import { LessonAdvisor } from "@/components/lesson/lesson-advisor";
@@ -274,6 +276,8 @@ export default function LessonPage() {
             {lesson.title}
           </h1>
 
+          <CourseSafetyNotice />
+
           {/* Video player - with progress tracking */}
           {lesson.videoUrl && (
             <div className="mb-8">
@@ -321,6 +325,13 @@ export default function LessonPage() {
               </div>
             </div>
           )}
+
+          <LessonPdfResource
+            pdfUrl={lesson.pdfUrl}
+            lessonTitle={lesson.title}
+            courseId={courseId}
+            lessonId={lessonId}
+          />
 
           {/* Mark as completed */}
           {convexUser && (

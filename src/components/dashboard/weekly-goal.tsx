@@ -1,7 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
+import {
+  getRemainingWeeklyMinutes,
+  getWeeklyGoalMessage,
+} from "@/lib/learner-journey";
 
 export function WeeklyGoal() {
   const data = useQuery(api.studentAnalytics.getWeeklyGoal);
@@ -17,15 +22,24 @@ export function WeeklyGoal() {
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (goalPercent / 100) * circumference;
 
-  const encouragingMessage = getEncouragingMessage(goalPercent, currentStreak);
+  const encouragingMessage = getWeeklyGoalMessage(goalPercent, currentStreak);
+  const remainingMinutes = getRemainingWeeklyMinutes(
+    weeklyGoalHours,
+    weeklyHoursLearned
+  );
 
   return (
     <div className="rounded-2xl border border-zinc-200/70 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
-        יעד שבועי
-      </h3>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+          קצב הלמידה השבועי
+        </h3>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          היעד הוא נקודת ייחוס גמישה, לא חובה ולא מבחן.
+        </p>
+      </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
         {/* Circular progress */}
         <div className="relative flex shrink-0 items-center justify-center">
           <svg
@@ -66,7 +80,7 @@ export function WeeklyGoal() {
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+            <span className="tabular-nums text-2xl font-bold text-zinc-900 dark:text-white">
               {goalPercent}%
             </span>
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -79,7 +93,7 @@ export function WeeklyGoal() {
         <div className="flex-1 space-y-3">
           <div>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">שעות למידה השבוע</p>
-            <p className="text-lg font-semibold text-zinc-900 dark:text-white">
+            <p className="tabular-nums text-lg font-semibold text-zinc-900 dark:text-white">
               {weeklyHoursLearned}
               <span className="text-sm font-normal text-zinc-400 dark:text-zinc-500">
                 {" "}/ {weeklyGoalHours} שעות
@@ -110,18 +124,22 @@ export function WeeklyGoal() {
           <p className="text-sm text-brand-600 dark:text-brand-400">
             {encouragingMessage}
           </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Link
+              href="/courses"
+              className="inline-flex min-h-10 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-[transform,background-color] hover:bg-zinc-800 active:scale-[0.96] dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+            >
+              לבחור את הצעד הבא
+            </Link>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              {remainingMinutes > 0
+                ? `נותרו כ־${remainingMinutes} דקות ליעד`
+                : "היעד השבועי הושלם"}
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
-function getEncouragingMessage(goalPercent: number, streak: number): string {
-  if (goalPercent >= 100) return "מדהים! השגת את היעד השבועי!";
-  if (goalPercent >= 75) return "כמעט שם! עוד קצת מאמץ!";
-  if (goalPercent >= 50) return "בדרך הנכונה, המשך כך!";
-  if (streak >= 7) return "שבוע שלם של למידה, וואו!";
-  if (streak >= 3) return "רצף נהדר, אל תפסיק!";
-  if (goalPercent > 0) return "התחלת טוב, המשך ללמוד!";
-  return "בוא נתחיל את השבוע בלמידה!";
 }

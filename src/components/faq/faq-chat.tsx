@@ -19,7 +19,7 @@ const STARTER_QUESTIONS = [
 const WELCOME: ChatMessage = {
   id: "welcome",
   role: "assistant",
-  text: "שלום! אני העוזר של הדרך. שאל אותי כל שאלה על הפלטפורמה — קורסים, מאמן AI, סימולטור, פרטיות, תשלום ועוד.",
+  text: "שלום! אני כלי AI אוטומטי של הדרך. אפשר לשאול אותי על הפלטפורמה — קורסים, כלי הרפלקציה, התרגול הבדיוני, פרטיות ותשלום. אני עלול לטעות ואינני איש מקצוע.",
 };
 
 function genId() {
@@ -74,8 +74,8 @@ export function FAQChat() {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-5 py-3">
-        <h3 className="text-base font-bold text-slate-900">שאל בצ'אט</h3>
-        <p className="text-xs text-slate-500">תשובות מהירות על "הדרך" — בלי לדפדף בקטגוריות</p>
+        <h3 className="text-base font-bold text-slate-900">שאל בצ&apos;אט</h3>
+        <p className="text-xs text-slate-500">תשובות מהירות על &quot;הדרך&quot; — בלי לדפדף בקטגוריות</p>
       </div>
 
       <div

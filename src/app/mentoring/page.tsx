@@ -401,9 +401,12 @@ function MentorCard({ mentor }: { mentor: MentorData }) {
         {/* Avatar + Name */}
         <div className="mb-4 flex items-center gap-4">
           {mentor.imageUrl || mentor.userImage ? (
-            <img
+            <Image
               src={mentor.imageUrl ?? mentor.userImage ?? ""}
               alt={mentor.displayName}
+              width={56}
+              height={56}
+              unoptimized
               className="h-14 w-14 rounded-full object-cover ring-2 ring-brand-100 dark:ring-zinc-700"
             />
           ) : (
@@ -512,10 +515,10 @@ export default function MentoringPage() {
             </svg>
           </div>
           <h1 className="mb-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl dark:text-white">
-            ייעוץ אישי 1-על-1
+            ליווי אישי
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-            קבלו הכוונה אישית ממאמנים מנוסים בתחום הדייטינג והזוגיות
+            האפשרות לתאם פגישה אינה פעילה עד שנשלים אימות של נותני השירות, ההכשרה, התנאים והפרטיות
           </p>
           <Image
             src="/images/illustrations/home-cta.webp"
@@ -593,10 +596,10 @@ export default function MentoringPage() {
               </svg>
             </div>
             <h3 className="mb-2 text-lg font-bold text-zinc-900 dark:text-white">
-              עדיין אין מאמנים
+              הזמנת פגישות אינה פתוחה כרגע
             </h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              מאמנים חדשים יתווספו בקרוב. חזרו שוב!
+              לא נציג נותני שירות ולא נאסוף בקשות או הערות לפגישה לפני שכל זהות, הכשרה, מחיר, זמינות ומדיניות פרטיות יאומתו בכתב.
             </p>
           </div>
         ) : (
@@ -618,8 +621,8 @@ export default function MentoringPage() {
                   d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
                 />
               ),
-              title: "מאמנים מוסמכים",
-              desc: "כל המאמנים שלנו עברו הכשרה ייעודית ובעלי ניסיון מוכח בתחום הדייטינג והזוגיות.",
+              title: "בחירה מושכלת",
+              desc: "לפני תיאום פגישה, בדקו מי המאמן או המאמנת, מה הכשרתם, מה ניסיונם ומה גבולות השירות. אל תניחו שמדובר בטיפול מוסמך אלא אם הוצגו פרטים ניתנים לאימות.",
             },
             {
               icon: (
@@ -629,8 +632,8 @@ export default function MentoringPage() {
                   d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
                 />
               ),
-              title: "פרטיות מלאה",
-              desc: "כל השיחות חסויות לחלוטין. מה שנאמר בפגישה נשאר בפגישה.",
+              title: "תיאום ציפיות לפרטיות",
+              desc: "לפני הפגישה בקשו הסבר כתוב על תיעוד, שמירה, גישה וחריגים לסודיות. אל תשתפו מידע רגיש לפני שהמדיניות ברורה לכם.",
             },
             {
               icon: (
@@ -640,8 +643,8 @@ export default function MentoringPage() {
                   d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
                 />
               ),
-              title: "גישה אישית",
-              desc: "כל פגישה מותאמת אישית לצרכים שלכם. אין גישה אחת שמתאימה לכולם.",
+              title: "שירות שאינו פעיל",
+              desc: "אין כרגע הבטחה לליווי, למחיר, לזמינות או לתוצאה. פגישות קיימות, אם ישנן בחשבון, נשארות נגישות דרך מסך הפגישות.",
             },
           ].map((item) => (
             <div

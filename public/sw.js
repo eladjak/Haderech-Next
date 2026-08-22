@@ -86,7 +86,7 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 // Notification close - track dismissals (optional analytics)
-self.addEventListener("notificationclose", (_event) => {
+self.addEventListener("notificationclose", () => {
   // ניתן לשלוח analytics event כאן בעתיד
 });
 

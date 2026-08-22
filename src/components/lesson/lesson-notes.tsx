@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useId, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
@@ -19,17 +19,20 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
   const saveNote = useMutation(api.notes.save);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState("");
+  const [draft, setDraft] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<number | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panelId = useId();
+  const notesLabelId = useId();
+  const content = draft ?? existingNote?.content ?? "";
 
-  // Load existing note
+  // Cancel a pending autosave when navigating away from the lesson.
   useEffect(() => {
-    if (existingNote) {
-      setContent(existingNote.content);
-    }
-  }, [existingNote]);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
 
   // Auto-save after 2 seconds of inactivity
   const triggerAutoSave = useCallback(
@@ -37,11 +40,15 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
 
       saveTimerRef.current = setTimeout(async () => {
+        saveTimerRef.current = null;
         if (!newContent.trim()) return;
         setSaving(true);
-        await saveNote({ lessonId, courseId, content: newContent });
-        setLastSaved(Date.now());
-        setSaving(false);
+        try {
+          await saveNote({ lessonId, courseId, content: newContent });
+          setLastSaved(Date.now());
+        } finally {
+          setSaving(false);
+        }
       }, 2000);
     },
     [saveNote, lessonId, courseId]
@@ -49,19 +56,25 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
 
   const handleChange = useCallback(
     (value: string) => {
-      setContent(value);
+      setDraft(value);
       triggerAutoSave(value);
     },
     [triggerAutoSave]
   );
 
   const handleManualSave = useCallback(async () => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
     if (!content.trim()) return;
     setSaving(true);
-    await saveNote({ lessonId, courseId, content });
-    setLastSaved(Date.now());
-    setSaving(false);
+    try {
+      await saveNote({ lessonId, courseId, content });
+      setLastSaved(Date.now());
+    } finally {
+      setSaving(false);
+    }
   }, [content, saveNote, lessonId, courseId]);
 
   if (!userId) return null;
@@ -73,6 +86,7 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 text-right transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800/70"
         aria-expanded={isOpen}
+        aria-controls={panelId}
       >
         <div className="flex items-center gap-2">
           <svg
@@ -89,7 +103,7 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
               d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
             />
           </svg>
-          <span className="text-sm font-medium text-zinc-900 dark:text-white">
+          <span id={notesLabelId} className="text-sm font-medium text-zinc-900 dark:text-white">
             ההערות שלי
           </span>
           {existingNote && (
@@ -115,10 +129,11 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
       </button>
 
       {isOpen && (
-        <div className="mt-2 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div id={panelId} className="mt-2 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
           <textarea
             value={content}
             onChange={(e) => handleChange(e.target.value)}
+            aria-labelledby={notesLabelId}
             placeholder="רשום הערות לשיעור זה... (נשמר אוטומטית)"
             rows={6}
             maxLength={10000}
@@ -126,7 +141,7 @@ export function LessonNotes({ lessonId, courseId, userId }: LessonNotesProps) {
             dir="rtl"
           />
           <div className="mt-2 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <div className="flex items-center gap-2 text-xs text-zinc-500" aria-live="polite">
               {saving && (
                 <span className="flex items-center gap-1">
                   <svg

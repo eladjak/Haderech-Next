@@ -28,9 +28,10 @@ function ProgressRing({
   size?: number;
   strokeWidth?: number;
 }) {
+  const normalizedPercent = Math.min(100, Math.max(0, percent));
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
+  const offset = circumference - (normalizedPercent / 100) * circumference;
 
   return (
     <svg
@@ -77,18 +78,20 @@ function SectionBar({
   value: number;
   label: string;
 }) {
+  const normalizedValue = Math.min(100, Math.max(0, value));
+
   return (
     <div
       className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
       role="progressbar"
-      aria-valuenow={value}
+      aria-valuenow={normalizedValue}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={label}
     >
       <div
         className="h-2 w-full origin-right bg-emerald-500 transition-transform duration-300"
-        style={{ transform: `scaleX(${value / 100})` }}
+        style={{ transform: `scaleX(${normalizedValue / 100})` }}
       />
     </div>
   );
@@ -110,8 +113,14 @@ export function CourseProgressTracker({
         className={`rounded-2xl bg-zinc-50 p-6 text-center dark:bg-zinc-900 ${className}`}
       >
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          הירשם לקורס כדי לראות את ההתקדמות שלך
+          אחרי פתיחת מסלול, יופיע כאן סיכום של השיעורים שסומנו כהושלמו.
         </p>
+        <Link
+          href="/courses"
+          className="mt-4 inline-flex min-h-10 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white dark:bg-white dark:text-zinc-900"
+        >
+          לראות את מסלול הלימוד
+        </Link>
       </div>
     );
   }
@@ -129,16 +138,21 @@ export function CourseProgressTracker({
     <div
       className={`rounded-2xl bg-zinc-50 p-6 dark:bg-zinc-900 ${className}`}
     >
-      <h2 className="mb-5 text-xl font-semibold text-zinc-900 dark:text-white">
-        התקדמות בלמידה
-      </h2>
+      <div className="mb-5">
+        <h2 className="text-balance text-xl font-semibold text-zinc-900 dark:text-white">
+          מפת ההתקדמות
+        </h2>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          הסימון עוזר לזכור איפה עצרת; אפשר תמיד לחזור לכל שיעור.
+        </p>
+      </div>
 
       {/* Overall ring + summary */}
       <div className="mb-6 flex items-center gap-6">
         <div className="relative shrink-0">
           <ProgressRing percent={overallPercent} size={100} strokeWidth={9} />
           <span className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl font-bold text-zinc-900 dark:text-white">
+            <span className="tabular-nums text-xl font-bold text-zinc-900 dark:text-white">
               {overallPercent}%
             </span>
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -180,7 +194,7 @@ export function CourseProgressTracker({
             <div className="mb-1 flex items-center justify-between gap-2">
               <Link
                 href={`/courses/${section.courseId}`}
-                className="truncate text-sm font-medium text-zinc-800 hover:text-emerald-600 dark:text-zinc-200 dark:hover:text-emerald-400"
+                className="inline-flex min-h-10 items-center truncate text-sm font-medium text-zinc-800 hover:text-emerald-600 dark:text-zinc-200 dark:hover:text-emerald-400"
               >
                 {section.courseTitle}
               </Link>
@@ -195,10 +209,10 @@ export function CourseProgressTracker({
                     <path d="M10 1l2.39 4.87L18 6.82l-4 3.9.94 5.5L10 13.77l-4.94 2.45.94-5.5-4-3.9 5.61-.95L10 1z" />
                   </svg>
                 )}
-                <span className="min-w-[3rem] text-right text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="tabular-nums min-w-[3rem] text-right text-xs text-zinc-500 dark:text-zinc-400">
                   {section.completedLessons}/{section.totalLessons}
                 </span>
-                <span className="min-w-[2.5rem] text-right text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                <span className="tabular-nums min-w-[2.5rem] text-right text-xs font-medium text-zinc-700 dark:text-zinc-300">
                   {section.completionPercent}%
                 </span>
               </div>

@@ -10,6 +10,7 @@ import { ContinueLearning } from "@/components/dashboard/continue-learning";
 import { WeeklyGoal } from "@/components/dashboard/weekly-goal";
 import { LearningStats } from "@/components/dashboard/learning-stats";
 import { RecommendedCourses } from "@/components/dashboard/recommended-courses";
+import { CANONICAL_COURSE_SCOPE } from "@/lib/learner-journey";
 
 // ==========================================
 // Phase 65 - Enhanced Student Progress Dashboard
@@ -51,20 +52,20 @@ export default function StudentDashboardPage() {
           </Link>
           <span className="mx-2">/</span>
           <span className="text-zinc-900 dark:text-white">
-            מעקב התקדמות מתקדם
+            המסלול שלי
           </span>
         </nav>
 
         {/* Page Title */}
         <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
-              מעקב התקדמות
+            <h1 className="text-balance text-3xl font-bold text-zinc-900 dark:text-white">
+              המסלול שלי
             </h1>
-            <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 text-pretty text-zinc-600 dark:text-zinc-400">
               {clerkUser?.firstName
-                ? `${clerkUser.firstName}, הנה סקירת הלמידה שלך`
-                : "הנה סקירת הלמידה שלך"}
+                ? `${clerkUser.firstName}, כאן רואים מה הצעד הבא ולאן אפשר לחזור`
+                : "כאן רואים מה הצעד הבא ולאן אפשר לחזור"}
             </p>
           </div>
         </div>
@@ -82,6 +83,44 @@ export default function StudentDashboardPage() {
               <ContinueLearning />
             </section>
 
+            {/* ===== Short practice paths ===== */}
+            <section className="mb-8" aria-labelledby="short-practice-title">
+              <div className="mb-4">
+                <h2
+                  id="short-practice-title"
+                  className="text-lg font-semibold text-zinc-900 dark:text-white"
+                >
+                  אם יש עכשיו רק כמה דקות
+                </h2>
+                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                  אפשר לבחור תרגול קצר ולחזור אחר כך למסלול המלא.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <QuickActionCard
+                  href="/tools/conversation-starters"
+                  title="לנסח שיחה"
+                  description="בוחרים מצב וטון ועורכים ניסוח אחד שמתאים לך."
+                  icon="conversation"
+                  color="brand"
+                />
+                <QuickActionCard
+                  href="/tools/values-quiz"
+                  title="לחדד ערך"
+                  description="מסמנים העדפות ומקבלים נקודה פשוטה להמשך התבוננות."
+                  icon="values"
+                  color="purple"
+                />
+                <QuickActionCard
+                  href="/tools/profile-builder"
+                  title="לערוך טיוטת פרופיל"
+                  description="יוצרים בדפדפן כמה טיוטות קצרות ובוחרים מה לשמור."
+                  icon="profile"
+                  color="amber"
+                />
+              </div>
+            </section>
+
             {/* ===== Section 1: Overview Cards Row ===== */}
             <section className="mb-8" aria-label="סטטיסטיקות ראשיות">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -97,7 +136,7 @@ export default function StudentDashboardPage() {
                       </svg>
                     </span>
                   </div>
-                  <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+                  <p className="tabular-nums text-3xl font-bold text-zinc-900 dark:text-white">
                     {overview.enrollments}
                   </p>
                   <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -117,7 +156,7 @@ export default function StudentDashboardPage() {
                       </svg>
                     </span>
                   </div>
-                  <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+                  <p className="tabular-nums text-3xl font-bold text-zinc-900 dark:text-white">
                     {overview.completedLessons}
                     <span className="text-lg font-normal text-zinc-400 dark:text-zinc-500">
                       /{overview.totalLessons}
@@ -142,7 +181,7 @@ export default function StudentDashboardPage() {
                       </svg>
                     </span>
                   </div>
-                  <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+                  <p className="tabular-nums text-3xl font-bold text-zinc-900 dark:text-white">
                     {streak?.currentStreak ?? 0}
                     <span className="text-lg font-normal text-zinc-400 dark:text-zinc-500"> ימים</span>
                   </p>
@@ -163,7 +202,7 @@ export default function StudentDashboardPage() {
                       </svg>
                     </span>
                   </div>
-                  <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+                  <p className="tabular-nums text-3xl font-bold text-zinc-900 dark:text-white">
                     {formatWatchTime(overview.totalWatchTime)}
                   </p>
                   <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -280,36 +319,6 @@ export default function StudentDashboardPage() {
             {/* ===== Recommended Courses ===== */}
             <section className="mb-8" aria-label="קורסים מומלצים">
               <RecommendedCourses />
-            </section>
-
-            {/* ===== Quick Actions (3 cards) ===== */}
-            <section className="mb-8" aria-label="פעולות מהירות">
-              <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
-                פעולות מהירות
-              </h2>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <QuickActionCard
-                  href="/chat"
-                  title="שיחה עם מאמן"
-                  description="שוחח עם מאמן AI לייעוץ מותאם אישית"
-                  icon="chat"
-                  color="brand"
-                />
-                <QuickActionCard
-                  href="/simulator"
-                  title="סימולטור דייטים"
-                  description="תרגל מצבים אמיתיים בסביבה בטוחה"
-                  icon="simulator"
-                  color="purple"
-                />
-                <QuickActionCard
-                  href="/student/badges"
-                  title="הישגים"
-                  description="צפה בכל ההישגים והתגים שלך"
-                  icon="badges"
-                  color="amber"
-                />
-              </div>
             </section>
 
             {/* ===== Recent Activity Feed ===== */}
@@ -775,7 +784,7 @@ function QuickActionCard({
   href: string;
   title: string;
   description: string;
-  icon: "chat" | "simulator" | "badges";
+  icon: "conversation" | "values" | "profile";
   color: "brand" | "purple" | "amber";
 }) {
   const colorClasses = {
@@ -804,7 +813,7 @@ function QuickActionCard({
   return (
     <Link
       href={href}
-      className={`group rounded-2xl border ${classes.border} ${classes.bg} p-5 transition-all hover:shadow-md`}
+      className={`group min-h-36 rounded-2xl border ${classes.border} ${classes.bg} p-5 transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96]`}
     >
       <div className="mb-3 flex items-center gap-3">
         <span
@@ -821,24 +830,28 @@ function QuickActionCard({
   );
 }
 
-function QuickActionIcon({ icon }: { icon: "chat" | "simulator" | "badges" }) {
+function QuickActionIcon({
+  icon,
+}: {
+  icon: "conversation" | "values" | "profile";
+}) {
   switch (icon) {
-    case "chat":
+    case "conversation":
       return (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
         </svg>
       );
-    case "simulator":
+    case "values":
+      return (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733C11.285 4.876 9.623 3.75 7.687 3.75 5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+        </svg>
+      );
+    case "profile":
       return (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-        </svg>
-      );
-    case "badges":
-      return (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0016.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.003 6.003 0 01-5.54 0" />
         </svg>
       );
   }
@@ -986,17 +999,28 @@ function EmptyState() {
         </svg>
       </div>
       <h2 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-white">
-        עדיין לא נרשמת לקורסים
+        מסלול הלמידה עדיין לא התחיל
       </h2>
-      <p className="mb-6 max-w-md text-zinc-500 dark:text-zinc-400">
-        התחל את המסע שלך ולמד איך לבנות מערכות יחסים בריאות ומספקות
+      <p className="mb-6 max-w-lg text-pretty text-zinc-500 dark:text-zinc-400">
+        תוכנית אומנות הקשר בנויה מ־{CANONICAL_COURSE_SCOPE.weeks} שבועות,
+        {" "}{CANONICAL_COURSE_SCOPE.phases} שלבים ו־
+        {CANONICAL_COURSE_SCOPE.lessons} שיעורים. אפשר לעיין במבנה ולבחור
+        מתי לפתוח את השיעור הראשון.
       </p>
-      <Link
-        href="/courses"
-        className="inline-flex min-h-[44px] items-center rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
-      >
-        עיין בקורסים
-      </Link>
+      <div className="flex flex-wrap justify-center gap-3">
+        <Link
+          href="/courses"
+          className="inline-flex min-h-11 items-center rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-[transform,filter,box-shadow] hover:brightness-110 hover:shadow-md active:scale-[0.96]"
+        >
+          לראות את מסלול הלימוד
+        </Link>
+        <Link
+          href="/tools/conversation-starters"
+          className="inline-flex min-h-11 items-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-zinc-700 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96] dark:bg-zinc-900 dark:text-zinc-200 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+        >
+          לנסות תרגול קצר
+        </Link>
+      </div>
     </div>
   );
 }

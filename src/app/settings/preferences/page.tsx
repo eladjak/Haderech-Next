@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Header } from "@/components/layout/header";
@@ -11,6 +11,25 @@ import { Footer } from "@/components/layout/footer";
 type Theme = "light" | "dark" | "system";
 type Language = "he" | "en";
 type Density = "comfortable" | "compact";
+
+type PreferenceSnapshot = {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  weeklyDigest: boolean;
+  courseReminders: boolean;
+  achievementAlerts: boolean;
+  theme: Theme;
+  displayDensity: Density;
+  language: Language;
+};
+
+type PreferenceUpdate = Partial<PreferenceSnapshot>;
+type BooleanPreferenceField =
+  | "emailNotifications"
+  | "pushNotifications"
+  | "weeklyDigest"
+  | "courseReminders"
+  | "achievementAlerts";
 
 // ---- Toast ----
 
@@ -37,61 +56,6 @@ function useToast() {
 
 export default function PreferencesPage() {
   const prefs = useQuery(api.preferences.getPreferences);
-  const updatePreferences = useMutation(api.preferences.updatePreferences);
-  const { toast, show: showToast } = useToast();
-
-  // Local state mirrors server state
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
-  const [weeklyDigest, setWeeklyDigest] = useState(true);
-  const [courseReminders, setCourseReminders] = useState(true);
-  const [achievementAlerts, setAchievementAlerts] = useState(true);
-  const [theme, setTheme] = useState<Theme>("system");
-  const [density, setDensity] = useState<Density>("comfortable");
-  const [language, setLanguage] = useState<Language>("he");
-
-  const [loaded, setLoaded] = useState(false);
-
-  // Sync from server on first load
-  useEffect(() => {
-    if (!prefs || loaded) return;
-    setEmailNotifications(prefs.emailNotifications);
-    setPushNotifications(prefs.pushNotifications);
-    setWeeklyDigest(prefs.weeklyDigest);
-    setCourseReminders(prefs.courseReminders);
-    setAchievementAlerts(prefs.achievementAlerts);
-    setTheme(prefs.theme);
-    setDensity(prefs.displayDensity);
-    setLanguage(prefs.language);
-    setLoaded(true);
-  }, [prefs, loaded]);
-
-  // Persist a single field
-  const save = useCallback(
-    async (field: string, value: boolean | string) => {
-      try {
-        await updatePreferences({ [field]: value });
-        showToast("ההעדפה נשמרה");
-      } catch {
-        showToast("שגיאה בשמירה", "error");
-      }
-    },
-    [updatePreferences, showToast]
-  );
-
-  // Toggle helpers (update local + persist)
-  const toggle = useCallback(
-    (
-      field: string,
-      getter: boolean,
-      setter: React.Dispatch<React.SetStateAction<boolean>>
-    ) => {
-      const next = !getter;
-      setter(next);
-      save(field, next);
-    },
-    [save]
-  );
 
   if (prefs === undefined) {
     return (
@@ -121,6 +85,70 @@ export default function PreferencesPage() {
       </div>
     );
   }
+
+  return <PreferencesEditor initialPreferences={prefs} />;
+}
+
+function PreferencesEditor({
+  initialPreferences,
+}: {
+  initialPreferences: PreferenceSnapshot;
+}) {
+  const updatePreferences = useMutation(api.preferences.updatePreferences);
+  const { toast, show: showToast } = useToast();
+
+  // This component mounts only after the query resolves. Initializing here
+  // avoids a render-and-effect synchronization cycle.
+  const [emailNotifications, setEmailNotifications] = useState(
+    initialPreferences.emailNotifications
+  );
+  const [pushNotifications, setPushNotifications] = useState(
+    initialPreferences.pushNotifications
+  );
+  const [weeklyDigest, setWeeklyDigest] = useState(
+    initialPreferences.weeklyDigest
+  );
+  const [courseReminders, setCourseReminders] = useState(
+    initialPreferences.courseReminders
+  );
+  const [achievementAlerts, setAchievementAlerts] = useState(
+    initialPreferences.achievementAlerts
+  );
+  const [theme, setTheme] = useState<Theme>(initialPreferences.theme);
+  const [density, setDensity] = useState<Density>(
+    initialPreferences.displayDensity
+  );
+  const [language, setLanguage] = useState<Language>(
+    initialPreferences.language
+  );
+
+  const save = useCallback(
+    async (update: PreferenceUpdate, rollback: () => void) => {
+      try {
+        await updatePreferences(update);
+        showToast("ההעדפה נשמרה");
+      } catch {
+        rollback();
+        showToast("שגיאה בשמירה", "error");
+      }
+    },
+    [updatePreferences, showToast]
+  );
+
+  const toggle = useCallback(
+    (
+      field: BooleanPreferenceField,
+      current: boolean,
+      setter: React.Dispatch<React.SetStateAction<boolean>>
+    ) => {
+      const next = !current;
+      const update: PreferenceUpdate = {};
+      update[field] = next;
+      setter(next);
+      void save(update, () => setter(current));
+    },
+    [save]
+  );
 
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
@@ -232,8 +260,9 @@ export default function PreferencesPage() {
                     key={value}
                     type="button"
                     onClick={() => {
+                      const previous = theme;
                       setTheme(value);
-                      save("theme", value);
+                      void save({ theme: value }, () => setTheme(previous));
                     }}
                     className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
                       theme === value
@@ -264,8 +293,11 @@ export default function PreferencesPage() {
                     key={value}
                     type="button"
                     onClick={() => {
+                      const previous = density;
                       setDensity(value);
-                      save("displayDensity", value);
+                      void save({ displayDensity: value }, () =>
+                        setDensity(previous)
+                      );
                     }}
                     className={`flex-1 rounded-xl border px-4 py-3.5 text-right transition-all ${
                       density === value
@@ -304,8 +336,11 @@ export default function PreferencesPage() {
                   key={value}
                   type="button"
                   onClick={() => {
+                    const previous = language;
                     setLanguage(value);
-                    save("language", value);
+                    void save({ language: value }, () =>
+                      setLanguage(previous)
+                    );
                   }}
                   className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
                     language === value

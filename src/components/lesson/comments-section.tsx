@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
@@ -30,6 +31,7 @@ export function CommentsSection({
   const [replyContent, setReplyContent] = useState("");
   const [editingId, setEditingId] = useState<Id<"comments"> | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [referenceTime] = useState(Date.now);
 
   const handleSubmit = useCallback(async () => {
     if (!newComment.trim() || submitting) return;
@@ -80,7 +82,7 @@ export function CommentsSection({
   );
 
   const formatTime = (timestamp: number) => {
-    const diff = Date.now() - timestamp;
+    const diff = referenceTime - timestamp;
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return "עכשיו";
     if (minutes < 60) return `לפני ${minutes} דקות`;
@@ -103,6 +105,7 @@ export function CommentsSection({
       {userId ? (
         <div className="mb-8">
           <textarea
+            aria-label="תגובה חדשה"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="כתוב תגובה..."
@@ -173,9 +176,12 @@ export function CommentsSection({
               {/* Comment header */}
               <div className="mb-2 flex items-center gap-2">
                 {comment.userImage ? (
-                  <img
+                  <Image
                     src={comment.userImage}
                     alt=""
+                    width={28}
+                    height={28}
+                    unoptimized
                     className="h-7 w-7 rounded-full"
                   />
                 ) : (
@@ -198,6 +204,7 @@ export function CommentsSection({
               {editingId === comment._id ? (
                 <div className="mb-2">
                   <textarea
+                    aria-label="עריכת תגובה"
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
                     rows={3}
@@ -274,6 +281,7 @@ export function CommentsSection({
               {replyingTo === comment._id && userId && (
                 <div className="mt-3 mr-4 border-r-2 border-zinc-200 pr-4 dark:border-zinc-700">
                   <textarea
+                    aria-label="תשובה לתגובה"
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
                     placeholder="כתוב תשובה..."
@@ -311,9 +319,12 @@ export function CommentsSection({
                     <div key={reply._id}>
                       <div className="mb-1 flex items-center gap-2">
                         {reply.userImage ? (
-                          <img
+                          <Image
                             src={reply.userImage}
                             alt=""
+                            width={24}
+                            height={24}
+                            unoptimized
                             className="h-6 w-6 rounded-full"
                           />
                         ) : (
@@ -335,6 +346,7 @@ export function CommentsSection({
                       {editingId === reply._id ? (
                         <div className="mb-1">
                           <textarea
+                            aria-label="עריכת תשובה"
                             value={editContent}
                             onChange={(e) => setEditContent(e.target.value)}
                             rows={2}

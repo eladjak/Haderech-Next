@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
@@ -26,6 +27,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 type StoryCategory = "dating" | "relationship" | "self-growth" | "marriage";
+
+// Keep the public surface aligned with the backend fail-closed contract.
+const VERIFIED_PUBLIC_STORIES_AVAILABLE = false;
+const STORY_SUBMISSION_AVAILABLE = false;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -161,24 +166,24 @@ export default function StoriesPage() {
           {/* Hero */}
           <div className="mb-10 text-center">
             <h1 className="mb-3 text-3xl font-bold text-zinc-900 dark:text-white md:text-4xl">
-              סיפורי הצלחה
+              סיפורי משתתפים
             </h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              הסיפורים של התלמידים שלנו מספרים את הכל
+              נציג כאן סיפורים רק לאחר אימות מקור והסכמה מפורשת לפרסום
             </p>
 
             {/* Social Share */}
             <div className="mt-4 flex justify-center">
               <SocialShare
                 url={`${siteConfig.url}/stories`}
-                title="סיפורי הצלחה - הדרך: אומנות הקשר"
-                description="קראו סיפורי הצלחה מתלמידים שעברו את הקורסים שלנו"
+                title="סיפורי משתתפים - הדרך: אומנות הקשר"
+                description="סיפורי משתתפים יוצגו לאחר אימות מקור והסכמה לפרסום"
               />
             </div>
           </div>
 
           {/* Category Filter Tabs */}
-          <div className="mb-8 flex flex-wrap justify-center gap-2">
+          {VERIFIED_PUBLIC_STORIES_AVAILABLE && <div className="mb-8 flex flex-wrap justify-center gap-2">
             {CATEGORY_OPTIONS.map((cat) => (
               <button
                 key={cat.value}
@@ -193,10 +198,19 @@ export default function StoriesPage() {
                 {cat.label}
               </button>
             ))}
-          </div>
+          </div>}
 
           {/* Stories Grid */}
-          {stories === undefined ? (
+          {!VERIFIED_PUBLIC_STORIES_AVAILABLE ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-10 text-center dark:border-amber-900/60 dark:bg-amber-950/30">
+              <h2 className="text-lg font-semibold text-amber-950 dark:text-amber-100">
+                המאגר הציבורי נמצא כרגע בבדיקה
+              </h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-amber-900/80 dark:text-amber-200/80">
+                אנחנו בודקים לכל סיפור את המקור, ההרשאה וההסכמה לפרסום. עד שהבדיקה ומנגנון הביטול יהיו מלאים, לא נציג כאן סיפורים ולא נאסוף סיפורים חדשים.
+              </p>
+            </div>
+          ) : stories === undefined ? (
             <div className="grid gap-6 md:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
@@ -209,8 +223,8 @@ export default function StoriesPage() {
             <div className="rounded-2xl bg-zinc-50 p-12 text-center dark:bg-zinc-900">
               <p className="text-zinc-500 dark:text-zinc-400">
                 {activeCategory === "all"
-                  ? "עדיין אין סיפורי הצלחה"
-                  : "אין סיפורים בקטגוריה זו"}
+                  ? "אין כרגע עדויות שאומתו וקיבלו הסכמה מפורשת לפרסום"
+                  : "אין עדויות מאומתות בקטגוריה זו"}
               </p>
             </div>
           ) : (
@@ -278,7 +292,7 @@ export default function StoriesPage() {
           )}
 
           {/* Submit Story Form */}
-          {clerkUser && (
+          {STORY_SUBMISSION_AVAILABLE && clerkUser && (
             <section className="mt-16" aria-labelledby="submit-story-heading">
               <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 md:p-8">
                 <h2
@@ -440,17 +454,17 @@ export default function StoriesPage() {
           )}
 
           {/* Not logged in CTA */}
-          {!clerkUser && (
+          {STORY_SUBMISSION_AVAILABLE && !clerkUser && (
             <div className="mt-16 rounded-2xl bg-zinc-50 p-8 text-center dark:bg-zinc-900">
               <p className="mb-3 text-zinc-600 dark:text-zinc-400">
                 רוצה לשתף את הסיפור שלך? התחבר כדי לשלוח סיפור הצלחה.
               </p>
-              <a
+              <Link
                 href="/sign-in"
                 className="inline-flex h-10 items-center rounded-full bg-[#E85D75] px-6 text-sm font-medium text-white transition-colors hover:bg-[#d64d65]"
               >
                 התחברות
-              </a>
+              </Link>
             </div>
           )}
         </div>

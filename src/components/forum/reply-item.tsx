@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useMutation, useQuery } from "convex/react";
 import { useUser, SignedIn } from "@clerk/nextjs";
 import { motion } from "framer-motion";
@@ -30,9 +31,12 @@ function AuthorAvatar({
 }) {
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
-        alt={name}
+        alt=""
+        width={40}
+        height={40}
+        unoptimized
         className="h-10 w-10 rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900"
       />
     );

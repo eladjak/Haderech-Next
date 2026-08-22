@@ -8,7 +8,7 @@ import type { Id } from "@/../convex/_generated/dataModel";
 const CATEGORY_LABELS: Record<string, string> = {
   general: "כללי",
   "dating-tips": "טיפי דייטינג",
-  "success-stories": "סיפורי הצלחה",
+  "success-stories": "שיתופים מהדרך",
   questions: "שאלות",
   advice: "עצות",
 };

@@ -181,7 +181,7 @@ function SessionsContent() {
   const sessions = useQuery(api.mentoring.getStudentSessions);
   const [activeTab, setActiveTab] = useState<Tab>("upcoming");
 
-  const now = Date.now();
+  const [now] = useState(Date.now);
   const { upcoming, past } = useMemo(() => {
     if (!sessions) return { upcoming: [], past: [] };
     const up: SessionData[] = [];

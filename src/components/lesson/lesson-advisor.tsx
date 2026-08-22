@@ -221,11 +221,7 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
                   תרגלת {practice.total}{" "}
                   {practice.total === 1 ? "פעם" : "פעמים"} מהשיעור הזה
                 </span>
-                {practice.bestScore !== null && (
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                    הציון הכי טוב שלך: {practice.bestScore}
-                  </span>
-                )}
+                <span>המשוב הוא אוטומטי ומוגבל לתרחיש; אין כאן ציון אישי.</span>
               </p>
             </div>
           )}

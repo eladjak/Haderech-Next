@@ -2,8 +2,6 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { useAction } from "convex/react";
-import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +23,97 @@ const TONES: { value: Tone; label: string; emoji: string }[] = [
   { value: "romantic", label: "רומנטי", emoji: "❤️" },
 ];
 
+const LOCAL_STARTERS: Record<Context, Record<Tone, string[]>> = {
+  first_date: {
+    serious: [
+      "מה העסיק אותך לטובה בזמן האחרון? אפשר גם לבחור משהו קטן.",
+      "יש משהו שלמדת לאחרונה ושינה לך קצת את נקודת המבט?",
+      "מה עוזר לך להרגיש בנוח בשיחה עם אדם חדש?",
+    ],
+    casual: [
+      "איך עבר עליך היום — יש רגע קטן שבא לך לספר עליו?",
+      "מה הדבר האחרון שעשית רק כי היה לך כיף?",
+      "אם היה מתפנה לך מחר חצי יום בלי תוכניות, מה היה בא לך לעשות?",
+    ],
+    funny: [
+      "שאלת בחירה לא מחייבת: ים, הרים או ספה עם מזגן?",
+      "איזה כישרון מיותר לגמרי יש לך ובכל זאת מגיע לו כבוד?",
+      "מה המאכל שיש לך עליו דעה מוגזמת במיוחד?",
+    ],
+    romantic: [
+      "איזה מקום או רגע פשוט מרגיש לך קצת קסום?",
+      "מה הופך מפגש לנעים ורומנטי מבחינתך — אם בכלל מתאים לדבר על זה?",
+      "יש שיר או סרט שתמיד מצליחים לרכך לך את היום?",
+    ],
+  },
+  dating_app: {
+    serious: [
+      "ראיתי שכתבת על [פרט מהפרופיל]. מה את/ה הכי אוהב/ת בזה?",
+      "איזה נושא אפשר לדבר עליו איתך הרבה בלי לשים לב לזמן?",
+      "מה חשוב לך ששיחה ראשונה תאפשר — קלילות, סקרנות, משהו אחר?",
+    ],
+    casual: [
+      "היי, [פרט מהפרופיל] סיקרן אותי — איך הגעת לזה?",
+      "שאלת פתיחה פשוטה: מה עשה לך טוב השבוע?",
+      "אם מתאים לך, אשמח לשמוע מה עומד מאחורי התמונה מ[מקום או פעילות בפרופיל].",
+    ],
+    funny: [
+      "שאלה חשובה למחקר בלתי רשמי: מתוק, מלוח או תלוי בשעה?",
+      "מה הוויכוח הכי לא חשוב שיש לך עליו עמדה מאוד ברורה?",
+      "ראיתי את [הפרט מהפרופיל] — זה סיפור קצר או הרפתקה בעשרה פרקים?",
+    ],
+    romantic: [
+      "יש בפרופיל שלך משהו נעים וסקרן. אם מתאים לך, אשמח להכיר בקצב שנוח לך.",
+      "מה מבחינתך הופך שיחה ראשונה לנעימה, בלי לנסות להרשים?",
+      "איזו מחווה קטנה יכולה לשמח אותך ביום רגיל?",
+    ],
+  },
+  social: {
+    serious: [
+      "היי, מתאים לך לדבר רגע? אני [שם פרטי], ומה הביא אותך לכאן?",
+      "איך את/ה מכיר/ה את האנשים או את המקום כאן?",
+      "מה מעניין אותך באירוע הזה? אפשר לענות בקצרה או לא בכלל.",
+    ],
+    casual: [
+      "היי, אני [שם פרטי]. איך עובר עליך הערב?",
+      "יש פה משהו שכבר הספקת ליהנות ממנו?",
+      "אני מתלבט/ת לאן להמשיך מכאן — יש משהו במקום הזה שכדאי לראות?",
+    ],
+    funny: [
+      "היי, אפשר שאלה קלה? מה הציון שלך למוזיקה כאן עד עכשיו?",
+      "אני מנסה להבין אם כולם כאן מכירים את כולם חוץ ממני — מה המצב אצלך?",
+      "אם האירוע הזה היה סדרה, איזה ז'אנר הוא היה?",
+    ],
+    romantic: [
+      "היי, נעים לי לידך. מתאים לך שנדבר קצת?",
+      "משהו באנרגיה כאן גרם לי לרצות להגיד שלום — אבל רק אם זה מתאים לך.",
+      "אני [שם פרטי]. אשמח להכיר, ואפשר כמובן גם להישאר בשיחה קצרה.",
+    ],
+  },
+  after_date: {
+    serious: [
+      "תודה על המפגש. היה לי נעים להכיר. אם גם לך מתאים, אשמח להמשיך לדבר.",
+      "רציתי לומר שנהניתי מ[רגע משותף]. אין לחץ לענות; אם מתאים לך, אשמח לעוד מפגש.",
+      "איך היה לך במפגש? מבחינתי אפשר לענות בכנות, גם אם לא מתאים להמשיך.",
+    ],
+    casual: [
+      "היה לי נעים הערב, תודה 🙂 אם בא לך, נדבר בהמשך.",
+      "הגעת בשלום? תודה על הזמן יחד — היה כיף להכיר.",
+      "עדיין חייכתי מ[רגע משותף]. אם מתאים לך, אשמח שניפגש שוב.",
+    ],
+    funny: [
+      "תודה על ערב נעים. [הבדיחה המשותפת] עדיין מנצחת מבחינתי 🙂",
+      "דיווח מצב: הגעתי בשלום, והוויכוח על [נושא קליל] עדיין פתוח. אם מתאים לך, נמשיך פעם אחרת.",
+      "היה כיף להכיר. אני מבטיח/ה לא לפתוח ועדת חקירה אם לא מתאים להמשיך 🙂",
+    ],
+    romantic: [
+      "היה לי ערב נעים ומיוחד. אם גם לך הרגיש טוב, אשמח להיפגש שוב.",
+      "תודה על הנוכחות והזמן. אשמח להמשיך להכיר, רק אם זה מתאים גם לך.",
+      "נשארתי עם תחושה נעימה מהמפגש. אין צורך להסביר אם זה לא הדדי.",
+    ],
+  },
+};
+
 export default function ConversationStartersPage() {
   const [selectedContext, setSelectedContext] = useState<Context>("first_date");
   const [selectedTone, setSelectedTone] = useState<Tone>("casual");
@@ -37,30 +126,13 @@ export default function ConversationStartersPage() {
       return [];
     }
   });
-  const [isLoading, setIsLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"generate" | "favorites">("generate");
 
-  const generateStarters = useAction(api.tools.generateConversationStarters);
-
-  const handleGenerate = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await generateStarters({
-        context: selectedContext,
-        tone: selectedTone,
-      });
-      setStarters(result);
-      setActiveTab("generate");
-    } catch (err) {
-      setError("שגיאה ביצירת פותחי השיחה. נסה שוב.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [generateStarters, selectedContext, selectedTone]);
+  const handleGenerate = useCallback(() => {
+    setStarters([...LOCAL_STARTERS[selectedContext][selectedTone]]);
+    setActiveTab("generate");
+  }, [selectedContext, selectedTone]);
 
   const handleCopy = useCallback(async (text: string, index: number) => {
     await navigator.clipboard.writeText(text);
@@ -113,9 +185,15 @@ export default function ConversationStartersPage() {
               פותחי שיחה
             </h1>
             <p className="text-zinc-500 dark:text-zinc-400">
-              AI יוצר פותחי שיחה מותאמים לסיטואציה ולסגנון שלך
+              בחר/י ניסוחים מקומיים שנכתבו מראש והתאם/י אותם לקול שלך
             </p>
           </motion.div>
+
+          <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-relaxed text-blue-900 dark:border-blue-400/25 dark:bg-blue-900/15 dark:text-blue-100">
+            הכלי עובד בדפדפן ואינו שולח תוכן לספק AI. אלה הצעות, לא נוסחת הצלחה:
+            מחליפים את הטקסט בסוגריים, לא שולחים מידע של אדם אחר, ומכבדים סירוב,
+            אי־מענה או בקשה להפסיק בלי לנסות שוב.
+          </div>
 
           {/* Context selector */}
           <motion.div
@@ -179,28 +257,10 @@ export default function ConversationStartersPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.15 }}
             onClick={handleGenerate}
-            disabled={isLoading}
-            className="mb-8 w-full rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:shadow-brand-500/30 hover:opacity-90 disabled:opacity-60"
+            className="mb-8 w-full rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:shadow-brand-500/30 hover:opacity-90"
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                יוצר פותחי שיחה...
-              </span>
-            ) : (
-              "✨ צור פותחי שיחה"
-            )}
+            ✨ הצג הצעות
           </motion.button>
-
-          {/* Error */}
-          {error && (
-            <div role="alert" aria-live="polite" className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
-              {error}
-            </div>
-          )}
 
           {/* Tabs */}
           {(starters.length > 0 || favorites.length > 0) && (
@@ -284,10 +344,9 @@ export default function ConversationStartersPage() {
                 {activeTab === "generate" && starters.length > 0 && (
                   <button
                     onClick={handleGenerate}
-                    disabled={isLoading}
-                    className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-600 transition-colors hover:border-brand-200 hover:text-brand-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-brand-700 dark:hover:text-brand-400 disabled:opacity-50"
+                    className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-600 transition-colors hover:border-brand-200 hover:text-brand-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-brand-700 dark:hover:text-brand-400"
                   >
-                    🔄 צור עוד פותחי שיחה
+                    🔄 טען שוב את ההצעות לסגנון הזה
                   </button>
                 )}
               </motion.div>

@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/../convex/_generated/api";
+import Link from "next/link";
+import {
+  CANONICAL_COURSE_SCOPE,
+  CANONICAL_PHASES,
+} from "@/lib/learner-journey";
 
 // ==========================================
 // Onboarding Wizard - Phase 42
@@ -12,39 +17,40 @@ import { api } from "@/../convex/_generated/api";
 // ==========================================
 
 const GOALS_OPTIONS = [
-  { id: "improve-dating", label: "לשפר מיומנויות דייטינג" },
-  { id: "find-partner", label: "למצוא זוגיות" },
-  { id: "confidence", label: "לחזק ביטחון עצמי" },
-  { id: "understand-dynamics", label: "להבין דינמיקות זוגיות" },
+  { id: "improve-dating", label: "לתרגל תקשורת בהירה" },
+  { id: "find-partner", label: "להרחיב אפשרויות פעולה בהיכרות" },
+  { id: "confidence", label: "לזהות ולנסח גבולות" },
+  { id: "understand-dynamics", label: "לקבל החלטות בקשר בקצב שלי" },
 ];
 
 const EXPERIENCE_OPTIONS = [
-  { id: "beginner", label: "מתחיל", description: "רק מתחיל ללמוד על דייטינג" },
+  {
+    id: "beginner",
+    label: "מההתחלה",
+    description: "נוח לי מסלול מסודר, צעד אחר צעד",
+  },
   {
     id: "intermediate",
-    label: "בינוני",
-    description: "יש לי ניסיון מסוים בדייטים",
+    label: "לפי נושא",
+    description: "נוח לי לבחור מיומנות מסוימת ולתרגל אותה",
   },
   {
     id: "advanced",
-    label: "מתקדם",
-    description: "מנוסה בדייטינג, מחפש לעלות רמה",
+    label: "חזרה ממוקדת",
+    description: "נוח לי לחזור לנקודות נבחרות ולחדד אותן",
   },
 ];
 
-const TOPICS_OPTIONS = [
-  { id: "conversations", label: "שיחות ופתיחות" },
-  { id: "dating", label: "יציאה לדייטים" },
-  { id: "profile", label: "פרופיל דייטינג" },
-  { id: "commitment", label: "זוגיות ומחויבות" },
-  { id: "self-confidence", label: "ביטחון עצמי" },
-];
+const TOPICS_OPTIONS = CANONICAL_PHASES.map((phase) => ({
+  id: `phase-${phase.number}`,
+  label: `שלב ${phase.number}: ${phase.name}`,
+}));
 
-const TOTAL_STEPS = 4;
+const QUESTION_STEPS = 3;
 
 // --- Confetti CSS animation ---
 function ConfettiEffect() {
-  const [particles, setParticles] = useState<
+  const [particles] = useState<
     Array<{
       id: number;
       left: number;
@@ -53,9 +59,7 @@ function ConfettiEffect() {
       size: number;
       duration: number;
     }>
-  >([]);
-
-  useEffect(() => {
+  >(() => {
     const colors = [
       "#E85D75",
       "#1E3A5F",
@@ -64,7 +68,7 @@ function ConfettiEffect() {
       "#c5d4e6",
       "#fde6ea",
     ];
-    const newParticles = Array.from({ length: 50 }, (_, i) => ({
+    return Array.from({ length: 50 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 2,
@@ -72,11 +76,10 @@ function ConfettiEffect() {
       size: Math.random() * 8 + 4,
       duration: Math.random() * 2 + 2,
     }));
-    setParticles(newParticles);
-  }, []);
+  });
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden motion-reduce:hidden">
       {particles.map((p) => (
         <span
           key={p.id}
@@ -108,13 +111,14 @@ function ConfettiEffect() {
 
 // --- Progress Bar ---
 function ProgressBar({ currentStep }: { currentStep: number }) {
-  const progress = ((currentStep + 1) / (TOTAL_STEPS + 1)) * 100;
+  const questionStep = Math.min(Math.max(currentStep, 1), QUESTION_STEPS);
+  const progress = (questionStep / QUESTION_STEPS) * 100;
 
   return (
     <div className="w-full" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="התקדמות שאלון">
       <div className="flex items-center justify-between mb-2 text-sm text-gray-500">
         <span>
-          שלב {Math.min(currentStep + 1, TOTAL_STEPS)} מתוך {TOTAL_STEPS}
+          שלב {questionStep} מתוך {QUESTION_STEPS}
         </span>
         <span>{Math.round(progress)}%</span>
       </div>
@@ -155,23 +159,24 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       </div>
 
       <h1 className="mb-4 text-3xl font-bold text-blue-500">
-        ברוכים הבאים להדרך!
+        נעים להכיר
       </h1>
 
-      <p className="mb-2 max-w-md text-lg text-gray-600">
-        הפלטפורמה שלנו תעזור לך לפתח את מיומנויות הדייטינג והזוגיות שלך עם
-        כלים מעשיים, קורסים מקצועיים ותמיכה של קהילה.
+      <p className="mb-2 max-w-md text-pretty text-lg text-gray-600">
+        אומנות הקשר היא סביבת למידה לתרגול היכרות, תקשורת וקבלת החלטות:
+        {" "}{CANONICAL_COURSE_SCOPE.weeks} שבועות, {CANONICAL_COURSE_SCOPE.phases}{" "}
+        שלבים ו־{CANONICAL_COURSE_SCOPE.lessons} שיעורים.
       </p>
 
       <p className="mb-8 text-sm text-gray-400">
-        בואו נכיר אתכם קצת - זה ייקח פחות מדקה
+        שלוש בחירות קצרות יעזרו לשמור נקודת פתיחה. אפשר לשנות כיוון בהמשך.
       </p>
 
       <button
         onClick={onNext}
         className="rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-8 py-3 text-lg font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
       >
-        בואו נתחיל
+        להתחיל
       </button>
     </div>
   );
@@ -200,9 +205,9 @@ function GoalsStep({
   return (
     <div className="flex flex-col items-center">
       <h2 className="mb-2 text-2xl font-bold text-blue-500">
-        מה המטרות שלך?
+        מה מתאים לתרגל עכשיו?
       </h2>
-      <p className="mb-6 text-gray-500">אפשר לבחור כמה שרוצים</p>
+      <p className="mb-6 text-gray-500">אפשר לבחור אפשרות אחת או יותר</p>
 
       <div className="mb-8 grid w-full max-w-md grid-cols-1 gap-3">
         {GOALS_OPTIONS.map((goal) => {
@@ -283,10 +288,10 @@ function ExperienceStep({
   return (
     <div className="flex flex-col items-center">
       <h2 className="mb-2 text-2xl font-bold text-blue-500">
-        מה הניסיון שלך?
+        איך נוח להתחיל?
       </h2>
       <p className="mb-6 text-gray-500">
-        נתאים את התוכן לרמה שלך
+        הבחירה נשמרת כהעדפה ואינה קובעת רמה או יכולת
       </p>
 
       <div className="mb-8 grid w-full max-w-md grid-cols-1 gap-3">
@@ -359,11 +364,13 @@ function TopicsStep({
   onSelect,
   onNext,
   onBack,
+  isSaving,
 }: {
   selected: string[];
   onSelect: (topics: string[]) => void;
   onNext: () => void;
   onBack: () => void;
+  isSaving: boolean;
 }) {
   const toggleTopic = (topicId: string) => {
     if (selected.includes(topicId)) {
@@ -376,9 +383,11 @@ function TopicsStep({
   return (
     <div className="flex flex-col items-center">
       <h2 className="mb-2 text-2xl font-bold text-blue-500">
-        מה מעניין אותך?
+        אילו שלבים מסקרנים כרגע?
       </h2>
-      <p className="mb-6 text-gray-500">בחר את הנושאים שהכי מדברים אליך</p>
+      <p className="mb-6 text-gray-500">
+        הקורס נשאר פתוח כולו; הבחירה רק מסמנת נקודות לחזרה
+      </p>
 
       <div className="mb-8 grid w-full max-w-md grid-cols-1 gap-3">
         {TOPICS_OPTIONS.map((topic) => {
@@ -434,10 +443,10 @@ function TopicsStep({
         </button>
         <button
           onClick={onNext}
-          disabled={selected.length === 0}
+          disabled={selected.length === 0 || isSaving}
           className="flex-1 rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
         >
-          סיום
+          {isSaving ? "שומר..." : "לשמור ולהמשיך"}
         </button>
       </div>
     </div>
@@ -446,7 +455,6 @@ function TopicsStep({
 
 // --- Completion Screen ---
 function CompletionScreen() {
-  const router = useRouter();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -478,24 +486,33 @@ function CompletionScreen() {
         </div>
 
         <h2 className="mb-3 text-3xl font-bold text-blue-500">
-          מעולה! סיימת את ההיכרות
+          ההיכרות נשמרה
         </h2>
 
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-300/20 px-5 py-2">
           <span className="text-lg font-bold text-accent-500">+50 XP</span>
-          <span className="text-sm text-gray-600">הרווחת!</span>
+          <span className="text-sm text-gray-600">על השלמת ההיכרות</span>
         </div>
 
-        <p className="mb-8 max-w-md text-gray-500">
-          התאמנו את התוכנים שלנו בדיוק בשבילך. בואו נתחיל את המסע!
+        <p className="mb-6 max-w-md text-pretty text-gray-500">
+          הצעד הפשוט מכאן הוא לפתוח שיעור אחד, לבחור תרגול אחד ולשמור נקודה
+          אחת לחזרה. אין צורך להספיק יותר מזה עכשיו.
         </p>
 
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="rounded-xl bg-gradient-to-l from-brand-500 to-blue-500 px-8 py-3 text-lg font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
-        >
-          למעבר לדשבורד
-        </button>
+        <div className="grid w-full max-w-md gap-3 sm:grid-cols-2">
+          <Link
+            href="/courses"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-gradient-to-l from-brand-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-md transition-[transform,box-shadow] hover:shadow-lg active:scale-[0.96] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+          >
+            לפתוח את מסלול הלימוד
+          </Link>
+          <Link
+            href="/dashboard"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 py-3 font-semibold text-zinc-700 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96]"
+          >
+            לעבור לאזור האישי
+          </Link>
+        </div>
       </div>
     </>
   );
@@ -515,6 +532,7 @@ export default function OnboardingPage() {
   const [topics, setTopics] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
 
   // Convex
   const onboarding = useQuery(api.onboarding.getOnboarding);
@@ -583,7 +601,9 @@ export default function OnboardingPage() {
   }, []);
 
   const handleComplete = useCallback(async () => {
+    if (isSaving) return;
     setIsSaving(true);
+    setCompletionError(null);
     try {
       await completeOnboardingMutation({
         answers: {
@@ -594,12 +614,13 @@ export default function OnboardingPage() {
       });
       setIsCompleted(true);
     } catch {
-      // Silent fail - show completion anyway
-      setIsCompleted(true);
+      setCompletionError(
+        "לא הצלחנו לשמור את ההיכרות. שום בחירה לא אבדה במסך הזה; אפשר לנסות שוב."
+      );
     } finally {
       setIsSaving(false);
     }
-  }, [completeOnboardingMutation, goals, experience, topics]);
+  }, [completeOnboardingMutation, goals, experience, topics, isSaving]);
 
   // Loading state
   if (!isLoaded || onboarding === undefined) {
@@ -629,7 +650,9 @@ export default function OnboardingPage() {
         )}
 
         {/* Progress bar */}
-        {!isCompleted && <ProgressBar currentStep={currentStep} />}
+        {!isCompleted && currentStep > 0 && (
+          <ProgressBar currentStep={currentStep} />
+        )}
 
         {/* Steps container */}
         <div className="mt-8">
@@ -657,15 +680,24 @@ export default function OnboardingPage() {
               onSelect={setTopics}
               onNext={handleComplete}
               onBack={handleBack}
+              isSaving={isSaving}
             />
           ) : null}
         </div>
 
         {/* Saving indicator */}
-        {isSaving && (
+        {isSaving && currentStep < 3 && (
           <div className="mt-4 text-center text-sm text-gray-400">
             שומר...
           </div>
+        )}
+        {completionError && (
+          <p
+            className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-center text-sm text-red-700"
+            role="alert"
+          >
+            {completionError}
+          </p>
         )}
       </div>
     </main>

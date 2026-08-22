@@ -31,7 +31,7 @@ export function LearningStats() {
       color: "emerald" as const,
     },
     {
-      label: "זמן צפייה",
+      label: "זמן למידה מתועד",
       value: formatWatchTime(overview.totalWatchTime),
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -41,9 +41,10 @@ export function LearningStats() {
       color: "blue" as const,
     },
     {
-      label: "רצף למידה",
-      value: `${overview.level}`,
-      sublabel: `${overview.totalXp} XP`,
+      label: "נקודות פעילות",
+      value: `${overview.totalXp}`,
+      suffix: " XP",
+      sublabel: `רמה ${overview.level}`,
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
@@ -93,7 +94,7 @@ export function LearningStats() {
                 {stat.icon}
               </span>
             </div>
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+            <p className="tabular-nums text-2xl font-bold text-zinc-900 dark:text-white">
               {stat.value}
               {stat.suffix && (
                 <span className="text-sm font-normal text-zinc-400 dark:text-zinc-500">

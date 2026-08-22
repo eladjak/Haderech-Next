@@ -127,7 +127,7 @@ const navSections: NavSection[] = [
       },
       {
         href: "/admin/stories",
-        label: "סיפורי הצלחה",
+        label: "עדויות משתתפים",
         icon: (
           <svg
             className="h-5 w-5"
