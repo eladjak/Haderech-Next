@@ -2,11 +2,12 @@
 
 import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ScenarioCard } from "@/components/simulator/scenario-card";
+import { SimulatorAccessPanel } from "@/components/simulator/simulator-access-panel";
 import Link from "next/link";
 
 const DIFFICULTY_FILTERS = [
@@ -20,7 +21,12 @@ const DIFFICULTY_FILTERS = [
 const STRUCTURED_DIALOGUE_AVAILABLE: boolean = false;
 
 export default function SimulatorPage() {
+  const { isSignedIn } = useAuth();
   const scenarios = useQuery(api.simulator.listScenarios);
+  const access = useQuery(
+    api.simulator.getAccessStatus,
+    isSignedIn ? {} : "skip",
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "all" | "easy" | "medium" | "hard"
@@ -70,13 +76,18 @@ export default function SimulatorPage() {
             תרגל שיחות דייט
           </h1>
           <p className="max-w-xl text-zinc-600 dark:text-zinc-400">
-            תרגל ניסוחים עם דמויות AI בדיוניות וקבל משוב אוטומטי מוגבל.
-            המשוב עלול לטעות ואינו מדד למשיכה, התאמה או יכולת זוגית.
+            תרגל ניסוחים עם דמויות AI בדיוניות וקבל משוב אוטומטי מוגבל. המשוב
+            עלול לטעות ואינו מדד למשיכה, התאמה או יכולת זוגית.
           </p>
         </div>
 
         {/* History link for signed-in users */}
         <SignedIn>
+          {access && (
+            <div className="mb-6">
+              <SimulatorAccessPanel access={access} />
+            </div>
+          )}
           <div className="mb-6 flex items-center justify-between">
             <div />
             <Link
@@ -232,31 +243,31 @@ export default function SimulatorPage() {
 
         {/* Dialogue Scenarios Banner */}
         {STRUCTURED_DIALOGUE_AVAILABLE && (
-        <div className="mt-12 rounded-2xl border border-brand-100 bg-gradient-to-l from-brand-50 to-white p-6 dark:border-blue-500/20 dark:from-blue-500/10 dark:to-zinc-900/50">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="mb-1 flex items-center gap-2">
-                <span className="text-lg">✨</span>
-                <span className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
-                  חדש - Phase 68
-                </span>
+          <div className="mt-12 rounded-2xl border border-brand-100 bg-gradient-to-l from-brand-50 to-white p-6 dark:border-blue-500/20 dark:from-blue-500/10 dark:to-zinc-900/50">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="text-lg">✨</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
+                    חדש - Phase 68
+                  </span>
+                </div>
+                <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-white">
+                  סימולציות דיאלוג מובנה
+                </h2>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  ארבעה תרגילי בחירה עם הסבר מיידי. הניקוד מתייחס לבחירות בתרגיל
+                  בלבד, לא לאישיות או לסיכויי הצלחה בעולם האמיתי.
+                </p>
               </div>
-              <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-white">
-                סימולציות דיאלוג מובנה
-              </h2>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                ארבעה תרגילי בחירה עם הסבר מיידי. הניקוד מתייחס לבחירות
-                בתרגיל בלבד, לא לאישיות או לסיכויי הצלחה בעולם האמיתי.
-              </p>
+              <Link
+                href="/simulator/dialogue"
+                className="flex-shrink-0 rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md sm:self-start"
+              >
+                נסה עכשיו
+              </Link>
             </div>
-            <Link
-              href="/simulator/dialogue"
-              className="flex-shrink-0 rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md sm:self-start"
-            >
-              נסה עכשיו
-            </Link>
           </div>
-        </div>
         )}
 
         {/* How it works */}

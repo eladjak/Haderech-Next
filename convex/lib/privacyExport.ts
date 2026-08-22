@@ -30,11 +30,13 @@ export async function collectUserDataExport(
     certificates,
     chatSessions,
     simulatorSessions,
+    simulatorTrialUsage,
     dialogueSessions,
     communityTopics,
     communityReplies,
     communityTopicLikes,
     communityReplyLikes,
+    communityEntitlements,
     dailyChallengeCompletions,
     contactMessages,
     xpEvents,
@@ -105,6 +107,10 @@ export async function collectUserDataExport(
       .withIndex("by_user", (q) => q.eq("userId", clerkId))
       .collect(),
     ctx.db
+      .query("simulatorTrialUsage")
+      .withIndex("by_user", (q) => q.eq("userId", clerkId))
+      .collect(),
+    ctx.db
       .query("dialogueSessions")
       .withIndex("by_user", (q) => q.eq("userId", clerkId))
       .collect(),
@@ -123,6 +129,10 @@ export async function collectUserDataExport(
     ctx.db
       .query("communityReplyLikes")
       .withIndex("by_user_reply", (q) => q.eq("userId", user._id))
+      .collect(),
+    ctx.db
+      .query("communityEntitlements")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect(),
     ctx.db
       .query("dailyChallengeCompletions")
@@ -258,12 +268,24 @@ export async function collectUserDataExport(
     chatSessions,
     chatMessages,
     simulatorSessions,
+    simulatorTrialUsage: simulatorTrialUsage.map((usage) => ({
+      consumedUnits: usage.consumedUnits,
+      updatedAt: usage.updatedAt,
+    })),
     simulatorMessages,
     dialogueSessions,
     communityTopics,
     communityReplies,
     communityTopicLikes,
     communityReplyLikes,
+    communityEntitlements: communityEntitlements.map((entitlement) => ({
+      accessBasis: entitlement.accessBasis,
+      status: entitlement.status,
+      source: entitlement.source,
+      grantedAt: entitlement.grantedAt,
+      validUntil: entitlement.validUntil,
+      revokedAt: entitlement.revokedAt,
+    })),
     dailyChallengeCompletions,
     contactMessages,
     xpEvents,

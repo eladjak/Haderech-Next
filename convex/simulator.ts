@@ -5,6 +5,8 @@ import {
   internalQuery,
   action,
 } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { readLlmKeys, hasLlmKey } from "./lib/llm";
@@ -24,11 +26,150 @@ import {
   requireOwnedClerkResource,
   requireUser,
 } from "./lib/authGuard";
+import {
+  claimSimulatorTrialUnit,
+  decideSimulatorAccess,
+  settleSimulatorTrialUnit,
+  SIMULATOR_TRIAL_POLICY,
+  SIMULATOR_TRIAL_LOCKED_ERROR,
+  type SimulatorAccessDecision,
+  type SimulatorTrialState,
+} from "./lib/simulatorTrialPolicy";
 
 // ==========================================
 // Simulator - Phase 17
 // Dating simulation with AI personas
 // ==========================================
+
+type SimulatorDbCtx = QueryCtx | MutationCtx;
+type SimulatorSendResult = {
+  content: string;
+  source: "live" | "template" | "safety";
+  access: SimulatorAccessDecision;
+};
+
+async function getSimulatorAccessFacts(
+  ctx: SimulatorDbCtx,
+  user: Doc<"users">,
+) {
+  const now = Date.now();
+  const entitlements = await ctx.db
+    .query("courseEntitlements")
+    .withIndex("by_user", (q) => q.eq("userId", user._id))
+    .collect();
+  const hasTrustedEntitlement =
+    SIMULATOR_TRIAL_POLICY.entitlementScope === "any_active_course" &&
+    entitlements.some(
+      (entitlement) =>
+        entitlement.status === "active" &&
+        (entitlement.validUntil === undefined || entitlement.validUntil > now),
+    );
+  const usage = await ctx.db
+    .query("simulatorTrialUsage")
+    .withIndex("by_user", (q) => q.eq("userId", user.clerkId))
+    .unique();
+  const state: SimulatorTrialState = usage
+    ? {
+        consumedUnits: usage.consumedUnits,
+        reservations: usage.reservations,
+      }
+    : { consumedUnits: 0, reservations: [] };
+  return {
+    now,
+    usage,
+    state,
+    isAdmin: user.role === "admin",
+    hasTrustedEntitlement,
+  };
+}
+
+async function getSimulatorAccessDecision(
+  ctx: SimulatorDbCtx,
+  user: Doc<"users">,
+) {
+  const facts = await getSimulatorAccessFacts(ctx, user);
+  return decideSimulatorAccess({
+    isAdmin: facts.isAdmin,
+    hasTrustedEntitlement: facts.hasTrustedEntitlement,
+    state: facts.state,
+    now: facts.now,
+  });
+}
+
+// One small, learner-safe status object. It reveals no entitlement source,
+// course identity, payment row, role detail or reservation token.
+export const getAccessStatus = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    return await getSimulatorAccessDecision(ctx, user);
+  },
+});
+
+export const getAccessStatusForAction = internalQuery({
+  args: { ownerUserId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.ownerUserId))
+      .unique();
+    if (!user) throw new Error("USER_RECORD_REQUIRED");
+    return await getSimulatorAccessDecision(ctx, user);
+  },
+});
+
+export const claimTrialUnit = internalMutation({
+  args: { ownerUserId: v.string(), token: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.ownerUserId))
+      .unique();
+    if (!user) throw new Error("USER_RECORD_REQUIRED");
+    const facts = await getSimulatorAccessFacts(ctx, user);
+    const claim = claimSimulatorTrialUnit({
+      state: facts.state,
+      now: facts.now,
+      token: args.token,
+      isAdmin: facts.isAdmin,
+      hasTrustedEntitlement: facts.hasTrustedEntitlement,
+    });
+    if (!claim.allowed) return claim;
+    if (claim.grant.kind === "trial") {
+      if (facts.usage) {
+        await ctx.db.patch(facts.usage._id, {
+          reservations: claim.state.reservations,
+          updatedAt: facts.now,
+        });
+      } else {
+        await ctx.db.insert("simulatorTrialUsage", {
+          userId: user.clerkId,
+          consumedUnits: claim.state.consumedUnits,
+          reservations: claim.state.reservations,
+          updatedAt: facts.now,
+        });
+      }
+    }
+    return claim;
+  },
+});
+
+export const releaseTrialUnit = internalMutation({
+  args: { ownerUserId: v.string(), token: v.string() },
+  handler: async (ctx, args) => {
+    const usage = await ctx.db
+      .query("simulatorTrialUsage")
+      .withIndex("by_user", (q) => q.eq("userId", args.ownerUserId))
+      .unique();
+    if (!usage) return;
+    await ctx.db.patch(usage._id, {
+      reservations: usage.reservations.filter(
+        (reservation) => reservation.token !== args.token,
+      ),
+      updatedAt: Date.now(),
+    });
+  },
+});
 
 // List all published scenarios
 export const listScenarios = query({
@@ -44,7 +185,7 @@ export const listScenarios = query({
         (scenario) =>
           Number.isInteger(scenario.personaAge) &&
           scenario.personaAge >= 18 &&
-          scenario.personaAge <= 100
+          scenario.personaAge <= 100,
       )
       .sort((a, b) => a.order - b.order);
   },
@@ -141,7 +282,7 @@ export const listUserSessions = query({
           scenarioDifficulty: scenario?.difficulty ?? "easy",
           personaName: scenario?.personaName ?? "",
         };
-      })
+      }),
     );
   },
 });
@@ -156,15 +297,21 @@ export const startSession = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
+    const access = await getSimulatorAccessDecision(ctx, user);
+    if (access.mode === "locked") {
+      throw new Error(SIMULATOR_TRIAL_LOCKED_ERROR);
+    }
 
     const activeSessions = await ctx.db
       .query("simulatorSessions")
       .withIndex("by_user_status", (q) =>
-        q.eq("userId", user.clerkId).eq("status", "active")
+        q.eq("userId", user.clerkId).eq("status", "active"),
       )
       .take(3);
     if (activeSessions.length >= 3) {
-      throw new Error("אפשר להפעיל עד שלושה תרגולים במקביל. סיימו תרגול פתוח לפני שמתחילים חדש.");
+      throw new Error(
+        "אפשר להפעיל עד שלושה תרגולים במקביל. סיימו תרגול פתוח לפני שמתחילים חדש.",
+      );
     }
     const recentSessions = await ctx.db
       .query("simulatorSessions")
@@ -173,10 +320,12 @@ export const startSession = mutation({
       .take(SIMULATOR_HOURLY_SESSION_LIMIT);
     if (
       recentSessions.length >= SIMULATOR_HOURLY_SESSION_LIMIT &&
-      recentSessions.every((session) => session.createdAt >= Date.now() - 60 * 60 * 1000)
+      recentSessions.every(
+        (session) => session.createdAt >= Date.now() - 60 * 60 * 1000,
+      )
     ) {
       throw new Error(
-        `אפשר לפתוח עד ${SIMULATOR_HOURLY_SESSION_LIMIT} תרגולים בשעה. אפשר לחזור בעוד שעה.`
+        `אפשר לפתוח עד ${SIMULATOR_HOURLY_SESSION_LIMIT} תרגולים בשעה. אפשר לחזור בעוד שעה.`,
       );
     }
 
@@ -230,7 +379,9 @@ export const saveUserMessage = internalMutation({
     }
     if (session.status !== "active") throw new Error("Session is not active");
     if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2 - 1) {
-      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+      throw new Error(
+        "התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.",
+      );
     }
 
     await ctx.db.insert("simulatorMessages", {
@@ -274,17 +425,16 @@ export const updateDirectorState = internalMutation({
     }
     if (session.status !== "active") throw new Error("Session is not active");
     if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2) {
-      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+      throw new Error(
+        "התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.",
+      );
     }
     const log = (session.connectionLog ?? []).slice(
-      -(SIMULATOR_MAX_USER_TURNS_PER_SESSION - 1)
+      -(SIMULATOR_MAX_USER_TURNS_PER_SESSION - 1),
     );
     await ctx.db.patch(args.sessionId, {
       currentConnection: args.connection,
-      connectionLog: [
-        ...log,
-        { turn: args.turn, connection: args.connection },
-      ],
+      connectionLog: [...log, { turn: args.turn, connection: args.connection }],
     });
   },
 });
@@ -296,6 +446,11 @@ export const savePersonaResponse = internalMutation({
     content: v.string(),
     createdAt: v.number(),
     ownerUserId: v.string(),
+    accessGrant: v.union(
+      v.object({ kind: v.literal("safety") }),
+      v.object({ kind: v.literal("full") }),
+      v.object({ kind: v.literal("trial"), token: v.string() }),
+    ),
   },
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId);
@@ -305,7 +460,42 @@ export const savePersonaResponse = internalMutation({
     }
     if (session.status !== "active") throw new Error("Session is not active");
     if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2) {
-      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+      throw new Error(
+        "התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.",
+      );
+    }
+
+    let settledAccess: SimulatorAccessDecision | null = null;
+    if (args.accessGrant.kind === "full") {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.ownerUserId))
+        .unique();
+      if (!user) throw new Error("USER_RECORD_REQUIRED");
+      const access = await getSimulatorAccessDecision(ctx, user);
+      if (!access.hasFullAccess) throw new Error(SIMULATOR_TRIAL_LOCKED_ERROR);
+      settledAccess = access;
+    } else if (args.accessGrant.kind === "trial") {
+      const usage = await ctx.db
+        .query("simulatorTrialUsage")
+        .withIndex("by_user", (q) => q.eq("userId", args.ownerUserId))
+        .unique();
+      if (!usage) throw new Error("SIMULATOR_TRIAL_RESERVATION_REQUIRED");
+      const settled = settleSimulatorTrialUnit({
+        state: {
+          consumedUnits: usage.consumedUnits,
+          reservations: usage.reservations,
+        },
+        token: args.accessGrant.token,
+        delivered: true,
+        now: args.createdAt,
+      });
+      settledAccess = settled.access;
+      await ctx.db.patch(usage._id, {
+        consumedUnits: settled.state.consumedUnits,
+        reservations: settled.state.reservations,
+        updatedAt: args.createdAt,
+      });
     }
 
     await ctx.db.insert("simulatorMessages", {
@@ -318,6 +508,7 @@ export const savePersonaResponse = internalMutation({
     await ctx.db.patch(args.sessionId, {
       messageCount: session.messageCount + 1,
     });
+    return { access: settledAccess };
   },
 });
 
@@ -338,8 +529,8 @@ export const saveAnalysis = internalMutation({
           quote: v.string(),
           analysis: v.string(),
           better: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     skillRadar: v.optional(
       v.object({
@@ -348,7 +539,7 @@ export const saveAnalysis = internalMutation({
         courage: v.number(),
         depth: v.number(),
         leading: v.number(),
-      })
+      }),
     ),
     drill: v.optional(v.string()),
     recommendedLesson: v.optional(
@@ -356,7 +547,7 @@ export const saveAnalysis = internalMutation({
         lessonId: v.id("lessons"),
         courseId: v.id("courses"),
         title: v.string(),
-      })
+      }),
     ),
   },
   handler: async (ctx, args) => {
@@ -365,7 +556,8 @@ export const saveAnalysis = internalMutation({
     if (session.userId !== args.ownerUserId) {
       throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
     }
-    if (session.status !== "completed") throw new Error("Session is not completed");
+    if (session.status !== "completed")
+      throw new Error("Session is not completed");
     const { sessionId, ownerUserId: _ownerUserId, ...fields } = args;
     void _ownerUserId;
     await ctx.db.patch(sessionId, fields);
@@ -385,10 +577,12 @@ export const countRecentUserMessages = internalQuery({
     const active = await ctx.db
       .query("simulatorSessions")
       .withIndex("by_user_status", (q) =>
-        q.eq("userId", args.ownerUserId).eq("status", "active")
+        q.eq("userId", args.ownerUserId).eq("status", "active"),
       )
       .take(20);
-    const sessions = [...new Map([...active, ...newest].map((s) => [s._id, s])).values()];
+    const sessions = [
+      ...new Map([...active, ...newest].map((s) => [s._id, s])).values(),
+    ];
 
     let count = 0;
     for (const session of sessions) {
@@ -398,7 +592,11 @@ export const countRecentUserMessages = internalQuery({
         .order("desc")
         .take(SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2 + 1);
       count += messages.filter(
-        (message) => message.role === "user" && message.createdAt >= args.sinceMs
+        (message) =>
+          message.createdAt >= args.sinceMs &&
+          (message.role === "user" ||
+            (message.role === "persona" &&
+              message.content === HIGH_RISK_RESPONSE)),
       ).length;
       if (count >= SIMULATOR_HOURLY_USER_MESSAGE_LIMIT) break;
     }
@@ -419,7 +617,7 @@ export const getLessonByOrder = internalQuery({
     const lesson = await ctx.db
       .query("lessons")
       .withIndex("by_course_order", (q) =>
-        q.eq("courseId", course._id).eq("order", args.lessonOrder)
+        q.eq("courseId", course._id).eq("order", args.lessonOrder),
       )
       .first();
     if (!lesson) return null;
@@ -433,7 +631,7 @@ export const sendMessage = action({
     sessionId: v.id("simulatorSessions"),
     content: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<SimulatorSendResult> => {
     const identity = await requireIdentity(ctx);
 
     // Validate
@@ -441,162 +639,208 @@ export const sendMessage = action({
     if (!trimmed) throw new Error("Message cannot be empty");
     if (trimmed.length > 1000) throw new Error("Message too long");
 
-    const session = await ctx.runQuery(internal.simulator.getOwnedSessionForAction, {
-      sessionId: args.sessionId,
-      ownerUserId: identity.subject,
-    });
-    if (!session) throw new Error("Session not found");
-    if (session.status !== "active") throw new Error("Session is not active");
-
-    if (detectHighRisk(trimmed)) {
-      await ctx.runMutation(internal.simulator.savePersonaResponse, {
+    const session = await ctx.runQuery(
+      internal.simulator.getOwnedSessionForAction,
+      {
         sessionId: args.sessionId,
         ownerUserId: identity.subject,
-        content: HIGH_RISK_RESPONSE,
-        createdAt: Date.now(),
-      });
-      return HIGH_RISK_RESPONSE;
-    }
+      },
+    );
+    if (!session) throw new Error("Session not found");
+    if (session.status !== "active") throw new Error("Session is not active");
+    const access = await ctx.runQuery(
+      internal.simulator.getAccessStatusForAction,
+      { ownerUserId: identity.subject },
+    );
 
     const recentUserMessages = await ctx.runQuery(
       internal.simulator.countRecentUserMessages,
       {
         ownerUserId: identity.subject,
         sinceMs: Date.now() - 60 * 60 * 1000,
-      }
+      },
     );
     if (recentUserMessages >= SIMULATOR_HOURLY_USER_MESSAGE_LIMIT) {
       throw new Error(
-        `הגעת למגבלת ${SIMULATOR_HOURLY_USER_MESSAGE_LIMIT} הודעות תרגול לשעה. אפשר לחזור בעוד שעה.`
+        `הגעת למגבלת ${SIMULATOR_HOURLY_USER_MESSAGE_LIMIT} הודעות תרגול לשעה. אפשר לחזור בעוד שעה.`,
       );
     }
     if (session.messageCount >= SIMULATOR_MAX_USER_TURNS_PER_SESSION * 2 - 1) {
-      throw new Error("התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.");
+      throw new Error(
+        "התרגול הגיע למספר ההודעות המרבי. אפשר לסיים ולקבל משוב.",
+      );
     }
 
-    const now = Date.now();
-
-    // Save user message and get updated context
-    const context = await ctx.runMutation(
-      internal.simulator.saveUserMessage,
-      {
+    // Safety routing stays free, but it still shares the existing durable
+    // per-user and per-session storage/rate boundaries.
+    if (detectHighRisk(trimmed)) {
+      await ctx.runMutation(internal.simulator.savePersonaResponse, {
         sessionId: args.sessionId,
-        content: trimmed,
-        createdAt: now,
         ownerUserId: identity.subject,
-      }
-    );
-
-    if (!context.scenario) throw new Error("Scenario not found");
-    if (
-      !Number.isInteger(context.scenario.personaAge) ||
-      context.scenario.personaAge < 18 ||
-      context.scenario.personaAge > 100
-    ) {
-      throw new Error("Simulator personas must be adults");
+        content: HIGH_RISK_RESPONSE,
+        createdAt: Date.now(),
+        accessGrant: { kind: "safety" },
+      });
+      return { content: HIGH_RISK_RESPONSE, source: "safety" as const, access };
     }
 
-    // Build conversation history (exclude narrator messages)
-    const conversationHistory = limitSimulatorHistory(context.messages
-      .filter((m: { role: string; content: string }) => m.role !== "narrator")
-      .map((m: { role: string; content: string }) => ({
-        role: m.role === "user" ? ("user" as const) : ("assistant" as const),
-        content: m.content,
-      })));
-
-    // --- Director (Phase 22): move the connection meter for this turn ---
-    // Deterministic + free. The persona then ACTS the updated state.
-    const turn = conversationHistory.filter((m) => m.role === "user").length;
-    const prevConnection = session.currentConnection ?? 50;
-    const arc = updateConnection(
-      prevConnection,
-      trimmed,
-      context.scenario.triggers ?? []
-    );
-    await ctx.runMutation(internal.simulator.updateDirectorState, {
-      sessionId: args.sessionId,
-      connection: arc.connection,
-      turn,
+    const reservationToken = crypto.randomUUID();
+    const claim = await ctx.runMutation(internal.simulator.claimTrialUnit, {
       ownerUserId: identity.subject,
+      token: reservationToken,
     });
-    const directorNote = buildDirectorNote(
-      arc.connection,
-      turn,
-      context.scenario.beats ?? []
-    );
+    if (!claim.allowed) throw new Error(SIMULATOR_TRIAL_LOCKED_ERROR);
 
-    // Live AI (Gemini free-tier preferred, then Claude) when a provider
-    // token is set; otherwise (or on failure) a persona-flavored template.
-    const keys = readLlmKeys();
-    const aiResponse = hasLlmKey(keys)
-      ? await ctx.runAction(internal.aiSimulator.getPersonaResponse, {
-          geminiKey: keys.geminiKey,
-          anthropicKey: keys.anthropicKey,
-          persona: {
-            personaName: context.scenario.personaName,
-            personaAge: context.scenario.personaAge,
-            personaGender: context.scenario.personaGender,
-            personaBackground: context.scenario.personaBackground,
-            personaPersonality: context.scenario.personaPersonality,
-            scenarioContext: context.scenario.scenarioContext,
-            difficulty: context.scenario.difficulty,
-            personaArchetype: context.scenario.personaArchetype,
-            attractionProfile: context.scenario.attractionProfile,
-            openers: context.scenario.openers,
-            triggers: context.scenario.triggers,
-          },
-          conversationHistory,
-          directorNote,
-        })
-      : null;
+    try {
+      const now = Date.now();
 
-    let personaResponse: string;
-    if (aiResponse) {
-      personaResponse = aiResponse;
-    } else {
-      // Free-degradation: persona-flavored, turn-aware fallback that now
-      // also reflects the director's connection meter (cool vs warm pools).
-      const name = context.scenario.personaName;
-      const lastUser = trimmed;
-      const askedQuestion = /\?|מה |איך |למה |איפה |מתי |האם /.test(lastUser);
-      const wantsToStop =
-        /רוצה לעצור|בוא נעצור|בואי נעצור|לא מתאים לי להמשיך|לא רוצה להמשיך/.test(
-          lastUser
-        );
+      // Save user message and get updated context
+      const context = await ctx.runMutation(
+        internal.simulator.saveUserMessage,
+        {
+          sessionId: args.sessionId,
+          content: trimmed,
+          createdAt: now,
+          ownerUserId: identity.subject,
+        },
+      );
 
-      const earlyTurn = [
-        `נעים מאוד, אני ${name}. זה תרחיש AI בדיוני; אפשר לבחור נושא שנוח לך ולשנות או לעצור בכל רגע.`,
-        `היי, אני ${name}. ${askedQuestion ? "אפשר לענות על זה בקצרה, " : ""}ואפשר גם לבחור נושא אחר לתרגול.`,
-      ];
-      const warmTurn = [
-        `שמעתי את מה שאמרת. ${askedQuestion ? "אענה לפי ההקשר הבדיוני, " : ""}ואפשר להמשיך רק אם מתאים לך.`,
-        `תודה על הניסוח הברור. אפשר להישאר בנושא הזה, להחליף נושא או לעצור.`,
-        `${askedQuestion ? "זו שאלה שאפשר לתרגל כאן. " : ""}אין צורך לשתף יותר ממה שנוח לך.`,
-      ];
-      const coolTurn = [
-        `אני מעדיפ/ה לא להיכנס לנושא הזה. אפשר לבחור נושא אחר או לסיים כאן.`,
-        `לא בטוח/ה שמתאים לי להמשיך בכיוון הזה. אין צורך לשכנע אותי.`,
-        `${askedQuestion ? "אני בוחר/ת לא לענות על זה. " : ""}אפשר לכבד את הגבול ולהמשיך רק אם שני הצדדים רוצים.`,
-      ];
-      if (wantsToStop) {
-        personaResponse = "ברור, נעצור כאן. אין צורך להסביר או להמשיך את התרגול.";
+      if (!context.scenario) throw new Error("Scenario not found");
+      if (
+        !Number.isInteger(context.scenario.personaAge) ||
+        context.scenario.personaAge < 18 ||
+        context.scenario.personaAge > 100
+      ) {
+        throw new Error("Simulator personas must be adults");
+      }
+
+      // Build conversation history (exclude narrator messages)
+      const conversationHistory = limitSimulatorHistory(
+        context.messages
+          .filter(
+            (m: { role: string; content: string }) => m.role !== "narrator",
+          )
+          .map((m: { role: string; content: string }) => ({
+            role:
+              m.role === "user" ? ("user" as const) : ("assistant" as const),
+            content: m.content,
+          })),
+      );
+
+      // --- Director (Phase 22): move the connection meter for this turn ---
+      // Deterministic + free. The persona then ACTS the updated state.
+      const turn = conversationHistory.filter((m) => m.role === "user").length;
+      const prevConnection = session.currentConnection ?? 50;
+      const arc = updateConnection(
+        prevConnection,
+        trimmed,
+        context.scenario.triggers ?? [],
+      );
+      await ctx.runMutation(internal.simulator.updateDirectorState, {
+        sessionId: args.sessionId,
+        connection: arc.connection,
+        turn,
+        ownerUserId: identity.subject,
+      });
+      const directorNote = buildDirectorNote(
+        arc.connection,
+        turn,
+        context.scenario.beats ?? [],
+      );
+
+      // Live AI (Gemini free-tier preferred, then Claude) when a provider
+      // token is set; otherwise (or on failure) a persona-flavored template.
+      const keys = readLlmKeys();
+      const aiResponse = hasLlmKey(keys)
+        ? await ctx.runAction(internal.aiSimulator.getPersonaResponse, {
+            geminiKey: keys.geminiKey,
+            anthropicKey: keys.anthropicKey,
+            persona: {
+              personaName: context.scenario.personaName,
+              personaAge: context.scenario.personaAge,
+              personaGender: context.scenario.personaGender,
+              personaBackground: context.scenario.personaBackground,
+              personaPersonality: context.scenario.personaPersonality,
+              scenarioContext: context.scenario.scenarioContext,
+              difficulty: context.scenario.difficulty,
+              personaArchetype: context.scenario.personaArchetype,
+              attractionProfile: context.scenario.attractionProfile,
+              openers: context.scenario.openers,
+              triggers: context.scenario.triggers,
+            },
+            conversationHistory,
+            directorNote,
+          })
+        : null;
+
+      let personaResponse: string;
+      if (aiResponse) {
+        personaResponse = aiResponse;
       } else {
-        const pool =
-          turn <= 1 ? earlyTurn : arc.connection < 40 ? coolTurn : warmTurn;
-        personaResponse = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
+        // Free-degradation: persona-flavored, turn-aware fallback that now
+        // also reflects the director's connection meter (cool vs warm pools).
+        const name = context.scenario.personaName;
+        const lastUser = trimmed;
+        const askedQuestion = /\?|מה |איך |למה |איפה |מתי |האם /.test(lastUser);
+        const wantsToStop =
+          /רוצה לעצור|בוא נעצור|בואי נעצור|לא מתאים לי להמשיך|לא רוצה להמשיך/.test(
+            lastUser,
+          );
+
+        const earlyTurn = [
+          `נעים מאוד, אני ${name}. זה תרחיש AI בדיוני; אפשר לבחור נושא שנוח לך ולשנות או לעצור בכל רגע.`,
+          `היי, אני ${name}. ${askedQuestion ? "אפשר לענות על זה בקצרה, " : ""}ואפשר גם לבחור נושא אחר לתרגול.`,
+        ];
+        const warmTurn = [
+          `שמעתי את מה שאמרת. ${askedQuestion ? "אענה לפי ההקשר הבדיוני, " : ""}ואפשר להמשיך רק אם מתאים לך.`,
+          `תודה על הניסוח הברור. אפשר להישאר בנושא הזה, להחליף נושא או לעצור.`,
+          `${askedQuestion ? "זו שאלה שאפשר לתרגל כאן. " : ""}אין צורך לשתף יותר ממה שנוח לך.`,
+        ];
+        const coolTurn = [
+          `אני מעדיפ/ה לא להיכנס לנושא הזה. אפשר לבחור נושא אחר או לסיים כאן.`,
+          `לא בטוח/ה שמתאים לי להמשיך בכיוון הזה. אין צורך לשכנע אותי.`,
+          `${askedQuestion ? "אני בוחר/ת לא לענות על זה. " : ""}אפשר לכבד את הגבול ולהמשיך רק אם שני הצדדים רוצים.`,
+        ];
+        if (wantsToStop) {
+          personaResponse =
+            "ברור, נעצור כאן. אין צורך להסביר או להמשיך את התרגול.";
+        } else {
+          const pool =
+            turn <= 1 ? earlyTurn : arc.connection < 40 ? coolTurn : warmTurn;
+          personaResponse =
+            pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
+        }
+        personaResponse = `תגובה אוטומטית בסיסית: ${personaResponse}`;
       }
-      personaResponse = `תגובה אוטומטית בסיסית: ${personaResponse}`;
+
+      // Save persona response
+      const settlement = await ctx.runMutation(
+        internal.simulator.savePersonaResponse,
+        {
+          sessionId: args.sessionId,
+          content: personaResponse,
+          createdAt: Date.now(),
+          ownerUserId: identity.subject,
+          accessGrant: claim.grant,
+        },
+      );
+
+      return {
+        content: personaResponse,
+        source: aiResponse ? ("live" as const) : ("template" as const),
+        access: {
+          ...(settlement.access ?? claim.access),
+        },
+      };
+    } catch (error) {
+      if (claim.grant.kind === "trial") {
+        await ctx.runMutation(internal.simulator.releaseTrialUnit, {
+          ownerUserId: identity.subject,
+          token: claim.grant.token,
+        });
+      }
+      throw error;
     }
-
-    // Save persona response
-    await ctx.runMutation(internal.simulator.savePersonaResponse, {
-      sessionId: args.sessionId,
-      content: personaResponse,
-      createdAt: Date.now(),
-      ownerUserId: identity.subject,
-    });
-
-    return personaResponse;
   },
 });
 
@@ -605,7 +849,7 @@ export const endSession = action({
   args: { sessionId: v.id("simulatorSessions") },
   handler: async (
     ctx,
-    args
+    args,
   ): Promise<{
     score: number;
     feedback: string;
@@ -614,12 +858,19 @@ export const endSession = action({
   }> => {
     const identity = await requireIdentity(ctx);
 
-    const session = await ctx.runQuery(internal.simulator.getOwnedSessionForAction, {
-      sessionId: args.sessionId,
-      ownerUserId: identity.subject,
-    });
+    const session = await ctx.runQuery(
+      internal.simulator.getOwnedSessionForAction,
+      {
+        sessionId: args.sessionId,
+        ownerUserId: identity.subject,
+      },
+    );
     if (!session) throw new Error("Session not found");
     if (session.status !== "active") throw new Error("Session is not active");
+    const access = await ctx.runQuery(
+      internal.simulator.getAccessStatusForAction,
+      { ownerUserId: identity.subject },
+    );
 
     const now = Date.now();
 
@@ -630,19 +881,24 @@ export const endSession = action({
       ownerUserId: identity.subject,
     });
 
-    const conversationHistory = limitSimulatorHistory(session.messages
-      .filter((m: { role: string; content: string }) => m.role !== "narrator")
-      .map((m: { role: string; content: string }) => ({
-        role: m.role === "user" ? ("user" as const) : ("assistant" as const),
-        content: m.content,
-      })));
+    const conversationHistory = limitSimulatorHistory(
+      session.messages
+        .filter((m: { role: string; content: string }) => m.role !== "narrator")
+        .map((m: { role: string; content: string }) => ({
+          role: m.role === "user" ? ("user" as const) : ("assistant" as const),
+          content: m.content,
+        })),
+    );
 
     // If very short session, return minimal analysis
-    if (conversationHistory.filter((m: { role: string }) => m.role === "user").length < 2) {
+    if (
+      conversationHistory.filter((m: { role: string }) => m.role === "user")
+        .length < 2
+    ) {
       const analysis = {
         score: 50,
         feedback:
-          "אין מספיק טקסט למשוב מפורט. עצירה מוקדמת או תשובה קצרה אינן כישלון, והמספר כאן אינו ציון ליכולת זוגית.",
+          "משוב אוטומטי בסיסי: אין מספיק טקסט למשוב מפורט. עצירה מוקדמת או תשובה קצרה אינן כישלון, והמספר כאן אינו ציון ליכולת זוגית.",
         strengths: ["בחרת את אורך התרגול שמתאים לך"],
         improvements: [
           "אם מתאים לך, אפשר לנסות ניסוח חלופי בתרחיש בדיוני נוסף",
@@ -658,7 +914,7 @@ export const endSession = action({
     }
 
     const userMessages = session.messages.filter(
-      (m: { role: string }) => m.role === "user"
+      (m: { role: string }) => m.role === "user",
     );
 
     // Deterministic deep debrief — the free-degradation feedback loop,
@@ -666,17 +922,19 @@ export const endSession = action({
     // Always computed: it also fills any field the AI analysis omits.
     const heuristic: DeepDebrief = buildDeepDebrief(userMessages);
 
-    // Live coach analysis when a provider (Gemini free / Claude) is set.
+    // Trial users receive the clearly labelled local heuristic. Provider-backed
+    // debrief and RAG are reserved for admin/trusted-entitlement access.
     const keys = readLlmKeys();
-    const aiAnalysis = hasLlmKey(keys)
-      ? await ctx.runAction(internal.aiSimulator.analyzeConversation, {
-          geminiKey: keys.geminiKey,
-          anthropicKey: keys.anthropicKey,
-          scenarioTitle: session.scenario?.title ?? "תרחיש",
-          difficulty: session.scenario?.difficulty ?? "easy",
-          conversationHistory,
-        })
-      : null;
+    const aiAnalysis =
+      access.hasFullAccess && hasLlmKey(keys)
+        ? await ctx.runAction(internal.aiSimulator.analyzeConversation, {
+            geminiKey: keys.geminiKey,
+            anthropicKey: keys.anthropicKey,
+            scenarioTitle: session.scenario?.title ?? "תרחיש",
+            difficulty: session.scenario?.difficulty ?? "easy",
+            conversationHistory,
+          })
+        : null;
 
     const analysis = {
       score: aiAnalysis?.score ?? heuristic.score,
@@ -698,9 +956,13 @@ export const endSession = action({
     // RAG bridge (Phase 22): find the ONE course lesson that teaches what
     // the learner missed, and attach it as a deep link. Degrades silently.
     let recommendedLesson:
-      | { lessonId: import("./_generated/dataModel").Id<"lessons">; courseId: import("./_generated/dataModel").Id<"courses">; title: string }
+      | {
+          lessonId: import("./_generated/dataModel").Id<"lessons">;
+          courseId: import("./_generated/dataModel").Id<"courses">;
+          title: string;
+        }
       | undefined;
-    if (keys.geminiKey) {
+    if (access.hasFullAccess && keys.geminiKey) {
       const gapText = [analysis.drill, ...analysis.improvements].join(" · ");
       const qVec = await embedQuery(keys.geminiKey, gapText);
       if (qVec) {
@@ -718,7 +980,7 @@ export const endSession = action({
           if (typeof order === "number") {
             const lesson = await ctx.runQuery(
               internal.simulator.getLessonByOrder,
-              { lessonOrder: order }
+              { lessonOrder: order },
             );
             if (lesson) recommendedLesson = lesson;
           }
@@ -833,7 +1095,7 @@ export const getLessonPracticeStats = query({
       .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .collect();
     const chatForLesson = chatSessions.filter(
-      (s) => s.lessonId === args.lessonId
+      (s) => s.lessonId === args.lessonId,
     );
 
     return {
@@ -878,7 +1140,7 @@ export const submitChoice = mutation({
     if (!scenario) throw new Error("Scenario not found");
 
     const dialoguePoint = scenario.dialoguePoints.find(
-      (dp) => dp.id === args.stepId
+      (dp) => dp.id === args.stepId,
     );
     if (!dialoguePoint) throw new Error("Dialogue point not found");
 
@@ -995,7 +1257,7 @@ export const getSimulationHistory = query({
           personaName: scenario?.personaName ?? "",
           personaEmoji: scenario?.personaEmoji ?? "👤",
         };
-      })
+      }),
     );
   },
 });
@@ -1041,7 +1303,7 @@ export const getLeaderboard = query({
       .collect();
 
     const completed = sessions.filter(
-      (s) => s.status === "completed" && s.totalScore !== undefined
+      (s) => s.status === "completed" && s.totalScore !== undefined,
     );
 
     // Get best score per user

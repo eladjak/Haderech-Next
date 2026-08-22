@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
 import { SimulatorChat } from "@/components/simulator/simulator-chat";
 import { DifficultyBadge } from "@/components/simulator/difficulty-badge";
+import { SimulatorAccessPanel } from "@/components/simulator/simulator-access-panel";
 import Link from "next/link";
 
 export default function ScenarioPage() {
+  const { isSignedIn } = useAuth();
   const params = useParams();
   const searchParams = useSearchParams();
   const scenarioId = params.scenarioId as Id<"simulatorScenarios">;
@@ -19,6 +21,10 @@ export default function ScenarioPage() {
   const fromLessonId = searchParams.get("lessonId") as Id<"lessons"> | null;
 
   const scenario = useQuery(api.simulator.getScenario, { scenarioId });
+  const access = useQuery(
+    api.simulator.getAccessStatus,
+    isSignedIn ? {} : "skip",
+  );
   const startSession = useMutation(api.simulator.startSession);
 
   const [activeSessionId, setActiveSessionId] =
@@ -37,7 +43,12 @@ export default function ScenarioPage() {
       });
       setActiveSessionId(sessionId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בהתחלת הסשן");
+      const message = err instanceof Error ? err.message : "";
+      setError(
+        message.includes("SIMULATOR_TRIAL_LOCKED")
+          ? "הניסיון החינמי הסתיים. המשך השימוש ייפתח כשמסלול התשלום והזכאות יהיה מוכן."
+          : message || "שגיאה בהתחלת הסשן",
+      );
       setIsStarting(false);
     }
   };
@@ -179,7 +190,7 @@ export default function ScenarioPage() {
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-brand-400">•</span>
-              השיחה עשויה להישלח ל-Gemini או Anthropic; אל תכתוב/י פרטים מזהים או מידע רגיש
+              {"השיחה עשויה להישלח ל-Gemini או Anthropic; אל תכתוב/י פרטים מזהים או מידע רגיש"}
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-brand-400">•</span>
@@ -205,14 +216,25 @@ export default function ScenarioPage() {
               {error}
             </div>
           )}
-          <button
-            type="button"
-            onClick={() => void handleStart()}
-            disabled={isStarting}
-            className="w-full rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 py-3.5 text-base font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 disabled:opacity-60"
-          >
-            {isStarting ? "מתחיל..." : "התחל סשן"}
-          </button>
+          {access === undefined ? (
+            <div className="flex justify-center py-4" aria-label="בודק גישה">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <SimulatorAccessPanel access={access} />
+              {access.mode !== "locked" && (
+                <button
+                  type="button"
+                  onClick={() => void handleStart()}
+                  disabled={isStarting}
+                  className="w-full rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 py-3.5 text-base font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 disabled:opacity-60"
+                >
+                  {isStarting ? "מתחיל..." : "התחל סשן"}
+                </button>
+              )}
+            </div>
+          )}
         </SignedIn>
 
         <SignedOut>

@@ -1,23 +1,23 @@
-import {
-  query,
-  mutation,
-  type MutationCtx,
-  type QueryCtx,
-} from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  readCommunityAccess,
+  requireCommunityAccess,
+} from "./lib/communityAccessGuard";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-async function requireUser(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("Not authenticated");
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) throw new Error("User not found");
-  return user;
-}
+// Learner-safe availability DTO. It deliberately exposes no role, entitlement
+// basis, issuer, order reference, or admin detail.
+export const getAccessStatus = query({
+  args: {},
+  handler: async (ctx) => {
+    const { decision } = await readCommunityAccess(ctx);
+    const canAccess = decision.startsWith("allow-");
+    return {
+      canAccess,
+      state: canAccess ? ("available" as const) : ("preparing" as const),
+    };
+  },
+});
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
@@ -36,7 +36,7 @@ export const listTopics = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     const limit = args.limit ?? 50;
 
     const topics = args.category
@@ -76,7 +76,7 @@ export const listTopics = query({
 export const getTopic = query({
   args: { topicId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     const topic = await ctx.db.get(args.topicId);
     if (!topic) return null;
 
@@ -115,14 +115,7 @@ export const getTopic = query({
 export const getTopicLikeStatus = query({
   args: { topicId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return false;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) return false;
+    const user = await requireCommunityAccess(ctx);
 
     const existing = await ctx.db
       .query("communityTopicLikes")
@@ -139,14 +132,7 @@ export const getTopicLikeStatus = query({
 export const getReplyLikeStatus = query({
   args: { replyId: v.id("communityReplies") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return false;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) return false;
+    const user = await requireCommunityAccess(ctx);
 
     const existing = await ctx.db
       .query("communityReplyLikes")
@@ -175,7 +161,7 @@ export const createTopic = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const title = args.title.trim();
     const content = args.content.trim();
@@ -205,7 +191,7 @@ export const createReply = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const topic = await ctx.db.get(args.topicId);
     if (!topic) throw new Error("נושא לא נמצא");
@@ -235,7 +221,7 @@ export const createReply = mutation({
 export const toggleLikeTopic = mutation({
   args: { topicId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const topic = await ctx.db.get(args.topicId);
     if (!topic) throw new Error("נושא לא נמצא");
@@ -272,7 +258,7 @@ export const toggleLikeTopic = mutation({
 export const toggleLikeReply = mutation({
   args: { replyId: v.id("communityReplies") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const reply = await ctx.db.get(args.replyId);
     if (!reply) throw new Error("תגובה לא נמצאה");
@@ -309,7 +295,7 @@ export const toggleLikeReply = mutation({
 export const deleteTopic = mutation({
   args: { topicId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const topic = await ctx.db.get(args.topicId);
     if (!topic) throw new Error("נושא לא נמצא");
@@ -351,7 +337,7 @@ export const deleteTopic = mutation({
 export const deleteReply = mutation({
   args: { replyId: v.id("communityReplies") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const reply = await ctx.db.get(args.replyId);
     if (!reply) throw new Error("תגובה לא נמצאה");

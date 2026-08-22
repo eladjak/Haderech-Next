@@ -1,11 +1,7 @@
-import {
-  query,
-  mutation,
-  type MutationCtx,
-  type QueryCtx,
-} from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
+import { requireCommunityAccess } from "./lib/communityAccessGuard";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -16,25 +12,13 @@ type ForumCategory =
   | "questions"
   | "advice";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-async function requireUser(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("נדרשת התחברות");
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) throw new Error("משתמש לא נמצא");
-  return user;
-}
-
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 /** Static list of forum categories */
 export const listCategories = query({
   args: {},
-  handler: async () => {
+  handler: async (ctx) => {
+    await requireCommunityAccess(ctx);
     return [
       {
         value: "general" as ForumCategory,
@@ -88,7 +72,7 @@ export const listPosts = query({
     take: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     const limit = args.take ?? 30;
 
     let posts: Doc<"communityTopics">[];
@@ -147,7 +131,7 @@ export const listPosts = query({
 export const getPost = query({
   args: { postId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     const post = await ctx.db.get(args.postId);
     if (!post) return null;
 
@@ -180,7 +164,7 @@ export const createPost = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const title = args.title.trim();
     const content = args.content.trim();
@@ -207,7 +191,7 @@ export const createPost = mutation({
 export const likePost = mutation({
   args: { postId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const post = await ctx.db.get(args.postId);
     if (!post) throw new Error("פוסט לא נמצא");
@@ -242,16 +226,7 @@ export const likePost = mutation({
 export const getPostLikeStatus = query({
   args: { postId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return false;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) =>
-        q.eq("clerkId", identity.subject)
-      )
-      .unique();
-    if (!user) return false;
+    const user = await requireCommunityAccess(ctx);
 
     const existing = await ctx.db
       .query("communityTopicLikes")
@@ -270,7 +245,7 @@ export const getPostLikeStatus = query({
 export const listReplies = query({
   args: { postId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     const replies = await ctx.db
       .query("communityReplies")
       .withIndex("by_topic", (q) => q.eq("topicId", args.postId))
@@ -302,7 +277,7 @@ export const createReply = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const post = await ctx.db.get(args.postId);
     if (!post) throw new Error("פוסט לא נמצא");
@@ -331,7 +306,7 @@ export const createReply = mutation({
 export const likeReply = mutation({
   args: { replyId: v.id("communityReplies") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const reply = await ctx.db.get(args.replyId);
     if (!reply) throw new Error("תגובה לא נמצאה");
@@ -366,16 +341,7 @@ export const likeReply = mutation({
 export const getReplyLikeStatus = query({
   args: { replyId: v.id("communityReplies") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return false;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) =>
-        q.eq("clerkId", identity.subject)
-      )
-      .unique();
-    if (!user) return false;
+    const user = await requireCommunityAccess(ctx);
 
     const existing = await ctx.db
       .query("communityReplyLikes")
@@ -394,7 +360,7 @@ export const getReplyLikeStatus = query({
 export const getForumStats = query({
   args: {},
   handler: async (ctx) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     const allPosts = await ctx.db
       .query("communityTopics")
       .withIndex("by_created")

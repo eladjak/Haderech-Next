@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site-config";
+import { CommunityAccessBoundary } from "@/components/community/community-access-boundary";
 
 export const metadata: Metadata = {
   title: "קהילה",
   description:
-    "הצטרפו לקהילת הדרך - מקום לשאול שאלות, לשתף חוויות ולקבל תמיכה מאנשים שעוברים את אותו המסע. ביחד לומדים טוב יותר.",
+    "הקהילה של אומנות הקשר נמצאת בהכנה לקראת פתיחה מסודרת סביב הספר, הקורס והליווי.",
   openGraph: {
     title: "קהילה | הדרך - אומנות הקשר",
     description:
-      "הצטרפו לקהילת הדרך - שאלו, שתפו ותמכו. ביחד לומדים טוב יותר.",
+      "קהילה אחת סביב הספר, הקורס והליווי — נמצאת כעת בהכנה לקראת פתיחה מסודרת.",
     url: `${siteConfig.url}/community`,
     images: [
       {
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "קהילה | הדרך - אומנות הקשר",
     description:
-      "הצטרפו לקהילת הדרך - שאלו, שתפו ותמכו. ביחד לומדים טוב יותר.",
+      "קהילה אחת סביב הספר, הקורס והליווי — נמצאת כעת בהכנה לקראת פתיחה מסודרת.",
     images: ["/images/hero.jpg"],
   },
 };
@@ -33,5 +34,5 @@ export default function CommunityLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <CommunityAccessBoundary>{children}</CommunityAccessBoundary>;
 }

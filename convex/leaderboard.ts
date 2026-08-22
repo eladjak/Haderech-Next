@@ -1,28 +1,16 @@
 import {
   query,
   mutation,
-  type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
+import { requireCommunityAccess } from "./lib/communityAccessGuard";
 
 // ==========================================
 // Leaderboard, Weekly Challenges & Rewards
 // Phase 74 - Advanced Gamification
 // ==========================================
-
-// --- Helper: get user from auth ---
-async function requireUser(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("Not authenticated");
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) throw new Error("User not found");
-  return user;
-}
 
 // --- Helper: compute XP for a user from xpEvents table ---
 async function getUserTotalXP(
@@ -65,7 +53,7 @@ function startOfMonthTs(): number {
 export const getWeeklyLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     // A truthful social ranking needs a bounded, consent-aware aggregate.
     // Until that exists, keep this compatibility endpoint fail-closed instead
     // of scanning every learner and exposing an improvised comparison table.
@@ -76,7 +64,7 @@ export const getWeeklyLeaderboard = query({
 export const getMonthlyLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     return [];
   },
 });
@@ -84,7 +72,7 @@ export const getMonthlyLeaderboard = query({
 export const getAllTimeLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    await requireUser(ctx);
+    await requireCommunityAccess(ctx);
     return [];
   },
 });
@@ -92,14 +80,7 @@ export const getAllTimeLeaderboard = query({
 export const getUserRank = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) return null;
+    const user = await requireCommunityAccess(ctx);
 
     const weekFromTs = startOfWeekTs();
     const monthFromTs = startOfMonthTs();
@@ -235,30 +216,20 @@ const WEEKLY_CHALLENGE_DEFINITIONS = [
 export const getWeeklyChallenges = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
+    const user = await requireCommunityAccess(ctx);
 
     // Get completed challenges for this user this week
     const weekFromTs = startOfWeekTs();
     let completedSlugs = new Set<string>();
 
-    if (identity) {
-      const user = await ctx.db
-        .query("users")
-        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-        .unique();
-
-      if (user) {
-        const completions = await ctx.db
-          .query("weeklyChallengCompletions")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .collect();
-
-        const thisWeekCompletions = (
-          completions as Array<{ challengeSlug: string; completedAt: number }>
-        ).filter((c) => c.completedAt >= weekFromTs);
-        completedSlugs = new Set(thisWeekCompletions.map((c) => c.challengeSlug));
-      }
-    }
+    const completions = await ctx.db
+      .query("weeklyChallengCompletions")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    const thisWeekCompletions = (
+      completions as Array<{ challengeSlug: string; completedAt: number }>
+    ).filter((c) => c.completedAt >= weekFromTs);
+    completedSlugs = new Set(thisWeekCompletions.map((c) => c.challengeSlug));
 
     // Calculate days remaining in week
     const now = Date.now();
@@ -284,7 +255,7 @@ export const completeWeeklyChallenge = mutation({
     challengeSlug: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
     const weekFromTs = startOfWeekTs();
 
     // Check if already completed this week
@@ -406,28 +377,17 @@ const REWARD_DEFINITIONS = [
 export const getRewardsShop = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
+    const user = await requireCommunityAccess(ctx);
     let userXP = 0;
     let redeemedSlugs = new Set<string>();
-
-    if (identity) {
-      const user = await ctx.db
-        .query("users")
-        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-        .unique();
-
-      if (user) {
-        userXP = await getUserTotalXP(ctx.db, user._id);
-
-        const redemptions = await ctx.db
-          .query("rewardRedemptions")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .collect();
-        redeemedSlugs = new Set(
-          redemptions.map((redemption) => redemption.rewardSlug)
-        );
-      }
-    }
+    userXP = await getUserTotalXP(ctx.db, user._id);
+    const redemptions = await ctx.db
+      .query("rewardRedemptions")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    redeemedSlugs = new Set(
+      redemptions.map((redemption) => redemption.rewardSlug)
+    );
 
     return {
       userXP,
@@ -451,7 +411,7 @@ export const redeemReward = mutation({
     rewardSlug: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireCommunityAccess(ctx);
 
     const reward = REWARD_DEFINITIONS.find((r) => r.slug === args.rewardSlug);
     if (!reward) throw new Error("פרס לא נמצא");
@@ -500,14 +460,7 @@ export const redeemReward = mutation({
 export const getMyRewards = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) return [];
+    const user = await requireCommunityAccess(ctx);
 
     const redemptions = await ctx.db
       .query("rewardRedemptions")

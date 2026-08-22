@@ -459,6 +459,21 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_session", ["sessionId"]),
 
+  // Server-authoritative free-trial meter for the free-chat simulator.
+  // Existing users intentionally start at zero: pre-gate history is not
+  // retroactively charged. Reservations make N/N+1 concurrency fail closed.
+  simulatorTrialUsage: defineTable({
+    userId: v.string(),
+    consumedUnits: v.number(),
+    reservations: v.array(
+      v.object({
+        token: v.string(),
+        expiresAt: v.number(),
+      })
+    ),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
   // סימולטור - תרחישי דיאלוג מובנה (Phase 68)
   dialogueScenarios: defineTable({
     title: v.string(),
@@ -574,6 +589,33 @@ export default defineSchema({
   })
     .index("by_reply", ["replyId"])
     .index("by_user_reply", ["userId", "replyId"]),
+
+  // Dedicated access to the single book/course/guidance community.
+  // No application writer exists yet: grants remain closed until a verified
+  // order/eligibility or owner-approved issuer is implemented.
+  communityEntitlements: defineTable({
+    userId: v.id("users"),
+    accessBasis: v.union(
+      v.literal("book"),
+      v.literal("course"),
+      v.literal("guidance"),
+      v.literal("ecosystem")
+    ),
+    status: v.union(v.literal("active"), v.literal("revoked")),
+    source: v.union(
+      v.literal("verified_book_order"),
+      v.literal("trusted_course_access"),
+      v.literal("verified_guidance_eligibility"),
+      v.literal("admin_grant")
+    ),
+    sourceReference: v.optional(v.string()),
+    grantedBy: v.optional(v.id("users")),
+    grantedAt: v.number(),
+    validUntil: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_status", ["userId", "status"]),
 
   // תוכן יומי - טיפים, ציטוטים, אתגרים
   dailyContent: defineTable({
