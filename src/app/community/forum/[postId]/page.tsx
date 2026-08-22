@@ -11,6 +11,7 @@ import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CommunitySafetyActions } from "@/components/community/community-safety-actions";
 import { ReplyItem } from "@/components/forum/reply-item";
 import { TimeAgo } from "@/components/forum/time-ago";
 import {
@@ -332,6 +333,10 @@ export default function PostDetailPage() {
                     liked={isLiked}
                     onToggle={handleToggleLike}
                     size="md"
+                  />
+                  <CommunitySafetyActions
+                    targetType="topic"
+                    topicId={post._id}
                   />
                 </SignedIn>
                 <SignedOut>

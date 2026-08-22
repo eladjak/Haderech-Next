@@ -617,6 +617,86 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_status", ["userId", "status"]),
 
+  communityReports: defineTable({
+    reporterUserId: v.id("users"),
+    subjectUserId: v.id("users"),
+    targetType: v.union(v.literal("topic"), v.literal("reply")),
+    targetKey: v.string(),
+    topicId: v.optional(v.id("communityTopics")),
+    replyId: v.optional(v.id("communityReplies")),
+    targetTitleSnapshot: v.optional(v.string()),
+    targetExcerptSnapshot: v.string(),
+    reason: v.union(
+      v.literal("harassment"),
+      v.literal("privacy"),
+      v.literal("spam"),
+      v.literal("unsafe_content"),
+      v.literal("other")
+    ),
+    details: v.optional(v.string()),
+    status: v.union(
+      v.literal("open"),
+      v.literal("under_review"),
+      v.literal("resolved_no_action"),
+      v.literal("dismissed")
+    ),
+    internalModeratorNote: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_reporter_target", ["reporterUserId", "targetKey"])
+    .index("by_reporter_created", ["reporterUserId", "createdAt"])
+    .index("by_status_created", ["status", "createdAt"]),
+
+  communityBlocks: defineTable({
+    blockerUserId: v.id("users"),
+    blockedUserId: v.id("users"),
+    status: v.union(v.literal("active"), v.literal("released")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    releasedAt: v.optional(v.number()),
+  })
+    .index("by_blocker_blocked", ["blockerUserId", "blockedUserId"])
+    .index("by_blocker_status", ["blockerUserId", "status"]),
+
+  communityModerationEvents: defineTable({
+    actorAdminUserId: v.id("users"),
+    subjectUserId: v.id("users"),
+    reportId: v.optional(v.id("communityReports")),
+    appealId: v.optional(v.id("communityAppeals")),
+    eventType: v.union(
+      v.literal("report_under_review"),
+      v.literal("report_resolved_no_action"),
+      v.literal("report_dismissed"),
+      v.literal("appeal_under_review"),
+      v.literal("appeal_resolved"),
+      v.literal("appeal_dismissed")
+    ),
+    appealable: v.boolean(),
+    internalNote: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_subject", ["subjectUserId"])
+    .index("by_report", ["reportId"]),
+
+  communityAppeals: defineTable({
+    requesterUserId: v.id("users"),
+    moderationEventId: v.id("communityModerationEvents"),
+    reason: v.string(),
+    status: v.union(
+      v.literal("submitted"),
+      v.literal("under_review"),
+      v.literal("resolved"),
+      v.literal("dismissed")
+    ),
+    internalModeratorNote: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_requester", ["requesterUserId"])
+    .index("by_requester_event", ["requesterUserId", "moderationEventId"])
+    .index("by_status_created", ["status", "createdAt"]),
+
   // תוכן יומי - טיפים, ציטוטים, אתגרים
   dailyContent: defineTable({
     type: v.union(

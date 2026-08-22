@@ -8,10 +8,12 @@ import { motion } from "framer-motion";
 import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { timeAgoHe } from "./time-ago";
+import { CommunitySafetyActions } from "@/components/community/community-safety-actions";
 
 interface ReplyItemProps {
   reply: {
     _id: Id<"communityReplies">;
+    userId: Id<"users">;
     content: string;
     authorName: string;
     authorImage?: string | null;
@@ -123,6 +125,10 @@ export function ReplyItem({ reply, onDelete, index = 0 }: ReplyItemProps) {
         {/* Actions */}
         <div className="mt-1.5 flex items-center gap-2 px-2">
           <SignedIn>
+            <CommunitySafetyActions
+              targetType="reply"
+              replyId={reply._id}
+            />
             <button
               onClick={handleLike}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${

@@ -10,6 +10,7 @@ import { api } from "@/../convex/_generated/api";
 import { fallbackAvatar } from "@/lib/fallback-avatar";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { MyCommunityBlocks } from "@/components/community/my-community-blocks";
 
 type Category =
   | "all"
@@ -395,6 +396,10 @@ export default function CommunityPage() {
             מקום לשתף, ללמוד ולהתחבר עם אנשים בדרך לאהבה
           </p>
         </motion.div>
+
+        <SignedIn>
+          <MyCommunityBlocks />
+        </SignedIn>
 
         {/* Toolbar */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

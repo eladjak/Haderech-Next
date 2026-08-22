@@ -4,6 +4,7 @@ import {
   readCommunityAccess,
   requireCommunityAccess,
 } from "./lib/communityAccessGuard";
+import { blockedUserIdsFor } from "./lib/communityModerationData";
 
 // Learner-safe availability DTO. It deliberately exposes no role, entitlement
 // basis, issuer, order reference, or admin detail.
@@ -36,24 +37,29 @@ export const listTopics = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireCommunityAccess(ctx);
-    const limit = args.limit ?? 50;
+    const user = await requireCommunityAccess(ctx);
+    const blockedUserIds = await blockedUserIdsFor(ctx, user._id);
+    const limit = Math.min(Math.max(args.limit ?? 50, 1), 100);
+    const scanLimit = Math.min(limit * 3, 300);
 
     const topics = args.category
       ? await ctx.db
           .query("communityTopics")
           .withIndex("by_category", (q) => q.eq("category", args.category!))
           .order("desc")
-          .take(limit)
+          .take(scanLimit)
       : await ctx.db
           .query("communityTopics")
           .withIndex("by_created")
           .order("desc")
-          .take(limit);
+          .take(scanLimit);
 
     // Enrich with user data
     const enriched = await Promise.all(
-      topics.map(async (topic) => {
+      topics
+        .filter((topic) => !blockedUserIds.has(String(topic.userId)))
+        .slice(0, limit)
+        .map(async (topic) => {
         const user = await ctx.db.get(topic.userId);
         const u = user as { name?: string; email?: string; imageUrl?: string } | null;
         return {
@@ -61,7 +67,7 @@ export const listTopics = query({
           authorName: u?.name ?? u?.email ?? "משתמש",
           authorImage: u?.imageUrl ?? null,
         };
-      })
+        })
     );
 
     // Pinned topics always first
@@ -76,9 +82,11 @@ export const listTopics = query({
 export const getTopic = query({
   args: { topicId: v.id("communityTopics") },
   handler: async (ctx, args) => {
-    await requireCommunityAccess(ctx);
+    const user = await requireCommunityAccess(ctx);
+    const blockedUserIds = await blockedUserIdsFor(ctx, user._id);
     const topic = await ctx.db.get(args.topicId);
     if (!topic) return null;
+    if (blockedUserIds.has(String(topic.userId))) return null;
 
     const authorRaw = await ctx.db.get(topic.userId);
     const author = authorRaw as { name?: string; email?: string; imageUrl?: string } | null;
@@ -91,7 +99,9 @@ export const getTopic = query({
       .collect();
 
     const enrichedReplies = await Promise.all(
-      replies.map(async (reply) => {
+      replies
+        .filter((reply) => !blockedUserIds.has(String(reply.userId)))
+        .map(async (reply) => {
         const userRaw = await ctx.db.get(reply.userId);
         const u = userRaw as { name?: string; email?: string; imageUrl?: string } | null;
         return {
@@ -99,7 +109,7 @@ export const getTopic = query({
           authorName: u?.name ?? u?.email ?? "משתמש",
           authorImage: u?.imageUrl ?? null,
         };
-      })
+        })
     );
 
     return {
@@ -195,6 +205,8 @@ export const createReply = mutation({
 
     const topic = await ctx.db.get(args.topicId);
     if (!topic) throw new Error("נושא לא נמצא");
+    const blockedUserIds = await blockedUserIdsFor(ctx, user._id);
+    if (blockedUserIds.has(String(topic.userId))) throw new Error("נושא לא נמצא");
 
     const content = args.content.trim();
     if (content.length === 0) throw new Error("תגובה לא יכולה להיות ריקה");
@@ -225,6 +237,8 @@ export const toggleLikeTopic = mutation({
 
     const topic = await ctx.db.get(args.topicId);
     if (!topic) throw new Error("נושא לא נמצא");
+    const blockedUserIds = await blockedUserIdsFor(ctx, user._id);
+    if (blockedUserIds.has(String(topic.userId))) throw new Error("נושא לא נמצא");
 
     const existing = await ctx.db
       .query("communityTopicLikes")
@@ -262,6 +276,8 @@ export const toggleLikeReply = mutation({
 
     const reply = await ctx.db.get(args.replyId);
     if (!reply) throw new Error("תגובה לא נמצאה");
+    const blockedUserIds = await blockedUserIdsFor(ctx, user._id);
+    if (blockedUserIds.has(String(reply.userId))) throw new Error("תגובה לא נמצאה");
 
     const existing = await ctx.db
       .query("communityReplyLikes")

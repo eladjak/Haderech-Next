@@ -11,6 +11,7 @@ import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CommunitySafetyActions } from "@/components/community/community-safety-actions";
 
 interface CommunityReplyView {
   _id: Id<"communityReplies">;
@@ -19,7 +20,7 @@ interface CommunityReplyView {
   createdAt: number;
   authorName?: string;
   authorImage?: string | null;
-  userId?: string;
+  userId: Id<"users">;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -185,6 +186,10 @@ function ReplyItem({
               count={likeCount}
               liked={isLiked !== undefined ? isLiked : serverLiked}
               onToggle={handleToggleLike}
+            />
+            <CommunitySafetyActions
+              targetType="reply"
+              replyId={reply._id}
             />
           </SignedIn>
           {currentUserId && (
@@ -387,6 +392,10 @@ export default function TopicDetailPage() {
                     liked={displayLiked}
                     onToggle={handleToggleLike}
                     size="md"
+                  />
+                  <CommunitySafetyActions
+                    targetType="topic"
+                    topicId={topic._id}
                   />
                 </SignedIn>
                 <SignedOut>

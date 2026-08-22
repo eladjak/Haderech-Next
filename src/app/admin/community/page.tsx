@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { useState } from "react";
 import type { Id } from "@/../convex/_generated/dataModel";
+import { CommunityModerationQueue } from "@/components/admin/community-moderation-queue";
 
 const CATEGORY_LABELS: Record<string, string> = {
   general: "כללי",
@@ -79,6 +80,8 @@ export default function AdminCommunityPage() {
           ניהול נושאים, הצמדה ומחיקה
         </p>
       </div>
+
+      <CommunityModerationQueue />
 
       {/* Stats Cards */}
       {stats ? (

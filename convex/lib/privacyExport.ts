@@ -37,6 +37,10 @@ export async function collectUserDataExport(
     communityTopicLikes,
     communityReplyLikes,
     communityEntitlements,
+    communityReports,
+    communityBlocks,
+    communityModerationEvents,
+    communityAppeals,
     dailyChallengeCompletions,
     contactMessages,
     xpEvents,
@@ -133,6 +137,24 @@ export async function collectUserDataExport(
     ctx.db
       .query("communityEntitlements")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect(),
+    ctx.db
+      .query("communityReports")
+      .withIndex("by_reporter_created", (q) =>
+        q.eq("reporterUserId", user._id),
+      )
+      .collect(),
+    ctx.db
+      .query("communityBlocks")
+      .withIndex("by_blocker_status", (q) => q.eq("blockerUserId", user._id))
+      .collect(),
+    ctx.db
+      .query("communityModerationEvents")
+      .withIndex("by_subject", (q) => q.eq("subjectUserId", user._id))
+      .collect(),
+    ctx.db
+      .query("communityAppeals")
+      .withIndex("by_requester", (q) => q.eq("requesterUserId", user._id))
       .collect(),
     ctx.db
       .query("dailyChallengeCompletions")
@@ -285,6 +307,32 @@ export async function collectUserDataExport(
       grantedAt: entitlement.grantedAt,
       validUntil: entitlement.validUntil,
       revokedAt: entitlement.revokedAt,
+    })),
+    communityReports: communityReports.map((report) => ({
+      targetType: report.targetType,
+      reason: report.reason,
+      details: report.details,
+      status: report.status,
+      createdAt: report.createdAt,
+      updatedAt: report.updatedAt,
+    })),
+    communityBlocks: communityBlocks.map((block) => ({
+      blockedUserId: block.blockedUserId,
+      status: block.status,
+      createdAt: block.createdAt,
+      updatedAt: block.updatedAt,
+      releasedAt: block.releasedAt,
+    })),
+    communityModerationEvents: communityModerationEvents.map((event) => ({
+      eventType: event.eventType,
+      appealable: event.appealable,
+      createdAt: event.createdAt,
+    })),
+    communityAppeals: communityAppeals.map((appeal) => ({
+      reason: appeal.reason,
+      status: appeal.status,
+      createdAt: appeal.createdAt,
+      updatedAt: appeal.updatedAt,
     })),
     dailyChallengeCompletions,
     contactMessages,
