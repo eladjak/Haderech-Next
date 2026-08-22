@@ -101,9 +101,6 @@ export const getMe = query({
   },
 });
 
-// אימיילים שתמיד יהיו admin
-const ADMIN_EMAILS = ["eladjak@gmail.com"];
-
 // יצירת משתמש אוטומטית מ-auth context (אם לא קיים)
 export const ensureUser = mutation({
   args: {},
@@ -112,7 +109,6 @@ export const ensureUser = mutation({
     if (!identity) return null;
 
     const email = identity.email ?? "";
-    const isAutoAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
 
     const existing = await ctx.db
       .query("users")
@@ -120,14 +116,6 @@ export const ensureUser = mutation({
       .unique();
 
     if (existing) {
-      // Auto-promote to admin if in ADMIN_EMAILS list and not already admin
-      if (isAutoAdmin && existing.role !== "admin") {
-        await ctx.db.patch(existing._id, {
-          role: "admin",
-          updatedAt: Date.now(),
-        });
-        return await ctx.db.get(existing._id);
-      }
       return existing;
     }
 
@@ -137,7 +125,7 @@ export const ensureUser = mutation({
       email,
       name: identity.name,
       imageUrl: identity.pictureUrl,
-      role: isAutoAdmin ? "admin" : "student",
+      role: "student",
       createdAt: now,
       updatedAt: now,
     });
@@ -146,53 +134,7 @@ export const ensureUser = mutation({
   },
 });
 
-// בדיקה אם יש admin כלשהו במערכת
-export const hasAnyAdmin = query({
-  args: {},
-  handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
-    return users.some((u) => u.role === "admin");
-  },
-});
-
-// קידום עצמי ל-admin (רק כשאין admins במערכת)
-export const promoteSelfToAdmin = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const allUsers = await ctx.db.query("users").collect();
-    const hasAdmin = allUsers.some((u) => u.role === "admin");
-    if (hasAdmin) {
-      throw new Error("Admin already exists. Contact existing admin for access.");
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      const now = Date.now();
-      await ctx.db.insert("users", {
-        clerkId: identity.subject,
-        email: identity.email ?? "",
-        name: identity.name,
-        imageUrl: identity.pictureUrl,
-        role: "admin",
-        createdAt: now,
-        updatedAt: now,
-      });
-      return { success: true };
-    }
-
-    await ctx.db.patch(user._id, { role: "admin", updatedAt: Date.now() });
-    return { success: true };
-  },
-});
-
-// קידום ראשוני ל-admin מה-CLI (ללא auth - רק כשאין admins)
+// קידום ראשוני ל-admin מתוך פעולה פנימית ומבוקרת בלבד.
 export const seedAdmin = internalMutation({
   args: { email: v.string() },
   handler: async (ctx, args) => {
