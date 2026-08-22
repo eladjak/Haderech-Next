@@ -215,7 +215,7 @@ export default function AboutPage() {
 
               <motion.p
                 variants={fadeIn}
-                className="mx-auto max-w-2xl text-lg leading-relaxed text-blue-500/70 dark:text-zinc-400"
+                className="mx-auto max-w-2xl text-lg leading-relaxed text-blue-500/75 dark:text-zinc-400"
               >
                 אומנות הקשר הוקמה מתוך אמונה אחת פשוטה: כל אחד ואחת ראויים
                 לאהבה אמיתית. "הדרך" היא הפלטפורמה שהפכה 15 שנות ניסיון
@@ -255,7 +255,7 @@ export default function AboutPage() {
 
                 <motion.div
                   variants={stagger}
-                  className="space-y-4 text-blue-500/70 dark:text-zinc-400"
+                  className="space-y-4 text-blue-500/75 dark:text-zinc-400"
                 >
                   <motion.p variants={fadeIn} className="leading-relaxed">
                     אומנות הקשר נוסדה לפני למעלה מ-15 שנה על ידי מטפלים
@@ -311,7 +311,7 @@ export default function AboutPage() {
                         <div className="text-sm font-semibold text-blue-500 dark:text-zinc-200">
                           צוות אומנות הקשר
                         </div>
-                        <div className="text-xs text-blue-500/60 dark:text-zinc-500">
+                        <div className="text-xs text-blue-500/75 dark:text-zinc-500">
                           מייסדי הפלטפורמה
                         </div>
                       </div>
@@ -343,7 +343,7 @@ export default function AboutPage() {
                   <div className="mb-1 text-3xl font-extrabold text-blue-500 dark:text-white md:text-4xl">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-blue-500/60 dark:text-zinc-400">
+                  <div className="text-sm text-blue-500/75 dark:text-zinc-400">
                     {stat.label}
                   </div>
                 </motion.div>
@@ -376,7 +376,7 @@ export default function AboutPage() {
               </motion.h2>
               <motion.p
                 variants={fadeIn}
-                className="text-blue-500/70 dark:text-zinc-400"
+                className="text-blue-500/75 dark:text-zinc-400"
               >
                 תהליך מובנה, מדורג ומוכח שמוביל מהיכן שאתה עכשיו עד לזוגיות
                 אמיתית. כל שלב בונה על הקודם.
@@ -420,7 +420,7 @@ export default function AboutPage() {
                   <h3 className={`mb-2 text-xl font-bold ${phase.text}`}>
                     {phase.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-blue-500/65 dark:text-zinc-400">
+                  <p className="text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
                     {phase.desc}
                   </p>
 
@@ -460,7 +460,7 @@ export default function AboutPage() {
               </motion.h2>
               <motion.p
                 variants={fadeIn}
-                className="text-blue-500/70 dark:text-zinc-400"
+                className="text-blue-500/75 dark:text-zinc-400"
               >
                 שלושה עמודי יסוד שעומדים בבסיס כל מה שאנחנו עושים
               </motion.p>
@@ -485,7 +485,7 @@ export default function AboutPage() {
                   >
                     {val.title}
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+                  <p className="mt-3 text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
                     {val.desc}
                   </p>
                 </motion.div>
@@ -517,7 +517,7 @@ export default function AboutPage() {
               </motion.h2>
               <motion.p
                 variants={fadeIn}
-                className="text-blue-500/70 dark:text-zinc-400"
+                className="text-blue-500/75 dark:text-zinc-400"
               >
                 לא קורס סטנדרטי – חוויה מלאה עם ליווי, תרגול ותמיכה
               </motion.p>
@@ -543,7 +543,7 @@ export default function AboutPage() {
                     <h3 className="mb-1.5 font-bold text-blue-500 dark:text-white">
                       {item.title}
                     </h3>
-                    <p className="text-sm leading-relaxed text-blue-500/65 dark:text-zinc-400">
+                    <p className="text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
                       {item.desc}
                     </p>
                   </div>

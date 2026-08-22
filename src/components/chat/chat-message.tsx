@@ -117,7 +117,7 @@ function CopyButton({ text }: { text: string }) {
       onClick={handleCopy}
       aria-label={copied ? "הועתק!" : "העתק הודעה"}
       title={copied ? "הועתק!" : "העתק"}
-      className="flex h-6 w-6 items-center justify-center rounded-lg text-blue-500/30 transition-all hover:bg-blue-50 hover:text-blue-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+      className="flex h-6 w-6 items-center justify-center rounded-lg text-blue-500/75 transition-all hover:bg-blue-50 hover:text-blue-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
     >
       {copied ? (
         <svg className="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
@@ -178,7 +178,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       >
         {/* Coach name label */}
         {!isUser && (
-          <span className="px-1 text-xs font-medium text-blue-500/60 dark:text-zinc-400">
+          <span className="px-1 text-xs font-medium text-blue-500/75 dark:text-zinc-400">
             המאמן שלי
           </span>
         )}
@@ -201,7 +201,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
         {/* Timestamp + copy */}
         <div className={`flex items-center gap-1.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-          <span className="text-xs text-blue-500/40 dark:text-zinc-500">
+          <span className="text-xs text-blue-500/75 dark:text-zinc-500">
             {formatTime(message.createdAt)}
           </span>
           {!isUser && (
@@ -229,7 +229,7 @@ export function TypingIndicator() {
         </div>
       </div>
       <div className="flex flex-col gap-1 items-start">
-        <span className="px-1 text-xs font-medium text-blue-500/60 dark:text-zinc-400">
+        <span className="px-1 text-xs font-medium text-blue-500/75 dark:text-zinc-400">
           המאמן שלי
         </span>
         <div className="rounded-2xl rounded-tr-sm border border-blue-100/30 bg-white px-5 py-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">

@@ -34,7 +34,7 @@ export default function NotFound() {
           הדף לא נמצא
         </h1>
 
-        <p className="mb-10 max-w-md text-lg leading-relaxed text-blue-500/60 dark:text-zinc-400">
+        <p className="mb-10 max-w-md text-lg leading-relaxed text-blue-500/75 dark:text-zinc-400">
           הדף שחיפשת לא קיים או שהוזז למקום אחר
         </p>
 

@@ -31,7 +31,7 @@ export function ContinueLearning() {
           </svg>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-blue-500/60 dark:text-zinc-400">
+          <p className="text-sm text-blue-500/75 dark:text-zinc-400">
             {data.courseName}
           </p>
           <p className="font-semibold text-blue-500 dark:text-white">

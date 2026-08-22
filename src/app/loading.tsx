@@ -14,7 +14,7 @@ export default function Loading() {
           הדרך
         </p>
 
-        <p className="text-sm text-blue-500/40 dark:text-zinc-500">
+        <p className="text-sm text-blue-500/75 dark:text-zinc-500">
           טוען...
         </p>
       </div>

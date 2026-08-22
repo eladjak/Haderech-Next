@@ -64,7 +64,7 @@ function FeatureValueCell({ value }: { value: FeatureValue }) {
   if (typeof value === "object" && "value" in value) {
     return (
       <span className="text-center text-xs font-medium text-blue-500 dark:text-zinc-300">
-        {value.value} <span className="text-blue-500/50 dark:text-zinc-500">{value.unit}</span>
+        {value.value} <span className="text-blue-500/75 dark:text-zinc-500">{value.unit}</span>
       </span>
     );
   }
@@ -174,7 +174,7 @@ function MainPricingCard({
         <h3 className="mb-1 text-xl font-bold text-blue-500 dark:text-white">
           {tier.name}
         </h3>
-        <p className="text-sm text-blue-500/60 dark:text-zinc-400">
+        <p className="text-sm text-blue-500/75 dark:text-zinc-400">
           {tier.subtitle}
         </p>
       </div>
@@ -186,7 +186,7 @@ function MainPricingCard({
             <span className="text-4xl font-extrabold text-blue-500 dark:text-white">
               חינם
             </span>
-            <span className="mb-1 text-sm text-blue-500/50 dark:text-zinc-500">
+            <span className="mb-1 text-sm text-blue-500/75 dark:text-zinc-500">
               לתמיד
             </span>
           </div>
@@ -196,13 +196,13 @@ function MainPricingCard({
               <span className="text-4xl font-extrabold text-blue-500 dark:text-white">
                 {formatPrice(price)}
               </span>
-              <span className="mb-1.5 text-sm text-blue-500/50 dark:text-zinc-500">
+              <span className="mb-1.5 text-sm text-blue-500/75 dark:text-zinc-500">
                 לחודש
               </span>
             </div>
             {isAnnual && tier.priceAnnual && (
               <div className="mt-1 flex items-center gap-2">
-                <span className="text-xs text-blue-500/50 dark:text-zinc-500">
+                <span className="text-xs text-blue-500/75 dark:text-zinc-500">
                   ₪{tier.priceAnnual} לשנה
                 </span>
                 {tier.annualSavingsPercent && (
@@ -213,7 +213,7 @@ function MainPricingCard({
               </div>
             )}
             {isAnnual && savings && savings > 0 && (
-              <p className="mt-0.5 text-xs text-blue-500/40 dark:text-zinc-500">
+              <p className="mt-0.5 text-xs text-blue-500/75 dark:text-zinc-500">
                 חוסך ₪{savings} לשנה לעומת חיסכון חודשי
               </p>
             )}
@@ -279,7 +279,7 @@ function MainPricingCard({
           </Link>
         )}
         {tier.upgradeNudge && (
-          <p className="mt-3 text-center text-xs text-blue-500/40 dark:text-zinc-500">
+          <p className="mt-3 text-center text-xs text-blue-500/75 dark:text-zinc-500">
             {tier.upgradeNudge.substring(0, 80)}
             {tier.upgradeNudge.length > 80 ? "..." : ""}
           </p>
@@ -332,7 +332,7 @@ function SecondaryPricingCard({
               </span>
             )}
           </div>
-          <p className="text-xs text-blue-500/60 dark:text-zinc-400">
+          <p className="text-xs text-blue-500/75 dark:text-zinc-400">
             {tier.subtitle}
           </p>
         </div>
@@ -340,7 +340,7 @@ function SecondaryPricingCard({
           <div className="text-2xl font-extrabold text-blue-500 dark:text-white">
             {formatPrice(price)}
           </div>
-          <div className="text-xs text-blue-500/50 dark:text-zinc-500">
+          <div className="text-xs text-blue-500/75 dark:text-zinc-500">
             {tier.billingCycles.includes("one_time") ? "תשלום חד-פעמי" : "לחודש"}
           </div>
           {isAnnual && tier.annualSavingsPercent && (
@@ -351,7 +351,7 @@ function SecondaryPricingCard({
         </div>
       </div>
 
-      <p className="mb-4 text-sm text-blue-500/60 dark:text-zinc-400">
+      <p className="mb-4 text-sm text-blue-500/75 dark:text-zinc-400">
         {tier.description}
       </p>
 
@@ -396,7 +396,7 @@ function ComparisonTable({ isAnnual }: { isAnnual: boolean }) {
         {/* Header */}
         <thead>
           <tr className="border-b border-brand-100/30 dark:border-blue-100/10">
-            <th className="sticky right-0 bg-brand-50/80 py-4 pr-6 pl-4 text-right text-xs font-semibold uppercase tracking-wider text-blue-500/50 backdrop-blur-sm dark:bg-blue-50/5 dark:text-zinc-500">
+            <th className="sticky right-0 bg-brand-50/80 py-4 pr-6 pl-4 text-right text-xs font-semibold uppercase tracking-wider text-blue-500/75 backdrop-blur-sm dark:bg-blue-50/5 dark:text-zinc-500">
               פיצ׳ר
             </th>
             {mainTiers.map((tier) => (
@@ -411,7 +411,7 @@ function ComparisonTable({ isAnnual }: { isAnnual: boolean }) {
                 <div className="mb-1 font-bold text-blue-500 dark:text-white">
                   {tier.name}
                 </div>
-                <div className="text-xs font-normal text-blue-500/50 dark:text-zinc-500">
+                <div className="text-xs font-normal text-blue-500/75 dark:text-zinc-500">
                   {tier.priceMonthly === null
                     ? "חינם"
                     : `${formatPrice(isAnnual ? tier.effectiveMonthlyOnAnnual : tier.priceMonthly)}/חודש`}
@@ -438,7 +438,7 @@ function ComparisonTable({ isAnnual }: { isAnnual: boolean }) {
               >
                 <td
                   colSpan={mainTiers.length + 1}
-                  className="py-2 pr-6 pl-4 text-xs font-semibold uppercase tracking-wider text-blue-500/40 dark:text-zinc-500"
+                  className="py-2 pr-6 pl-4 text-xs font-semibold uppercase tracking-wider text-blue-500/75 dark:text-zinc-500"
                 >
                   {group.categoryName}
                 </td>
@@ -452,7 +452,7 @@ function ComparisonTable({ isAnnual }: { isAnnual: boolean }) {
                     <div className="font-medium text-blue-500 dark:text-zinc-200">
                       {row.feature.name}
                     </div>
-                    <div className="text-xs text-blue-500/40 dark:text-zinc-500">
+                    <div className="text-xs text-blue-500/75 dark:text-zinc-500">
                       {row.feature.description}
                     </div>
                   </td>
@@ -579,12 +579,12 @@ function AddOnCard({ addOn }: { addOn: AddOn }) {
               <span className="text-base font-bold text-blue-500 dark:text-white">
                 ₪{addOn.price}
               </span>
-              <span className="text-xs text-blue-500/40 dark:text-zinc-500">
+              <span className="text-xs text-blue-500/75 dark:text-zinc-500">
                 {addOn.billingCycle === "monthly" ? "/חודש" : " חד-פעמי"}
               </span>
             </div>
           </div>
-          <p className="mt-1 text-xs text-blue-500/60 dark:text-zinc-400">
+          <p className="mt-1 text-xs text-blue-500/75 dark:text-zinc-400">
             {addOn.description}
           </p>
         </div>
@@ -592,7 +592,7 @@ function AddOnCard({ addOn }: { addOn: AddOn }) {
 
       {addOn.includedInTiers.length > 0 && (
         <div className="mt-auto pt-3">
-          <p className="text-xs text-blue-500/40 dark:text-zinc-500">
+          <p className="text-xs text-blue-500/75 dark:text-zinc-500">
             כלול בתוכניות:{" "}
             {addOn.includedInTiers
               .map((id) => includedLabels[id])
@@ -695,7 +695,7 @@ function FAQAccordion() {
                 className="overflow-hidden"
               >
                 <div className="border-t border-brand-100/20 px-5 py-4 dark:border-blue-100/5">
-                  <p className="text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+                  <p className="text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
                     {item.a}
                   </p>
                 </div>
@@ -808,7 +808,7 @@ export default function PricingPage() {
 
               <motion.p
                 variants={fadeIn}
-                className="mb-8 text-lg text-blue-500/60 dark:text-zinc-400"
+                className="mb-8 text-lg text-blue-500/75 dark:text-zinc-400"
               >
                 התחל בחינם, שדרג כשתרגיש מוכן. ביטול בכל עת.
               </motion.p>
@@ -837,7 +837,7 @@ export default function PricingPage() {
                     className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                       !isAnnual
                         ? "bg-blue-500 text-white shadow-sm dark:bg-blue-600"
-                        : "text-blue-500/60 hover:text-blue-500 dark:text-zinc-400 dark:hover:text-white"
+                        : "text-blue-500/75 hover:text-blue-500 dark:text-zinc-400 dark:hover:text-white"
                     }`}
                     aria-pressed={!isAnnual}
                   >
@@ -849,7 +849,7 @@ export default function PricingPage() {
                     className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                       isAnnual
                         ? "bg-blue-500 text-white shadow-sm dark:bg-blue-600"
-                        : "text-blue-500/60 hover:text-blue-500 dark:text-zinc-400 dark:hover:text-white"
+                        : "text-blue-500/75 hover:text-blue-500 dark:text-zinc-400 dark:hover:text-white"
                     }`}
                     aria-pressed={isAnnual}
                   >
@@ -904,7 +904,7 @@ export default function PricingPage() {
 
             {/* Coaching anchor */}
             <motion.p
-              className="mx-auto mt-8 max-w-lg text-center text-sm text-blue-500/40 dark:text-zinc-500"
+              className="mx-auto mt-8 max-w-lg text-center text-sm text-blue-500/75 dark:text-zinc-500"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -935,7 +935,7 @@ export default function PricingPage() {
               <h2 className="text-xl font-bold text-blue-500 dark:text-white">
                 אפשרויות נוספות
               </h2>
-              <p className="mt-2 text-sm text-blue-500/50 dark:text-zinc-500">
+              <p className="mt-2 text-sm text-blue-500/75 dark:text-zinc-500">
                 {PRICING_PAGE_CONTENT.courseCtaText}
               </p>
             </motion.div>
@@ -1009,7 +1009,7 @@ export default function PricingPage() {
               <h2 className="text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
                 מה כלול בכל תוכנית?
               </h2>
-              <p className="mt-3 text-blue-500/60 dark:text-zinc-400">
+              <p className="mt-3 text-blue-500/75 dark:text-zinc-400">
                 השוואה מפורטת בין התוכניות העיקריות
               </p>
             </motion.div>
@@ -1043,7 +1043,7 @@ export default function PricingPage() {
               <h2 className="text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
                 שדרג בצורה גמישה
               </h2>
-              <p className="mt-3 text-blue-500/60 dark:text-zinc-400">
+              <p className="mt-3 text-blue-500/75 dark:text-zinc-400">
                 הוסף יכולות ספציפיות לכל תוכנית שתבחר
               </p>
             </motion.div>
@@ -1107,7 +1107,7 @@ export default function PricingPage() {
                     <div className="text-3xl font-extrabold text-blue-500 dark:text-white">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-blue-500/50 dark:text-zinc-500">
+                    <div className="text-sm text-blue-500/75 dark:text-zinc-500">
                       {stat.label}
                     </div>
                   </motion.div>
@@ -1189,7 +1189,7 @@ export default function PricingPage() {
 
               <motion.p
                 variants={fadeIn}
-                className="mt-8 text-center text-sm text-blue-500/50 dark:text-zinc-500"
+                className="mt-8 text-center text-sm text-blue-500/75 dark:text-zinc-500"
               >
                 יש עוד שאלות?{" "}
                 <Link

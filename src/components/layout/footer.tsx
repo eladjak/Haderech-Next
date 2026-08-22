@@ -35,10 +35,10 @@ export function Footer() {
                 הדרך
               </span>
             </Link>
-            <p className="mt-1.5 text-xs font-medium text-blue-500/40 dark:text-zinc-500">
+            <p className="mt-1.5 text-xs font-medium text-blue-500/75 dark:text-zinc-500">
               פרויקט של אומנות הקשר
             </p>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-blue-500/50 dark:text-zinc-400">
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
               תוכנית &quot;הדרך&quot; של אומנות הקשר.
               <br />
               12 שבועות שישנו לך את חיי הזוגיות.
@@ -46,7 +46,7 @@ export function Footer() {
 
             {/* Newsletter */}
             <div className="mt-6">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-blue-500/40 dark:text-zinc-500">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-blue-500/75 dark:text-zinc-500">
                 הישארו מעודכנים
               </p>
               {subscribed ? (
@@ -66,7 +66,7 @@ export function Footer() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="כתובת אימייל"
                     required
-                    className="h-9 flex-1 rounded-full border border-brand-200/50 bg-white/70 px-4 text-sm text-blue-500 placeholder:text-blue-500/30 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-blue-100/20 dark:bg-blue-50/10 dark:text-zinc-300 dark:placeholder:text-zinc-600"
+                    className="h-9 flex-1 rounded-full border border-brand-200/50 bg-white/70 px-4 text-sm text-blue-500 placeholder:text-blue-500/75 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/20 dark:border-blue-100/20 dark:bg-blue-50/10 dark:text-zinc-300 dark:placeholder:text-zinc-600"
                     dir="ltr"
                   />
                   <button
@@ -82,7 +82,7 @@ export function Footer() {
 
           {/* Navigation Links */}
           <nav className="flex flex-col gap-2.5" aria-label="ניווט תחתון">
-            <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-500/40 dark:text-zinc-500">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-500/75 dark:text-zinc-500">
               תוכנית
             </span>
             <FooterLink href="/courses">הקורסים</FooterLink>
@@ -95,7 +95,7 @@ export function Footer() {
 
           {/* Resources */}
           <nav className="flex flex-col gap-2.5" aria-label="משאבים">
-            <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-500/40 dark:text-zinc-500">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-500/75 dark:text-zinc-500">
               משאבים
             </span>
             <FooterLink href="/chat">צ&apos;אט AI</FooterLink>
@@ -108,7 +108,7 @@ export function Footer() {
 
           {/* Social */}
           <div className="flex flex-col gap-2.5">
-            <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-500/40 dark:text-zinc-500">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-500/75 dark:text-zinc-500">
               עקבו אחרינו
             </span>
             <SocialLink
@@ -151,10 +151,10 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-center gap-3 border-t border-brand-100/20 pt-6 dark:border-blue-100/10 sm:flex-row sm:justify-between">
-          <p className="text-xs text-blue-500/40 dark:text-zinc-500">
+          <p className="text-xs text-blue-500/75 dark:text-zinc-500">
             &copy; {currentYear} הדרך - אומנות הקשר. כל הזכויות שמורות.
           </p>
-          <p className="flex items-center gap-1.5 text-xs text-blue-500/30 dark:text-zinc-600">
+          <p className="flex items-center gap-1.5 text-xs text-blue-500/75 dark:text-zinc-600">
             נבנה עם
             <span className="text-brand-500" aria-label="אהבה">
               &#9829;
@@ -177,7 +177,7 @@ function FooterLink({
   return (
     <Link
       href={href}
-      className="text-sm text-blue-500/50 transition-colors hover:text-brand-500 dark:text-zinc-400 dark:hover:text-brand-400"
+      className="text-sm text-blue-500/75 transition-colors hover:text-brand-500 dark:text-zinc-400 dark:hover:text-brand-400"
     >
       {children}
     </Link>
@@ -198,7 +198,7 @@ function SocialLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2.5 text-sm text-blue-500/50 transition-colors hover:text-brand-500 dark:text-zinc-400 dark:hover:text-brand-400"
+      className="inline-flex items-center gap-2.5 text-sm text-blue-500/75 transition-colors hover:text-brand-500 dark:text-zinc-400 dark:hover:text-brand-400"
       aria-label={label}
     >
       <svg

@@ -65,11 +65,11 @@ export default function CoursesPage() {
           <h1 className="mb-3 text-3xl font-black text-blue-500 dark:text-white md:text-4xl lg:text-5xl">
             הקורסים שלנו
           </h1>
-          <p className="mx-auto max-w-lg text-blue-500/60 dark:text-zinc-400">
+          <p className="mx-auto max-w-lg text-blue-500/75 dark:text-zinc-400">
             קורסים מקצועיים בתחום התקשורת הזוגית והאישית - לומדים, מתאמנים, ומשנים
           </p>
           {filteredCourses !== undefined && filteredCourses.length > 0 && (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-200/50 bg-white/80 px-4 py-1.5 text-sm font-medium text-blue-500/70 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-400">
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-200/50 bg-white/80 px-4 py-1.5 text-sm font-medium text-blue-500/75 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-400">
               <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342" />
               </svg>
@@ -121,7 +121,7 @@ export default function CoursesPage() {
               className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                 selectedCategory === "all" && selectedLevel === "all"
                   ? "bg-brand-500 text-white shadow-sm shadow-brand-500/20"
-                  : "border border-brand-100/50 bg-white text-blue-500/70 hover:border-brand-200 hover:bg-brand-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
+                  : "border border-brand-100/50 bg-white text-blue-500/75 hover:border-brand-200 hover:bg-brand-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
               }`}
             >
               הכל
@@ -136,7 +136,7 @@ export default function CoursesPage() {
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                   selectedCategory === cat
                     ? "bg-brand-500 text-white shadow-sm shadow-brand-500/20"
-                    : "border border-brand-100/50 bg-white text-blue-500/70 hover:border-brand-200 hover:bg-brand-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
+                    : "border border-brand-100/50 bg-white text-blue-500/75 hover:border-brand-200 hover:bg-brand-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
                 }`}
               >
                 {cat}
@@ -157,7 +157,7 @@ export default function CoursesPage() {
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                   selectedLevel === key
                     ? "bg-blue-500 text-white shadow-sm shadow-blue-500/20"
-                    : "border border-brand-100/50 bg-white text-blue-500/70 hover:border-blue-100 hover:bg-blue-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
+                    : "border border-brand-100/50 bg-white text-blue-500/75 hover:border-blue-100 hover:bg-blue-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
                 }`}
               >
                 {label}
@@ -168,7 +168,7 @@ export default function CoursesPage() {
 
         {/* Filtered result count */}
         {filteredCourses !== undefined && filteredCourses.length > 0 && (searchQuery || selectedCategory !== "all" || selectedLevel !== "all") && (
-          <p className="mb-4 text-sm text-blue-500/50 dark:text-zinc-500">
+          <p className="mb-4 text-sm text-blue-500/75 dark:text-zinc-500">
             {filteredCourses.length} תוצאות
           </p>
         )}

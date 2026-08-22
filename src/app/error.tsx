@@ -52,7 +52,7 @@ export default function Error({
           משהו השתבש
         </h1>
 
-        <p className="mb-10 max-w-md text-lg leading-relaxed text-blue-500/60 dark:text-zinc-400">
+        <p className="mb-10 max-w-md text-lg leading-relaxed text-blue-500/75 dark:text-zinc-400">
           אירעה שגיאה בלתי צפויה. אפשר לנסות לרענן את הדף או לחזור לדף הבית.
         </p>
 
