@@ -84,7 +84,7 @@ const PHASES = [
     num: 5,
     title: "אינטימיות",
     subtitle: "Intimacy",
-    desc: "פגיעות בטוחה, קרבה רגשית אמיתית, 36 השאלות להתאהבות.",
+    desc: "קרבה מבחירה, פרטיות ושאלות מדורגות שאפשר לשנות, לדלג עליהן או לעצור.",
     color: "from-purple-400 to-purple-600",
     bg: "bg-purple-50 dark:bg-purple-50/10",
     border: "border-purple-100 dark:border-purple-100/20",
@@ -127,22 +127,22 @@ const VALUES = [
 ];
 
 const STATS = [
-  { value: "461", label: "זוגות מצאו אהבה", icon: "❤️" },
-  { value: "73", label: "שיעורים מקצועיים", icon: "🎬" },
-  { value: "15+", label: "שנות ניסיון", icon: "⭐" },
-  { value: "6", label: "שלבים מוכחים", icon: "🗺️" },
+  { value: "12", label: "שבועות בתוכנית", icon: "🗓️" },
+  { value: "75", label: "שיעורי קורס", icon: "🎬" },
+  { value: "8", label: "מסמכי תרגול", icon: "📄" },
+  { value: "6", label: "שלבי למידה", icon: "🗺️" },
 ];
 
 const DIFFERENTIATORS = [
   {
     icon: "🤖",
-    title: "AI מאמן אישי 24/7",
-    desc: "צ'אט עם AI שמלווה אותך לאורך כל הדרך – עונה על שאלות, מנחה ומעודד בכל שעה.",
+    title: "כלי AI לתרגול",
+    desc: "צ'אט אוטומטי המבוסס על תכני הקורס. הוא עלול לטעות, אינו איש מקצוע, ועשוי להשתמש ב-Gemini או Anthropic.",
   },
   {
     icon: "🎭",
-    title: "סימולטור דייטים מתקדם",
-    desc: "התאמן על שיחות ודייטים בסביבה בטוחה לפני שהולכים לעולם האמיתי.",
+    title: "תרגול שיחה עם דמות AI",
+    desc: "תרגול בדיוני של ניסוחים ומשוב אוטומטי מוגבל. הוא אינו סביבה נטולת סיכון ואינו מנבא תגובה, משיכה או הסכמה בעולם האמיתי.",
   },
   {
     icon: "👥",
@@ -151,8 +151,8 @@ const DIFFERENTIATORS = [
   },
   {
     icon: "📊",
-    title: "שיטה מבוססת מחקר",
-    desc: "15 שנות עבודה עם מאות זוגות + ממצאים מהפסיכולוגיה החיובית ומחקרי קשרים.",
+    title: "שקיפות לגבי מקורות",
+    desc: "תוכן לימודי ותרגול מעשי, עם הבחנה בין מקורות מתועדים, פרשנות מקצועית והצעות לתרגול.",
   },
 ];
 
@@ -163,7 +163,7 @@ export default function AboutPage() {
     <div className="min-h-dvh bg-[var(--background)]">
       <Header />
 
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         {/* ── Hero ──────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden pb-24 pt-20 md:pb-32 md:pt-28">
           {/* Background image */}
@@ -175,6 +175,7 @@ export default function AboutPage() {
               src="/images/hero.jpg"
               alt=""
               fill
+              sizes="100vw"
               className="object-cover opacity-10 dark:opacity-7"
               priority
             />
@@ -218,8 +219,8 @@ export default function AboutPage() {
                 className="mx-auto max-w-2xl text-lg leading-relaxed text-blue-500/70 dark:text-zinc-400"
               >
                 אומנות הקשר הוקמה מתוך אמונה אחת פשוטה: כל אחד ואחת ראויים
-                לאהבה אמיתית. "הדרך" היא הפלטפורמה שהפכה 15 שנות ניסיון
-                לתהליך מובנה ועוצמתי שעובד.
+                ליחסים שיש בהם כבוד, בחירה ובטיחות. &quot;הדרך&quot; מרכזת חומרי
+                למידה ותרגול בתהליך מובנה — בלי להבטיח תוצאה אישית.
               </motion.p>
             </motion.div>
           </div>
@@ -246,10 +247,10 @@ export default function AboutPage() {
                   variants={fadeIn}
                   className="mb-5 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
                 >
-                  15 שנה. אלפי שיחות.
+                  תוכן. תרגול. בחירה.
                   <br />
                   <span className="bg-gradient-to-l from-brand-500 to-accent-400 bg-clip-text text-transparent">
-                    461 זוגות.
+                    בקצב שמתאים לכם.
                   </span>
                 </motion.h2>
 
@@ -258,19 +259,19 @@ export default function AboutPage() {
                   className="space-y-4 text-blue-500/70 dark:text-zinc-400"
                 >
                   <motion.p variants={fadeIn} className="leading-relaxed">
-                    אומנות הקשר נוסדה לפני למעלה מ-15 שנה על ידי מטפלים
-                    ומאמנים שראו שוב ושוב אנשים מדהימים שנתקעים בדרך לזוגיות.
-                    לא מחוסר רצון – אלא מחוסר כלים.
+                    אומנות הקשר נבנתה כדי לארגן רעיונות, תרגילים ושאלות
+                    להתבוננות סביב היכרות, תקשורת וקשרים. היא אינה טיפול,
+                    אבחון או הבטחה למצוא זוגיות.
                   </motion.p>
                   <motion.p variants={fadeIn} className="leading-relaxed">
-                    מאז ליווינו מאות לקוחות בהתאמה אישית, ראינו מה עובד ומה
-                    לא, מה אנשים באמת צריכים ואיפה הם נתקעים. "הדרך" היא
-                    המיטב של כל הידע הזה – ארוז בתהליך ברור, נגיש, ועם
-                    ליווי של AI חכם.
+                    &quot;הדרך&quot; אורזת את התוכן בתוכנית של 12 שבועות, עם שיעורים,
+                    מסמכי תרגול וכלי AI. כלי ה-AI מציעים תרגול ומשוב, אך הם
+                    עלולים לטעות ואינם מחליפים שיקול דעת או איש מקצוע.
                   </motion.p>
                   <motion.p variants={fadeIn} className="leading-relaxed">
-                    הגישה שלנו אישית ואותנטית. אנחנו לא מציעים "שיטות פיק-אפ"
-                    או טריקים – אלא עבודה אמיתית שמביאה תוצאות אמיתיות.
+                    הגישה אינה מבוססת על &quot;שיטות פיק-אפ&quot; או לחץ על אדם אחר,
+                    אלא על התבוננות, תקשורת, הסכמה וכבוד לגבולות. כל תרגיל
+                    ניתן לעצירה או לדילוג.
                   </motion.p>
                 </motion.div>
               </motion.div>
@@ -372,14 +373,14 @@ export default function AboutPage() {
                 variants={fadeIn}
                 className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
               >
-                6 שלבים לזוגיות שאתה ראוי לה
+                6 שלבים ללמידה ולתרגול
               </motion.h2>
               <motion.p
                 variants={fadeIn}
                 className="text-blue-500/70 dark:text-zinc-400"
               >
-                תהליך מובנה, מדורג ומוכח שמוביל מהיכן שאתה עכשיו עד לזוגיות
-                אמיתית. כל שלב בונה על הקודם.
+                תהליך מובנה ומדורג שעובר מעבודה פנימית דרך תקשורת והיכרות
+                ועד אינטימיות ומחויבות. הוא מציע כלים — לא מסלול מובטח לזוגיות.
               </motion.p>
             </motion.div>
 
@@ -513,7 +514,7 @@ export default function AboutPage() {
                 variants={fadeIn}
                 className="mb-3 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl"
               >
-                מה הופך את "הדרך" לשונה
+                מה הופך את &quot;הדרך&quot; לשונה
               </motion.h2>
               <motion.p
                 variants={fadeIn}
@@ -579,8 +580,8 @@ export default function AboutPage() {
                   מוכנים להתחיל?
                 </h2>
                 <p className="mx-auto mb-8 max-w-lg text-lg text-white/80">
-                  הצטרפו ל-461 זוגות שכבר מצאו אהבה אמיתית. המסע שלכם מתחיל
-                  עכשיו.
+                  אפשר להכיר את מבנה התוכנית ולבחור אם הכלים מתאימים לכם.
+                  פתיחת חשבון אינה מבטיחה תוצאה או גישה לתוכן בתשלום.
                 </p>
                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link

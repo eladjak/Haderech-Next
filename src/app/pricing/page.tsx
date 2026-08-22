@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAction } from "convex/react";
 import { api } from "@/../convex/_generated/api";
@@ -14,6 +15,7 @@ import {
   ADD_ONS,
   PRICING_PAGE_CONTENT,
   SOCIAL_PROOF,
+  PAID_PURCHASES_AVAILABLE,
   formatPrice,
   calculateAnnualSavings,
   generateComparisonMatrix,
@@ -117,7 +119,7 @@ function MainPricingCard({
       "ספריית מאמרים",
     ],
     basic: [
-      "כל 73 השיעורים",
+      "כל 75 השיעורים",
       "100 הודעות AI בחודש",
       "10 תרחישי סימולטור",
       "ספרייה מלאה",
@@ -125,7 +127,7 @@ function MainPricingCard({
       "תעודת סיום",
     ],
     premium: [
-      "כל 73 השיעורים",
+      "כל 75 השיעורים",
       "AI ללא הגבלה + זיכרון מלא",
       "כל תרחישי הסימולטור",
       "סימולטור קולי + וידאו",
@@ -616,7 +618,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "האם אפשר לבטל בכל עת?",
-    a: "כן, ביטול בכל עת ובלי שאלות. ניתן לבטל ישירות מהחשבון שלך. אם ביטלת במהלך תקופת חיוב, תמשיך ליהנות מהשירות עד סוף התקופה ששילמת עליה. אנחנו מאמינים ביושרה מלאה.",
+    a: "תנאי הביטול והמשך הגישה נקבעים לפי המסלול והתנאים שמוצגים לפני התשלום. עד שקיים מסלול ביטול עצמי מאומת, יש לפנות לתמיכה ולשמור את אישור הפנייה. בקשת מחיקת חשבון אינה מבטלת חיוב אוטומטית.",
   },
   {
     q: "מה ההבדל בין מנוי חודשי לשנתי?",
@@ -624,15 +626,15 @@ const FAQ_ITEMS = [
   },
   {
     q: "האם יש ליווי אחד על אחד?",
-    a: "ליווי אישי 1-על-1 עם אלעד הוא שירות נפרד שעולה אלפי שקלים ואינו חלק מהתוכניות. תוכנית VIP (מוביל) כוללת מפגשי קואצ׳ינג קבוצתיים חיים עם אלעד - 2 פעמים בחודש. זו הדרך הטובה ביותר לקבל ליווי ישיר מאלעד במחיר הרבה יותר נגיש.",
+    a: "אין כרגע הצעה מאושרת לליווי אישי או קבוצתי דרך עמוד זה. לפני תיאום יש לקבל בכתב את זהות המנחה, ההכשרה, התכולה, המחיר, הזמינות ותנאי הפרטיות.",
   },
   {
     q: "מה קורה אחרי שמסיימים את הקורס?",
-    a: "הקורס זמין לצפייה חוזרת כל עוד המנוי שלך פעיל. רכישת הקורס החד-פעמית נותנת לך גישה לצמיתות. בנוסף, אנחנו מוסיפים תכנים ושיעורים חדשים באופן שוטף, כך שתמיד תהיה לך חומר חדש לצפות.",
+    a: "משך הגישה נקבע לפי המסלול ותנאי הרכישה שמוצגים בסיכום ההזמנה. אין להניח שרכישה מעניקה גישה לצמיתות או שתכנים חדשים יתווספו, אלא אם הדבר נכתב במפורש לפני התשלום.",
   },
   {
     q: "האם אפשר לשדרג או לשנמך תוכנית?",
-    a: "בהחלט. ניתן לשדרג בכל עת - ההפרש יחויב מיד. שנמוך אפשרי בסוף תקופת החיוב הנוכחית. לא צריך ליצור קשר עם תמיכה - הכל נעשה דרך הגדרות החשבון שלך.",
+    a: "אפשרות שדרוג, שנמוך וההשפעה על החיוב תלויות במסלול ובמנגנון החשבון הפעיל. לפני שינוי יש לבדוק את הסיכום שיוצג; אם אין סיכום ברור או אישור כתוב, פנו לתמיכה ואל תניחו שהשינוי בוצע.",
   },
   {
     q: "איך עובד הסימולטור?",
@@ -644,11 +646,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "איך עובד התשלום?",
-    a: "התשלום מתבצע באופן מאובטח דרך Stripe, ספק התשלומים המוביל בעולם. אנחנו תומכים בכרטיסי אשראי ישראליים ובינלאומיים. כל התשלומים בשקלים (ILS). לאחר הרכישה תקבל חשבונית במייל.",
+    a: "התשלום אמור לעבור דרך עמוד מאובטח של ספק הסליקה שמוצג בזמן הרכישה. המחיר, המטבע, אמצעי התשלום, המסמכים ותקופת הגישה הקובעים הם אלה שיופיעו בסיכום ההזמנה לפני האישור.",
   },
   {
     q: "האם התשלום מאובטח?",
-    a: "בהחלט. אנחנו משתמשים ב-Stripe, שמעבד תשלומים עבור חברות כמו Google, Amazon ו-Shopify. פרטי כרטיס האשראי שלך לא נשמרים במערכת שלנו כלל - הכל מוצפן ומעובד ישירות ב-Stripe. בנוסף, כל עמודי התשלום מאובטחים ב-SSL.",
+    a: "אין למסור פרטי תשלום אלא בעמוד HTTPS שמזהה בבירור את ספק הסליקה ומציג סיכום הזמנה מלא. אם מופיע מסך חלופי, הפניה לא ברורה או הודעת הצלחה בלי אישור מספק התשלום, עצרו ופנו לתמיכה.",
   },
 ];
 
@@ -713,6 +715,7 @@ function FAQAccordion() {
 // ---------------------------------------------------------------------------
 
 export default function PricingPage() {
+  const router = useRouter();
   const [isAnnual, setIsAnnual] = useState(true);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
@@ -727,6 +730,10 @@ export default function PricingPage() {
       setCheckoutNotice(null);
       try {
         const result = await createCheckout({ plan });
+        if (result.status === "unavailable") {
+          setCheckoutNotice(result.message);
+          return;
+        }
         if (result.status === "credentials_pending") {
           setCheckoutNotice(
             result.message ??
@@ -743,12 +750,12 @@ export default function PricingPage() {
         }
       } catch {
         // User not authenticated - redirect to sign-up
-        window.location.href = "/sign-up";
+        router.push("/sign-up");
       } finally {
         setIsCheckingOut(false);
       }
     },
-    [createCheckout]
+    [createCheckout, router]
   );
 
   // Bring the checkout notice into view when it appears (the click may have
@@ -767,6 +774,51 @@ export default function PricingPage() {
   const secondaryTiers = PRICING_TIERS.filter((t) =>
     ["basic", "course"].includes(t.id)
   );
+
+  if (!PAID_PURCHASES_AVAILABLE) {
+    return (
+      <div className="min-h-dvh bg-[var(--background)]">
+        <Header />
+        <main id="main-content" tabIndex={-1}>
+          <section className="container mx-auto px-4 py-20 text-center">
+            <div className="mx-auto max-w-2xl rounded-3xl border border-amber-200 bg-amber-50 p-8 shadow-sm dark:border-amber-400/25 dark:bg-amber-900/15 md:p-12">
+              <p className="mb-3 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                עדכון שקוף
+              </p>
+              <h1 className="mb-5 text-4xl font-extrabold text-blue-500 dark:text-white">
+                רכישה ותשלום עדיין אינם זמינים
+              </h1>
+              <p className="mb-6 leading-relaxed text-blue-500/75 dark:text-zinc-300">
+                המסלולים, המחירים והתוספות בעמוד הישן היו טיוטת מוצר, ולא הצעה
+                מאושרת. השארנו את התשלום חסום עד שיהיו סליקה מאומתת, תיעוד
+                הזמנה, הפעלת גישה, ביטול והחזר כספי שעובדים מקצה לקצה.
+              </p>
+              <div className="mb-8 grid gap-3 text-right sm:grid-cols-3" role="list">
+                {["12 שבועות בתוכנית", "75 שיעורי קורס", "8 מסמכי תרגול"].map((fact) => (
+                  <div key={fact} role="listitem" className="rounded-xl bg-white px-4 py-3 text-sm font-medium text-blue-500 shadow-sm dark:bg-blue-950/35 dark:text-zinc-200">
+                    {fact}
+                  </div>
+                ))}
+              </div>
+              <p className="mb-8 text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+                פתיחת חשבון אינה הוכחת תשלום ואינה מבטיחה גישה לתוכן בתשלום.
+                אל תמסרו פרטי תשלום מחוץ לעמוד סליקה מאובטח שמציג סיכום הזמנה מלא.
+              </p>
+              <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                <Link href="/tools" className="inline-flex h-11 items-center justify-center rounded-xl bg-brand-500 px-6 text-sm font-semibold text-white hover:bg-brand-600">
+                  לנסות כלי זמין עכשיו
+                </Link>
+                <Link href="/contact" className="inline-flex h-11 items-center justify-center rounded-xl border border-brand-200 bg-white px-6 text-sm font-semibold text-brand-600 hover:bg-brand-50 dark:bg-transparent">
+                  שאלות ותמיכה
+                </Link>
+              </div>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-[var(--background)]">
@@ -795,7 +847,7 @@ export default function PricingPage() {
               <motion.div variants={fadeIn}>
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-600 dark:border-brand-200/30 dark:bg-brand-50/20 dark:text-brand-300">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
-                  {SOCIAL_PROOF.count} זוגות מצאו אהבה דרך השיטה
+                  {SOCIAL_PROOF.count} שיעורים ממופים למקור הקנוני
                 </div>
               </motion.div>
 
@@ -1081,10 +1133,10 @@ export default function PricingPage() {
                 className="mb-10 text-center"
               >
                 <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
-                  הוכחה חברתית
+                  היקף מאומת
                 </span>
                 <h2 className="text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
-                  הם כבר מצאו אהבה
+                  מה קיים במקור הקורס
                 </h2>
               </motion.div>
 
@@ -1094,9 +1146,9 @@ export default function PricingPage() {
                 className="mb-12 grid gap-6 sm:grid-cols-3"
               >
                 {[
-                  { value: "461", label: "זוגות שנוצרו", icon: "💑" },
-                  { value: "73", label: "שיעורים בקורס", icon: "📚" },
-                  { value: "30", label: "ימי אחריות החזר", icon: "🛡️" },
+                  { value: "12", label: "שבועות בתוכנית", icon: "🗓️" },
+                  { value: "75", label: "שיעורים בקורס", icon: "📚" },
+                  { value: "8", label: "מסמכי תרגול", icon: "📄" },
                 ].map((stat) => (
                   <motion.div
                     key={stat.label}
@@ -1114,48 +1166,45 @@ export default function PricingPage() {
                 ))}
               </motion.div>
 
-              {/* Testimonials */}
+              {/* Product truth principles — no fabricated testimonials */}
               <motion.div
                 variants={staggerContainer}
                 className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {[
                   {
-                    name: "דניאל כ.",
-                    tier: "משנה",
-                    text: "אחרי חצי שנה עם תוכנית משנה, פגשתי את אהבת חיי. הסימולטור עזר לי לא להישמע נואש בדייטים.",
+                    title: "בלי הבטחת תוצאה",
+                    status: "מדיניות תוכן",
+                    text: "הקורס מציע למידה ותרגול; הוא אינו מבטיח זוגיות, שינוי או לוח זמנים אישי.",
                   },
                   {
-                    name: "שרה מ.",
-                    tier: "מוביל VIP",
-                    text: "הקואצ׳ינג הקבוצתי עם אלעד שינה לי את הגישה כולה. הוא ראה בדיוק איפה אני תוקעת.",
+                    title: "הסכמה וגבולות",
+                    status: "מדיניות בטיחות",
+                    text: "אפשר לעצור או לדלג על תרגיל. אין צורך לחשוף מידע, לפנות לאדם או להמשיך קשר כדי להתקדם.",
                   },
                   {
-                    name: "יוסי ל.",
-                    tier: "מגלה",
-                    text: "התחלתי עם מגלה ואחרי שלושה חודשים עצרתי - כי נסגרתי עם מישהי. הקורס עובד.",
+                    title: "תשלום חסום",
+                    status: "מצב מערכת",
+                    text: "לא ניתן לרכוש מסלול עד שסליקה, תיעוד הזמנה, זכאות וביטול יעבדו מקצה לקצה.",
                   },
-                ].map((testimonial) => (
-                  <motion.blockquote
-                    key={testimonial.name}
+                ].map((principle) => (
+                  <motion.article
+                    key={principle.title}
                     variants={fadeIn}
                     className="rounded-2xl border border-brand-100/30 bg-white p-5 dark:border-blue-100/10 dark:bg-blue-50/5"
-                    cite="#"
                   >
                     <p className="mb-4 text-sm leading-relaxed text-blue-500/80 dark:text-zinc-300">
-                      &ldquo;{testimonial.text}&rdquo;
+                      {principle.text}
                     </p>
                     <footer className="flex items-center justify-between">
-                      <cite className="not-italic">
-                        <span className="text-sm font-semibold text-blue-500 dark:text-white">
-                          {testimonial.name}
-                        </span>
-                      </cite>
+                      <span className="text-sm font-semibold text-blue-500 dark:text-white">
+                        {principle.title}
+                      </span>
                       <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-50/20 dark:text-brand-400">
-                        תוכנית {testimonial.tier}
+                        {principle.status}
                       </span>
                     </footer>
-                  </motion.blockquote>
+                  </motion.article>
                 ))}
               </motion.div>
             </motion.div>
@@ -1222,7 +1271,7 @@ export default function PricingPage() {
               <div className="relative">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-sm font-medium text-white">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-                  461 זוגות כבר מצאו אהבה
+                  רכישה אינה זמינה כרגע
                 </div>
                 <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
                   מוכן להתחיל את המסע?
