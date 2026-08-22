@@ -1,6 +1,11 @@
-import { query, mutation } from "./_generated/server";
+import {
+  query,
+  mutation,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { v } from "convex/values";
-import { type Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -13,25 +18,15 @@ type ForumCategory =
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function requireUser(ctx: {
-  auth: { getUserIdentity: () => Promise<{ subject: string } | null> };
-  db: any;
-}) {
+async function requireUser(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("נדרשת התחברות");
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
     .unique();
   if (!user) throw new Error("משתמש לא נמצא");
-  return user as {
-    _id: Id<"users">;
-    clerkId: string;
-    email: string;
-    name?: string;
-    imageUrl?: string;
-    role: "student" | "admin";
-  };
+  return user;
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -55,7 +50,7 @@ export const listCategories = query({
       },
       {
         value: "success-stories" as ForumCategory,
-        label: "סיפורי הצלחה",
+        label: "שיתופים מהדרך",
         emoji: "💕",
         description: "שתפו את הסיפור שלכם",
       },
@@ -93,15 +88,17 @@ export const listPosts = query({
     take: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     const limit = args.take ?? 30;
 
-    let posts: any[];
+    let posts: Doc<"communityTopics">[];
 
-    if (args.category) {
+    const category = args.category;
+    if (category) {
       posts = await ctx.db
         .query("communityTopics")
-        .withIndex("by_category", (q: any) =>
-          q.eq("category", args.category)
+        .withIndex("by_category", (q) =>
+          q.eq("category", category)
         )
         .order("desc")
         .take(limit);
@@ -116,14 +113,14 @@ export const listPosts = query({
     // Sort by popular (likes + replies) if requested
     if (args.sortBy === "popular") {
       posts.sort(
-        (a: any, b: any) =>
+        (a, b) =>
           b.likesCount + b.repliesCount - (a.likesCount + a.repliesCount)
       );
     }
 
     // Enrich with author info
     const enriched = await Promise.all(
-      posts.map(async (post: any) => {
+      posts.map(async (post) => {
         const userRaw = await ctx.db.get(post.userId);
         const u = userRaw as {
           name?: string;
@@ -140,8 +137,8 @@ export const listPosts = query({
 
     // Pinned posts always come first
     return [
-      ...enriched.filter((p: any) => p.pinned),
-      ...enriched.filter((p: any) => !p.pinned),
+      ...enriched.filter((post) => post.pinned),
+      ...enriched.filter((post) => !post.pinned),
     ];
   },
 });
@@ -150,6 +147,7 @@ export const listPosts = query({
 export const getPost = query({
   args: { postId: v.id("communityTopics") },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     const post = await ctx.db.get(args.postId);
     if (!post) return null;
 
@@ -216,7 +214,7 @@ export const likePost = mutation({
 
     const existing = await ctx.db
       .query("communityTopicLikes")
-      .withIndex("by_user_topic", (q: any) =>
+      .withIndex("by_user_topic", (q) =>
         q.eq("userId", user._id).eq("topicId", args.postId)
       )
       .unique();
@@ -249,7 +247,7 @@ export const getPostLikeStatus = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q: any) =>
+      .withIndex("by_clerk_id", (q) =>
         q.eq("clerkId", identity.subject)
       )
       .unique();
@@ -257,7 +255,7 @@ export const getPostLikeStatus = query({
 
     const existing = await ctx.db
       .query("communityTopicLikes")
-      .withIndex("by_user_topic", (q: any) =>
+      .withIndex("by_user_topic", (q) =>
         q.eq("userId", user._id).eq("topicId", args.postId)
       )
       .unique();
@@ -272,14 +270,15 @@ export const getPostLikeStatus = query({
 export const listReplies = query({
   args: { postId: v.id("communityTopics") },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     const replies = await ctx.db
       .query("communityReplies")
-      .withIndex("by_topic", (q: any) => q.eq("topicId", args.postId))
+      .withIndex("by_topic", (q) => q.eq("topicId", args.postId))
       .order("asc")
       .collect();
 
     return await Promise.all(
-      replies.map(async (reply: any) => {
+      replies.map(async (reply) => {
         const userRaw = await ctx.db.get(reply.userId);
         const u = userRaw as {
           name?: string;
@@ -339,7 +338,7 @@ export const likeReply = mutation({
 
     const existing = await ctx.db
       .query("communityReplyLikes")
-      .withIndex("by_user_reply", (q: any) =>
+      .withIndex("by_user_reply", (q) =>
         q.eq("userId", user._id).eq("replyId", args.replyId)
       )
       .unique();
@@ -372,7 +371,7 @@ export const getReplyLikeStatus = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q: any) =>
+      .withIndex("by_clerk_id", (q) =>
         q.eq("clerkId", identity.subject)
       )
       .unique();
@@ -380,7 +379,7 @@ export const getReplyLikeStatus = query({
 
     const existing = await ctx.db
       .query("communityReplyLikes")
-      .withIndex("by_user_reply", (q: any) =>
+      .withIndex("by_user_reply", (q) =>
         q.eq("userId", user._id).eq("replyId", args.replyId)
       )
       .unique();
@@ -395,6 +394,7 @@ export const getReplyLikeStatus = query({
 export const getForumStats = query({
   args: {},
   handler: async (ctx) => {
+    await requireUser(ctx);
     const allPosts = await ctx.db
       .query("communityTopics")
       .withIndex("by_created")
@@ -407,13 +407,13 @@ export const getForumStats = query({
     // Active users = distinct users who posted or replied in last 24 hours
     const recentPostUserIds = new Set(
       allPosts
-        .filter((p: any) => p.createdAt >= oneDayAgo)
-        .map((p: any) => String(p.userId))
+        .filter((post) => post.createdAt >= oneDayAgo)
+        .map((post) => String(post.userId))
     );
     const recentReplyUserIds = new Set(
       allReplies
-        .filter((r: any) => r.createdAt >= oneDayAgo)
-        .map((r: any) => String(r.userId))
+        .filter((reply) => reply.createdAt >= oneDayAgo)
+        .map((reply) => String(reply.userId))
     );
     const activeUsersToday = new Set([
       ...recentPostUserIds,

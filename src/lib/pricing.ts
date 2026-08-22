@@ -1,23 +1,13 @@
 /**
  * HaDerech (הדרך) by Omanut HaKesher - Monetization & Pricing Model
  *
- * Pricing architecture based on research across:
- * - EdTech (Masterclass, Coursera, Udemy)
- * - Dating apps (Tinder, Hinge, Bumble)
- * - AI SaaS (ChatGPT, Jasper AI)
- * - Premium coaching (Tony Robbins, Matthew Hussey)
- * - Israeli digital market benchmarks
- *
- * Key principles:
- * 1. 1-on-1 coaching (thousands ₪) is the ultimate price anchor - NOT part of tiers
- * 2. Free tier uses "reverse trial" psychology (taste premium, then gate)
- * 3. Annual plans at ~35% discount match Israeli preference for "deals"
- * 4. VIP delivers group coaching + exclusive content (NOT 1-on-1)
- * 5. Course one-time purchase serves ownership-preference buyers
- * 6. A la carte add-ons capture additional revenue from any tier
- *
- * 461 couples found love = powerful social proof for all tiers.
+ * DRAFT offer catalog. Prices and capabilities below are product hypotheses,
+ * not an approved or purchasable offer. The UI and server must remain
+ * fail-closed until checkout, durable payment state, fulfillment, cancellation,
+ * entitlement writers and an owner-approved truth contract are implemented.
  */
+
+export const PAID_PURCHASES_AVAILABLE: boolean = false
 
 // ---------------------------------------------------------------------------
 // Core Types
@@ -168,7 +158,7 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
   {
     id: "course_access",
     name: "גישה לקורס",
-    description: "גישה לקורס 73 השיעורים המלא",
+    description: "גישה לקורס בן 75 שיעורים, בכפוף לזכאות מאומתת",
     category: "course",
     sortOrder: 1,
   },
@@ -182,7 +172,8 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
   {
     id: "certificate",
     name: "תעודת סיום",
-    description: "תעודה דיגיטלית מוכרת עם שם וציון",
+    description:
+      "תיעוד דיגיטלי של השלמת מסלול הלמידה; אינו הסמכה מקצועית",
     category: "course",
     sortOrder: 3,
   },
@@ -197,8 +188,8 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
   // AI
   {
     id: "ai_chat_messages",
-    name: "הודעות AI Coach",
-    description: "כמות הודעות חודשיות עם מאמן ה-AI",
+    name: "הודעות בכלי ה-AI",
+    description: "מכסת הודעות חודשית בכלי הרפלקציה האוטומטי",
     category: "ai",
     sortOrder: 1,
   },
@@ -280,8 +271,8 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
   },
   {
     id: "community_leaderboard",
-    name: "לוח מובילים",
-    description: "השתתפות בלוח המובילים של הקהילה",
+    name: "תמונת התקדמות אישית",
+    description: "סיכום פרטי של פעילות הלמידה בשלושה טווחי זמן",
     category: "community",
     sortOrder: 3,
   },
@@ -346,11 +337,11 @@ const FREE_TIER: PricingTier = {
   name: "טעימה",
   subtitle: "התחל את המסע",
   description:
-    "גלה את השיטה שעזרה ל-461 זוגות למצוא אהבה. קבל טעימה מהקורס, המאמן האישי והכלים.",
+    "טיוטת מסלול היכרות. התכולה והזכאות חייבות אימות לפני פרסום או הפעלה.",
   valueProp:
-    "אפס סיכון. תתנסה בשיטה שמשנה חיים, תרגיש את ההבדל, ותחליט אם אתה מוכן להשקיע בעצמך.",
+    "אפשר להכיר את מבנה המערכת בלי הבטחת תוצאה ובלי להניח שפתיחת חשבון מעניקה תוכן בתשלום.",
   upgradeNudge:
-    "אוהב את מה שאתה מרגיש? עם הבסיסי תפתח את כל 73 השיעורים ותקבל מאמן AI אישי שזוכר אותך.",
+    "מסלולים בתשלום יפורסמו רק לאחר אימות תכולה, פרטיות, זכאות ותשלום מקצה לקצה.",
   priceMonthly: null,
   priceAnnual: null,
   priceOneTime: null,
@@ -404,11 +395,11 @@ const FREE_TIER: PricingTier = {
 const BASIC_TIER: PricingTier = {
   id: "basic",
   name: "מגלה",
-  subtitle: "כל הקורס + מאמן AI",
+  subtitle: "כל הקורס + כלי AI לרפלקציה",
   description:
-    "גישה מלאה לכל 73 השיעורים, מאמן AI אישי, וכלים שיעזרו לך להתחיל לשנות את חיי הדייטינג שלך.",
+    "טיוטת מסלול לקורס בן 75 שיעורים ולכלי AI; אינה זמינה לרכישה עד לאישור חוזה המוצר.",
   valueProp:
-    "פחות ממחיר ארוחת ערב יוצאת דופן בחודש, ואתה מקבל שיטה מוכחת + מאמן AI זמין 24/7. 461 זוגות כבר הצליחו.",
+    "המחיר, המגבלות ותקופת הגישה הם טיוטה ואינם הצעה מחייבת.",
   upgradeNudge:
     "רוצה שה-AI יזכור אותך לעומק, סימולטור קולי ווידאו, וקהילה פעילה? הפרימיום ייקח אותך לשלב הבא.",
   priceMonthly: 79,
@@ -423,8 +414,8 @@ const BASIC_TIER: PricingTier = {
   icon: "Compass",
   maxUsers: 1,
   features: {
-    course_access: "כל 73 השיעורים",
-    lesson_count: 73,
+    course_access: "75 שיעורים בכפוף לזכאות",
+    lesson_count: 75,
     ai_chat_messages: { value: 100, unit: "הודעות/חודש" },
     ai_chat_context: "שבוע אחרון",
     simulator_scenarios: 10,
@@ -467,9 +458,9 @@ const PREMIUM_TIER: PricingTier = {
   name: "משנה",
   subtitle: "שינוי אמיתי מתחיל כאן",
   description:
-    "מאמן AI ללא הגבלה שזוכר הכל, סימולטור דייט מתקדם עם קול ווידאו, קהילה פעילה, וכל הכלים ללא מגבלות.",
+    "טיוטת מסלול הכוללת יכולות AI, סימולטור וקהילה; כל יכולת ומגבלה דורשות אימות לפני פרסום.",
   valueProp:
-    "תחשוב על זה - מאמן אישי 24/7, סימולטור לתרגול דייטים, וקהילה תומכת. הכל במחיר של פגישה אחת עם יועץ זוגיות. זו ההשקעה הכי חכמה שתעשה בחיי האהבה שלך.",
+    "זהו מודל תמחור פנימי בלבד, לא תחליף למאמן אנושי ולא הבטחה לשינוי או לזמינות רציפה.",
   upgradeNudge:
     "מוכן לקואצ׳ינג קבוצתי חי עם אלעד, מאסטרקלאסים בלעדיים ודוחות התקדמות מעמיקים? ה-VIP הוא השלב הסופי.",
   priceMonthly: 149,
@@ -484,8 +475,8 @@ const PREMIUM_TIER: PricingTier = {
   icon: "Zap",
   maxUsers: 1,
   features: {
-    course_access: "כל 73 השיעורים",
-    lesson_count: 73,
+    course_access: "75 שיעורים בכפוף לזכאות",
+    lesson_count: 75,
     ai_chat_messages: "ללא הגבלה",
     ai_chat_context: "כל ההיסטוריה",
     simulator_scenarios: "כל התרחישים",
@@ -535,7 +526,7 @@ const VIP_TIER: PricingTier = {
   description:
     "קואצ׳ינג קבוצתי חי עם אלעד, מאסטרקלאסים בלעדיים, דוחות AI מתקדמים, סטטוס VIP בקהילה, וגישה ראשונה לכל דבר חדש.",
   valueProp:
-    "קואצ׳ינג אישי עם אלעד עולה אלפי שקלים. כאן אתה מקבל אותו במפגשים קבוצתיים חיים, יחד עם כל מה שהפלטפורמה מציעה, במחיר שבריר מליווי אישי. זו ההזדמנות לקבל ערך של אלפים בכל חודש.",
+    "תכולת המפגשים, זהות המנחים, ההכשרה, הזמינות והמחיר חייבים אישור והצגה לפני רכישה.",
   upgradeNudge: null, // Top tier - no upgrade nudge
   priceMonthly: 299,
   priceAnnual: 2299,
@@ -549,8 +540,8 @@ const VIP_TIER: PricingTier = {
   icon: "Crown",
   maxUsers: 1,
   features: {
-    course_access: "כל 73 השיעורים",
-    lesson_count: 73,
+    course_access: "75 שיעורים בכפוף לזכאות",
+    lesson_count: 75,
     ai_chat_messages: "ללא הגבלה",
     ai_chat_context: "כל ההיסטוריה + ניתוח מעמיק",
     simulator_scenarios: "כל התרחישים + בלעדיים",
@@ -560,9 +551,9 @@ const VIP_TIER: PricingTier = {
     community_access: "מלא + סטטוס VIP",
     community_badges: "VIP זהב",
     community_leaderboard: true,
-    profile_builder: "מלא + AI מתקדם + ביקורת אישית",
-    photo_analysis: "ללא הגבלה + ביקורת מקצועית",
-    date_analysis: "ללא הגבלה + ייעוץ אסטרטגי",
+    profile_builder: "טיוטת כלי לעריכת פרופיל; התכולה והמכסה טרם אושרו",
+    photo_analysis: "טיוטת כלי משוב לתמונות; התכולה והמכסה טרם אושרו",
+    date_analysis: "טיוטת כלי רפלקציה; התכולה והמכסה טרם אושרו",
     group_coaching: { value: 2, unit: "מפגשים חיים/חודש" },
     masterclasses: "חי + הקלטות + Q&A",
     progress_reports: "שבועי מתקדם + תוכנית פעולה",
@@ -593,25 +584,25 @@ const COURSE_TIER: PricingTier = {
   name: "הקורס המלא",
   subtitle: "רכישה חד-פעמית",
   description:
-    "גישה לצמיתות לכל 73 השיעורים של הקורס, כולל תעודת סיום. מאמן AI בסיסי וכלים נלווים לשנה הראשונה.",
+    "טיוטה לרכישה חד-פעמית של קורס בן 75 שיעורים. תקופת הגישה והכלים הנלווים טרם אושרו.",
   valueProp:
-    "שלם פעם אחת, למד לנצח. הקורס שעזר ל-461 זוגות שלך לצמיתות. מתאים למי שיודע מה הוא רוצה ומעדיף לא להתחייב למנוי.",
+    "אין לפרסם גישה קבועה, תוצאה או תנאי בעלות עד שהם מוגדרים בחוזה המוצר ובסיכום ההזמנה.",
   upgradeNudge:
-    "רוצה מאמן AI ללא הגבלה, סימולטור דייטים וקהילה? שדרג למנוי פרימיום וקבל הנחה מיוחדת כבעל הקורס.",
+    "טיוטת הצעת שדרוג לכלי AI, תרגול וקהילה. אין להציג אותה לפני אישור תכולה, מכסות, מחיר וזכאות.",
   priceMonthly: null,
   priceAnnual: null,
   priceOneTime: 1197,
   billingCycles: ["one_time"],
   effectiveMonthlyOnAnnual: null,
   annualSavingsPercent: null,
-  badge: "לצמיתות",
+  badge: "טיוטה",
   isRecommended: false,
   accentColor: "#10B981", // emerald-500
   icon: "BookOpen",
   maxUsers: 1,
   features: {
-    course_access: "כל 73 השיעורים - לצמיתות",
-    lesson_count: 73,
+    course_access: "75 שיעורים; תקופת הגישה טרם אושרה",
+    lesson_count: 75,
     ai_chat_messages: { value: 30, unit: "הודעות/חודש (שנה ראשונה)" },
     ai_chat_context: "שבוע אחרון (שנה ראשונה)",
     simulator_scenarios: 5,
@@ -668,8 +659,8 @@ export const SUBSCRIPTION_TIERS: PricingTier[] = [
 export const ADD_ONS: AddOn[] = [
   {
     id: "ai_unlimited",
-    name: "AI ללא הגבלה",
-    description: "הודעות ללא הגבלה למאמן ה-AI + זיכרון מלא",
+    name: "הרחבת מכסת כלי AI (טיוטה)",
+    description: "טיוטת תוסף שאינה זמינה עד לאישור מכסה, שמירת היסטוריה, מחיר וזכאות.",
     price: 49,
     billingCycle: "monthly",
     availableForTiers: ["free", "basic"],
@@ -708,8 +699,9 @@ export const ADD_ONS: AddOn[] = [
   },
   {
     id: "profile_builder_pro",
-    name: "בונה פרופיל PRO",
-    description: "בניית פרופיל דייטינג מושלם עם AI מתקדם + ביקורת מקצועית",
+    name: "כלי עריכת פרופיל מורחב (טיוטה)",
+    description:
+      "טיוטת כלי לעריכת פרופיל; היכולות, המשוב והזכאות טרם אושרו",
     price: 69,
     billingCycle: "one_time",
     availableForTiers: ["free", "basic", "course"],
@@ -768,7 +760,7 @@ export function generateComparisonMatrix(): {
 }[] {
   const categoryNames: Record<FeatureCategory, string> = {
     course: "קורס",
-    ai: "מאמן AI",
+    ai: "כלי AI",
     simulator: "סימולטור דייטים",
     tools: "כלים",
     community: "קהילה",
@@ -952,9 +944,9 @@ export function calculateTotalMonthlyCost(
 // ---------------------------------------------------------------------------
 
 export const SOCIAL_PROOF: CoupleSuccessMetric = {
-  count: 461,
-  label: "זוגות מצאו אהבה",
-  description: "461 זוגות כבר מצאו אהבה דרך השיטה של אומנות הקשר",
+  count: 75,
+  label: "שיעורי קורס קנוניים",
+  description: "75 שיעורים ממופים למקור התוכן הקנוני של הקורס",
 }
 
 // ---------------------------------------------------------------------------
@@ -962,10 +954,10 @@ export const SOCIAL_PROOF: CoupleSuccessMetric = {
 // ---------------------------------------------------------------------------
 
 export const PRICING_PAGE_CONTENT = {
-  headline: "השקעה בחיי האהבה שלך",
-  subheadline: "השיטה שעזרה ל-461 זוגות למצוא אהבה - עכשיו זמינה לך",
-  guaranteeText: "30 יום אחריות החזר כספי מלא. בלי שאלות.",
-  guaranteeDays: 30,
+  headline: "מסלולים בתכנון",
+  subheadline: "רכישה ותשלום אינם זמינים עד להשלמת חוזה המוצר והתשתית",
+  guaranteeText: "אין כרגע מדיניות החזר מאושרת למסלול רכישה פעיל.",
+  guaranteeDays: 0,
   faqTitle: "שאלות נפוצות",
   annualToggleLabel: "שנתי (חסכון של עד 37%)",
   monthlyToggleLabel: "חודשי",
@@ -973,7 +965,7 @@ export const PRICING_PAGE_CONTENT = {
   enterpriseCtaText: "מחפש ליווי אישי? קואצ׳ינג 1-על-1 עם אלעד",
   enterpriseCtaLink: "/contact",
   /** The 1-on-1 coaching CTA serves as the price anchor */
-  coachingAnchorText: "ליווי אישי 1-על-1 עם אלעד מתחיל מאלפי שקלים",
+  coachingAnchorText: "לפרטי שירות שאומתו, זמינות ותנאים יש לפנות ישירות",
 } as const
 
 // ---------------------------------------------------------------------------

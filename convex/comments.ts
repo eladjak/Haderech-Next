@@ -1,10 +1,17 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  requireCourseContentAccess,
+  requireLessonCourseAccess,
+} from "./lib/authGuard";
 
 // שליפת תגובות לשיעור (כולל פרטי משתמש)
 export const listByLesson = query({
   args: { lessonId: v.id("lessons") },
   handler: async (ctx, args) => {
+    const lesson = await ctx.db.get(args.lessonId);
+    if (!lesson) return [];
+    await requireCourseContentAccess(ctx, lesson.courseId);
     const comments = await ctx.db
       .query("comments")
       .withIndex("by_lesson", (q) => q.eq("lessonId", args.lessonId))
@@ -43,6 +50,9 @@ export const listByLesson = query({
 export const countByLesson = query({
   args: { lessonId: v.id("lessons") },
   handler: async (ctx, args) => {
+    const lesson = await ctx.db.get(args.lessonId);
+    if (!lesson) return 0;
+    await requireCourseContentAccess(ctx, lesson.courseId);
     const comments = await ctx.db
       .query("comments")
       .withIndex("by_lesson", (q) => q.eq("lessonId", args.lessonId))
@@ -60,14 +70,11 @@ export const create = mutation({
     parentId: v.optional(v.id("comments")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const { user } = await requireLessonCourseAccess(
+      ctx,
+      args.lessonId,
+      args.courseId
+    );
 
     // Validate content
     const trimmed = args.content.trim();
@@ -79,6 +86,12 @@ export const create = mutation({
     if (args.parentId) {
       const parent = await ctx.db.get(args.parentId);
       if (!parent) throw new Error("Parent comment not found");
+      if (
+        parent.lessonId !== args.lessonId ||
+        parent.courseId !== args.courseId
+      ) {
+        throw new Error("PARENT_COMMENT_CONTEXT_MISMATCH");
+      }
     }
 
     const now = Date.now();

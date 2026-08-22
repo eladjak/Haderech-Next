@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSelfOrAdmin } from "./lib/authGuard";
+import { requireAdmin, requireSelfOrAdmin } from "./lib/authGuard";
 
 // Get current user's subscription
 export const getCurrentSubscription = query({
@@ -20,7 +20,20 @@ export const getCurrentSubscription = query({
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .first();
 
-    return subscription || { plan: "free" as const, status: "active" as const };
+    if (!subscription) {
+      return { plan: "free" as const, status: "active" as const };
+    }
+
+    // Do not expose provider/customer identifiers through a public query.
+    return {
+      plan: subscription.plan,
+      status: subscription.status,
+      currentPeriodStart: subscription.currentPeriodStart,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      createdAt: subscription.createdAt,
+      updatedAt: subscription.updatedAt,
+    };
   },
 });
 
@@ -42,7 +55,16 @@ export const getPaymentHistory = query({
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    return payments.sort((a, b) => b.createdAt - a.createdAt);
+    return payments
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map((payment) => ({
+        _id: payment._id,
+        amount: payment.amount,
+        currency: payment.currency,
+        status: payment.status,
+        description: payment.description,
+        createdAt: payment.createdAt,
+      }));
   },
 });
 
@@ -72,6 +94,7 @@ export const createFreeSubscription = mutation({
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const subs = await ctx.db.query("subscriptions").collect();
     const payments = await ctx.db.query("payments").collect();
 

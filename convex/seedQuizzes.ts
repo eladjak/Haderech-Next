@@ -1,13 +1,10 @@
 /**
- * Seed Quiz Content - Hebrew Relationship Quizzes
+ * LEGACY quiz archive — not a writable seed path.
  *
- * Seeds the database with 5 sample quizzes based on real content from
- * "אומנות הקשר" (The Art of Connection) course.
- *
- * Usage (from Convex dashboard or CLI):
- *   npx convex run seedQuizzes:seedRelationshipQuizzes --no-push
- *
- * The function is idempotent - checks for existing quizzes before inserting.
+ * These five quizzes predate the stable IDs, week mapping and review policy in
+ * the canonical assessment pipeline. Approximate title/order matching can attach
+ * a quiz to the wrong lesson, so the mutation below is deliberately fail-closed.
+ * Use `seedWeeklyQuizzes:seedWeeklyQuizzes` for canonical synchronization.
  */
 
 import { internalMutation } from "./_generated/server";
@@ -392,77 +389,18 @@ const QUIZ_DATA: QuizSeedData[] = [
 
 export const seedRelationshipQuizzes = internalMutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async () => {
     assertSeedAllowed("seedRelationshipQuizzes");
-    // בדוק אם כבר יש בחנים
-    const existingQuizzes = await ctx.db.query("quizzes").collect();
-    if (existingQuizzes.length > 0) {
-      console.log(
-        `[seedQuizzes] Found ${existingQuizzes.length} existing quizzes - skipping seed`
-      );
-      return { skipped: true, count: existingQuizzes.length };
-    }
-
-    // שלוף את כל השיעורים
-    const allLessons = await ctx.db.query("lessons").collect();
-    if (allLessons.length === 0) {
-      console.log(
-        "[seedQuizzes] No lessons found - run seedCourseContent first"
-      );
-      return { skipped: true, count: 0 };
-    }
-
-    // מיין לפי order
-    const sortedLessons = [...allLessons].sort((a, b) => a.order - b.order);
-
-    let createdCount = 0;
-
-    for (const quizData of QUIZ_DATA) {
-      // מצא שיעור מתאים לפי titleMatch או lessonOrder
-      let lesson = sortedLessons.find((l) =>
-        l.title.includes(quizData.titleMatch)
-      );
-
-      // fallback: השתמש ב-lessonOrder
-      if (!lesson && sortedLessons.length >= quizData.lessonOrder) {
-        lesson = sortedLessons[quizData.lessonOrder - 1];
-      }
-
-      if (!lesson) {
-        console.log(
-          `[seedQuizzes] Could not find lesson for quiz "${quizData.quizTitle}" - skipping`
-        );
-        continue;
-      }
-
-      // צור את הבוחן
-      const quizId = await ctx.db.insert("quizzes", {
-        lessonId: lesson._id,
-        courseId: lesson.courseId,
-        title: quizData.quizTitle,
-        passingScore: quizData.passingScore,
-        createdAt: Date.now(),
-      });
-
-      // צור את השאלות
-      for (let i = 0; i < quizData.questions.length; i++) {
-        const q = quizData.questions[i];
-        await ctx.db.insert("quizQuestions", {
-          quizId,
-          question: q.question,
-          options: q.options,
-          correctIndex: q.correctIndex,
-          explanation: q.explanation,
-          order: i,
-        });
-      }
-
-      console.log(
-        `[seedQuizzes] Created quiz "${quizData.quizTitle}" (${quizData.questions.length} questions) for lesson: "${lesson.title}"`
-      );
-      createdCount++;
-    }
-
-    return { skipped: false, count: createdCount };
+    return {
+      success: false,
+      skipped: true,
+      code: "LEGACY_SEED_DISABLED",
+      message:
+        "Approximate legacy quiz matching is disabled. Use seedWeeklyQuizzes:seedWeeklyQuizzes for the canonical, stable-ID assessment sync.",
+      archivedOnly: {
+        quizzes: QUIZ_DATA.length,
+        questions: QUIZ_DATA.reduce((sum, quiz) => sum + quiz.questions.length, 0),
+      },
+    };
   },
 });

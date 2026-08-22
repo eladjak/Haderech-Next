@@ -1,14 +1,12 @@
 /**
- * Seed Content - Real course content from "אומנות הקשר" book
+ * LEGACY Seed Content - archived pre-canonical course draft
  *
- * Seeds the database with the main 12-week course and 2 mini-courses.
- * Content is derived from the actual book chapters.
+ * This file contains a stale 51-lesson draft that predates the canonical
+ * 75-lesson Git + manifest pipeline. It remains readable for migration review,
+ * but execution is deliberately disabled to prevent publishing unsafe or
+ * contradictory legacy content.
  *
- * Usage:
- *   - From Convex dashboard: run `seedContent:seedCourseContent`
- *   - From CLI: `npx convex run seedContent:seedCourseContent --no-push`
- *
- * The function is idempotent - it checks if courses already exist before inserting.
+ * Use `seedCourseData.ts` together with the canonical generator and manifest.
  */
 
 import { internalMutation } from "./_generated/server";
@@ -545,146 +543,22 @@ const DATING_COURSE_LESSONS: LessonData[] = [
 
 export const seedCourseContent = internalMutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async () => {
     assertSeedAllowed("seedCourseContent");
-    // Check if courses already exist
-    const existingCourses = await ctx.db.query("courses").collect();
-    if (existingCourses.length > 0) {
-      return {
-        success: false,
-        message: `Already have ${existingCourses.length} courses. Delete existing courses first or run clearAll.`,
-        existingCourses: existingCourses.map((c) => c.title),
-      };
-    }
-
-    const now = Date.now();
-    const results: string[] = [];
-
-    // ─── 1. Main Course: הדרך - תוכנית 12 שבועות ─────────────────────────
-
-    const mainCourseId = await ctx.db.insert("courses", {
-      title: "הדרך - תוכנית 12 שבועות לזוגיות",
-      description:
-        "תוכנית מקיפה ומעשית בת 12 שבועות שמלווה אותך צעד אחר צעד בדרך לזוגיות בריאה ומספקת. מ-51 שיעורים מעשיים תלמד להכיר את עצמך, לשבור דפוסים, לפתח תקשורת רגשית, לבנות ביטחון ואומץ, ולייצר חיבור אמיתי ועמוק. מבוסס על הספר 'אומנות הקשר' ועל ניסיון של ליווי מאות אנשים בדרך לזוגיות.",
-      imageUrl: "/images/course-haderech.jpg",
-      published: true,
-      order: 0,
-      category: "תוכנית מלאה",
-      level: "beginner",
-      estimatedHours: 24,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    let lessonOrder = 0;
-    let totalLessons = 0;
-
-    for (const stage of MAIN_COURSE_STAGES) {
-      for (const week of stage.weeks) {
-        for (const lesson of week.lessons) {
-          await ctx.db.insert("lessons", {
-            courseId: mainCourseId,
-            title: lesson.title,
-            content: `[${stage.stageName} | ${week.weekTitle}]\n\n${lesson.content}`,
-            duration: lesson.duration,
-            order: lessonOrder,
-            published: true,
-            createdAt: now,
-            updatedAt: now,
-          });
-          lessonOrder++;
-          totalLessons++;
-        }
-      }
-    }
-
-    results.push(
-      `Main course "${"הדרך - תוכנית 12 שבועות לזוגיות"}" created with ${totalLessons} lessons`
+    const archivedMainLessons = MAIN_COURSE_STAGES.reduce(
+      (sum, stage) =>
+        sum + stage.weeks.reduce((weekSum, week) => weekSum + week.lessons.length, 0),
+      0
     );
-
-    // ─── 2. Mini-Course: מבוא לאומנות הקשר ────────────────────────────────
-
-    const introCourseId = await ctx.db.insert("courses", {
-      title: "מבוא לאומנות הקשר",
-      description:
-        "קורס מבוא חינמי שנותן לכם טעימה מהדרך. 5 שיעורים קצרים שיעזרו לכם להבין למה אתם עדיין לבד, איזה סיפורים מגבילים אתם מספרים לעצמכם, ואיך להתחיל את המסע לזוגיות. מושלם למי שרוצה לטעום לפני שמתחייב לתוכנית המלאה.",
-      imageUrl: "/images/course-intro.jpg",
-      published: true,
-      order: 1,
-      category: "מבוא",
-      level: "beginner",
-      estimatedHours: 2,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    for (let i = 0; i < INTRO_COURSE_LESSONS.length; i++) {
-      const lesson = INTRO_COURSE_LESSONS[i];
-      await ctx.db.insert("lessons", {
-        courseId: introCourseId,
-        title: lesson.title,
-        content: lesson.content,
-        duration: lesson.duration,
-        order: i,
-        published: true,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
-
-    results.push(
-      `Intro course "${"מבוא לאומנות הקשר"}" created with ${INTRO_COURSE_LESSONS.length} lessons`
-    );
-
-    // ─── 3. Mini-Course: אומנות הדייט ─────────────────────────────────────
-
-    const datingCourseId = await ctx.db.insert("courses", {
-      title: "אומנות הדייט",
-      description:
-        "קורס מרוכז על אומנות הדייט - מהפרופיל באפליקציה ועד הרגע שאחרי. 8 שיעורים שיהפכו את הדייטים שלכם מראיונות עבודה מייגעים למפגשים אמיתיים ומחברים. למדו איך לשאול את השאלות הנכונות, ליצור חיבור אמיתי, ולהבין מה כימיה באמת אומרת.",
-      imageUrl: "/images/course-dating.jpg",
-      published: true,
-      order: 2,
-      category: "דייטינג",
-      level: "intermediate",
-      estimatedHours: 4,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    for (let i = 0; i < DATING_COURSE_LESSONS.length; i++) {
-      const lesson = DATING_COURSE_LESSONS[i];
-      await ctx.db.insert("lessons", {
-        courseId: datingCourseId,
-        title: lesson.title,
-        content: lesson.content,
-        duration: lesson.duration,
-        order: i,
-        published: true,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
-
-    results.push(
-      `Dating course "${"אומנות הדייט"}" created with ${DATING_COURSE_LESSONS.length} lessons`
-    );
-
-    // ─── Summary ──────────────────────────────────────────────────────────
-
-    const totalAllLessons =
-      totalLessons +
-      INTRO_COURSE_LESSONS.length +
-      DATING_COURSE_LESSONS.length;
-
     return {
-      success: true,
-      message: `Successfully seeded 3 courses with ${totalAllLessons} total lessons.`,
-      details: results,
-      courseIds: {
-        main: mainCourseId,
-        intro: introCourseId,
-        dating: datingCourseId,
+      success: false,
+      code: "LEGACY_SEED_DISABLED",
+      message:
+        "This archived 51-lesson draft cannot be seeded. Use seedHaderech:seedHaderechCourse and the canonical manifest-backed lesson-content pipeline.",
+      archivedOnly: {
+        mainLessons: archivedMainLessons,
+        introLessons: INTRO_COURSE_LESSONS.length,
+        datingLessons: DATING_COURSE_LESSONS.length,
       },
     };
   },

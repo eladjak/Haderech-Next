@@ -1,12 +1,35 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
+
+// Public proof is deliberately fail-closed. The current table has no durable
+// record of provenance, publication-consent version, or consent withdrawal.
+// Do not enable these flags until that contract exists and legacy rows have
+// been reviewed. Existing rows remain available to their owner/admin so they
+// can be handled without deleting user data.
+const VERIFIED_PUBLIC_STORIES_AVAILABLE = false;
+const STORY_SUBMISSION_AVAILABLE = false;
+
+function toPublicStory(story: Doc<"successStories">) {
+  return {
+    _id: story._id,
+    name: story.isAnonymous ? "אנונימי" : story.name,
+    story: story.story,
+    rating: story.rating,
+    isAnonymous: story.isAnonymous,
+    category: story.category,
+    createdAt: story.createdAt,
+  };
+}
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-// רשימת סיפורי הצלחה מאושרים (תצוגה ציבורית)
+// רשימת עדויות שאומתו וקיבלו הסכמה מפורשת לפרסום (תצוגה ציבורית)
 export const listApproved = query({
   args: {},
   handler: async (ctx) => {
+    if (!VERIFIED_PUBLIC_STORIES_AVAILABLE) return [];
+
     const stories = await ctx.db
       .query("successStories")
       .withIndex("by_approved", (q) => q.eq("approved", true))
@@ -15,7 +38,7 @@ export const listApproved = query({
     // Sort by newest first
     stories.sort((a, b) => b.createdAt - a.createdAt);
 
-    return stories;
+    return stories.map(toPublicStory);
   },
 });
 
@@ -23,6 +46,8 @@ export const listApproved = query({
 export const listFeatured = query({
   args: {},
   handler: async (ctx) => {
+    if (!VERIFIED_PUBLIC_STORIES_AVAILABLE) return [];
+
     const stories = await ctx.db
       .query("successStories")
       .withIndex("by_featured", (q) => q.eq("featured", true))
@@ -34,7 +59,7 @@ export const listFeatured = query({
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, 6);
 
-    return approvedFeatured;
+    return approvedFeatured.map(toPublicStory);
   },
 });
 
@@ -114,6 +139,10 @@ export const submitStory = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    if (!STORY_SUBMISSION_AVAILABLE) {
+      throw new Error("Story submission is unavailable pending a verified publication-consent flow");
+    }
+
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
@@ -165,6 +194,10 @@ export const approveStory = mutation({
     featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    if (!STORY_SUBMISSION_AVAILABLE) {
+      throw new Error("Story publication is unavailable pending a verified publication-consent flow");
+    }
+
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
@@ -217,6 +250,10 @@ export const deleteStory = mutation({
 export const toggleFeatured = mutation({
   args: { storyId: v.id("successStories") },
   handler: async (ctx, args) => {
+    if (!STORY_SUBMISSION_AVAILABLE) {
+      throw new Error("Story publication is unavailable pending a verified publication-consent flow");
+    }
+
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
@@ -240,6 +277,7 @@ export const toggleFeatured = mutation({
 
 // NOTE: a `seedStories` mutation used to live here. It inserted six invented
 // "success stories" (fictional named people with ages) as approved+featured
-// content shown publicly under the heading "סיפורי הצלחה אמיתיים".
+// content shown publicly as a participant testimonial only after provenance and
+// explicit publication consent are both verified.
 // It was removed deliberately: real success stories must come from real users
 // via `submitStory` + admin approval. Do not re-add fabricated testimonials.

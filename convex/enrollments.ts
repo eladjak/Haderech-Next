@@ -1,6 +1,24 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSelfOrAdmin } from "./lib/authGuard";
+import {
+  requireCourseContentAccess,
+  requireSelfOrAdmin,
+} from "./lib/authGuard";
+
+// תשובת UI מצומצמת: האם למשתמש המחובר יש כרגע הרשאת תוכן אמינה.
+// אין כאן פרטי entitlement, תשלום או תפקיד, ולכן השאילתה אינה הופכת
+// את מצב ההרשאה של אדם אחר ל-oracle ציבורי.
+export const getContentAccessStatus = query({
+  args: { courseId: v.id("courses") },
+  handler: async (ctx, args) => {
+    try {
+      await requireCourseContentAccess(ctx, args.courseId);
+      return { hasAccess: true } as const;
+    } catch {
+      return { hasAccess: false } as const;
+    }
+  },
+});
 
 // בדיקה אם משתמש רשום לקורס
 export const isEnrolled = query({
@@ -9,6 +27,7 @@ export const isEnrolled = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const enrollment = await ctx.db
       .query("enrollments")
       .withIndex("by_user_course", (q) =>
@@ -24,6 +43,7 @@ export const isEnrolled = query({
 export const listByUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const enrollments = await ctx.db
       .query("enrollments")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -32,8 +52,20 @@ export const listByUser = query({
     const courses = await Promise.all(
       enrollments.map(async (enrollment) => {
         const course = await ctx.db.get(enrollment.courseId);
+        let hasContentAccess = false;
+        try {
+          await requireCourseContentAccess(ctx, enrollment.courseId);
+          hasContentAccess = true;
+        } catch {
+          // A saved/self-service enrollment is useful navigation metadata, but
+          // it must never be presented as a trusted content grant.
+        }
         return course
-          ? { ...course, enrolledAt: enrollment.enrolledAt }
+          ? {
+              ...course,
+              enrolledAt: enrollment.enrolledAt,
+              hasContentAccess,
+            }
           : null;
       })
     );

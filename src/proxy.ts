@@ -1,9 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import {
+  assertDemoModeConfiguration,
+  isDemoModeExplicitlyEnabled,
+} from "@/lib/production-config";
 
 // נתיבים פרטיים שדורשים התחברות
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/courses/:courseId/learn(.*)",
+  "/courses/:courseId/lessons(.*)",
   "/certificates(.*)",
   "/admin(.*)",
   "/quiz(.*)",
@@ -15,8 +20,10 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Demo mode - skip auth protection
-  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+  // Runtime guard: a build-time check alone cannot protect a container whose
+  // environment changes before `next start`.
+  assertDemoModeConfiguration();
+  if (isDemoModeExplicitlyEnabled()) {
     return;
   }
   // אם זה נתיב מוגן, דרוש התחברות

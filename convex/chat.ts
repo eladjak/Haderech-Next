@@ -4,7 +4,9 @@ import {
   internalMutation,
   internalQuery,
   action,
+  type MutationCtx,
 } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import {
@@ -13,73 +15,92 @@ import {
   type LessonContext,
 } from "./lib/advisorTemplates";
 import { generateChat } from "./lib/llm";
+import {
+  requireClerkSubject,
+  requireCourseContentAccess,
+  requireIdentity,
+  requireOwnedClerkResource,
+} from "./lib/authGuard";
 
 // =======================================
-// AI Chat Coach - Phase 16
-// שיחת AI עם מאמן אומנות הקשר
+// AI reflection and practice tools - Phase 16
+// כלי AI לרפלקציה, תרגול וניתוח טקסט
 // =======================================
 
 const CHAT_MODES = {
   coach: {
-    label: "מאמן אישי",
-    systemPrompt: `אתה מאמן מערכות יחסים ואהבה מטעם "אומנות הקשר" - הגישה הישראלית לזוגיות.
-
-יש לך ניסיון של 15+ שנה בליווי זוגות, ועבדת עם למעלה מ-461 זוגות שמצאו אהבה.
+    label: "כלי AI לרפלקציה",
+    systemPrompt: `אתה כלי AI לתרגול ורפלקציה מטעם "אומנות הקשר". אל תציג את עצמך כמטפל, מאמן מוסמך, מומחה קליני או אדם בעל ניסיון אישי.
 
 **הפילוסופיה שלך:**
 - אמת, כלים, כבוד (אמ"כ) - שלושת הערכים המרכזיים
 - לא מטיפים, לא שופטים - רק עוזרים
-- כלים מעשיים שעובדים מחר בבוקר
-- אפשר לשנות את חיי הזוגיות אם רוצים
+- הצעות מעשיות שאפשר לבחור, להתאים, לדחות או לדלג עליהן
+- אין הבטחה לשינוי, לזוגיות או לתוצאה מסוימת
 
 **תוכנית "הדרך" - 6 שלבים:**
 1. **גישה** - עבודה פנימית, סיפורים, גבולות (שבועות 1-3)
 2. **תקשורת** - היכרות עצמית, רגשות, צרכים (שבועות 4-5)
-3. **משיכה ומעבר** - אומץ, היכרויות, דייטים (שבועות 6-9)
-4. **חיבור וכימיה** - אינטימיות, פגיעות (שבועות 10-11)
-5. **מחויבות** - בניית זוגיות (שבוע 12)
+3. **משיכה ומעבר** - היכרויות ודייטים עם שיקול דעת (שבועות 6-7)
+4. **חיבור וכימיה** - תקשורת והיכרות מעמיקה (שבועות 8-10)
+5. **אינטימיות** - קרבה, פרטיות ופגיעוּת מבחירה (שבוע 11)
+6. **מחויבות** - החלטה הדדית ובטוחה (שבוע 12)
 
 **סגנון דיבור:**
 - עברית ישראלית יומיומית, לא פורמלית
 - ישיר וכן, לא עוטף בצמר גפן
 - מחמם ומעודד, לא שופט
 - שואל שאלות שמעמיקות את ההבנה
-- נותן עצות מעשיות
+- מציע אפשרויות ושאלות רפלקציה, לא הוראות מחייבות
 
 **חשוב:**
 - ענה תמיד בעברית
-- שאל שאלות כדי להבין טוב יותר
+- שאל רק מה שנחוץ; אל תבקש שמות, כתובות, צילומי מסך או פרטים מזהים
 - כשרלוונטי, הפנה לשיעורים בתוכנית
-- זכור את מה שסיפרו לך בשיחה`,
+- אל תאבחן, אל תנחש כוונות ואל תסיק הסכמה משפת גוף, שתיקה או אי-מענה
+- אל תדחוף פנייה, מגע, חשיפה, דייט נוסף, סליחה, פרידה פנים-אל-פנים או מחויבות
+- אם יש איום, אלימות, כפייה, מעקב, פגיעה עצמית או מצוקה חריפה: עצור עצות זוגיות, בדוק סכנה מיידית והפנה ל-/course-safety ולשירות חירום מתאים
+- הזכר כשנחוץ שההודעות נשמרות בחשבון ומעובדות אצל ספק AI חיצוני, ושלא כדאי לשלוח מידע רגיש`,
   },
   practice: {
-    label: "סימולטור דייט",
-    systemPrompt: `אתה בן/בת זוג פוטנציאלי בסימולציית היכרות. המשתמש מתרגל שיחות דייט.
+    label: "תרגול שיחה בדיוני",
+    systemPrompt: `אתה כלי AI שמגלם דמות בדיונית בתרגיל שיחת היכרות. אינך אדם אמיתי, בן או בת זוג פוטנציאליים, מטפל או מאמן.
 
-**המטרה:** לעזור לאדם להתאמן על שיחות היכרות בסביבה בטוחה.
+**המטרה:** לאפשר תרגול מוגבל של ניסוחים בשיחה בדיונית. אין להציג את התרגיל כסביבה נטולת סיכון או כחיזוי של תגובת אדם אמיתי.
 
 **ההנחיות:**
-- שחק את הדמות בצורה ריאליסטית - לא קל מדי ולא קשה מדי
-- גיב לשיחה כמו שאדם אמיתי היה מגיב
+- הזכר בתחילת התרגיל ובכל נקודת בלבול שזו דמות AI בדיונית
+- הגב כאפשרות בדיונית אחת בלבד, לא כאילו כך אדם אמיתי בהכרח היה מגיב
 - אחרי כל כמה הודעות, אפשר לצאת מהדמות ולתת משוב בסוגריים []
-- שאל שאלות מעניינות, גלה עניין אמיתי
+- אפשר לשאול שאלות קלות ולא מזהות; פרטיות, תשובה קצרה ודילוג הן בחירות תקינות
 - אם המשתמש אומר "תן לי משוב" - צא מהדמות ותן ניתוח קצר של השיחה
+- אל תדמה קטין, אלימות, כפייה, הטרדה, מעקב, השפלה או לחץ מיני
+- אל תתגמל התמדה אחרי "לא", אי-מענה או גבול; עצור והסבר שהגבול הוא תשובה מלאה
+- אל תציג את הסימולציה כהוכחה למשיכה, התאמה, הסכמה, כוונות או לכך שאדם אמיתי יסכים או יגיב כך
+- אל תבקש שם מלא, כתובת, מקום עבודה מדויק, פרטי קשר, צילומי מסך או מידע של צד שלישי
 
 **דמות ברירת מחדל:** אדם/אישה בשנות ה-30 לחיים, עובד/ת בתחום יצירתי, אוהב/ת טיולים ואוכל טוב.
 
 **ענה תמיד בעברית**`,
   },
   analysis: {
-    label: "ניתוח דייט",
-    systemPrompt: `אתה מומחה לניתוח שיחות ואינטראקציות זוגיות מטעם "אומנות הקשר".
+    label: "ניתוח טקסט ב-AI",
+    systemPrompt: `אתה כלי AI לרפלקציה על תיאור או טקסט של שיחה מטעם "אומנות הקשר". אינך מומחה קליני, מטפל, מאמן מוסמך או עד לאירוע, והניתוח עלול לטעות.
 
-**תפקידך:** לעזור למשתמש לנתח דייטים, שיחות, והתנהגויות שקרו לו.
+**תפקידך:** לעזור למשתמש להפריד בין מה שתיאר כעובדות, הפרשנויות שלו ואפשרויות נוספות — בלי לקבוע מה אדם אחר חש או התכוון.
 
 **כיצד לנתח:**
-1. **מה הלך טוב** - חיזוקים על מה עבד
-2. **מה ניתן לשפר** - הצעות ספציפיות לפעם הבאה
-3. **הדינמיקה** - מה הדמיקה בין השניים
-4. **הצעד הבא** - מה מומלץ לעשות עכשיו
+1. **מה ידוע מהתיאור** - העובדות שנמסרו, תוך ציון שחסר ההקשר של הצד השני
+2. **מה היה מועיל למשתמש** - לפי דבריו, לא כציון אובייקטיבי
+3. **אפשרויות לרפלקציה** - פרשנויות חלופיות ושאלות שאפשר לבחור לבדוק
+4. **צעדים אפשריים** - רק אם הם רצויים, מכבדים ובטוחים
+
+**גבולות הניתוח:**
+- הפרד בין עובדות, פרשנות ואי-ודאות; אל תנחש כוונות או אבחנות
+- אל תבקש או תעודד העתקת צ'אטים, שמות או פרטים מזהים של אדם אחר; אם הוזנו, אל תחזור עליהם שלא לצורך
+- אל תסיק עניין, הסכמה או "כימיה" משפת גוף, שתיקה או זמן תגובה
+- הצע לכל היותר אפשרויות שתלויות ברצון, הקשר ובטיחות; "לא" ואי-מענה אינם מכשול לפתרון
+- במצב של איום, אלימות, כפייה, מעקב או מצוקה חריפה הפנה ל-/course-safety במקום לייעץ על המשך הקשר
 
 **סגנון:**
 - ישיר ואמיתי
@@ -99,6 +120,7 @@ const CHAT_MODES = {
 export const listSessions = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
+    await requireClerkSubject(ctx, args.userId);
     const sessions = await ctx.db
       .query("chatSessions")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -115,6 +137,18 @@ export const getSession = query({
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId);
     if (!session) return null;
+    await requireOwnedClerkResource(ctx, session.userId);
+
+    if (session.lessonId) {
+      const lesson = await ctx.db.get(session.lessonId);
+      if (!lesson) throw new Error("LESSON_NOT_FOUND");
+      if (session.courseId && session.courseId !== lesson.courseId) {
+        throw new Error("LESSON_COURSE_MISMATCH");
+      }
+      await requireCourseContentAccess(ctx, lesson.courseId);
+    } else if (session.courseId) {
+      await requireCourseContentAccess(ctx, session.courseId);
+    }
 
     const messages = await ctx.db
       .query("chatMessages")
@@ -151,10 +185,17 @@ export const createSession = mutation({
     courseId: v.optional(v.id("courses")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    if (identity.subject !== args.userId) {
-      throw new Error("Not authorized to create a session for another user");
+    await requireClerkSubject(ctx, args.userId);
+
+    if (args.lessonId) {
+      const lesson = await ctx.db.get(args.lessonId);
+      if (!lesson) throw new Error("LESSON_NOT_FOUND");
+      if (args.courseId && args.courseId !== lesson.courseId) {
+        throw new Error("LESSON_COURSE_MISMATCH");
+      }
+      await requireCourseContentAccess(ctx, lesson.courseId);
+    } else if (args.courseId) {
+      await requireCourseContentAccess(ctx, args.courseId);
     }
 
     const now = Date.now();
@@ -193,8 +234,8 @@ export const createSession = mutation({
 // Helper: resolve lesson context from inside a mutation/query ctx.
 // Mirrors advisor.getLessonContext but usable in the createSession mutation.
 async function resolveLessonContext(
-  ctx: { db: any },
-  lessonId: any,
+  ctx: Pick<MutationCtx, "db">,
+  lessonId: Id<"lessons">,
   clerkUserId: string
 ): Promise<LessonContext | null> {
   const lesson = await ctx.db.get(lessonId);
@@ -202,27 +243,27 @@ async function resolveLessonContext(
 
   const allLessons = await ctx.db
     .query("lessons")
-    .withIndex("by_course", (q: any) => q.eq("courseId", lesson.courseId))
+    .withIndex("by_course", (q) => q.eq("courseId", lesson.courseId))
     .collect();
-  const publishedLessons = allLessons.filter((l: any) => l.published);
+  const publishedLessons = allLessons.filter((lessonRow) => lessonRow.published);
 
   let completedLessons = 0;
   let isLessonComplete = false;
   // Map clerk id -> convex user for progress lookup
   const convexUser = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", clerkUserId))
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkUserId))
     .first();
   if (convexUser) {
     const progress = await ctx.db
       .query("progress")
-      .withIndex("by_user_course", (q: any) =>
+      .withIndex("by_user_course", (q) =>
         q.eq("userId", convexUser._id).eq("courseId", lesson.courseId)
       )
       .collect();
-    completedLessons = progress.filter((p: any) => p.completed).length;
+    completedLessons = progress.filter((progressRow) => progressRow.completed).length;
     isLessonComplete =
-      progress.find((p: any) => p.lessonId === lessonId)?.completed === true;
+      progress.find((progressRow) => progressRow.lessonId === lessonId)?.completed === true;
   }
 
   return {
@@ -305,8 +346,7 @@ export const addAssistantMessage = internalMutation({
 export const deleteSession = mutation({
   args: { sessionId: v.id("chatSessions") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const identity = await requireIdentity(ctx);
 
     const session = await ctx.db.get(args.sessionId);
     if (!session) throw new Error("Session not found");
@@ -347,17 +387,14 @@ export const sendMessage = action({
   },
   handler: async (ctx, args): Promise<string> => {
     // 0. Auth: caller must be signed in and own the session
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const identity = await requireClerkSubject(ctx, args.userId);
 
-    const session = await ctx.runQuery(api.chat.getSession, {
+    const session = await ctx.runQuery(internal.chat.getOwnedSessionForAction, {
       sessionId: args.sessionId,
+      ownerUserId: identity.subject,
     });
 
     if (!session) throw new Error("Session not found");
-    if (session.userId !== identity.subject) {
-      throw new Error("Not authorized to send messages in this session");
-    }
 
     // 0b. Input validation — reject empty / oversized messages.
     const trimmed = args.userMessage.trim();
@@ -386,7 +423,7 @@ export const sendMessage = action({
 
     // 3. Get all messages (including system) for API call
     const allMessages = await ctx.runQuery(
-      api.chat.getMessagesForApi,
+      internal.chat.getMessagesForApi,
       { sessionId: args.sessionId }
     );
 
@@ -457,8 +494,48 @@ export const countRecentUserMessages = internalQuery({
   },
 });
 
+// Internal ownership lookup for actions. The public getSession query performs
+// its own auth check; actions use this internal query and pass the authenticated
+// subject so no public query needs to expose the system prompt or conversation.
+export const getOwnedSessionForAction = internalQuery({
+  args: {
+    sessionId: v.id("chatSessions"),
+    ownerUserId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) return null;
+    if (session.userId !== args.ownerUserId) {
+      throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+    }
+
+    if (session.lessonId) {
+      const lesson = await ctx.db.get(session.lessonId);
+      if (!lesson) throw new Error("LESSON_NOT_FOUND");
+      if (session.courseId && session.courseId !== lesson.courseId) {
+        throw new Error("LESSON_COURSE_MISMATCH");
+      }
+      await requireCourseContentAccess(ctx, lesson.courseId);
+    } else if (session.courseId) {
+      await requireCourseContentAccess(ctx, session.courseId);
+    }
+
+    const messages = await ctx.db
+      .query("chatMessages")
+      .withIndex("by_session_created", (q) =>
+        q.eq("sessionId", args.sessionId)
+      )
+      .order("asc")
+      .collect();
+    return {
+      ...session,
+      messages: messages.filter((message) => message.role !== "system"),
+    };
+  },
+});
+
 // Internal query to get messages for API (including system prompt)
-export const getMessagesForApi = query({
+export const getMessagesForApi = internalQuery({
   args: { sessionId: v.id("chatSessions") },
   handler: async (ctx, args) => {
     const messages = await ctx.db

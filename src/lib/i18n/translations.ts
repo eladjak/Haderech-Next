@@ -106,7 +106,7 @@ export const translations = {
       categories: {
         general: "כללי",
         datingTips: "טיפים לדייטינג",
-        successStories: "סיפורי הצלחה",
+        successStories: "שיתופים מהדרך",
         questions: "שאלות",
         advice: "עצות",
       },

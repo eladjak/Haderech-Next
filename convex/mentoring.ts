@@ -1,9 +1,18 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireUser } from "./lib/authGuard";
+
+// No mentor may be listed or booked until identity, professional claims,
+// service boundaries, privacy terms, price and availability are verified.
+// Existing sessions remain readable/manageable so this containment does not
+// strand user records or silently delete commitments.
+const VERIFIED_MENTORING_AVAILABLE = false;
 
 // שליפת כל המנטורים הזמינים
 export const listMentors = query({
   handler: async (ctx) => {
+    if (!VERIFIED_MENTORING_AVAILABLE) return [];
+    await requireUser(ctx);
     const mentors = await ctx.db
       .query("mentors")
       .withIndex("by_available", (q) => q.eq("available", true))
@@ -16,7 +25,6 @@ export const listMentors = query({
         return {
           ...mentor,
           userImage: user?.imageUrl ?? null,
-          userEmail: user?.email ?? null,
         };
       })
     );
@@ -29,6 +37,8 @@ export const listMentors = query({
 export const getMentor = query({
   args: { mentorId: v.id("mentors") },
   handler: async (ctx, args) => {
+    if (!VERIFIED_MENTORING_AVAILABLE) return null;
+    await requireUser(ctx);
     const mentor = await ctx.db.get(args.mentorId);
     if (!mentor) return null;
 
@@ -36,7 +46,6 @@ export const getMentor = query({
     return {
       ...mentor,
       userImage: user?.imageUrl ?? null,
-      userEmail: user?.email ?? null,
     };
   },
 });
@@ -125,6 +134,10 @@ export const bookSession = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    if (!VERIFIED_MENTORING_AVAILABLE) {
+      throw new Error("Mentoring booking is unavailable pending provider and service verification");
+    }
+
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 

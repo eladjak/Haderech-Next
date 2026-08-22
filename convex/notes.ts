@@ -1,5 +1,9 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  requireLessonCourseAccess,
+  requireSelfOrAdmin,
+} from "./lib/authGuard";
 
 // שליפת הערה של משתמש לשיעור
 export const getForLesson = query({
@@ -8,6 +12,7 @@ export const getForLesson = query({
     lessonId: v.id("lessons"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("notes")
       .withIndex("by_user_lesson", (q) =>
@@ -24,6 +29,7 @@ export const listByCourse = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const notes = await ctx.db
       .query("notes")
       .withIndex("by_user_course", (q) =>
@@ -51,6 +57,7 @@ export const listByCourse = query({
 export const listAll = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const notes = await ctx.db
       .query("notes")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -80,14 +87,11 @@ export const save = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const { user } = await requireLessonCourseAccess(
+      ctx,
+      args.lessonId,
+      args.courseId
+    );
 
     if (args.content.length > 10000)
       throw new Error("Note too long (max 10000 characters)");
@@ -125,21 +129,9 @@ export const save = mutation({
 export const remove = mutation({
   args: { id: v.id("notes") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
-
     const note = await ctx.db.get(args.id);
     if (!note) throw new Error("Note not found");
-
-    if (note.userId !== user._id) {
-      throw new Error("Not authorized to delete this note");
-    }
+    await requireSelfOrAdmin(ctx, note.userId);
 
     await ctx.db.delete(args.id);
   },

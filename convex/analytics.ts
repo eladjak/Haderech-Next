@@ -1,5 +1,13 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  requireCourseContentAccess,
+  requireSelfOrAdmin,
+} from "./lib/authGuard";
+import {
+  averagePassedQuizScore,
+  learnerVisibleQuizScore,
+} from "./lib/quizAssessmentPolicy";
 
 // סטטיסטיקות כלליות של סטודנט
 export const getStudentOverview = query({
@@ -7,6 +15,7 @@ export const getStudentOverview = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // קורסים שנרשם אליהם
     const enrollments = await ctx.db
       .query("enrollments")
@@ -28,19 +37,13 @@ export const getStudentOverview = query({
     // ניסיונות בחנים
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
 
     const completedLessons = allProgress.filter((p) => p.completed).length;
     const totalLessonsStarted = allProgress.length;
-    const averageQuizScore =
-      userAttempts.length > 0
-        ? Math.round(
-            userAttempts.reduce((sum, a) => sum + a.score, 0) /
-              userAttempts.length
-          )
-        : 0;
+    const averageQuizScore = averagePassedQuizScore(userAttempts) ?? 0;
 
     // סך זמן צפייה (שניות)
     const totalWatchTimeSeconds = allProgress.reduce(
@@ -66,6 +69,7 @@ export const getCourseProgress = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const enrollments = await ctx.db
       .query("enrollments")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -73,6 +77,11 @@ export const getCourseProgress = query({
 
     const courseProgressData = await Promise.all(
       enrollments.map(async (enrollment) => {
+        try {
+          await requireCourseContentAccess(ctx, enrollment.courseId);
+        } catch {
+          return null;
+        }
         const course = await ctx.db.get(enrollment.courseId);
         if (!course) return null;
 
@@ -128,12 +137,17 @@ export const getQuizScoreHistory = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
 
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
+
+    for (const courseId of new Set(userAttempts.map((attempt) => attempt.courseId))) {
+      await requireCourseContentAccess(ctx, courseId);
+    }
 
     // העשרה עם שם הבוחן והקורס
     const enrichedAttempts = await Promise.all(
@@ -145,7 +159,7 @@ export const getQuizScoreHistory = query({
           attemptId: attempt._id,
           quizTitle: quiz?.title ?? "בוחן לא ידוע",
           courseTitle: course?.title ?? "קורס לא ידוע",
-          score: attempt.score,
+          score: learnerVisibleQuizScore(attempt),
           passed: attempt.passed,
           attemptedAt: attempt.attemptedAt,
         };
@@ -163,6 +177,7 @@ export const getLearningStreak = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const allProgress = await ctx.db
       .query("progress")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -184,10 +199,10 @@ export const getLearningStreak = query({
     // גם ניסיונות בחנים נחשבים כפעילות
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
 
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
     for (const a of userAttempts) {
       const date = new Date(a.attemptedAt);
       const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -261,6 +276,8 @@ export const getNextLesson = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
+    await requireCourseContentAccess(ctx, args.courseId);
     // Get all published lessons for this course, ordered by their order field
     const lessons = await ctx.db
       .query("lessons")
@@ -310,6 +327,7 @@ export const getContinueLearningData = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const enrollments = await ctx.db
       .query("enrollments")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -319,6 +337,11 @@ export const getContinueLearningData = query({
 
     const coursesWithNextLesson = await Promise.all(
       enrollments.map(async (enrollment) => {
+        try {
+          await requireCourseContentAccess(ctx, enrollment.courseId);
+        } catch {
+          return null;
+        }
         const course = await ctx.db.get(enrollment.courseId);
         if (!course) return null;
 
@@ -418,6 +441,7 @@ export const getAchievements = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const achievements: Array<{
       id: string;
       title: string;
@@ -449,9 +473,9 @@ export const getAchievements = query({
     // בחנים
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
     const passedAttempts = userAttempts.filter((a) => a.passed);
 
     // streak
@@ -463,11 +487,11 @@ export const getAchievements = query({
       );
     }
 
-    // הישג: צעד ראשון - נרשם לקורס
+    // הישג ניווט בלבד: enrollment עצמי שומר קורס, אך אינו מעניק גישה.
     achievements.push({
       id: "first_enrollment",
-      title: "צעד ראשון",
-      description: "נרשמת לקורס הראשון שלך",
+      title: "שמירה ראשונה",
+      description: "שמרת קורס ראשון בחשבון",
       icon: "rocket",
       earned: enrollments.length >= 1,
       earnedAt: enrollments.length >= 1 ? enrollments[0].enrolledAt : undefined,
@@ -487,7 +511,7 @@ export const getAchievements = query({
     });
 
     // הישג: מצטיין - עבר בוחן עם ציון מושלם
-    const perfectScore = userAttempts.find((a) => a.score === 100);
+    const perfectScore = userAttempts.find((a) => a.passed && a.score === 100);
     achievements.push({
       id: "perfect_score",
       title: "מצטיין",

@@ -109,6 +109,54 @@ export default defineSchema({
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"]),
 
+  // Privacy requests are intake/audit records only. A request row is not
+  // evidence that data was deleted, corrected, or disclosed.
+  privacyRequests: defineTable({
+    userId: v.id("users"),
+    clerkId: v.string(),
+    requestType: v.union(
+      v.literal("access"),
+      v.literal("correction"),
+      v.literal("deletion"),
+      v.literal("marketing_objection")
+    ),
+    status: v.union(
+      v.literal("received"),
+      v.literal("identity_verification_required"),
+      v.literal("in_review"),
+      v.literal("completed"),
+      v.literal("rejected"),
+      v.literal("cancelled")
+    ),
+    identityVerification: v.union(
+      v.literal("authenticated_session_only"),
+      v.literal("manual_verification_required"),
+      v.literal("verified")
+    ),
+    requestedAt: v.number(),
+    updatedAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_type", ["userId", "requestType"])
+    .index("by_status", ["status"]),
+
+  // Append-only consent decisions. This records what an authenticated user
+  // decided; it does not by itself prove that every third-party script obeyed
+  // the decision.
+  privacyConsents: defineTable({
+    userId: v.id("users"),
+    clerkId: v.string(),
+    consentType: v.union(v.literal("analytics"), v.literal("marketing")),
+    decision: v.union(v.literal("granted"), v.literal("withdrawn")),
+    purpose: v.string(),
+    policyVersion: v.string(),
+    source: v.literal("authenticated_api"),
+    decidedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_type", ["userId", "consentType"]),
+
   // הרשמות לקורסים
   enrollments: defineTable({
     userId: v.id("users"),
@@ -118,6 +166,31 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_course", ["courseId"])
     .index("by_user_course", ["userId", "courseId"]),
+
+  // A trusted content grant is deliberately separate from an enrollment.
+  // Enrollments are self-service navigation records and never prove payment.
+  // No public mutation creates these rows in this repository.
+  courseEntitlements: defineTable({
+    userId: v.id("users"),
+    courseId: v.id("courses"),
+    status: v.union(
+      v.literal("active"),
+      v.literal("revoked"),
+      v.literal("expired")
+    ),
+    source: v.union(
+      v.literal("admin_grant"),
+      v.literal("verified_order")
+    ),
+    sourceReference: v.optional(v.string()),
+    grantedBy: v.optional(v.id("users")),
+    grantedAt: v.number(),
+    validUntil: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_course", ["userId", "courseId"])
+    .index("by_course_status", ["courseId", "status"]),
 
   // התקדמות בשיעורים
   progress: defineTable({
@@ -141,7 +214,12 @@ export default defineSchema({
     courseId: v.id("courses"),
     title: v.string(),
     passingScore: v.number(), // 0-100, ציון מעבר
+    // Stable canonical identity and digest for deterministic assessment sync.
+    // Optional so existing rows can be adopted without a destructive migration.
+    sourceKey: v.optional(v.string()),
+    contentHash: v.optional(v.string()),
     createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_lesson", ["lessonId"])
     .index("by_course", ["courseId"]),
@@ -149,6 +227,11 @@ export default defineSchema({
   // שאלות בבוחן
   quizQuestions: defineTable({
     quizId: v.id("quizzes"),
+    // Stable ID from the canonical course quiz (for example w3q7).
+    sourceId: v.optional(v.string()),
+    questionType: v.optional(
+      v.union(v.literal("multiple_choice"), v.literal("true_false"))
+    ),
     question: v.string(),
     options: v.array(v.string()), // אפשרויות תשובה
     correctIndex: v.number(), // אינדקס התשובה הנכונה
@@ -230,7 +313,7 @@ export default defineSchema({
     .index("by_user_course", ["userId", "courseId"])
     .index("by_certificate_number", ["certificateNumber"]),
 
-  // סשנים של צ'אט עם המאמן AI
+  // סשנים עם כלי ה-AI לרפלקציה ולתרגול
   chatSessions: defineTable({
     userId: v.string(), // Clerk user ID
     title: v.optional(v.string()),
@@ -283,14 +366,15 @@ export default defineSchema({
     published: v.boolean(),
     order: v.number(),
     createdAt: v.number(),
-    // --- Phase 22: persona depth from Elad's typology (all optional/additive) ---
-    /** הטיפוס מתורת אומנות-הקשר (למשל "החרדה שנפגעה בעבר") */
+    // Fictional writing cues only. Legacy names remain for data compatibility;
+    // none of these fields diagnoses a person or measures attraction/consent.
+    /** רמז כתיבה בדיוני לדמות, לא טיפוס אישיות או אבחון */
     personaArchetype: v.optional(v.string()),
-    /** רמת המשיכה הדומיננטית: שכלית / רגשית / פיזית */
+    /** העדפת שיחה אפשרית בתוך הסצנה בלבד; לא מדד משיכה */
     attractionProfile: v.optional(v.string()),
-    /** מה מכבה את הפרסונה (תלונות, חקירה, התנשאות...) */
+    /** נושאים או התנהגויות שהדמות רשאית להציב מולם גבול */
     triggers: v.optional(v.array(v.string())),
-    /** מה מקרב אותה (סקרנות אמיתית, פגיעות מדודה, הומור...) */
+    /** נושאי שיחה אפשריים, ללא הבטחת קרבה או תגמול */
     openers: v.optional(v.array(v.string())),
     /** ביטים של הבמאי — הנחיה שנכנסת בתור מסוים */
     beats: v.optional(
@@ -321,10 +405,10 @@ export default defineSchema({
     improvements: v.optional(v.array(v.string())),
     createdAt: v.number(),
     completedAt: v.optional(v.number()),
-    // --- Phase 22: director state (emotional arc) + deep debrief ---
-    /** מד-החיבור הנוכחי 0-100 (הבמאי מעדכן כל תור) */
+    // Fictional scenario-response state retained for compatibility and debrief.
+    /** מד תגובת הסצנה 0-100; אינו משיכה, התאמה, הסכמה או ציון אישי */
     currentConnection: v.optional(v.number()),
-    /** היסטוריית מד-החיבור — גרף הקשת הרגשית בדיבריף */
+    /** היסטוריית תגובת הסצנה הבדיונית לצורך דיבריף מוגבל */
     connectionLog: v.optional(
       v.array(v.object({ turn: v.number(), connection: v.number() }))
     ),
@@ -530,6 +614,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_status", ["status"])
+    .index("by_user", ["userId"])
     .index("by_created", ["createdAt"]),
 
   // XP אירועים
@@ -658,6 +743,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_slug", ["slug"])
+    .index("by_author", ["authorId"])
     .index("by_published", ["published"])
     .index("by_category", ["category"])
     .index("by_created", ["createdAt"]),
@@ -709,7 +795,7 @@ export default defineSchema({
     .index("by_subscription", ["subscriptionId"])
     .index("by_status", ["status"]),
 
-  // סיפורי הצלחה / עדויות
+  // עדויות משתתפים — פרסום מחייב אימות מקור והסכמה מפורשת
   successStories: defineTable({
     userId: v.optional(v.id("users")),
     name: v.string(), // can be anonymous
@@ -727,6 +813,7 @@ export default defineSchema({
     ),
     createdAt: v.number(),
   })
+    .index("by_user", ["userId"])
     .index("by_approved", ["approved"])
     .index("by_featured", ["featured"])
     .index("by_category", ["category"]),

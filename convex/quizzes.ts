@@ -1,6 +1,16 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAdmin, requireSelfOrAdmin } from "./lib/authGuard";
+import {
+  requireAdmin,
+  requireCourseContentAccess,
+  requireSelfOrAdmin,
+} from "./lib/authGuard";
+import {
+  toLearnerQuizQuestion,
+  toQuizAttemptSummary,
+} from "./lib/authorizationPolicy";
+import { submitLearnerQuizAttempt } from "./lib/quizSubmission";
+import { assertValidQuizPassingScore } from "./lib/quizAssessmentPolicy";
 
 // שליפת בוחן לפי שיעור (alias לשימוש מהדף החדש)
 export const getQuizByLesson = query({
@@ -12,13 +22,16 @@ export const getQuizByLesson = query({
       .first();
 
     if (!quiz) return null;
+    await requireCourseContentAccess(ctx, quiz.courseId);
 
     const questions = await ctx.db
       .query("quizQuestions")
       .withIndex("by_quiz", (q) => q.eq("quizId", quiz._id))
       .collect();
 
-    const sortedQuestions = [...questions].sort((a, b) => a.order - b.order);
+    const sortedQuestions = [...questions]
+      .sort((a, b) => a.order - b.order)
+      .map(toLearnerQuizQuestion);
     return { ...quiz, questions: sortedQuestions };
   },
 });
@@ -33,53 +46,7 @@ export const submitQuizAnswer = mutation({
     answers: v.array(v.number()),
     timeTakenSeconds: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
-    await requireSelfOrAdmin(ctx, args.userId);
-    const questions = await ctx.db
-      .query("quizQuestions")
-      .withIndex("by_quiz", (q) => q.eq("quizId", args.quizId))
-      .collect();
-
-    if (questions.length === 0) throw new Error("Quiz has no questions");
-
-    const sortedQuestions = [...questions].sort((a, b) => a.order - b.order);
-    let correctCount = 0;
-    for (let i = 0; i < sortedQuestions.length; i++) {
-      if (args.answers[i] === sortedQuestions[i].correctIndex) correctCount++;
-    }
-
-    const score = Math.round((correctCount / sortedQuestions.length) * 100);
-    const quiz = await ctx.db.get(args.quizId);
-    if (!quiz) throw new Error("Quiz not found");
-    const passed = score >= quiz.passingScore;
-
-    const attemptId = await ctx.db.insert("quizAttempts", {
-      userId: args.userId,
-      quizId: args.quizId,
-      lessonId: args.lessonId,
-      courseId: args.courseId,
-      answers: args.answers,
-      score,
-      passed,
-      attemptedAt: Date.now(),
-    });
-
-    const allAttempts = await ctx.db
-      .query("quizAttempts")
-      .withIndex("by_user_quiz", (q) =>
-        q.eq("userId", args.userId).eq("quizId", args.quizId)
-      )
-      .collect();
-
-    return {
-      attemptId,
-      score,
-      passed,
-      correctCount,
-      totalQuestions: sortedQuestions.length,
-      attemptNumber: allAttempts.length,
-    };
-  },
+  handler: submitLearnerQuizAttempt,
 });
 
 // שליפת תוצאות בחנים של משתמש בקורס
@@ -89,6 +56,8 @@ export const getQuizResults = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
+    await requireCourseContentAccess(ctx, args.courseId);
     const attempts = await ctx.db
       .query("quizAttempts")
       .withIndex("by_user_course", (q) =>
@@ -101,7 +70,7 @@ export const getQuizResults = query({
       attempts.map(async (attempt) => {
         const quiz = await ctx.db.get(attempt.quizId);
         return {
-          ...attempt,
+          ...toQuizAttemptSummary(attempt),
           quizTitle: quiz?.title ?? "בוחן לא נמצא",
         };
       })
@@ -116,42 +85,13 @@ export const getQuizResults = query({
 export const getQuizStats = query({
   args: { courseId: v.optional(v.id("courses")) },
   handler: async (ctx, args) => {
-    let allAttempts;
-    if (args.courseId) {
-      allAttempts = await ctx.db
-        .query("quizAttempts")
-        .filter((q) => q.eq(q.field("courseId"), args.courseId))
-        .collect();
-    } else {
-      // Collect all attempts (no per-course filter)
-      allAttempts = await ctx.db.query("quizAttempts").collect();
-    }
-
-    if (allAttempts.length === 0) {
-      return {
-        totalAttempts: 0,
-        uniqueStudents: 0,
-        averageScore: 0,
-        passRate: 0,
-        totalQuizzesTaken: 0,
-      };
-    }
-
-    const totalPassed = allAttempts.filter((a) => a.passed).length;
-    const averageScore = Math.round(
-      allAttempts.reduce((sum, a) => sum + a.score, 0) / allAttempts.length
-    );
-    const uniqueStudents = new Set(allAttempts.map((a) => a.userId)).size;
-    const uniqueQuizzes = new Set(allAttempts.map((a) => a.quizId)).size;
-    const passRate = Math.round((totalPassed / allAttempts.length) * 100);
-
-    return {
-      totalAttempts: allAttempts.length,
-      uniqueStudents,
-      averageScore,
-      passRate,
-      totalQuizzesTaken: uniqueQuizzes,
-    };
+    await requireAdmin(ctx);
+    void args;
+    // There is currently no course-first index on quizAttempts. Returning
+    // partial aggregates would be misleading, while collect() can become an
+    // unbounded self-DoS. Keep this unused admin surface fail-closed until a
+    // separately approved schema/index change enables bounded pagination.
+    throw new Error("QUIZ_STATS_REQUIRES_BOUNDED_INDEX");
   },
 });
 
@@ -159,10 +99,25 @@ export const getQuizStats = query({
 export const getByLesson = query({
   args: { lessonId: v.id("lessons") },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const quiz = await ctx.db
       .query("quizzes")
       .withIndex("by_lesson", (q) => q.eq("lessonId", args.lessonId))
       .first();
+    if (!quiz) return null;
+    await requireCourseContentAccess(ctx, quiz.courseId);
+    return quiz;
+  },
+});
+
+// Learner-facing quiz metadata. Questions are projected separately so the
+// answer key never shares a response envelope with public quiz data.
+export const getById = query({
+  args: { quizId: v.id("quizzes") },
+  handler: async (ctx, args) => {
+    const quiz = await ctx.db.get(args.quizId);
+    if (!quiz) return null;
+    await requireCourseContentAccess(ctx, quiz.courseId);
+    return quiz;
   },
 });
 
@@ -170,10 +125,16 @@ export const getByLesson = query({
 export const getQuestions = query({
   args: { quizId: v.id("quizzes") },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const quiz = await ctx.db.get(args.quizId);
+    if (!quiz) return [];
+    await requireCourseContentAccess(ctx, quiz.courseId);
+    const questions = await ctx.db
       .query("quizQuestions")
       .withIndex("by_quiz", (q) => q.eq("quizId", args.quizId))
       .collect();
+    return questions
+      .sort((a, b) => a.order - b.order)
+      .map(toLearnerQuizQuestion);
   },
 });
 
@@ -184,6 +145,10 @@ export const getLastAttempt = query({
     quizId: v.id("quizzes"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
+    const quiz = await ctx.db.get(args.quizId);
+    if (!quiz) return null;
+    await requireCourseContentAccess(ctx, quiz.courseId);
     const attempts = await ctx.db
       .query("quizAttempts")
       .withIndex("by_user_quiz", (q) =>
@@ -194,9 +159,10 @@ export const getLastAttempt = query({
     if (attempts.length === 0) return null;
 
     // החזר את הניסיון האחרון
-    return attempts.reduce((latest, attempt) =>
-      attempt.attemptedAt > latest.attemptedAt ? attempt : latest
+    const latest = attempts.reduce((latestAttempt, attempt) =>
+      attempt.attemptedAt > latestAttempt.attemptedAt ? attempt : latestAttempt
     );
+    return toQuizAttemptSummary(latest);
   },
 });
 
@@ -209,48 +175,7 @@ export const submitAttempt = mutation({
     courseId: v.id("courses"),
     answers: v.array(v.number()),
   },
-  handler: async (ctx, args) => {
-    await requireSelfOrAdmin(ctx, args.userId);
-    // שליפת השאלות
-    const questions = await ctx.db
-      .query("quizQuestions")
-      .withIndex("by_quiz", (q) => q.eq("quizId", args.quizId))
-      .collect();
-
-    if (questions.length === 0) {
-      throw new Error("Quiz has no questions");
-    }
-
-    // חישוב ציון
-    const sortedQuestions = [...questions].sort((a, b) => a.order - b.order);
-    let correctCount = 0;
-    for (let i = 0; i < sortedQuestions.length; i++) {
-      if (args.answers[i] === sortedQuestions[i].correctIndex) {
-        correctCount++;
-      }
-    }
-
-    const score = Math.round((correctCount / sortedQuestions.length) * 100);
-
-    // שליפת ציון מעבר
-    const quiz = await ctx.db.get(args.quizId);
-    if (!quiz) throw new Error("Quiz not found");
-
-    const passed = score >= quiz.passingScore;
-
-    const attemptId = await ctx.db.insert("quizAttempts", {
-      userId: args.userId,
-      quizId: args.quizId,
-      lessonId: args.lessonId,
-      courseId: args.courseId,
-      answers: args.answers,
-      score,
-      passed,
-      attemptedAt: Date.now(),
-    });
-
-    return { attemptId, score, passed, correctCount, totalQuestions: sortedQuestions.length };
-  },
+  handler: submitLearnerQuizAttempt,
 });
 
 // יצירת בוחן (למנהלים)
@@ -271,6 +196,7 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    assertValidQuizPassingScore(args.passingScore);
     const quizId = await ctx.db.insert("quizzes", {
       lessonId: args.lessonId,
       courseId: args.courseId,

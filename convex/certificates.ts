@@ -1,12 +1,18 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSelfOrAdmin } from "./lib/authGuard";
+import {
+  requireCourseContentAccess,
+  requireSelfOrAdmin,
+  requireUser,
+} from "./lib/authGuard";
+import { toPublicCertificate } from "./lib/authorizationPolicy";
 
 // שליפת תעודה לפי ID (ציבורי - לשיתוף)
 export const getCertificate = query({
   args: { id: v.id("certificates") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const certificate = await ctx.db.get(args.id);
+    return certificate ? toPublicCertificate(certificate) : null;
   },
 });
 
@@ -14,14 +20,7 @@ export const getCertificate = query({
 export const getUserCertificates = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) return [];
+    const user = await requireUser(ctx);
 
     return await ctx.db
       .query("certificates")
@@ -36,14 +35,7 @@ export const generateCertificate = mutation({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await requireCourseContentAccess(ctx, args.courseId);
 
     // בדיקה שאין כבר תעודה
     const existing = await ctx.db
@@ -112,6 +104,7 @@ export const getByUserAndCourse = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("certificates")
       .withIndex("by_user_course", (q) =>
@@ -125,6 +118,7 @@ export const getByUserAndCourse = query({
 export const listByUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("certificates")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -136,12 +130,13 @@ export const listByUser = query({
 export const verifyByCertificateNumber = query({
   args: { certificateNumber: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const certificate = await ctx.db
       .query("certificates")
       .withIndex("by_certificate_number", (q) =>
         q.eq("certificateNumber", args.certificateNumber)
       )
       .first();
+    return certificate ? toPublicCertificate(certificate) : null;
   },
 });
 
@@ -153,6 +148,7 @@ export const issue = mutation({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    await requireCourseContentAccess(ctx, args.courseId);
     // בדיקה שאין כבר תעודה
     const existing = await ctx.db
       .query("certificates")

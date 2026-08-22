@@ -1,6 +1,10 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSelfOrAdmin } from "./lib/authGuard";
+import {
+  requireCourseContentAccess,
+  requireLessonCourseAccess,
+  requireSelfOrAdmin,
+} from "./lib/authGuard";
 
 // ---- Watch-time & resume helpers (auth-based, no userId arg) ----
 
@@ -13,14 +17,11 @@ export const updateWatchTime = mutation({
     progressPercent: v.number(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const { user } = await requireLessonCourseAccess(
+      ctx,
+      args.lessonId,
+      args.courseId
+    );
 
     const existing = await ctx.db
       .query("progress")
@@ -64,14 +65,9 @@ export const updateWatchTime = mutation({
 export const getLessonProgress = query({
   args: { lessonId: v.id("lessons") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) return null;
+    const lesson = await ctx.db.get(args.lessonId);
+    if (!lesson) return null;
+    const user = await requireCourseContentAccess(ctx, lesson.courseId);
 
     return await ctx.db
       .query("progress")
@@ -89,6 +85,10 @@ export const getForLesson = query({
     lessonId: v.id("lessons"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
+    const lesson = await ctx.db.get(args.lessonId);
+    if (!lesson) return null;
+    await requireCourseContentAccess(ctx, lesson.courseId);
     return await ctx.db
       .query("progress")
       .withIndex("by_user_lesson", (q) =>
@@ -105,6 +105,8 @@ export const getForCourse = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
+    await requireCourseContentAccess(ctx, args.courseId);
     return await ctx.db
       .query("progress")
       .withIndex("by_user_course", (q) =>
@@ -121,6 +123,8 @@ export const getCourseCompletion = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
+    await requireCourseContentAccess(ctx, args.courseId);
     const lessons = await ctx.db
       .query("lessons")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
@@ -151,6 +155,7 @@ export const updateProgress = mutation({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    await requireLessonCourseAccess(ctx, args.lessonId, args.courseId);
     const now = Date.now();
     const completed = args.progressPercent >= 90;
 
@@ -196,6 +201,7 @@ export const markComplete = mutation({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    await requireLessonCourseAccess(ctx, args.lessonId, args.courseId);
     const now = Date.now();
 
     const existing = await ctx.db

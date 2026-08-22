@@ -1,5 +1,11 @@
-import { query, mutation } from "./_generated/server";
+import {
+  query,
+  mutation,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 
 // ==========================================
 // Leaderboard, Weekly Challenges & Rewards
@@ -7,53 +13,27 @@ import { v } from "convex/values";
 // ==========================================
 
 // --- Helper: get user from auth ---
-async function requireUser(ctx: {
-  auth: { getUserIdentity: () => Promise<{ subject: string } | null> };
-  db: any;
-}) {
+async function requireUser(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Not authenticated");
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
     .unique();
   if (!user) throw new Error("User not found");
-  return user as {
-    _id: import("./_generated/dataModel").Id<"users">;
-    clerkId: string;
-    name?: string;
-    imageUrl?: string;
-  };
+  return user;
 }
 
 // --- Helper: compute XP for a user from xpEvents table ---
 async function getUserTotalXP(
-  db: any,
-  userId: import("./_generated/dataModel").Id<"users">
+  db: QueryCtx["db"],
+  userId: Id<"users">
 ): Promise<number> {
   const events = await db
     .query("xpEvents")
-    .withIndex("by_user", (q: any) => q.eq("userId", userId))
+    .withIndex("by_user", (q) => q.eq("userId", userId))
     .collect();
-  return (events as Array<{ points: number }>).reduce(
-    (sum, e) => sum + e.points,
-    0
-  );
-}
-
-// --- Helper: compute XP for a user in a time range ---
-async function getUserXPInRange(
-  db: any,
-  userId: import("./_generated/dataModel").Id<"users">,
-  fromTs: number
-): Promise<number> {
-  const events = await db
-    .query("xpEvents")
-    .withIndex("by_user", (q: any) => q.eq("userId", userId))
-    .collect();
-  return (events as Array<{ points: number; createdAt: number }>)
-    .filter((e) => e.createdAt >= fromTs)
-    .reduce((sum, e) => sum + e.points, 0);
+  return events.reduce((sum, event) => sum + event.points, 0);
 }
 
 // --- Helper: level from XP ---
@@ -85,86 +65,27 @@ function startOfMonthTs(): number {
 export const getWeeklyLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    const fromTs = startOfWeekTs();
-    const users = await ctx.db.query("users").collect();
-
-    const entries = await Promise.all(
-      users.map(async (user: any) => {
-        const xp = await getUserXPInRange(ctx.db, user._id, fromTs);
-        return {
-          userId: user._id,
-          name: user.name ?? "סטודנט",
-          imageUrl: user.imageUrl ?? null,
-          xp,
-          level: levelFromXP(await getUserTotalXP(ctx.db, user._id)),
-        };
-      })
-    );
-
-    return entries
-      .filter((e) => e.xp > 0)
-      .sort((a, b) => b.xp - a.xp)
-      .slice(0, 20)
-      .map((e, i) => ({ ...e, rank: i + 1 }));
+    await requireUser(ctx);
+    // A truthful social ranking needs a bounded, consent-aware aggregate.
+    // Until that exists, keep this compatibility endpoint fail-closed instead
+    // of scanning every learner and exposing an improvised comparison table.
+    return [];
   },
 });
 
 export const getMonthlyLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    const fromTs = startOfMonthTs();
-    const users = await ctx.db.query("users").collect();
-
-    const entries = await Promise.all(
-      users.map(async (user: any) => {
-        const xp = await getUserXPInRange(ctx.db, user._id, fromTs);
-        return {
-          userId: user._id,
-          name: user.name ?? "סטודנט",
-          imageUrl: user.imageUrl ?? null,
-          xp,
-          level: levelFromXP(await getUserTotalXP(ctx.db, user._id)),
-        };
-      })
-    );
-
-    return entries
-      .filter((e) => e.xp > 0)
-      .sort((a, b) => b.xp - a.xp)
-      .slice(0, 20)
-      .map((e, i) => ({ ...e, rank: i + 1 }));
+    await requireUser(ctx);
+    return [];
   },
 });
 
 export const getAllTimeLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
-
-    const entries = await Promise.all(
-      users.map(async (user: any) => {
-        const xp = await getUserTotalXP(ctx.db, user._id);
-        const badgeCount = await ctx.db
-          .query("userBadges")
-          .withIndex("by_user", (q: any) => q.eq("userId", user._id))
-          .collect()
-          .then((b: any[]) => b.length);
-        return {
-          userId: user._id,
-          name: user.name ?? "סטודנט",
-          imageUrl: user.imageUrl ?? null,
-          xp,
-          level: levelFromXP(xp),
-          badgeCount,
-        };
-      })
-    );
-
-    return entries
-      .filter((e) => e.xp > 0)
-      .sort((a, b) => b.xp - a.xp)
-      .slice(0, 20)
-      .map((e, i) => ({ ...e, rank: i + 1 }));
+    await requireUser(ctx);
+    return [];
   },
 });
 
@@ -183,51 +104,33 @@ export const getUserRank = query({
     const weekFromTs = startOfWeekTs();
     const monthFromTs = startOfMonthTs();
 
-    const allUsers = await ctx.db.query("users").collect();
-
-    // Calculate XP for all users in each timeframe
-    const allEntries = await Promise.all(
-      allUsers.map(async (u: any) => {
-        const totalXp = await getUserTotalXP(ctx.db, u._id);
-        const weekXp = await getUserXPInRange(ctx.db, u._id, weekFromTs);
-        const monthXp = await getUserXPInRange(ctx.db, u._id, monthFromTs);
-        return { userId: u._id, totalXp, weekXp, monthXp };
-      })
-    );
-
-    const sortedByWeek = [...allEntries]
-      .filter((e) => e.weekXp > 0)
-      .sort((a, b) => b.weekXp - a.weekXp);
-    const sortedByMonth = [...allEntries]
-      .filter((e) => e.monthXp > 0)
-      .sort((a, b) => b.monthXp - a.monthXp);
-    const sortedByAll = [...allEntries]
-      .filter((e) => e.totalXp > 0)
-      .sort((a, b) => b.totalXp - a.totalXp);
-
-    const weekRank =
-      sortedByWeek.findIndex((e) => e.userId === user._id) + 1 || null;
-    const monthRank =
-      sortedByMonth.findIndex((e) => e.userId === user._id) + 1 || null;
-    const allTimeRank =
-      sortedByAll.findIndex((e) => e.userId === user._id) + 1 || null;
-
-    const myEntry = allEntries.find((e) => e.userId === user._id);
+    const events = await ctx.db
+      .query("xpEvents")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    const totalXp = events.reduce((sum, event) => sum + event.points, 0);
+    const weekXp = events
+      .filter((event) => event.createdAt >= weekFromTs)
+      .reduce((sum, event) => sum + event.points, 0);
+    const monthXp = events
+      .filter((event) => event.createdAt >= monthFromTs)
+      .reduce((sum, event) => sum + event.points, 0);
 
     return {
       userId: user._id,
       name: user.name ?? "סטודנט",
       imageUrl: user.imageUrl ?? null,
-      totalXp: myEntry?.totalXp ?? 0,
-      weekXp: myEntry?.weekXp ?? 0,
-      monthXp: myEntry?.monthXp ?? 0,
-      level: levelFromXP(myEntry?.totalXp ?? 0),
-      weekRank,
-      monthRank,
-      allTimeRank,
-      weekTotal: sortedByWeek.length,
-      monthTotal: sortedByMonth.length,
-      allTimeTotal: sortedByAll.length,
+      totalXp,
+      weekXp,
+      monthXp,
+      level: levelFromXP(totalXp),
+      comparisonStatus: "unavailable" as const,
+      weekRank: null,
+      monthRank: null,
+      allTimeRank: null,
+      weekTotal: null,
+      monthTotal: null,
+      allTimeTotal: null,
     };
   },
 });
@@ -285,7 +188,7 @@ const WEEKLY_CHALLENGE_DEFINITIONS = [
   {
     slug: "share_success_story",
     title: "שתף סיפור הצלחה",
-    description: "פרסם פוסט בקטגוריית 'סיפורי הצלחה' בקהילה",
+    description: "פרסם פוסט בקטגוריית 'שיתופים מהדרך' בקהילה",
     icon: "🌟",
     xpReward: 25,
     targetCount: 1,
@@ -347,7 +250,7 @@ export const getWeeklyChallenges = query({
       if (user) {
         const completions = await ctx.db
           .query("weeklyChallengCompletions")
-          .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
           .collect();
 
         const thisWeekCompletions = (
@@ -387,7 +290,7 @@ export const completeWeeklyChallenge = mutation({
     // Check if already completed this week
     const existing = await ctx.db
       .query("weeklyChallengCompletions")
-      .withIndex("by_user_slug", (q: any) =>
+      .withIndex("by_user_slug", (q) =>
         q.eq("userId", user._id).eq("challengeSlug", args.challengeSlug)
       )
       .first();
@@ -518,12 +421,10 @@ export const getRewardsShop = query({
 
         const redemptions = await ctx.db
           .query("rewardRedemptions")
-          .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
           .collect();
         redeemedSlugs = new Set(
-          (redemptions as Array<{ rewardSlug: string }>).map(
-            (r) => r.rewardSlug
-          )
+          redemptions.map((redemption) => redemption.rewardSlug)
         );
       }
     }
@@ -559,7 +460,7 @@ export const redeemReward = mutation({
     // Check not already redeemed
     const existingRedemption = await ctx.db
       .query("rewardRedemptions")
-      .withIndex("by_user_reward", (q: any) =>
+      .withIndex("by_user_reward", (q) =>
         q.eq("userId", user._id).eq("rewardSlug", args.rewardSlug)
       )
       .first();
@@ -610,17 +511,10 @@ export const getMyRewards = query({
 
     const redemptions = await ctx.db
       .query("rewardRedemptions")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    return (
-      redemptions as Array<{
-        rewardSlug: string;
-        rewardTitle: string;
-        xpSpent: number;
-        redeemedAt: number;
-      }>
-    )
+    return redemptions
       .map((r) => {
         const def = REWARD_DEFINITIONS.find((d) => d.slug === r.rewardSlug);
         return {

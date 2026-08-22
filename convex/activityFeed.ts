@@ -118,11 +118,11 @@ export const getActivityFeed = query({
           ? "הושלמה"
           : sim.status === "active"
             ? "בתהליך"
-            : "ננטשה";
+            : "נעצרה";
       activities.push({
         type: "simulator",
         title: `סימולציה: ${scenario?.title ?? "תרחיש"}`,
-        description: `${statusText}${sim.score ? ` - ציון ${sim.score}` : ""}`,
+        description: `${statusText} · תרגיל עם דמות AI בדיונית`,
         timestamp: sim.completedAt ?? sim.createdAt,
         icon: "simulator",
       });
@@ -135,9 +135,9 @@ export const getActivityFeed = query({
       .collect();
 
     const modeLabels: Record<string, string> = {
-      coach: "מאמן אישי",
-      practice: "סימולטור דייט",
-      analysis: "ניתוח שיחה",
+      coach: "כלי AI לרפלקציה",
+      practice: "תרגול שיחה בדיוני",
+      analysis: "ניתוח טקסט ב-AI",
     };
 
     for (const chat of chatSessions) {

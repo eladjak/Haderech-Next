@@ -5,7 +5,7 @@
 /**
  * Wraps email body content in a branded HTML layout with header, footer, and RTL support.
  */
-function emailLayout(content: string, _preheader?: string): string {
+function emailLayout(content: string): string {
   return `<!DOCTYPE html>
 <html dir="rtl" lang="he">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,9 +36,9 @@ export function welcomeTemplate(userName: string): string {
     <p>הנה מה שמחכה לך:</p>
     <ul>
       <li>📚 קורסים מקצועיים בנושאי דייטינג</li>
-      <li>🤖 מאמן AI אישי</li>
-      <li>🎭 סימולטור דייטים</li>
-      <li>👥 קהילה תומכת</li>
+      <li>🤖 כלי AI אוטומטי לרפלקציה, בכפוף לזמינות ולהרשאה</li>
+      <li>🎭 תרגול שיחה עם דמות AI בדיונית, בכפוף לזמינות ולהרשאה</li>
+      <li>👥 מרחב קהילתי, אם הוא מופעל בחשבון</li>
     </ul>
     <p><a class="button" href="{{APP_URL}}/dashboard">התחל ללמוד</a></p>
   `);

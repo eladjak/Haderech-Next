@@ -1,6 +1,9 @@
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { assertSeedAllowed } from "./lib/seedGuard";
+import { requireSelfOrAdmin, requireUser } from "./lib/authGuard";
+import { averagePassedQuizScore } from "./lib/quizAssessmentPolicy";
 
 // ==========================================
 // Gamification Module - Phase 5
@@ -123,6 +126,7 @@ export const getUserXP = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     let totalXP = 0;
 
     // Completed lessons: 10 XP each
@@ -136,9 +140,9 @@ export const getUserXP = query({
     // Quiz attempts
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
 
     // 5 XP per attempt
     totalXP += userAttempts.length * 5;
@@ -148,7 +152,9 @@ export const getUserXP = query({
     totalXP += passedAttempts.length * 15;
 
     // 25 XP bonus for perfect scores
-    const perfectAttempts = userAttempts.filter((a) => a.score === 100);
+    const perfectAttempts = userAttempts.filter(
+      (a) => a.passed && a.score === 100
+    );
     totalXP += perfectAttempts.length * 25;
 
     // Certificates: 50 XP each
@@ -195,96 +201,28 @@ export const getUserXP = query({
   },
 });
 
-// Leaderboard - top students by XP
+type LeaderboardEntry = {
+  userId: Id<"users">;
+  name: string;
+  imageUrl?: string;
+  totalXP: number;
+  level: number;
+  completedLessons: number;
+  certificatesEarned: number;
+  badgesEarned: number;
+};
+
+// Leaderboard containment. Accurate ranking needs a bounded, materialized XP
+// aggregate; scanning every user and then every activity table is not safe.
 export const getLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    // Get all users
-    const users = await ctx.db.query("users").collect();
-
-    // Calculate XP for each user
-    const leaderboardEntries = await Promise.all(
-      users.map(async (user) => {
-        let totalXP = 0;
-
-        // Completed lessons
-        const allProgress = await ctx.db
-          .query("progress")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .collect();
-        const completedLessons = allProgress.filter((p) => p.completed);
-        totalXP += completedLessons.length * 10;
-
-        // Quiz attempts
-        const allAttempts = await ctx.db
-          .query("quizAttempts")
-          .withIndex("by_user_quiz")
-          .collect();
-        const userAttempts = allAttempts.filter(
-          (a) => a.userId === user._id
-        );
-        totalXP += userAttempts.length * 5;
-        totalXP += userAttempts.filter((a) => a.passed).length * 15;
-        totalXP += userAttempts.filter((a) => a.score === 100).length * 25;
-
-        // Certificates
-        const certificates = await ctx.db
-          .query("certificates")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .collect();
-        totalXP += certificates.length * 50;
-
-        // Active days
-        const activeDaysSet = new Set<string>();
-        for (const p of allProgress) {
-          const date = new Date(p.lastWatchedAt);
-          activeDaysSet.add(
-            `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-          );
-        }
-        totalXP += activeDaysSet.size * 3;
-
-        const level = Math.floor(Math.sqrt(totalXP / 25)) + 1;
-
-        // Count badges earned
-        const enrollments = await ctx.db
-          .query("enrollments")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .collect();
-
-        let badgesEarned = 0;
-        // Simple badge count based on thresholds
-        if (enrollments.length >= 1) badgesEarned++;
-        if (enrollments.length >= 3) badgesEarned++;
-        if (completedLessons.length >= 5) badgesEarned++;
-        if (completedLessons.length >= 15) badgesEarned++;
-        if (userAttempts.some((a) => a.score === 100)) badgesEarned++;
-        if (userAttempts.length >= 5) badgesEarned++;
-        if (userAttempts.filter((a) => a.passed).length >= 5) badgesEarned++;
-        if (certificates.length >= 1) badgesEarned++;
-        if (certificates.length >= 3) badgesEarned++;
-        if (activeDaysSet.size >= 3) badgesEarned++;
-        if (activeDaysSet.size >= 7) badgesEarned++;
-        if (activeDaysSet.size >= 30) badgesEarned++;
-
-        return {
-          userId: user._id,
-          name: user.name ?? "סטודנט",
-          imageUrl: user.imageUrl,
-          totalXP,
-          level,
-          completedLessons: completedLessons.length,
-          certificatesEarned: certificates.length,
-          badgesEarned,
-        };
-      })
-    );
-
-    // Sort by XP descending, filter out users with 0 XP
-    return leaderboardEntries
-      .filter((entry) => entry.totalXP > 0)
-      .sort((a, b) => b.totalXP - a.totalXP)
-      .slice(0, 50);
+    await requireUser(ctx);
+    return {
+      status: "unavailable" as const,
+      reason: "LEADERBOARD_REQUIRES_BOUNDED_AGGREGATE" as const,
+      entries: [] as LeaderboardEntry[],
+    };
   },
 });
 
@@ -294,6 +232,7 @@ export const getUserBadges = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // Gather all user data
     const enrollments = await ctx.db
       .query("enrollments")
@@ -313,9 +252,9 @@ export const getUserBadges = query({
 
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
     const passedAttempts = userAttempts.filter((a) => a.passed);
 
     // Calculate streak for streak badges
@@ -374,7 +313,9 @@ export const getUserBadges = query({
           earnedAt = earned ? completedLessons[14]?.completedAt : undefined;
           break;
         case "perfect_score": {
-          const perfect = userAttempts.find((a) => a.score === 100);
+          const perfect = userAttempts.find(
+            (a) => a.passed && a.score === 100
+          );
           earned = perfect !== undefined;
           earnedAt = perfect?.attemptedAt;
           break;
@@ -431,6 +372,7 @@ export const getDailyStreak = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const allProgress = await ctx.db
       .query("progress")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -438,9 +380,9 @@ export const getDailyStreak = query({
 
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
 
     // Build set of active days
     const activeDaysSet = new Set<string>();
@@ -536,6 +478,7 @@ export const getStudentProfile = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const user = await ctx.db.get(args.userId);
     if (!user) return null;
 
@@ -561,24 +504,19 @@ export const getStudentProfile = query({
     // Quiz stats
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
     const passedAttempts = userAttempts.filter((a) => a.passed);
-    const averageScore =
-      userAttempts.length > 0
-        ? Math.round(
-            userAttempts.reduce((sum, a) => sum + a.score, 0) /
-              userAttempts.length
-          )
-        : 0;
+    const averageScore = averagePassedQuizScore(userAttempts) ?? 0;
 
     // XP calculation
     let totalXP = 0;
     totalXP += completedLessons.length * 10;
     totalXP += userAttempts.length * 5;
     totalXP += passedAttempts.length * 15;
-    totalXP += userAttempts.filter((a) => a.score === 100).length * 25;
+    totalXP +=
+      userAttempts.filter((a) => a.passed && a.score === 100).length * 25;
     totalXP += certificates.length * 50;
 
     const activeDaysSet = new Set<string>();
@@ -714,6 +652,7 @@ export const getUserStats = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // Sum XP from xpEvents table
     const xpEvents = await ctx.db
       .query("xpEvents")
@@ -802,6 +741,7 @@ export const getUserXpHistory = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const events = await ctx.db
       .query("xpEvents")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -818,6 +758,7 @@ export const getUserEarnedBadges = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // Get all badge definitions
     const allBadges = await ctx.db.query("badges").collect();
 
@@ -859,38 +800,8 @@ export const getUserEarnedBadges = query({
 export const getXpLeaderboard = query({
   args: {},
   handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
-
-    const entries = await Promise.all(
-      users.map(async (user) => {
-        const xpEvents = await ctx.db
-          .query("xpEvents")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .collect();
-
-        const totalXP = xpEvents.reduce((sum, e) => sum + e.points, 0);
-        const level = Math.floor(totalXP / 100) + 1;
-
-        const userBadges = await ctx.db
-          .query("userBadges")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .collect();
-
-        return {
-          userId: user._id,
-          name: user.name ?? "סטודנט",
-          imageUrl: user.imageUrl,
-          totalXP,
-          level,
-          badgeCount: userBadges.length,
-        };
-      })
-    );
-
-    return entries
-      .filter((e) => e.totalXP > 0)
-      .sort((a, b) => b.totalXP - a.totalXP)
-      .slice(0, 10);
+    await requireUser(ctx);
+    throw new Error("XP_LEADERBOARD_REQUIRES_BOUNDED_AGGREGATE");
   },
 });
 
@@ -948,9 +859,9 @@ export const checkAndAwardBadges = internalMutation({
 
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const userAttempts = allAttempts;
     const passedQuizzes = userAttempts.filter((a) => a.passed).length;
 
     const chatSessions = await ctx.db

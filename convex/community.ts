@@ -1,25 +1,22 @@
-import { query, mutation } from "./_generated/server";
+import {
+  query,
+  mutation,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { v } from "convex/values";
-import { type Id } from "./_generated/dataModel";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function requireUser(ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> }; db: any }) {
+async function requireUser(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Not authenticated");
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
     .unique();
   if (!user) throw new Error("User not found");
-  return user as {
-    _id: Id<"users">;
-    clerkId: string;
-    email: string;
-    name?: string;
-    imageUrl?: string;
-    role: "student" | "admin";
-  };
+  return user;
 }
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
@@ -39,6 +36,7 @@ export const listTopics = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     const limit = args.limit ?? 50;
 
     const topics = args.category
@@ -78,6 +76,7 @@ export const listTopics = query({
 export const getTopic = query({
   args: { topicId: v.id("communityTopics") },
   handler: async (ctx, args) => {
+    await requireUser(ctx);
     const topic = await ctx.db.get(args.topicId);
     if (!topic) return null;
 

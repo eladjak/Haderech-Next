@@ -1,3 +1,11 @@
+/**
+ * LEGACY demo-data archive — all mutations in this file are fail-closed.
+ *
+ * The course drafts, approximate quizzes and fabricated community activity do
+ * not match the canonical 75-lesson product or a real user-generated community.
+ * Use the dedicated manifest-backed course and assessment synchronizers instead.
+ */
+
 import { internalMutation, mutation } from "./_generated/server";
 import { requireAdmin } from "./lib/authGuard";
 import { assertSeedAllowed } from "./lib/seedGuard";
@@ -116,13 +124,13 @@ const SEED_COURSES = [
       {
         title: "פגיעות ככוח - לפתוח את הלב",
         content:
-          "ברנה בראון אומרת: 'פגיעות היא מקום הלידה של אהבה, שייכות ושמחה'. בשיעור זה נלמד כיצד פגיעות הופכת מחולשה לכוח העוצמתי ביותר בזוגיות.\n\nנושאים מרכזיים:\n- מדוע אנחנו מפחדים מפגיעות\n- השריון הרגשי שלנו ואיך לפרק אותו בהדרגה\n- רמות של חשיפה עצמית\n- תרגיל: '36 השאלות' - תרגיל קרבה מוכח מחקרית",
+          "בשיעור זה נבדוק כיצד שיתוף רצוני והדרגתי עשוי לתרום לקרבה, ומתי שמירה על פרטיות היא הבחירה הבטוחה.\n\nנושאים מרכזיים:\n- מדוע חשיפה יכולה להרגיש מאיימת\n- גבולות, הקשר והדדיות\n- רמות של שיתוף עצמי שאפשר לבחור או לדלג עליהן\n- תרגיל 36 השאלות ככלי אופציונלי לרפלקציה, לא כמנגנון מוכח להתאהבות",
         duration: 840,
       },
       {
         title: "ריטואלים של חיבור",
         content:
-          "זוגות מאושרים לא סתם 'קורה להם' - הם בונים חיבור באופן מכוון. בשיעור זה נלמד ליצור ריטואלים יומיומיים ושבועיים שמחזקים את הקשר.\n\nנושאים מרכזיים:\n- מחקר גוטמן: 'הפניות רגשיות' וכיצד להגיב להן\n- 6 ריטואלים יומיים של זוגות מאושרים\n- תאריך שבועי: איך להפוך אותו למשמעותי\n- תרגיל: עיצוב הריטואלים הזוגיים שלכם",
+          "הרגלים משותפים יכולים לתמוך בחיבור כששני הצדדים רוצים בהם והם מתאימים לחיים בפועל. בשיעור זה נציע אפשרויות לשיחה ולזמן משותף, בלי להציג נוסחה אחת לזוגיות טובה.\n\nנושאים מרכזיים:\n- תשומת לב לניסיונות חיבור\n- רעיונות גמישים להרגלים יומיים ושבועיים\n- זמן משותף שמתחשב בעומס ובנגישות\n- תרגיל אופציונלי: עיצוב הרגל אחד ובדיקתו יחד",
         duration: 900,
       },
       {
@@ -147,87 +155,19 @@ export const seedCourses = mutation({
   handler: async (ctx) => {
     assertSeedAllowed("seedCourses");
     await requireAdmin(ctx);
-    // Check if courses already exist
-    const existingCourses = await ctx.db.query("courses").collect();
-    if (existingCourses.length > 0) {
-      return {
-        success: false,
-        message: `Already have ${existingCourses.length} courses. Skipping seed.`,
-      };
-    }
-
-    const now = Date.now();
-    const createdCourses: string[] = [];
-
-    for (let i = 0; i < SEED_COURSES.length; i++) {
-      const courseData = SEED_COURSES[i];
-
-      // Create the course
-      const courseId = await ctx.db.insert("courses", {
-        title: courseData.title,
-        description: courseData.description,
-        imageUrl: courseData.imageUrl,
-        category: courseData.category,
-        level: courseData.level,
-        estimatedHours: courseData.estimatedHours,
-        published: true,
-        order: i,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      // Create lessons for this course
-      for (let j = 0; j < courseData.lessons.length; j++) {
-        const lessonData = courseData.lessons[j];
-        await ctx.db.insert("lessons", {
-          courseId,
-          title: lessonData.title,
-          content: lessonData.content,
-          videoUrl: undefined,
-          duration: lessonData.duration,
-          order: j,
-          published: true,
-          createdAt: now,
-          updatedAt: now,
-        });
-      }
-
-      createdCourses.push(courseData.title);
-
-      // Create a quiz for the first lesson of each course
-      const firstLessonId = await ctx.db
-        .query("lessons")
-        .withIndex("by_course_order", (q) => q.eq("courseId", courseId))
-        .first();
-
-      if (firstLessonId) {
-        const quizId = await ctx.db.insert("quizzes", {
-          lessonId: firstLessonId._id,
-          courseId,
-          title: `בוחן - ${courseData.lessons[0].title}`,
-          passingScore: 60,
-          createdAt: now,
-        });
-
-        // Create quiz questions based on course topic
-        const quizQuestions = getQuizQuestionsForCourse(i);
-        for (let q = 0; q < quizQuestions.length; q++) {
-          await ctx.db.insert("quizQuestions", {
-            quizId,
-            question: quizQuestions[q].question,
-            options: quizQuestions[q].options,
-            correctIndex: quizQuestions[q].correctIndex,
-            explanation: quizQuestions[q].explanation,
-            order: q,
-          });
-        }
-      }
-    }
-
     return {
-      success: true,
-      message: `Created ${createdCourses.length} courses with lessons and quizzes.`,
-      courses: createdCourses,
+      success: false,
+      code: "LEGACY_SEED_DISABLED",
+      message:
+        "Legacy demo courses are disabled. Use seedHaderech:seedHaderechCourse and seedWeeklyQuizzes:seedWeeklyQuizzes.",
+      archivedOnly: {
+        courses: SEED_COURSES.length,
+        lessons: SEED_COURSES.reduce((sum, course) => sum + course.lessons.length, 0),
+        quizQuestions: SEED_COURSES.reduce(
+          (sum, _course, index) => sum + getQuizQuestionsForCourse(index).length,
+          0
+        ),
+      },
     };
   },
 });
@@ -418,58 +358,12 @@ export const seedCommunity = mutation({
   handler: async (ctx) => {
     assertSeedAllowed("seedCommunity");
     await requireAdmin(ctx);
-    // Check if community topics already exist
-    const existingTopics = await ctx.db.query("communityTopics").take(1);
-    if (existingTopics.length > 0) {
-      return {
-        success: false,
-        message: `Community topics already exist. Skipping seed.`,
-      };
-    }
-
-    // Find or create a system user to author the seed topics
-    let systemUser = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", "system@haderech.co.il"))
-      .unique();
-
-    if (!systemUser) {
-      const now = Date.now();
-      const systemUserId = await ctx.db.insert("users", {
-        clerkId: "system_seed_user",
-        email: "system@haderech.co.il",
-        name: "צוות הדרך",
-        role: "admin",
-        createdAt: now,
-        updatedAt: now,
-      });
-      systemUser = await ctx.db.get(systemUserId);
-    }
-
-    if (!systemUser) throw new Error("Failed to create system user");
-
-    const now = Date.now();
-    const createdTopics: string[] = [];
-
-    for (let i = 0; i < SEED_COMMUNITY_TOPICS.length; i++) {
-      const topicData = SEED_COMMUNITY_TOPICS[i];
-      await ctx.db.insert("communityTopics", {
-        userId: systemUser._id,
-        title: topicData.title,
-        content: topicData.content,
-        category: topicData.category,
-        pinned: topicData.pinned,
-        likesCount: topicData.likesCount,
-        repliesCount: topicData.repliesCount,
-        createdAt: now - (SEED_COMMUNITY_TOPICS.length - i) * 1000 * 60 * 60, // stagger creation times
-      });
-      createdTopics.push(topicData.title);
-    }
-
     return {
-      success: true,
-      message: `Created ${createdTopics.length} community topics.`,
-      topics: createdTopics,
+      success: false,
+      code: "LEGACY_SEED_DISABLED",
+      message:
+        "Fabricated community posts, authors and engagement counts are archived and cannot be seeded.",
+      archivedOnly: { topics: SEED_COMMUNITY_TOPICS.length },
     };
   },
 });
@@ -480,109 +374,15 @@ export const seedAll = mutation({
   handler: async (ctx) => {
     assertSeedAllowed("seedAll");
     await requireAdmin(ctx);
-    const results: { courses?: string; simulator?: string; community?: string } = {};
-
-    // 1. Seed courses
-    const existingCourses = await ctx.db.query("courses").collect();
-    if (existingCourses.length > 0) {
-      results.courses = `Skipped - ${existingCourses.length} courses already exist`;
-    } else {
-      const now = Date.now();
-      const createdCourses: string[] = [];
-
-      for (let i = 0; i < SEED_COURSES.length; i++) {
-        const courseData = SEED_COURSES[i];
-        const courseId = await ctx.db.insert("courses", {
-          title: courseData.title,
-          description: courseData.description,
-          imageUrl: courseData.imageUrl,
-          category: courseData.category,
-          level: courseData.level,
-          estimatedHours: courseData.estimatedHours,
-          published: true,
-          order: i,
-          createdAt: now,
-          updatedAt: now,
-        });
-
-        for (let j = 0; j < courseData.lessons.length; j++) {
-          const lessonData = courseData.lessons[j];
-          await ctx.db.insert("lessons", {
-            courseId,
-            title: lessonData.title,
-            content: lessonData.content,
-            videoUrl: undefined,
-            duration: lessonData.duration,
-            order: j,
-            published: true,
-            createdAt: now,
-            updatedAt: now,
-          });
-        }
-        createdCourses.push(courseData.title);
-      }
-
-      results.courses = `Created ${createdCourses.length} courses: ${createdCourses.join(", ")}`;
-    }
-
-    // 2. Seed simulator scenarios
-    const existingScenarios = await ctx.db
-      .query("simulatorScenarios")
-      .take(1);
-    if (existingScenarios.length > 0) {
-      results.simulator = `Skipped - simulator scenarios already exist`;
-    } else {
-      results.simulator = `Simulator scenarios: run seedSimulatorScenarios mutation separately (it's in seedSimulatorData.ts)`;
-    }
-
-    // 3. Seed community topics
-    const existingTopics = await ctx.db.query("communityTopics").take(1);
-    if (existingTopics.length > 0) {
-      results.community = `Skipped - community topics already exist`;
-    } else {
-      let systemUser = await ctx.db
-        .query("users")
-        .withIndex("by_email", (q) => q.eq("email", "system@haderech.co.il"))
-        .unique();
-
-      if (!systemUser) {
-        const now2 = Date.now();
-        const systemUserId = await ctx.db.insert("users", {
-          clerkId: "system_seed_user",
-          email: "system@haderech.co.il",
-          name: "צוות הדרך",
-          role: "admin",
-          createdAt: now2,
-          updatedAt: now2,
-        });
-        systemUser = await ctx.db.get(systemUserId);
-      }
-
-      if (systemUser) {
-        const now3 = Date.now();
-        for (let i = 0; i < SEED_COMMUNITY_TOPICS.length; i++) {
-          const topicData = SEED_COMMUNITY_TOPICS[i];
-          await ctx.db.insert("communityTopics", {
-            userId: systemUser._id,
-            title: topicData.title,
-            content: topicData.content,
-            category: topicData.category,
-            pinned: topicData.pinned,
-            likesCount: topicData.likesCount,
-            repliesCount: topicData.repliesCount,
-            createdAt: now3 - (SEED_COMMUNITY_TOPICS.length - i) * 1000 * 60 * 60,
-          });
-        }
-        results.community = `Created ${SEED_COMMUNITY_TOPICS.length} community topics`;
-      }
-    }
-
     return {
-      success: true,
-      results,
-      summary: Object.entries(results)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join("\n"),
+      success: false,
+      code: "LEGACY_SEED_DISABLED",
+      message:
+        "The combined legacy seed is disabled. Run only the dedicated canonical synchronizers after explicit environment authorization.",
+      archivedOnly: {
+        courses: SEED_COURSES.length,
+        communityTopics: SEED_COMMUNITY_TOPICS.length,
+      },
     };
   },
 });
@@ -590,28 +390,13 @@ export const seedAll = mutation({
 // Clear all seed data (for development - use carefully)
 export const clearAll = internalMutation({
   args: {},
-  handler: async (ctx) => {
-    const tables = [
-      "notifications",
-      "notes",
-      "comments",
-      "quizAttempts",
-      "quizQuestions",
-      "quizzes",
-      "certificates",
-      "progress",
-      "enrollments",
-      "lessons",
-      "courses",
-    ] as const;
-
-    for (const table of tables) {
-      const docs = await ctx.db.query(table).collect();
-      for (const doc of docs) {
-        await ctx.db.delete(doc._id);
-      }
-    }
-
-    return { success: true, message: "All course data cleared." };
+  handler: async () => {
+    assertSeedAllowed("clearAll");
+    return {
+      success: false,
+      code: "LEGACY_SEED_DISABLED",
+      message:
+        "The broad legacy clearAll operation is disabled. Use a reviewed, table-specific migration with backup and explicit data authority.",
+    };
   },
 });

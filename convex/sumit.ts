@@ -5,9 +5,13 @@ import { v } from "convex/values";
  * Sumit payment integration — Convex actions + webhook mutations.
  * Replaces Stripe (Phase 14, 2026-05-14).
  *
- * Status: credentials pending. Until SUMIT_API_TOKEN + SUMIT_ORG_ID +
- * SUMIT_WEBHOOK_SECRET are set, createCheckoutSession returns a notice.
+ * Status: deliberately disabled. Credentials alone must never enable checkout;
+ * durable pending orders, verified fulfillment and entitlement writers are not
+ * implemented yet.
  */
+
+const PAYMENT_FULFILLMENT_IMPLEMENTED: boolean = false;
+const DURABLE_PAYMENT_STORE_IMPLEMENTED: boolean = false;
 
 // Create Sumit hosted-tashlumim checkout
 export const createCheckoutSession = action({
@@ -17,6 +21,17 @@ export const createCheckoutSession = action({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+
+    if (
+      !PAYMENT_FULFILLMENT_IMPLEMENTED ||
+      !DURABLE_PAYMENT_STORE_IMPLEMENTED
+    ) {
+      return {
+        status: "unavailable" as const,
+        message:
+          "הרכישה אינה זמינה כרגע. לא יתבצע חיוב עד להשלמת תיעוד הזמנה, אימות תשלום והפעלת גישה מקצה לקצה.",
+      };
+    }
 
     const token = process.env.SUMIT_API_TOKEN;
     const orgId = process.env.SUMIT_ORG_ID;
@@ -124,6 +139,15 @@ export const handleSubscriptionUpdate = internalMutation({
     currentPeriodEnd: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    if (
+      !PAYMENT_FULFILLMENT_IMPLEMENTED ||
+      !DURABLE_PAYMENT_STORE_IMPLEMENTED
+    ) {
+      throw new Error(
+        "Payment fulfillment disabled: subscription updates require a durable verified order."
+      );
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))

@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAdmin } from "./lib/authGuard";
+import { getOptionalUser, requireAdmin } from "./lib/authGuard";
+import { toPublicLessonSummary } from "./lib/authorizationPolicy";
 
 // שליפת כל הקורסים המפורסמים
 export const listPublished = query({
@@ -37,7 +38,11 @@ export const listCategories = query({
 export const getById = query({
   args: { id: v.id("courses") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const course = await ctx.db.get(args.id);
+    if (!course) return null;
+    if (course.published) return course;
+    const user = await getOptionalUser(ctx);
+    return user?.role === "admin" ? course : null;
   },
 });
 
@@ -48,13 +53,26 @@ export const getWithLessons = query({
     const course = await ctx.db.get(args.id);
     if (!course) return null;
 
+    const user = await getOptionalUser(ctx);
+    const isAdmin = user?.role === "admin";
+    if (!course.published && !isAdmin) return null;
+
     const lessons = await ctx.db
       .query("lessons")
       .withIndex("by_course_order", (q) => q.eq("courseId", args.id))
       .order("asc")
       .collect();
 
-    return { ...course, lessons };
+    if (isAdmin) return { ...course, lessons };
+
+    // Public catalog metadata only. Full lesson text, video and PDF locations
+    // are served exclusively by lessons.getById behind the course-access gate.
+    return {
+      ...course,
+      lessons: lessons
+        .filter((lesson) => lesson.published)
+        .map(toPublicLessonSummary),
+    };
   },
 });
 
