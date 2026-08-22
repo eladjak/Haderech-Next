@@ -141,16 +141,24 @@ function NewPostForm() {
           }
           className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-brand-600 dark:focus:bg-zinc-900"
         />
-        {titleError && (
-          <p
-            id="title-error"
-            role="alert"
-            className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400"
-          >
-            <span aria-hidden="true">⚠</span>
-            {titleError}
-          </p>
-        )}
+        {/* Mounted before it has content: a live region injected in the same
+            tick as its text is frequently not announced. */}
+        <p
+          id="title-error"
+          role="alert"
+          className={
+            titleError
+              ? "mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400"
+              : "sr-only"
+          }
+        >
+          {titleError ? (
+            <>
+              <span aria-hidden="true">⚠</span>
+              {titleError}
+            </>
+          ) : null}
+        </p>
         <p
           id="title-count"
           className="mt-1 text-left text-xs text-zinc-400"
@@ -192,16 +200,23 @@ function NewPostForm() {
           rows={8}
           className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-brand-600 dark:focus:bg-zinc-900"
         />
-        {contentError && (
-          <p
-            id="content-error"
-            role="alert"
-            className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400"
-          >
-            <span aria-hidden="true">⚠</span>
-            {contentError}
-          </p>
-        )}
+        {/* Mounted before it has content — see title-error above. */}
+        <p
+          id="content-error"
+          role="alert"
+          className={
+            contentError
+              ? "mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400"
+              : "sr-only"
+          }
+        >
+          {contentError ? (
+            <>
+              <span aria-hidden="true">⚠</span>
+              {contentError}
+            </>
+          ) : null}
+        </p>
         <div className="mt-1 flex items-center justify-between">
           <p id="content-help" className="text-xs text-zinc-400">
             מינימום {MIN_CONTENT_LENGTH} תווים
@@ -223,15 +238,17 @@ function NewPostForm() {
         </div>
       </div>
 
-      {/* Error */}
-      {error && (
-        <p
-          role="alert"
-          className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400"
-        >
-          {error}
-        </p>
-      )}
+      {/* Submit failure. Mounted before it has content, same reason. */}
+      <p
+        role="alert"
+        className={
+          error
+            ? "rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400"
+            : "sr-only"
+        }
+      >
+        {error || null}
+      </p>
 
       {/* Buttons */}
       <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
