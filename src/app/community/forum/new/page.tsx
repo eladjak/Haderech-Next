@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
@@ -29,18 +29,41 @@ function NewPostForm() {
   const [category, setCategory] = useState<ForumCategory>("general");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [titleError, setTitleError] = useState("");
+  const [contentError, setContentError] = useState("");
+
+  const titleRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   const titleTrimmed = title.trim();
   const contentTrimmed = content.trim();
-  const isValid =
-    titleTrimmed.length > 0 &&
-    titleTrimmed.length <= MAX_TITLE_LENGTH &&
-    contentTrimmed.length >= MIN_CONTENT_LENGTH &&
-    contentTrimmed.length <= MAX_CONTENT_LENGTH;
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isValid) return;
+
+    // Say what is wrong, tie it to the field, and put the caret there.
+    // A silent `return` leaves a screen-reader or keyboard user with nothing.
+    const nextTitleError =
+      titleTrimmed.length === 0
+        ? "יש להזין כותרת לפוסט"
+        : titleTrimmed.length > MAX_TITLE_LENGTH
+          ? `הכותרת ארוכה מדי - עד ${MAX_TITLE_LENGTH} תווים`
+          : "";
+    const nextContentError =
+      contentTrimmed.length < MIN_CONTENT_LENGTH
+        ? `התוכן קצר מדי - יש להוסיף עוד ${MIN_CONTENT_LENGTH - contentTrimmed.length} תווים לפחות`
+        : contentTrimmed.length > MAX_CONTENT_LENGTH
+          ? `התוכן ארוך מדי - עד ${MAX_CONTENT_LENGTH} תווים`
+          : "";
+
+    setTitleError(nextTitleError);
+    setContentError(nextContentError);
+
+    if (nextTitleError || nextContentError) {
+      const firstInvalid = nextTitleError ? titleRef.current : contentRef.current;
+      firstInvalid?.focus();
+      return;
+    }
+
     setError("");
     setLoading(true);
     try {
@@ -101,16 +124,33 @@ function NewPostForm() {
         </label>
         <input
           id="post-title"
+          ref={titleRef}
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (titleError) setTitleError("");
+          }}
           placeholder="על מה תרצה לכתוב?"
           maxLength={MAX_TITLE_LENGTH}
           required
           aria-required="true"
-          aria-describedby="title-count"
+          aria-invalid={titleError ? "true" : undefined}
+          aria-describedby={
+            titleError ? "title-error title-count" : "title-count"
+          }
           className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-brand-600 dark:focus:bg-zinc-900"
         />
+        {titleError && (
+          <p
+            id="title-error"
+            role="alert"
+            className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400"
+          >
+            <span aria-hidden="true">⚠</span>
+            {titleError}
+          </p>
+        )}
         <p
           id="title-count"
           className="mt-1 text-left text-xs text-zinc-400"
@@ -133,16 +173,35 @@ function NewPostForm() {
         </label>
         <textarea
           id="post-content"
+          ref={contentRef}
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+            if (contentError) setContentError("");
+          }}
           placeholder="שתף את המחשבות, הניסיון, או השאלה שלך..."
           maxLength={MAX_CONTENT_LENGTH}
           required
           aria-required="true"
-          aria-describedby="content-help content-count"
+          aria-invalid={contentError ? "true" : undefined}
+          aria-describedby={
+            contentError
+              ? "content-error content-help content-count"
+              : "content-help content-count"
+          }
           rows={8}
           className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-brand-600 dark:focus:bg-zinc-900"
         />
+        {contentError && (
+          <p
+            id="content-error"
+            role="alert"
+            className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400"
+          >
+            <span aria-hidden="true">⚠</span>
+            {contentError}
+          </p>
+        )}
         <div className="mt-1 flex items-center justify-between">
           <p id="content-help" className="text-xs text-zinc-400">
             מינימום {MIN_CONTENT_LENGTH} תווים
@@ -151,12 +210,15 @@ function NewPostForm() {
             id="content-count"
             className={`text-xs ${
               contentTrimmed.length < MIN_CONTENT_LENGTH
-                ? "text-amber-500"
+                ? "text-amber-600 dark:text-amber-500"
                 : "text-zinc-400"
             }`}
             aria-live="polite"
           >
-            {content.length}/{MAX_CONTENT_LENGTH}
+            {/* the shortfall must be readable, not only amber */}
+            {contentTrimmed.length < MIN_CONTENT_LENGTH
+              ? `חסרים ${MIN_CONTENT_LENGTH - contentTrimmed.length} תווים`
+              : `${content.length}/${MAX_CONTENT_LENGTH}`}
           </p>
         </div>
       </div>
@@ -181,7 +243,10 @@ function NewPostForm() {
         </Link>
         <button
           type="submit"
-          disabled={loading || !isValid}
+          // Stays reachable while invalid: a disabled button leaves the tab
+          // order with no way to find out what is missing. handleSubmit
+          // reports the problem instead.
+          disabled={loading}
           className="rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
