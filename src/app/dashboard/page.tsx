@@ -11,52 +11,58 @@ import { CourseProgressTracker } from "@/components/course/course-progress-track
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
 import { DailyWidget } from "@/components/daily/daily-widget";
 import { PrivateWeeklyReflection } from "@/components/dashboard/private-weekly-reflection";
-import { CANONICAL_COURSE_SCOPE } from "@/lib/learner-journey";
+import { StructuredNextStepCard } from "@/components/onboarding/structured-next-step-card";
+import {
+  CANONICAL_COURSE_SCOPE,
+  chooseStructuredOnboardingNextStep,
+  type StructuredOnboardingNextStep,
+} from "@/lib/learner-journey";
 
 export default function DashboardPage() {
   const { user } = useUser();
   const courses = useQuery(api.courses.listPublished);
+  const onboarding = useQuery(api.onboarding.getOnboarding);
 
   // Get Convex user
   const convexUser = useQuery(
     api.users.getByClerkId,
-    user?.id ? { clerkId: user.id } : "skip"
+    user?.id ? { clerkId: user.id } : "skip",
   );
 
   // Get enrolled courses
   const enrolledCourses = useQuery(
     api.enrollments.listByUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
   // Get certificates
   const certificates = useQuery(
     api.certificates.listByUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
   // Get student overview (total lessons completed, avg quiz score)
   const overview = useQuery(
     api.analytics.getStudentOverview,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
   // Get per-course progress for the tracker component
   const courseProgress = useQuery(
     api.analytics.getCourseProgress,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
   // Get learning streak
   const streak = useQuery(
     api.analytics.getLearningStreak,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
   // Get achievements
   const achievements = useQuery(
     api.analytics.getAchievements,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
   const accessibleCourses =
@@ -73,14 +79,14 @@ export default function DashboardPage() {
   // Continue learning with next-lesson resolution
   const continueData = useQuery(
     api.analytics.getContinueLearningData,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
   // "Continue where you left off" - find the most recently active enrolled course
   const lastActiveCourse =
     courseProgress && courseProgress.length > 0
       ? courseProgress.reduce((latest, curr) =>
-          (curr.enrolledAt ?? 0) > (latest.enrolledAt ?? 0) ? curr : latest
+          (curr.enrolledAt ?? 0) > (latest.enrolledAt ?? 0) ? curr : latest,
         )
       : null;
 
@@ -91,7 +97,7 @@ export default function DashboardPage() {
   // In-progress courses (some progress but not 100%)
   const inProgressCourses =
     courseProgress?.filter(
-      (c) => c.completedLessons > 0 && c.completionPercent < 100
+      (c) => c.completedLessons > 0 && c.completionPercent < 100,
     ) ?? [];
 
   // The "continue" suggestion: prefer in-progress, else not-started
@@ -101,6 +107,9 @@ export default function DashboardPage() {
       : notStartedCourses.length > 0
         ? notStartedCourses[0]
         : null;
+  const onboardingNextStep = onboarding?.completed
+    ? chooseStructuredOnboardingNextStep(onboarding.answers)
+    : null;
 
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
@@ -161,9 +170,21 @@ export default function DashboardPage() {
               <ReturnToPracticeCard />
             )
           ) : (
-            <FirstMinutesCard />
+            <FirstMinutesCard recommendation={onboardingNextStep} />
           )}
         </section>
+
+        {enrolledCount > 0 && onboardingNextStep?.mode === "choice-based" && (
+          <section
+            className="mb-8"
+            aria-label="נקודת פתיחה נוספת לפי הבחירות שנשמרו"
+          >
+            <StructuredNextStepCard
+              recommendation={onboardingNextStep}
+              headingLevel="h3"
+            />
+          </section>
+        )}
 
         {/* Quick Stats Cards */}
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
@@ -303,7 +324,7 @@ export default function DashboardPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {accessibleCourses.map((course) => {
                 const progress = courseProgress?.find(
-                  (p) => p.courseId === course._id
+                  (p) => p.courseId === course._id,
                 );
                 return (
                   <CourseCard
@@ -327,9 +348,8 @@ export default function DashboardPage() {
               קורסים ששמרת — ללא גישה פעילה
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-amber-800 dark:text-amber-200">
-              שמירת קורס בחשבון אינה רכישה ואינה הרשאה לתוכן. אפשר לפתוח את
-              עמוד הקורס כדי לראות את המבנה, להסיר אותו מהחשבון או לברר על
-              זמינות.
+              שמירת קורס בחשבון אינה רכישה ואינה הרשאה לתוכן. אפשר לפתוח את עמוד
+              הקורס כדי לראות את המבנה, להסיר אותו מהחשבון או לברר על זמינות.
             </p>
             <ul className="mt-4 grid gap-3 sm:grid-cols-2">
               {savedWithoutAccess.map((course) => (
@@ -354,9 +374,7 @@ export default function DashboardPage() {
         <section className="mt-12">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-              {accessibleCourses.length > 0
-                ? "קורסים נוספים"
-                : "הקורסים שלנו"}
+              {accessibleCourses.length > 0 ? "קורסים נוספים" : "הקורסים שלנו"}
             </h2>
             <Link
               href="/courses"
@@ -418,7 +436,7 @@ export default function DashboardPage() {
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     הונפקה:{" "}
                     {new Intl.DateTimeFormat("he-IL").format(
-                      new Date(cert.issuedAt)
+                      new Date(cert.issuedAt),
                     )}
                   </p>
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">
@@ -443,7 +461,11 @@ export default function DashboardPage() {
 
 // ---- Sub-components ----
 
-function FirstMinutesCard() {
+function FirstMinutesCard({
+  recommendation,
+}: {
+  recommendation: StructuredOnboardingNextStep | null;
+}) {
   const scope = [
     [CANONICAL_COURSE_SCOPE.weeks, "שבועות"],
     [CANONICAL_COURSE_SCOPE.phases, "שלבים"],
@@ -458,41 +480,54 @@ function FirstMinutesCard() {
           <p className="text-sm font-semibold text-brand-700 dark:text-brand-300">
             מתחילים בלי להציף
           </p>
-          <h2 className="mt-2 text-balance text-2xl font-bold text-zinc-900 sm:text-3xl dark:text-white">
-            הצעד הראשון יכול לקחת עשר דקות
-          </h2>
-          <p className="mt-3 max-w-2xl text-pretty leading-relaxed text-zinc-600 dark:text-zinc-400">
-            בוחרים את מסלול אומנות הקשר, פותחים שיעור אחד ושומרים נקודה אחת
-            לחזרה. אפשר לעצור שם ולהמשיך בזמן שמתאים.
-          </p>
+          {recommendation ? (
+            <div className="mt-4">
+              <StructuredNextStepCard recommendation={recommendation} />
+            </div>
+          ) : (
+            <>
+              <h2 className="mt-2 text-balance text-2xl font-bold text-zinc-900 sm:text-3xl dark:text-white">
+                הצעד הראשון יכול לקחת עשר דקות
+              </h2>
+              <p className="mt-3 max-w-2xl text-pretty leading-relaxed text-zinc-600 dark:text-zinc-400">
+                בוחרים את מסלול אומנות הקשר, פותחים שיעור אחד ושומרים נקודה אחת
+                לחזרה. אפשר לעצור שם ולהמשיך בזמן שמתאים.
+              </p>
 
-          <ol className="mt-5 grid gap-3 sm:grid-cols-3">
-            {["פותחים שיעור", "בוחרים תרגול אחד", "שומרים נקודה וחוזרים"].map(
-              (step, index) => (
-                <li key={step} className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white font-bold text-brand-700 shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-zinc-800 dark:text-brand-300 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-                    {index + 1}
-                  </span>
-                  {step}
-                </li>
-              )
-            )}
-          </ol>
+              <ol className="mt-5 grid gap-3 sm:grid-cols-3">
+                {[
+                  "פותחים שיעור",
+                  "בוחרים תרגול אחד",
+                  "שומרים נקודה וחוזרים",
+                ].map((step, index) => (
+                  <li
+                    key={step}
+                    className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white font-bold text-brand-700 shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-zinc-800 dark:text-brand-300 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+                      {index + 1}
+                    </span>
+                    {step}
+                  </li>
+                ))}
+              </ol>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/courses"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-[transform,box-shadow,background-color] hover:bg-zinc-800 hover:shadow-md active:scale-[0.96] dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-            >
-              לבחור את מסלול הלימוד
-            </Link>
-            <Link
-              href="/tools/conversation-starters"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-800 shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96] dark:bg-zinc-800 dark:text-zinc-100 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
-            >
-              לנסות קודם תרגול קצר
-            </Link>
-          </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/courses"
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-[transform,box-shadow,background-color] hover:bg-zinc-800 hover:shadow-md active:scale-[0.96] dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+                >
+                  לבחור את מסלול הלימוד
+                </Link>
+                <Link
+                  href="/tools/conversation-starters"
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-800 shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96] dark:bg-zinc-800 dark:text-zinc-100 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+                >
+                  לנסות קודם תרגול קצר
+                </Link>
+              </div>
+            </>
+          )}
         </div>
 
         <dl className="grid grid-cols-2 gap-3">
@@ -877,10 +912,13 @@ const NEW_FEATURES = [
 ] as const;
 
 const FEATURE_COLOR_CLASSES = {
-  brand: "border-brand-200 bg-brand-50 hover:border-brand-300 hover:bg-brand-100 dark:border-brand-700/40 dark:bg-brand-900/20 dark:hover:bg-brand-900/30",
-  purple: "border-purple-200 bg-purple-50 hover:border-purple-300 hover:bg-purple-100 dark:border-purple-700/40 dark:bg-purple-900/20 dark:hover:bg-purple-900/30",
+  brand:
+    "border-brand-200 bg-brand-50 hover:border-brand-300 hover:bg-brand-100 dark:border-brand-700/40 dark:bg-brand-900/20 dark:hover:bg-brand-900/30",
+  purple:
+    "border-purple-200 bg-purple-50 hover:border-purple-300 hover:bg-purple-100 dark:border-purple-700/40 dark:bg-purple-900/20 dark:hover:bg-purple-900/30",
   blue: "border-blue-200 bg-blue-50 hover:border-blue-300 hover:bg-blue-100 dark:border-blue-700/40 dark:bg-blue-900/20 dark:hover:bg-blue-900/30",
-  emerald: "border-emerald-200 bg-emerald-50 hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30",
+  emerald:
+    "border-emerald-200 bg-emerald-50 hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30",
 };
 
 const FEATURE_LABEL_CLASSES = {
@@ -943,10 +981,14 @@ function NewFeaturesSection() {
               {feature.icon}
             </span>
             <div>
-              <p className={`font-semibold ${FEATURE_LABEL_CLASSES[feature.color]}`}>
+              <p
+                className={`font-semibold ${FEATURE_LABEL_CLASSES[feature.color]}`}
+              >
                 {feature.label}
               </p>
-              <p className={`mt-0.5 text-xs ${FEATURE_DESC_CLASSES[feature.color]}`}>
+              <p
+                className={`mt-0.5 text-xs ${FEATURE_DESC_CLASSES[feature.color]}`}
+              >
                 {feature.description}
               </p>
             </div>
@@ -978,8 +1020,8 @@ function EmptyCoursesState() {
         עדיין אין קורסים במערכת
       </p>
       <p className="mb-4 text-zinc-500 dark:text-zinc-400">
-        קורסים יתווספו בקרוב. בינתיים, תוכל להשתמש בכלי יצירת הנתונים למטה
-        (במצב פיתוח).
+        קורסים יתווספו בקרוב. בינתיים, תוכל להשתמש בכלי יצירת הנתונים למטה (במצב
+        פיתוח).
       </p>
     </div>
   );
@@ -998,7 +1040,7 @@ function SeedDataTool() {
       setStatus(result.message);
     } catch (err) {
       setStatus(
-        `Error: ${err instanceof Error ? err.message : "Unknown error"}`
+        `Error: ${err instanceof Error ? err.message : "Unknown error"}`,
       );
     } finally {
       setLoading(false);
@@ -1013,8 +1055,8 @@ function SeedDataTool() {
         </span>
       </div>
       <p className="mb-4 text-sm text-amber-700 dark:text-amber-400">
-        יצירת נתוני דוגמה: 3 קורסים עם 16 שיעורים בסך הכל (אומנות ההקשבה,
-        תקשורת זוגית מתקדמת, מפתחות לאינטימיות).
+        יצירת נתוני דוגמה: 3 קורסים עם 16 שיעורים בסך הכל (אומנות ההקשבה, תקשורת
+        זוגית מתקדמת, מפתחות לאינטימיות).
       </p>
       <button
         type="button"

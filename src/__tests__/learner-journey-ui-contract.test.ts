@@ -19,13 +19,17 @@ describe("learner journey UI contract", () => {
     expect(visuals).toContain("stage-5-intimacy.jpg");
     expect(visuals).toContain("stage-6-commitment.jpg");
     expect(coursePage).not.toContain("const LESSONS_PER_WEEK = 7");
-    expect(learnPage).toContain("previousLesson?.phaseNumber !== lesson.phaseNumber");
-    expect(learnPage).toContain("previousLesson?.weekNumber !== lesson.weekNumber");
+    expect(learnPage).toContain(
+      "previousLesson?.phaseNumber !== lesson.phaseNumber",
+    );
+    expect(learnPage).toContain(
+      "previousLesson?.weekNumber !== lesson.weekNumber",
+    );
 
     const lessonContent = learnPage.indexOf("<LessonContent content=");
     const completionAction = learnPage.indexOf(
       "<LessonCompleteButton",
-      lessonContent
+      lessonContent,
     );
     expect(lessonContent).toBeGreaterThan(-1);
     expect(completionAction).toBeGreaterThan(lessonContent);
@@ -33,13 +37,13 @@ describe("learner journey UI contract", () => {
 
   it("puts the next learner action before dashboard statistics", () => {
     const dashboard = read("src/app/dashboard/page.tsx");
-    const primaryAction = dashboard.indexOf(
-      'aria-label="הצעד הבא בלמידה"'
-    );
+    const primaryAction = dashboard.indexOf('aria-label="הצעד הבא בלמידה"');
     const stats = dashboard.indexOf("{/* Quick Stats Cards */}");
     expect(primaryAction).toBeGreaterThan(-1);
     expect(stats).toBeGreaterThan(primaryAction);
-    expect(dashboard).toContain("<FirstMinutesCard />");
+    expect(dashboard).toContain(
+      "<FirstMinutesCard recommendation={onboardingNextStep} />",
+    );
     expect(dashboard).toContain("/learn?lesson=${nextLessonId}");
     expect(dashboard).not.toContain("הירשם לקורס והתחל את מסע הלמידה שלך!");
   });
@@ -49,26 +53,47 @@ describe("learner journey UI contract", () => {
     expect(modal).toContain("chooseOnboardingNextStep(selectedInterests)");
     expect(modal).toContain('href="/tools"');
     expect(modal).toContain("12 שבועות, 6 שלבים ו־75 שיעורים");
-    expect(modal).not.toMatch(/דבר עם המאמן|AI מאמן|תרגל דייטינג עם AI פרסונה/u);
+    expect(modal).not.toMatch(
+      /דבר עם המאמן|AI מאמן|תרגל דייטינג עם AI פרסונה/u,
+    );
+  });
+
+  it("turns the full questionnaire into a visible next step and preserves refusal", () => {
+    const onboarding = read("src/app/onboarding/page.tsx");
+    const dashboard = read("src/app/dashboard/page.tsx");
+    const card = read(
+      "src/components/onboarding/structured-next-step-card.tsx",
+    );
+    const contract = read("src/lib/learner-journey.ts");
+
+    expect(onboarding).toContain("chooseStructuredOnboardingNextStep");
+    expect(onboarding).toContain("להמשיך בלי לענות על השאלון");
+    expect(onboarding).toContain("<StructuredNextStepCard");
+    expect(dashboard).toContain("api.onboarding.getOnboarding");
+    expect(dashboard).toContain('onboardingNextStep?.mode === "choice-based"');
+    expect(dashboard).toContain("נקודת פתיחה נוספת לפי הבחירות שנשמרו");
+    expect(contract).toContain("ההצעה מבוססת רק על הבחירות");
+    expect(card).toContain("הבחירות שעליהן מבוססת ההצעה");
+    expect(card).not.toMatch(/אבחנתי|מתאים לך בוודאות|המסלול הנכון עבורך/u);
   });
 
   it("does not show onboarding completion when the save mutation failed", () => {
     const onboarding = read("src/app/onboarding/page.tsx");
     const completionHandler = onboarding.match(
-      /const handleComplete[\s\S]*?\}, \[completeOnboardingMutation/u
+      /const handleComplete[\s\S]*?\}, \[completeOnboardingMutation/u,
     )?.[0];
     expect(completionHandler).toBeTruthy();
     expect(completionHandler).toMatch(
-      /await completeOnboardingMutation[\s\S]*setIsCompleted\(true\)/u
+      /await completeOnboardingMutation[\s\S]*setIsCompleted\(true\)/u,
     );
     expect(completionHandler).toMatch(/catch[\s\S]*setCompletionError/u);
-    expect(completionHandler).not.toMatch(/catch[\s\S]*setIsCompleted\(true\)/u);
+    expect(completionHandler).not.toMatch(
+      /catch[\s\S]*setIsCompleted\(true\)/u,
+    );
   });
 
   it("keeps lesson completion retryable after a failed save", () => {
-    const button = read(
-      "src/components/course/lesson-complete-button.tsx"
-    );
+    const button = read("src/components/course/lesson-complete-button.tsx");
     expect(button).toMatch(/try[\s\S]*await onMarkComplete\(\)[\s\S]*catch/u);
     expect(button).toContain("לא הצלחנו לשמור את ההשלמה. אפשר לנסות שוב.");
     expect(button).toMatch(/finally[\s\S]*setLoading\(false\)/u);

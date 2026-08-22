@@ -9,7 +9,9 @@ import Link from "next/link";
 import {
   CANONICAL_COURSE_SCOPE,
   CANONICAL_PHASES,
+  chooseStructuredOnboardingNextStep,
 } from "@/lib/learner-journey";
+import { StructuredNextStepCard } from "@/components/onboarding/structured-next-step-card";
 
 // ==========================================
 // Onboarding Wizard - Phase 42
@@ -115,7 +117,14 @@ function ProgressBar({ currentStep }: { currentStep: number }) {
   const progress = (questionStep / QUESTION_STEPS) * 100;
 
   return (
-    <div className="w-full" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="התקדמות שאלון">
+    <div
+      className="w-full"
+      role="progressbar"
+      aria-valuenow={progress}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="התקדמות שאלון"
+    >
       <div className="flex items-center justify-between mb-2 text-sm text-gray-500">
         <span>
           שלב {questionStep} מתוך {QUESTION_STEPS}
@@ -133,7 +142,15 @@ function ProgressBar({ currentStep }: { currentStep: number }) {
 }
 
 // --- Step 0: Welcome ---
-function WelcomeStep({ onNext }: { onNext: () => void }) {
+function WelcomeStep({
+  onNext,
+  onSkip,
+  isSaving,
+}: {
+  onNext: () => void;
+  onSkip: () => void;
+  isSaving: boolean;
+}) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -158,13 +175,11 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         </svg>
       </div>
 
-      <h1 className="mb-4 text-3xl font-bold text-blue-500">
-        נעים להכיר
-      </h1>
+      <h1 className="mb-4 text-3xl font-bold text-blue-500">נעים להכיר</h1>
 
       <p className="mb-2 max-w-md text-pretty text-lg text-gray-600">
-        אומנות הקשר היא סביבת למידה לתרגול היכרות, תקשורת וקבלת החלטות:
-        {" "}{CANONICAL_COURSE_SCOPE.weeks} שבועות, {CANONICAL_COURSE_SCOPE.phases}{" "}
+        אומנות הקשר היא סביבת למידה לתרגול היכרות, תקשורת וקבלת החלטות:{" "}
+        {CANONICAL_COURSE_SCOPE.weeks} שבועות, {CANONICAL_COURSE_SCOPE.phases}{" "}
         שלבים ו־{CANONICAL_COURSE_SCOPE.lessons} שיעורים.
       </p>
 
@@ -174,10 +189,21 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 
       <button
         onClick={onNext}
+        disabled={isSaving}
         className="rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-8 py-3 text-lg font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
       >
         להתחיל
       </button>
+      <button
+        onClick={onSkip}
+        disabled={isSaving}
+        className="mt-3 min-h-11 rounded-xl px-5 py-2 text-sm font-medium text-zinc-600 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-60 dark:text-zinc-300 dark:hover:text-white"
+      >
+        {isSaving ? "ממשיך..." : "להמשיך בלי לענות על השאלון"}
+      </button>
+      <p className="mt-2 max-w-sm text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+        אין חובה לשמור מטרות או העדפות כדי להשתמש באזור האישי.
+      </p>
     </div>
   );
 }
@@ -287,9 +313,7 @@ function ExperienceStep({
 }) {
   return (
     <div className="flex flex-col items-center">
-      <h2 className="mb-2 text-2xl font-bold text-blue-500">
-        איך נוח להתחיל?
-      </h2>
+      <h2 className="mb-2 text-2xl font-bold text-blue-500">איך נוח להתחיל?</h2>
       <p className="mb-6 text-gray-500">
         הבחירה נשמרת כהעדפה ואינה קובעת רמה או יכולת
       </p>
@@ -454,7 +478,11 @@ function TopicsStep({
 }
 
 // --- Completion Screen ---
-function CompletionScreen() {
+function CompletionScreen({
+  recommendation,
+}: {
+  recommendation: ReturnType<typeof chooseStructuredOnboardingNextStep>;
+}) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -486,7 +514,9 @@ function CompletionScreen() {
         </div>
 
         <h2 className="mb-3 text-3xl font-bold text-blue-500">
-          ההיכרות נשמרה
+          {recommendation.mode === "choice-based"
+            ? "ההיכרות נשמרה"
+            : "אפשר להתחיל בלי שאלון"}
         </h2>
 
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-300/20 px-5 py-2">
@@ -495,20 +525,14 @@ function CompletionScreen() {
         </div>
 
         <p className="mb-6 max-w-md text-pretty text-gray-500">
-          הצעד הפשוט מכאן הוא לפתוח שיעור אחד, לבחור תרגול אחד ולשמור נקודה
-          אחת לחזרה. אין צורך להספיק יותר מזה עכשיו.
+          הנה נקודת פתיחה אחת. זו הצעה שאפשר לקבל, לשנות או להשאיר להמשך.
         </p>
 
-        <div className="grid w-full max-w-md gap-3 sm:grid-cols-2">
-          <Link
-            href="/courses"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-gradient-to-l from-brand-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-md transition-[transform,box-shadow] hover:shadow-lg active:scale-[0.96] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
-          >
-            לפתוח את מסלול הלימוד
-          </Link>
+        <div className="w-full max-w-md">
+          <StructuredNextStepCard recommendation={recommendation} />
           <Link
             href="/dashboard"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 py-3 font-semibold text-zinc-700 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96]"
+            className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-white px-6 py-3 font-semibold text-zinc-700 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 dark:bg-zinc-900 dark:text-zinc-100"
           >
             לעבור לאזור האישי
           </Link>
@@ -538,7 +562,7 @@ export default function OnboardingPage() {
   const onboarding = useQuery(api.onboarding.getOnboarding);
   const saveStepMutation = useMutation(api.onboarding.saveStep);
   const completeOnboardingMutation = useMutation(
-    api.onboarding.completeOnboarding
+    api.onboarding.completeOnboarding,
   );
 
   // Redirect if not signed in
@@ -587,7 +611,7 @@ export default function OnboardingPage() {
         setIsSaving(false);
       }
     },
-    [saveStepMutation, goals, experience, topics, isSaving]
+    [saveStepMutation, goals, experience, topics, isSaving],
   );
 
   const handleNext = useCallback(() => {
@@ -615,12 +639,37 @@ export default function OnboardingPage() {
       setIsCompleted(true);
     } catch {
       setCompletionError(
-        "לא הצלחנו לשמור את ההיכרות. שום בחירה לא אבדה במסך הזה; אפשר לנסות שוב."
+        "לא הצלחנו לשמור את ההיכרות. שום בחירה לא אבדה במסך הזה; אפשר לנסות שוב.",
       );
     } finally {
       setIsSaving(false);
     }
   }, [completeOnboardingMutation, goals, experience, topics, isSaving]);
+
+  const handleSkipQuestions = useCallback(async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    setCompletionError(null);
+    try {
+      await completeOnboardingMutation({ answers: {} });
+      setGoals([]);
+      setExperience("");
+      setTopics([]);
+      setIsCompleted(true);
+    } catch {
+      setCompletionError(
+        "לא הצלחנו להמשיך בלי השאלון. לא נשמרו בחירות חדשות; אפשר לנסות שוב.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }, [completeOnboardingMutation, isSaving]);
+
+  const recommendation = chooseStructuredOnboardingNextStep({
+    goals,
+    experience,
+    preferredTopics: topics,
+  });
 
   // Loading state
   if (!isLoaded || onboarding === undefined) {
@@ -657,9 +706,13 @@ export default function OnboardingPage() {
         {/* Steps container */}
         <div className="mt-8">
           {isCompleted ? (
-            <CompletionScreen />
+            <CompletionScreen recommendation={recommendation} />
           ) : currentStep === 0 ? (
-            <WelcomeStep onNext={handleNext} />
+            <WelcomeStep
+              onNext={handleNext}
+              onSkip={handleSkipQuestions}
+              isSaving={isSaving}
+            />
           ) : currentStep === 1 ? (
             <GoalsStep
               selected={goals}
@@ -687,9 +740,7 @@ export default function OnboardingPage() {
 
         {/* Saving indicator */}
         {isSaving && currentStep < 3 && (
-          <div className="mt-4 text-center text-sm text-gray-400">
-            שומר...
-          </div>
+          <div className="mt-4 text-center text-sm text-gray-400">שומר...</div>
         )}
         {completionError && (
           <p

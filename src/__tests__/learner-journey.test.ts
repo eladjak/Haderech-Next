@@ -3,6 +3,7 @@ import {
   CANONICAL_COURSE_SCOPE,
   CANONICAL_PHASES,
   chooseOnboardingNextStep,
+  chooseStructuredOnboardingNextStep,
   getRemainingWeeklyMinutes,
   getWeeklyGoalMessage,
 } from "@/lib/learner-journey";
@@ -30,13 +31,13 @@ describe("canonical learner journey", () => {
 
   it("turns the learner's first recognized interest into a real route", () => {
     expect(chooseOnboardingNextStep(["values"]).href).toBe(
-      "/tools/values-quiz"
+      "/tools/values-quiz",
     );
-    expect(
-      chooseOnboardingNextStep(["profile", "conversation"]).href
-    ).toBe("/tools/profile-builder");
+    expect(chooseOnboardingNextStep(["profile", "conversation"]).href).toBe(
+      "/tools/profile-builder",
+    );
     expect(chooseOnboardingNextStep(["unknown", "conversation"]).href).toBe(
-      "/tools/conversation-starters"
+      "/tools/conversation-starters",
     );
   });
 
@@ -45,6 +46,82 @@ describe("canonical learner journey", () => {
       href: "/courses",
       label: "להתחיל במסלול הלימוד",
       description: "לבחור את הקורס ולפתוח את השיעור הראשון.",
+    });
+  });
+
+  it("gives two different onboarding personas different real next steps and explains every input", () => {
+    const communicationBeginner = chooseStructuredOnboardingNextStep({
+      goals: ["improve-dating"],
+      experience: "beginner",
+      preferredTopics: ["phase-2"],
+    });
+    const commitmentReturner = chooseStructuredOnboardingNextStep({
+      goals: ["understand-dynamics"],
+      experience: "advanced",
+      preferredTopics: ["phase-6"],
+    });
+
+    expect(communicationBeginner).toMatchObject({
+      href: "/tools/conversation-starters",
+      mode: "choice-based",
+    });
+    expect(communicationBeginner.basis).toEqual([
+      "שלב 2: תקשורת",
+      "לתרגל תקשורת בהירה",
+      "מההתחלה",
+    ]);
+    expect(communicationBeginner.description).toContain("בחרת להתחיל מההתחלה");
+
+    expect(commitmentReturner).toMatchObject({
+      href: "/courses",
+      mode: "choice-based",
+    });
+    expect(commitmentReturner.basis).toEqual([
+      "שלב 6: מחויבות",
+      "לקבל החלטות בקשר בקצב שלי",
+      "חזרה ממוקדת",
+    ]);
+    expect(commitmentReturner.description).toContain("בחרת חזרה ממוקדת");
+    expect(commitmentReturner).not.toEqual(communicationBeginner);
+  });
+
+  it("uses an experience-only answer without pretending to infer a topic", () => {
+    expect(
+      chooseStructuredOnboardingNextStep({ experience: "intermediate" }),
+    ).toMatchObject({
+      href: "/tools",
+      mode: "choice-based",
+      basis: ["לפי נושא"],
+    });
+  });
+
+  it("keeps refusal and empty answers useful without personalization claims", () => {
+    const refusal = chooseStructuredOnboardingNextStep({});
+
+    expect(refusal).toEqual({
+      href: "/courses",
+      label: "להתחיל במסלול הלימוד",
+      description: "לבחור את הקורס ולפתוח את השיעור הראשון.",
+      mode: "default",
+      basis: [],
+      explanation:
+        "לא נשמרו בחירות, וזה בסדר. מוצג המסלול המלא בלי התאמה ובלי סיווג.",
+    });
+  });
+
+  it("rejects inherited and unknown keys instead of treating them as recommendations", () => {
+    expect(chooseOnboardingNextStep(["toString", "conversation"]).href).toBe(
+      "/tools/conversation-starters",
+    );
+    expect(
+      chooseStructuredOnboardingNextStep({
+        goals: ["__proto__"],
+        preferredTopics: ["constructor"],
+      }),
+    ).toMatchObject({
+      href: "/courses",
+      mode: "default",
+      basis: [],
     });
   });
 
