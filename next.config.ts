@@ -1,6 +1,16 @@
 import type { NextConfig } from "next";
+import { assertDemoModeConfiguration } from "./src/lib/production-config";
+
+const demoModeAuthorizedForClient = assertDemoModeConfiguration();
 
 const nextConfig: NextConfig = {
+  env: {
+    // This value is computed from the server-only ALLOW_DEMO_MODE flag. Client
+    // code cannot enable synthetic admin state with NEXT_PUBLIC_DEMO_MODE alone.
+    NEXT_PUBLIC_DEMO_MODE_AUTHORIZED: demoModeAuthorizedForClient
+      ? "true"
+      : "false",
+  },
   // תמונות מ-URLs חיצוניים (Clerk avatars, course images)
   images: {
     remotePatterns: [

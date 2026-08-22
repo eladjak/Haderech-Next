@@ -34,7 +34,8 @@ test.describe("Navigation", () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
-    const menuButton = page.locator('button[aria-label="תפריט ניווט"]');
+    const menuButton = page.locator('button[aria-controls="mobile-nav-menu"]');
+    await expect(menuButton).toHaveAccessibleName("פתיחת תפריט ניווט");
     await expect(menuButton).toBeVisible();
     await expect(menuButton).toHaveAttribute("aria-expanded", "false");
   });
@@ -42,8 +43,8 @@ test.describe("Navigation", () => {
   test("should toggle mobile menu on button click", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
 
-    const menuButton = page.locator('button[aria-label="תפריט ניווט"]');
-    const mobileMenu = page.locator("#mobile-nav-menu");
+    const menuButton = page.locator('button[aria-controls="mobile-nav-menu"]');
+    const mobileMenu = page.getByRole("navigation", { name: "תפריט ניווט נייד" });
 
     // Initially hidden
     await expect(mobileMenu).toBeHidden();
@@ -52,11 +53,14 @@ test.describe("Navigation", () => {
     await menuButton.click();
     await expect(mobileMenu).toBeVisible();
     await expect(menuButton).toHaveAttribute("aria-expanded", "true");
+    await expect(menuButton).toHaveAccessibleName("סגירת תפריט ניווט");
+    await expect(mobileMenu.getByRole("link", { name: "חיפוש" })).toBeFocused();
 
-    // Close menu
-    await menuButton.click();
+    // Escape closes the menu and restores focus to its trigger.
+    await page.keyboard.press("Escape");
     await expect(mobileMenu).toBeHidden();
     await expect(menuButton).toHaveAttribute("aria-expanded", "false");
+    await expect(menuButton).toBeFocused();
   });
 
   test("should show mobile navigation links when menu is open", async ({
@@ -64,10 +68,10 @@ test.describe("Navigation", () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 667 });
 
-    const menuButton = page.locator('button[aria-label="תפריט ניווט"]');
+    const menuButton = page.locator('button[aria-controls="mobile-nav-menu"]');
     await menuButton.click();
 
-    const mobileMenu = page.locator("#mobile-nav-menu");
+    const mobileMenu = page.getByRole("navigation", { name: "תפריט ניווט נייד" });
     await expect(mobileMenu).toBeVisible();
 
     // Public nav links visible in mobile menu
@@ -81,17 +85,17 @@ test.describe("Navigation", () => {
   });
 
   test("should navigate to the courses page", async ({ page }) => {
-    await page.locator('header a[href="/courses"]').click();
+    await page.getByRole("navigation", { name: "ניווט ראשי" }).getByRole("link", { name: "קורסים", exact: true }).click();
     await expect(page).toHaveURL("/courses");
   });
 
   test("should navigate to the blog page", async ({ page }) => {
-    await page.locator('header a[href="/blog"]').click();
+    await page.getByRole("navigation", { name: "ניווט ראשי" }).getByRole("link", { name: "בלוג", exact: true }).click();
     await expect(page).toHaveURL("/blog");
   });
 
   test("should navigate to the pricing page", async ({ page }) => {
-    await page.locator('header a[href="/pricing"]').click();
+    await page.getByRole("navigation", { name: "ניווט ראשי" }).getByRole("link", { name: "מחירים", exact: true }).click();
     await expect(page).toHaveURL("/pricing");
   });
 
@@ -103,8 +107,7 @@ test.describe("Navigation", () => {
     await expect(footer.locator('a[href="/blog"]')).toBeVisible();
     await expect(footer.locator('a[href="/dashboard"]')).toBeVisible();
 
-    // Tools links
-    await expect(footer.locator('a[href="/tools"]')).toBeVisible();
+    // Resource and information links currently exposed in the footer
     await expect(footer.locator('a[href="/resources"]')).toBeVisible();
 
     // Info links

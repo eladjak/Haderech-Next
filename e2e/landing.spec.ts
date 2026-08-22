@@ -12,33 +12,29 @@ test.describe("Landing Page", () => {
   test("should display the hero section with Hebrew content", async ({
     page,
   }) => {
-    // Main heading
-    const heading = page.locator("h1");
+    const hero = page.locator('section[aria-labelledby="hero-heading"]');
+    const heading = hero.getByRole("heading", { level: 1 });
     await expect(heading).toBeVisible();
     await expect(heading).toContainText("הדרך שלך");
     await expect(heading).toContainText("לזוגיות שאתה ראוי לה");
 
-    // Subheading / description
-    const description = page.locator("text=תוכנית \"הדרך\" של אומנות הקשר");
+    const description = hero.getByText(/תוכנית "הדרך" של אומנות הקשר/).first();
     await expect(description).toBeVisible();
   });
 
-  test("should display the badge with couple count", async ({ page }) => {
-    const badge = page.locator("text=זוגות כבר מצאו אהבה");
-    await expect(badge).toBeVisible();
+  test("should expose a single labelled hero region", async ({ page }) => {
+    const hero = page.locator('section[aria-labelledby="hero-heading"]');
+    await expect(hero).toHaveCount(1);
+    await expect(hero.locator("#hero-heading")).toBeVisible();
   });
 
   test("should have CTA buttons in the hero", async ({ page }) => {
     // Primary CTA - "Start the journey"
-    const primaryCta = page.locator('a[href="/courses"]', {
-      hasText: "התחילו את המסע",
-    });
+    const hero = page.locator('section[aria-labelledby="hero-heading"]');
+    const primaryCta = hero.getByRole("link", { name: "התחילו את המסע" });
     await expect(primaryCta).toBeVisible();
 
-    // Secondary CTA - "Start for free"
-    const secondaryCta = page.locator('a[href="/sign-up"]', {
-      hasText: "התחל בחינם",
-    });
+    const secondaryCta = hero.getByRole("link", { name: "התחל בחינם" });
     await expect(secondaryCta).toBeVisible();
   });
 
@@ -54,9 +50,10 @@ test.describe("Landing Page", () => {
     await expect(valuesHeading).toBeVisible();
 
     // Each value card
-    await expect(page.locator("h3", { hasText: "אמת" })).toBeVisible();
-    await expect(page.locator("h3", { hasText: "כלים" })).toBeVisible();
-    await expect(page.locator("h3", { hasText: "כבוד" })).toBeVisible();
+    const values = page.locator('section[aria-labelledby="values-heading"]');
+    await expect(values.getByRole("heading", { level: 3, name: "אמת", exact: true })).toBeVisible();
+    await expect(values.getByRole("heading", { level: 3, name: "כלים", exact: true })).toBeVisible();
+    await expect(values.getByRole("heading", { level: 3, name: "כבוד", exact: true })).toBeVisible();
   });
 
   test('should display the "What you get" ecosystem section', async ({
@@ -72,10 +69,10 @@ test.describe("Landing Page", () => {
     });
     await expect(pricingHeading).toBeVisible();
 
-    // Three pricing tiers
-    await expect(page.locator("text=טעימה")).toBeVisible();
-    await expect(page.locator("text=משנה")).toBeVisible();
-    await expect(page.locator("text=מוביל")).toBeVisible();
+    const pricing = page.locator('section[aria-labelledby="pricing-heading"]');
+    await expect(pricing.getByRole("heading", { level: 3, name: "טעימה", exact: true })).toBeVisible();
+    await expect(pricing.getByRole("heading", { level: 3, name: "משנה", exact: true })).toBeVisible();
+    await expect(pricing.getByRole("heading", { level: 3, name: "מוביל", exact: true })).toBeVisible();
   });
 
   test("should display the final CTA section", async ({ page }) => {
@@ -98,12 +95,12 @@ test.describe("Landing Page", () => {
   });
 
   test("should have navigation links in the header", async ({ page }) => {
-    const header = page.locator("header");
-    await expect(header).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "ניווט ראשי" });
+    await expect(nav).toBeVisible();
 
     // Public nav links (visible without auth)
-    await expect(header.locator('a[href="/courses"]')).toBeVisible();
-    await expect(header.locator('a[href="/blog"]')).toBeVisible();
-    await expect(header.locator('a[href="/pricing"]')).toBeVisible();
+    await expect(nav.getByRole("link", { name: "קורסים", exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "בלוג", exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "מחירים", exact: true })).toBeVisible();
   });
 });

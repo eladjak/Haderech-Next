@@ -25,43 +25,37 @@ test.describe("Tools Page", () => {
   test("should display AI chat and simulator quick-access links", async ({
     page,
   }) => {
-    const chatLink = page.locator('a[href="/chat"]', {
-      hasText: "צ'אט AI מאמן",
-    });
+    const main = page.getByRole("main");
+    const chatLink = main.getByRole("link", { name: "צ'אט AI מאמן" });
     await expect(chatLink).toBeVisible();
 
-    const simulatorLink = page.locator('a[href="/simulator"]', {
-      hasText: "סימולטור דייטים",
-    });
+    const simulatorLink = main.getByRole("link", { name: "סימולטור דייטים" });
     await expect(simulatorLink).toBeVisible();
   });
 
   test("should display available tools with links", async ({ page }) => {
-    // Profile builder - available tool
-    const profileBuilder = page.locator("h3", { hasText: "בונה הפרופיל" });
-    await expect(profileBuilder).toBeVisible();
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 3, name: "בונה פרופיל דייטינג" })).toBeVisible();
+    await expect(main.getByRole("heading", { level: 3, name: "בונה ביו AI" })).toBeVisible();
 
-    // Should have a link to the tool
-    const profileLink = page.locator('a[href="/tools/profile-builder"]');
+    const profileLink = main.locator('a[href="/tools/profile-builder"]');
     await expect(profileLink).toBeVisible();
     await expect(profileLink).toContainText("התחל");
 
     // Conversation starters - available tool
-    const conversationStarters = page.locator("h3", {
-      hasText: "פותחי שיחה",
-    });
+    const conversationStarters = main.getByRole("heading", { level: 3, name: "פותחי שיחה" });
     await expect(conversationStarters).toBeVisible();
 
-    const conversationLink = page.locator(
+    const conversationLink = main.locator(
       'a[href="/tools/conversation-starters"]',
     );
     await expect(conversationLink).toBeVisible();
 
     // Values quiz - available tool
-    const valuesQuiz = page.locator("h3", { hasText: "מבחן ערכים" });
+    const valuesQuiz = main.getByRole("heading", { level: 3, name: "מבחן ערכים" });
     await expect(valuesQuiz).toBeVisible();
 
-    const valuesLink = page.locator('a[href="/tools/values-quiz"]');
+    const valuesLink = main.locator('a[href="/tools/values-quiz"]');
     await expect(valuesLink).toBeVisible();
   });
 
@@ -95,16 +89,22 @@ test.describe("Tools Page", () => {
     expect(await comingSoonBadges.count()).toBeGreaterThanOrEqual(3);
   });
 
-  test("should display all six tool cards", async ({ page }) => {
-    const toolCards = page.locator("h3").filter({
-      hasText:
-        /בונה הפרופיל|ניתוח תמונות|מתכנן דייטים|ניתוח דייט|פותחי שיחה|מבחן ערכים/,
-    });
-    await expect(toolCards).toHaveCount(6);
+  test("should display all seven tool cards", async ({ page }) => {
+    const toolCards = page.getByRole("main").getByRole("heading", { level: 3 });
+    await expect(toolCards).toHaveCount(7);
+    await expect(toolCards).toHaveText([
+      "בונה פרופיל דייטינג",
+      "בונה ביו AI",
+      "ניתוח תמונות",
+      "מתכנן דייטים",
+      "ניתוח דייט",
+      "פותחי שיחה",
+      "מבחן ערכים",
+    ]);
   });
 
   test("should have header and footer", async ({ page }) => {
-    await expect(page.locator("header")).toBeVisible();
-    await expect(page.locator("footer")).toBeVisible();
+    await expect(page.getByRole("banner").first()).toBeVisible();
+    await expect(page.getByRole("contentinfo").first()).toBeVisible();
   });
 });
