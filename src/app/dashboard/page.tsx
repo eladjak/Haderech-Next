@@ -53,18 +53,6 @@ export default function DashboardPage() {
     convexUser?._id ? { userId: convexUser._id } : "skip",
   );
 
-  // Get learning streak
-  const streak = useQuery(
-    api.analytics.getLearningStreak,
-    convexUser?._id ? { userId: convexUser._id } : "skip",
-  );
-
-  // Get achievements
-  const achievements = useQuery(
-    api.analytics.getAchievements,
-    convexUser?._id ? { userId: convexUser._id } : "skip",
-  );
-
   const accessibleCourses =
     enrolledCourses?.filter((course) => course.hasContentAccess) ?? [];
   const savedWithoutAccess =
@@ -73,8 +61,6 @@ export default function DashboardPage() {
   const certificateCount = certificates?.length ?? 0;
   const completedLessonsCount = overview?.completedLessons ?? 0;
   const avgQuizScore = overview?.averageQuizScore ?? 0;
-  const currentStreak = streak?.currentStreak ?? 0;
-  const earnedAchievements = achievements?.filter((a) => a.earned) ?? [];
 
   // Continue learning with next-lesson resolution
   const continueData = useQuery(
@@ -272,20 +258,6 @@ export default function DashboardPage() {
                 />
               </svg>
             </Link>
-          </div>
-        )}
-
-        {/* Streak + Achievements are secondary context, after the next action. */}
-        {enrolledCount > 0 && (
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <StreakCard streak={currentStreak} />
-            {earnedAchievements.length > 0 && (
-              <AchievementsSummaryCard
-                earnedCount={earnedAchievements.length}
-                totalCount={achievements?.length ?? 0}
-                icons={earnedAchievements.slice(0, 4).map((a) => a.icon)}
-              />
-            )}
           </div>
         )}
 
@@ -781,105 +753,6 @@ function ContinueLearningCard({
   );
 }
 
-function StreakCard({ streak }: { streak: number }) {
-  const streakColor =
-    streak === 0
-      ? "text-zinc-400"
-      : streak >= 7
-        ? "text-amber-500"
-        : "text-orange-500";
-
-  return (
-    <div className="rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900">
-      <p className="mb-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-        ימים עם פעילות למידה
-      </p>
-      <div className="flex items-center gap-3">
-        <span className="text-3xl" aria-hidden="true">
-          🔥
-        </span>
-        <div>
-          <p className={`tabular-nums text-2xl font-bold ${streakColor}`}>
-            {streak}{" "}
-            <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">
-              {streak === 1 ? "יום" : "ימים"}
-            </span>
-          </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            {streak === 0
-              ? "גם תרגול קצר יכול להיות נקודת חזרה"
-              : streak === 1
-                ? "חזרת ללמידה היום"
-                : "זה מספר הימים הרצופים שבהם חזרת ללמידה"}
-          </p>
-        </div>
-      </div>
-      <Link
-        href="/student/analytics"
-        className="mt-3 block text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      >
-        לסקירת הלמידה &rarr;
-      </Link>
-    </div>
-  );
-}
-
-function AchievementsSummaryCard({
-  earnedCount,
-  totalCount,
-  icons,
-}: {
-  earnedCount: number;
-  totalCount: number;
-  icons: string[];
-}) {
-  // Map achievement icon names to simple emoji representations
-  const iconEmoji: Record<string, string> = {
-    rocket: "🚀",
-    book: "📚",
-    bookOpen: "📖",
-    star: "⭐",
-    sword: "⚔️",
-    trophy: "🏆",
-    medal: "🏅",
-    fire: "🔥",
-    flame: "🔥",
-    crown: "👑",
-    compass: "🧭",
-    shield: "🛡️",
-    puzzle: "🧩",
-    check: "✅",
-    heart: "❤️",
-  };
-
-  return (
-    <div className="rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        הישגים
-      </p>
-      <div className="mb-2 flex gap-1">
-        {icons.map((icon, i) => (
-          <span key={i} className="text-xl" aria-hidden="true">
-            {iconEmoji[icon] ?? "🏅"}
-          </span>
-        ))}
-      </div>
-      <p className="text-sm text-zinc-700 dark:text-zinc-300">
-        <span className="font-semibold text-zinc-900 dark:text-white">
-          {earnedCount}
-        </span>{" "}
-        מתוך {totalCount} הישגים הושגו
-      </p>
-      <Link
-        href="/student/profile"
-        className="mt-2 block text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      >
-        הצג פרופיל &rarr;
-      </Link>
-    </div>
-  );
-}
-
 const NEW_FEATURES = [
   {
     href: "/chat",
@@ -898,7 +771,7 @@ const NEW_FEATURES = [
   {
     href: "/tools",
     label: "כלי דייטינג",
-    description: "בנה פרופיל, נתח תמונות ועוד",
+    description: "בנה טיוטת פרופיל ותרגל פתיחת שיחה",
     icon: "🛠️",
     color: "blue",
   },

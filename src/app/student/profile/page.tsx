@@ -8,10 +8,6 @@ import { useState } from "react";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import {
-  BadgeCard,
-  StreakDisplay,
-} from "@/components/gamification/badge-icon";
 import { CERTIFICATE_SCOPE_NOTICE } from "@/lib/certificate-truth";
 
 export default function StudentProfilePage() {
@@ -27,26 +23,7 @@ export default function StudentProfilePage() {
     convexUser?._id ? { userId: convexUser._id } : "skip"
   );
 
-  const xpData = useQuery(
-    api.gamification.getUserXP,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
-  );
-
-  const badgesData = useQuery(
-    api.gamification.getUserBadges,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
-  );
-
-  const streakData = useQuery(
-    api.gamification.getDailyStreak,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
-  );
-
-  const isLoading =
-    profile === undefined ||
-    xpData === undefined ||
-    badgesData === undefined ||
-    streakData === undefined;
+  const isLoading = profile === undefined;
 
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
@@ -111,38 +88,6 @@ export default function StudentProfilePage() {
                       }).format(new Date(profile.joinedAt))}
                     </p>
 
-                    {/* Level & XP */}
-                    {xpData && (
-                      <div className="mt-4">
-                        <div className="mb-1 flex items-center justify-center gap-3 sm:justify-start">
-                          <span className="flex h-8 items-center rounded-full bg-emerald-100 px-3 text-sm font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                            רמה {xpData.level}
-                          </span>
-                          <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                            {xpData.totalXP} XP
-                          </span>
-                        </div>
-                        <div className="mt-2 max-w-sm">
-                          <div className="mb-1 flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                            <span>
-                              רמה {xpData.level}
-                            </span>
-                            <span>
-                              רמה {xpData.level + 1}
-                            </span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-                            <div
-                              className="h-full rounded-full bg-emerald-500 transition-all duration-500 dark:bg-emerald-400"
-                              style={{ width: `${xpData.progressPercent}%` }}
-                            />
-                          </div>
-                          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                            {xpData.xpInCurrentLevel} / {xpData.xpNeededForNextLevel} XP
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Quick links */}
@@ -193,43 +138,6 @@ export default function StudentProfilePage() {
                 />
               </div>
             </section>
-
-            {/* Daily Streak */}
-            {streakData && (
-              <section className="mb-8">
-                <StreakDisplay streak={streakData} />
-              </section>
-            )}
-
-            {/* Achievement Badges */}
-            {badgesData && (
-              <section className="mb-8">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-                    הישגים
-                  </h2>
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {badgesData.earnedCount}/{badgesData.totalCount} (
-                    {badgesData.completionPercent}%)
-                  </span>
-                </div>
-                <div className="mb-3">
-                  <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-                    <div
-                      className="h-full rounded-full bg-amber-500 transition-all duration-500 dark:bg-amber-400"
-                      style={{
-                        width: `${badgesData.completionPercent}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {badgesData.badges.map((badge) => (
-                    <BadgeCard key={badge.id} badge={badge} />
-                  ))}
-                </div>
-              </section>
-            )}
 
             {/* Course Progress */}
             <section className="mb-8">

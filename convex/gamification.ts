@@ -127,6 +127,7 @@ export const getUserXP = query({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    throw new Error("XP_STATUS_DISABLED");
     let totalXP = 0;
 
     // Completed lessons: 10 XP each
@@ -233,6 +234,7 @@ export const getUserBadges = query({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    throw new Error("GAMIFIED_BADGES_DISABLED");
     // Gather all user data
     const enrollments = await ctx.db
       .query("enrollments")
@@ -373,6 +375,7 @@ export const getDailyStreak = query({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    throw new Error("LEARNING_STREAK_STATUS_DISABLED");
     const allProgress = await ctx.db
       .query("progress")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -653,6 +656,7 @@ export const getUserStats = query({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    throw new Error("XP_STATUS_DISABLED");
     // Sum XP from xpEvents table
     const xpEvents = await ctx.db
       .query("xpEvents")
@@ -742,6 +746,7 @@ export const getUserXpHistory = query({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    throw new Error("XP_STATUS_DISABLED");
     const events = await ctx.db
       .query("xpEvents")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -759,6 +764,7 @@ export const getUserEarnedBadges = query({
   },
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
+    throw new Error("GAMIFIED_BADGES_DISABLED");
     // Get all badge definitions
     const allBadges = await ctx.db.query("badges").collect();
 
@@ -813,14 +819,8 @@ export const awardXp = internalMutation({
     points: v.number(),
     description: v.string(),
   },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("xpEvents", {
-      userId: args.userId,
-      type: args.type,
-      points: args.points,
-      description: args.description,
-      createdAt: Date.now(),
-    });
+  handler: async () => {
+    throw new Error("XP_AWARDS_DISABLED");
   },
 });
 

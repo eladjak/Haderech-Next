@@ -4,7 +4,8 @@ export const SIMULATOR_TRIAL_POLICY = Object.freeze({
   freeCompletedTurns: 5,
   reservationTtlMs: 10 * 60 * 1000,
   commerceAvailable: false,
-  entitlementScope: "any_active_course" as const,
+  entitlementScope: "haderech_course_only" as const,
+  entitlementCourseTitle: "הדרך - אומנות הקשר",
 });
 
 export const SIMULATOR_TRIAL_LOCKED_ERROR = "SIMULATOR_TRIAL_LOCKED";

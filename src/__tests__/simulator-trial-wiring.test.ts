@@ -43,6 +43,15 @@ describe("simulator trial server and UI wiring", () => {
     expect(simulator).toContain("משוב אוטומטי בסיסי:");
   });
 
+  it("unlocks full access only for the canonical Haderech course entitlement", () => {
+    expect(simulator).toContain("activeEntitlements");
+    expect(simulator).toContain("entitlementCourseTitle");
+    expect(simulator).toContain("ctx.db.get(entitlement.courseId)");
+    expect(simulator).not.toContain(
+      'entitlementScope === "any_active_course"',
+    );
+  });
+
   it("shows a warm locked state without inventing live commerce", () => {
     expect(accessPanel).toContain("הניסיון החינמי הסתיים");
     expect(accessPanel).toContain("הרכישה אינה");

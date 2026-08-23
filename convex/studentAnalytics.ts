@@ -48,19 +48,6 @@ export const getStudentOverview = query({
       0
     );
 
-    // XP from xpEvents table
-    const xpEvents = await ctx.db
-      .query("xpEvents")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-    const totalXp = xpEvents.reduce((sum, e) => sum + e.points, 0);
-
-    // Badges from userBadges table
-    const badges = await ctx.db
-      .query("userBadges")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-
     // Certificates
     const certificates = await ctx.db
       .query("certificates")
@@ -134,11 +121,6 @@ export const getStudentOverview = query({
       });
     }
 
-    // Recent XP events (last 5)
-    const recentXpEvents = xpEvents
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, 5);
-
     // Total lessons across all courses
     let totalLessonsCount = 0;
     for (const enrollment of enrollments) {
@@ -154,11 +136,6 @@ export const getStudentOverview = query({
       completedLessons,
       totalLessons: totalLessonsCount,
       totalWatchTime,
-      totalXp,
-      level: Math.floor(totalXp / 100) + 1,
-      xpInCurrentLevel: totalXp % 100,
-      xpNeededForNextLevel: 100,
-      badgeCount: badges.length,
       certificateCount: certificates.length,
       chatSessionCount: allChatSessions.length,
       simSessionCount: allSimSessions.length,
@@ -166,7 +143,6 @@ export const getStudentOverview = query({
       courseProgress: courseProgress.sort(
         (a, b) => b.lastActivity - a.lastActivity
       ),
-      recentXpEvents,
     };
   },
 });

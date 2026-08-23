@@ -40,6 +40,15 @@ export default defineSchema({
     phaseNumber: v.optional(v.number()),     // שלב 1-6
     phaseName: v.optional(v.string()),       // שם השלב בעברית
     scriptIndex: v.optional(v.string()),     // אינדקס תסריט e.g. "1.1.1"
+    contentKey: v.optional(v.string()),      // זהות קנונית יציבה ממניפסט הקורס
+    learnerAvailability: v.optional(
+      v.union(v.literal("required"), v.literal("optional"))
+    ),
+    completionAffectsProgress: v.optional(v.boolean()),
+    assessmentOrScoring: v.optional(v.boolean()),
+    personalDisclosureRequired: v.optional(v.boolean()),
+    relationshipOrPartnerRequired: v.optional(v.boolean()),
+    learnerAlternatives: v.optional(v.array(v.string())),
     pdfUrl: v.optional(v.string()),          // שם קובץ PDF נלווה
     createdAt: v.number(),
     updatedAt: v.number(),

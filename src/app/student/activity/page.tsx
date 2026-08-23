@@ -14,8 +14,6 @@ import { motion } from "framer-motion";
 
 type ActivityType =
   | "lesson"
-  | "xp"
-  | "badge"
   | "certificate"
   | "simulator"
   | "chat";
@@ -29,20 +27,6 @@ const ACTIVITY_CONFIG: Record<
     color: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
     dotColor: "bg-blue-500",
     label: "שיעורים",
-  },
-  xp: {
-    emoji: "\u{2B50}",
-    color:
-      "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    dotColor: "bg-amber-500",
-    label: "XP",
-  },
-  badge: {
-    emoji: "\u{1F3C5}",
-    color:
-      "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-    dotColor: "bg-purple-500",
-    label: "הישגים",
   },
   certificate: {
     emoji: "\u{1F4DC}",
@@ -69,8 +53,6 @@ const ACTIVITY_CONFIG: Record<
 
 const ALL_TYPES: ActivityType[] = [
   "lesson",
-  "xp",
-  "badge",
   "certificate",
   "simulator",
   "chat",
@@ -314,16 +296,11 @@ export default function ActivityPage() {
                                 </div>
                               </div>
 
-                              {/* Right side: time + XP */}
+                              {/* Activity time */}
                               <div className="flex shrink-0 flex-col items-end gap-1">
                                 <span className="text-xs text-zinc-400 dark:text-zinc-500">
                                   {formatRelativeTime(activity.timestamp)}
                                 </span>
-                                {activity.xp && (
-                                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
-                                    +{activity.xp} XP
-                                  </span>
-                                )}
                               </div>
                             </div>
                           </div>

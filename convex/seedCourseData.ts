@@ -2,7 +2,7 @@
  * Seed Course Data - HaDerech Learning Platform
  *
  * Metadata for the current "הדרך" course placement in the LMS.
- * 75 mapped lessons organized into 12 weeks across 6 phases, with 8 linked
+ * 75 progress-bearing lessons plus one optional practice, organized into 12 weeks across 6 phases, with 8 linked
  * practice PDFs. Learner-facing lesson text is generated separately from the
  * canonical Git manifest; this file does not establish research or outcome proof.
  *
@@ -30,6 +30,14 @@ export interface SeedLesson {
   duration: number;
   /** Script index reference e.g. "1.1.1" */
   scriptIndex: string;
+  /** Stable identity from the canonical course manifest */
+  contentKey?: string;
+  learnerAvailability?: "required" | "optional";
+  completionAffectsProgress?: boolean;
+  assessmentOrScoring?: boolean;
+  personalDisclosureRequired?: boolean;
+  relationshipOrPartnerRequired?: boolean;
+  learnerAlternatives?: string[];
   /** Filename of an accompanying PDF resource (optional) */
   pdfUrl?: string;
 }
@@ -518,10 +526,28 @@ const HADERECH_MODULES: SeedModule[] = [
         pdfUrl: "מפת_העדפות_חיבה.pdf",
       },
       {
+        title: "לבחור אם לקבל — תרגול רשות",
+        description:
+          "תרגול אופציונלי על קבלה וסירוב: אפשר לעבוד עם תרחיש בדיוני, לבחור חלופת כתיבה פרטית או לדלג. אין צורך בחשיפה אישית, באדם נוסף או בקשר, והתרגול אינו משפיע על ההתקדמות ואינו מקבל ציון.",
+        order: 5,
+        weekNumber: 5,
+        phaseNumber: 2,
+        phaseName: PHASES[2].name,
+        duration: 90,
+        scriptIndex: "5.3.2",
+        contentKey: "oh.course.lesson.receiving-practice",
+        learnerAvailability: "optional",
+        completionAffectsProgress: false,
+        assessmentOrScoring: false,
+        personalDisclosureRequired: false,
+        relationshipOrPartnerRequired: false,
+        learnerAlternatives: ["written-fictional", "private-written", "skip"],
+      },
+      {
         title: "התנהגויות שעשויות לצמצם זמינות",
         description:
           "בחינה של הרגלים, עומס, קשרי עבר וגבולות שעשויים להשפיע על הרצון או היכולת להכיר כרגע. זו אינה אבחנה או הבטחה ששינוי התנהגות יוביל לזוגיות; גם בחירה לא להיות זמינים היא לגיטימית.",
-        order: 5,
+        order: 6,
         weekNumber: 5,
         phaseNumber: 2,
         phaseName: PHASES[2].name,
@@ -532,7 +558,7 @@ const HADERECH_MODULES: SeedModule[] = [
         title: "סיכום שלב התקשורת",
         description:
           "סיכום שבועות 4-5: הכרת עצמנו, רגשות, צרכים, המודל הפופולרי של שפות אהבה והדדיות. אפשר לבחור מה להמשיך לתרגל ובאיזה קצב; אין חובה לצאת להיכרויות או לבצע משימת חשיפה כדי להתקדם בקורס.",
-        order: 6,
+        order: 7,
         weekNumber: 5,
         phaseNumber: 2,
         phaseName: PHASES[2].name,
@@ -1303,7 +1329,7 @@ export const SEED_COURSES: SeedCourse[] = [
   {
     title: "הדרך - אומנות הקשר",
     description:
-      "תוכנית למידה ותרגול בת 12 שבועות וב-6 שלבים סביב היכרות, תקשורת וקשרים. היא כוללת 75 שיעורים ו-8 מסמכי PDF לתרגול, בלי להבטיח תוצאה אישית.",
+      "תוכנית למידה ותרגול בת 12 שבועות וב-6 שלבים סביב היכרות, תקשורת וקשרים. היא כוללת 75 שיעורי ליבה, תרגול רשות אחד ו-8 מסמכי PDF לתרגול, בלי להבטיח תוצאה אישית.",
     category: "זוגיות",
     level: "beginner",
     order: 0,
@@ -1343,11 +1369,12 @@ export function totalDurationMinutes(course: SeedCourse): number {
 // Summary (for verification)
 // ---------------------------------------------------------------------------
 // Course 1: "הדרך - אומנות הקשר"
-//   - 12 modules (weeks), 75 lessons
+//   - 12 modules (weeks), 76 content items: 75 progress-bearing lessons + 1 optional practice
 //   - Phase 1 (גישה): Weeks 1-3 = 22 lessons  (8+6+8)
-//   - Phase 2 (תקשורת): Weeks 4-5 = 14 lessons  (7+7)
+//   - Phase 2 (תקשורת): Weeks 4-5 = 15 items (14 progress-bearing + 1 optional)
 //     - 5.2.2: NVC / ניהול קונפליקטים (updated from original "להסכים לקבל")
 //     - 5.3.1: שפות האהבה (new lesson added in Iter 2)
+//     - 5.3.2: לבחור אם לקבל (optional; no progress, score or disclosure)
 //   - Phase 3 (מעבר ומשיכה): Weeks 6-9 = 21 lessons  (6+5+5+5)
 //   - Phase 4 (חיבור וכימיה): Week 10 = 5 lessons
 //     - 10.1.2: מיתוסים על כימיה (new lesson added in Iter 2)

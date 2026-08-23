@@ -31,7 +31,7 @@ const exportedCourses = between(
 );
 
 describe("canonical course seed metadata", () => {
-  it("matches all 75 generated manifest placements exactly once", () => {
+  it("matches 76 content placements while keeping only 75 progress-bearing", () => {
     const seedIndexes = [
       ...activeCourseMetadata.matchAll(/scriptIndex:\s*"([^"]+)"/g),
     ].map((match) => match[1]);
@@ -39,9 +39,11 @@ describe("canonical course seed metadata", () => {
       ...read("convex/lessonContentData.ts").matchAll(/^\s*"(\d+\.\d+\.\d+)":/gm),
     ].map((match) => match[1]);
 
-    expect(seedIndexes).toHaveLength(75);
-    expect(uniqueSorted(seedIndexes)).toHaveLength(75);
+    expect(seedIndexes).toHaveLength(76);
+    expect(uniqueSorted(seedIndexes)).toHaveLength(76);
     expect(uniqueSorted(seedIndexes)).toEqual(uniqueSorted(generatedIndexes));
+    expect(activeCourseMetadata).toContain('scriptIndex: "5.3.2"');
+    expect(activeCourseMetadata).toContain("completionAffectsProgress: false");
   });
 
   it("exports one current course with the approved public inventory", () => {
@@ -50,7 +52,9 @@ describe("canonical course seed metadata", () => {
       /modules:\s*(?:OMANUT_HASICHA_MODULES|PROFILE_MENATZEACH_MODULES|SIMULATOR_DATIM_MODULES)/
     );
     expect(exportedCourses).toContain("12 שבועות וב-6 שלבים");
-    expect(exportedCourses).toContain("75 שיעורים ו-8 מסמכי PDF לתרגול");
+    expect(exportedCourses).toContain(
+      "75 שיעורי ליבה, תרגול רשות אחד ו-8 מסמכי PDF לתרגול",
+    );
     expect(exportedCourses).not.toContain("estimatedHours: 24");
     expect(seedCourseData).toContain(
       "export const LEGACY_UNPUBLISHED_COURSE_DRAFT_COUNT"

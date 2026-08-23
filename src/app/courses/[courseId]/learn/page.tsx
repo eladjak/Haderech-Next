@@ -155,17 +155,21 @@ function LearnContent() {
 
   const { lessons, ...course } = courseWithLessons;
   const publishedLessons = lessons.filter((l) => l.published);
+  const progressLessons = publishedLessons.filter(
+    (lesson) => lesson.completionAffectsProgress !== false,
+  );
+  const progressLessonIds = new Set(progressLessons.map((lesson) => lesson._id));
 
   // Build progress map
   const progressMap = new Map(
     (courseProgress ?? []).map((p) => [p.lessonId, p])
   );
   const completedCount = (courseProgress ?? []).filter(
-    (p) => p.completed
+    (p) => p.completed && progressLessonIds.has(p.lessonId),
   ).length;
   const completionPercent =
-    publishedLessons.length > 0
-      ? Math.round((completedCount / publishedLessons.length) * 100)
+    progressLessons.length > 0
+      ? Math.round((completedCount / progressLessons.length) * 100)
       : 0;
 
   // Default to first lesson if none selected
@@ -186,7 +190,7 @@ function LearnContent() {
       : null;
 
   const courseComplete =
-    publishedLessons.length > 0 && completedCount >= publishedLessons.length;
+    progressLessons.length > 0 && completedCount >= progressLessons.length;
 
   const isCurrentLessonComplete =
     activeLessonId !== null &&
@@ -229,7 +233,7 @@ function LearnContent() {
           {course.title}
         </h2>
         <p className="tabular-nums mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          {completedCount}/{publishedLessons.length} שיעורים הושלמו
+          {completedCount}/{progressLessons.length} שיעורי ליבה הושלמו
         </p>
         {completionPercent > 0 && (
           <div className="mt-2">
@@ -468,6 +472,18 @@ function LearnContent() {
               <LessonContent content={activeLesson.content} className="mb-8" />
             )}
 
+            {activeLesson.completionAffectsProgress === false && (
+              <OptionalReceivingPractice
+                onSkip={() => {
+                  if (nextLesson) {
+                    router.push(
+                      `/courses/${courseId}/learn?lesson=${nextLesson._id}`,
+                    );
+                  }
+                }}
+              />
+            )}
+
             <LessonPdfResource
               pdfUrl={
                 "pdfUrl" in activeLesson ? activeLesson.pdfUrl : undefined
@@ -495,7 +511,8 @@ function LearnContent() {
             )}
 
             {/* Quiz Section */}
-            {quiz && quizQuestions && quizQuestions.length > 0 && (
+            {activeLesson.assessmentOrScoring !== false &&
+              quiz && quizQuestions && quizQuestions.length > 0 && (
               <div className="mb-8">
                 <QuizPlayer
                   quizTitle={quiz.title}
@@ -512,7 +529,7 @@ function LearnContent() {
             )}
 
             {/* Completion belongs after the lesson, its practice and optional quiz. */}
-            {convexUser && (
+            {convexUser && activeLesson.completionAffectsProgress !== false && (
               <div className="mb-8 rounded-2xl bg-zinc-50 p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-zinc-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
                 <p className="mb-3 text-sm text-zinc-600 dark:text-zinc-400">
                   אחרי הקריאה והתרגול שמתאים לך, אפשר לשמור כאן את נקודת
@@ -620,6 +637,60 @@ function LearnContent() {
         )}
       </main>
     </div>
+  );
+}
+
+function OptionalReceivingPractice({ onSkip }: { onSkip: () => void }) {
+  const [choice, setChoice] = useState<"fictional" | "private" | null>(null);
+
+  return (
+    <section className="mb-8 rounded-3xl border border-sky-200 bg-sky-50/70 p-6 dark:border-sky-800 dark:bg-sky-950/20">
+      <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">
+        תרגול רשות — לא משפיע על ההתקדמות ואין בו ציון
+      </p>
+      <h2 className="mt-2 text-xl font-bold text-zinc-950 dark:text-white">
+        איך מתאים לך לתרגל?
+      </h2>
+      <p className="mt-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+        אין צורך בקשר, באדם נוסף או בחשיפה אישית. אפשר לבחור אפשרות אחת,
+        להחליף ביניהן או לדלג בלי שהשיעור יסומן כחסר.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => setChoice("fictional")}
+          className="min-h-11 rounded-xl border border-sky-300 bg-white px-4 py-3 text-sm font-semibold text-sky-900 hover:bg-sky-100 dark:border-sky-700 dark:bg-zinc-900 dark:text-sky-200"
+        >
+          לבחור תרחיש בדיוני
+        </button>
+        <button
+          type="button"
+          onClick={() => setChoice("private")}
+          className="min-h-11 rounded-xl border border-sky-300 bg-white px-4 py-3 text-sm font-semibold text-sky-900 hover:bg-sky-100 dark:border-sky-700 dark:bg-zinc-900 dark:text-sky-200"
+        >
+          לבחור חלופת כתיבה פרטית
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="min-h-11 rounded-xl px-4 py-3 text-sm font-semibold text-zinc-700 hover:bg-white dark:text-zinc-300 dark:hover:bg-zinc-900"
+        >
+          לדלג ולהמשיך
+        </button>
+      </div>
+      {choice === "fictional" && (
+        <div className="mt-5 rounded-2xl bg-white p-4 text-sm leading-7 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+          דמות בדיונית מקבלת הצעה לעזרה קטנה. כתבו שתי תגובות אפשריות:
+          אחת שמקבלת בתודה ואחת שמסרבת או מבקשת זמן. אין תשובה מדורגת.
+        </div>
+      )}
+      {choice === "private" && (
+        <div className="mt-5 rounded-2xl bg-white p-4 text-sm leading-7 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+          אפשר לכתוב לעצמך משפט קבלה ומשפט סירוב כלליים, בלי שם, אירוע או
+          פרט מזהה. הכתיבה נשארת אצלך ואין צורך להזין אותה למערכת.
+        </div>
+      )}
+    </section>
   );
 }
 

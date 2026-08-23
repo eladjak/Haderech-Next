@@ -349,10 +349,10 @@ export default function Home() {
               badge="כלים"
             />
             <EcosystemCard
-              emoji="🏆"
-              title="XP, תגים ולוח מובילים"
-              description="כלי מעקב ומשחק אופציונליים בתוך הפלטפורמה; הם אינם מדד להתקדמות אישית או זוגית."
-              badge="גיימיפיקציה"
+              emoji="🧭"
+              title="התקדמות אישית בקורס"
+              description="מעקב פרטי אחר שיעורים ותרגולים, בלי דירוג מול אחרים ובלי להפוך קשרים למשחק."
+              badge="למידה בקצב שלך"
             />
             <EcosystemCard
               emoji="📅"

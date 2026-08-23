@@ -11,12 +11,21 @@ const EMPTY: SimulatorTrialState = { consumedUnits: 0, reservations: [] };
 const NOW = 1_900_000_000_000;
 
 describe("simulator trial policy", () => {
-  it("keeps the current trusted-entitlement scope and closed commerce explicit", () => {
+  it("keeps the five-turn trial, product-specific entitlement, and closed commerce explicit", () => {
     expect(SIMULATOR_TRIAL_POLICY).toMatchObject({
       freeCompletedTurns: 5,
       commerceAvailable: false,
-      entitlementScope: "any_active_course",
+      entitlementScope: "haderech_course_only",
+      entitlementCourseTitle: "הדרך - אומנות הקשר",
     });
+  });
+
+  it("does not allow the old any-course entitlement scope to return", () => {
+    expect(SIMULATOR_TRIAL_POLICY.entitlementScope).not.toBe(
+      "any_active_course",
+    );
+    expect(SIMULATOR_TRIAL_POLICY.freeCompletedTurns).toBe(5);
+    expect(SIMULATOR_TRIAL_POLICY.commerceAvailable).toBe(false);
   });
   it("isolates user A usage from user B", () => {
     const userA = { consumedUnits: 5, reservations: [] };

@@ -5,74 +5,65 @@ import { describe, expect, it } from "vitest";
 const read = (relativePath: string) =>
   fs.readFileSync(path.resolve(process.cwd(), relativePath), "utf8");
 
-describe("private progress contract", () => {
-  it("never builds a social leaderboard by scanning every learner", () => {
+describe("private progress and gamification containment", () => {
+  it("hard-disables ranking, weekly point challenges and reward redemption", () => {
     const source = read("convex/leaderboard.ts");
-    const start = source.indexOf("export const getWeeklyLeaderboard");
-    const end = source.indexOf("// Weekly Challenges");
-    const progressQueries = source.slice(start, end);
 
-    expect(start).toBeGreaterThan(-1);
-    expect(end).toBeGreaterThan(start);
-    expect(progressQueries).not.toContain('.query("users").collect()');
-    expect(progressQueries).not.toContain("Promise.all(");
-    expect(progressQueries.match(/return \[\];/g)).toHaveLength(3);
-    expect(progressQueries).toContain('.withIndex("by_user"');
-    expect(progressQueries).toContain('comparisonStatus: "unavailable"');
-
-    const legacySource = read("convex/gamification.ts");
-    const legacyStart = legacySource.indexOf("export const getLeaderboard");
-    const legacyEnd = legacySource.indexOf("// Get all badges for a user");
-    const legacyLeaderboard = legacySource.slice(legacyStart, legacyEnd);
-
-    expect(legacyStart).toBeGreaterThan(-1);
-    expect(legacyEnd).toBeGreaterThan(legacyStart);
-    expect(legacyLeaderboard).not.toContain('.query("users")');
-    expect(legacyLeaderboard).not.toContain("Promise.all(");
-    expect(legacyLeaderboard).toContain('status: "unavailable"');
-    expect(legacyLeaderboard).toContain("entries: []");
+    expect(source).toContain("publicRanking: false");
+    expect(source).toContain("xpStatus: false");
+    expect(source).toContain("weeklyChallenges: false");
+    expect(source).toContain("rewardShop: false");
+    expect(source).toContain("privateLessonProgress: true");
+    expect(source).toContain("privateMasteryFeedback: true");
+    expect(source).toContain("WEEKLY_XP_CHALLENGES_DISABLED");
+    expect(source).toContain("XP_REWARD_REDEMPTION_DISABLED");
+    expect(source).not.toContain('insert("xpEvents"');
+    expect(source).not.toContain('insert("rewardRedemptions"');
   });
 
-  it("shows only the signed-in learner's activity and gives it human context", () => {
-    const page = read("src/app/community/leaderboard/page.tsx");
-
-    expect(page).toContain("ההתקדמות האישית שלי");
-    expect(page).toContain("ה־XP אינו ציון לאיכות");
-    expect(page).toContain("מה ה־XP כן אומר?");
-    expect(page).toContain("לבחור צעד המשך");
-    expect(page).toContain("api.leaderboard.getUserRank");
-    expect(page).not.toContain("getWeeklyLeaderboard");
-    expect(page).not.toContain("getMonthlyLeaderboard");
-    expect(page).not.toContain("getAllTimeLeaderboard");
-    expect(page).not.toContain("לוח הדירוגים");
-    expect(page).not.toContain("ביחס לשאר הלומדים");
-    expect(page).not.toContain("היה הראשון לצבור XP");
-
-    const historicalStudentRoute = read(
-      "src/app/student/leaderboard/page.tsx",
-    );
-    expect(historicalStudentRoute).toContain(
-      'redirect("/community/leaderboard")',
-    );
-    expect(historicalStudentRoute).not.toContain("getLeaderboard");
-    expect(historicalStudentRoute).not.toContain("לוח המובילים");
-
-    const challenges = read("src/app/community/challenges/page.tsx");
-    const rewards = read("src/app/community/rewards/page.tsx");
-    const footer = read("src/components/layout/footer.tsx");
-    const profile = read("src/app/student/profile/page.tsx");
-    const pricing = read("src/lib/pricing.ts");
-    for (const adjacentSurface of [
-      challenges,
-      rewards,
-      footer,
-      profile,
-      pricing,
+  it("removes coercive challenge and unapproved reward promises", () => {
+    const source = read("convex/leaderboard.ts");
+    for (const forbidden of [
+      "share_success_story",
+      "simulator_grade_a",
+      "streak_7_days",
+      "coach_call_15min",
+      "bonus_lesson_access",
+      "course_discount_10",
+      "excellence_certificate",
     ]) {
-      expect(adjacentSurface).toContain("התקדמות אישית");
-      expect(adjacentSurface).not.toContain("לוח דירוגים");
-      expect(adjacentSurface).not.toContain("לוח מובילים");
-      expect(adjacentSurface).not.toContain("טבלת מובילים");
+      expect(source).not.toContain(forbidden);
     }
+  });
+
+  it("keeps active learner surfaces factual and private", () => {
+    const surfaces = [
+      read("src/app/dashboard/page.tsx"),
+      read("src/app/student/dashboard/page.tsx"),
+      read("src/app/student/profile/page.tsx"),
+      read("src/app/community/leaderboard/page.tsx"),
+      read("src/app/community/challenges/page.tsx"),
+      read("src/app/community/rewards/page.tsx"),
+      read("src/components/dashboard/learning-stats.tsx"),
+    ];
+
+    for (const surface of surfaces) {
+      expect(surface).not.toMatch(/\bXP\b/u);
+      expect(surface).not.toContain("StreakCard");
+      expect(surface).not.toContain("נתח תמונות");
+    }
+    expect(surfaces.join("\n")).toContain("התקדמות אישית");
+    expect(surfaces.join("\n")).toContain("שיעורים");
+  });
+
+  it("does not award status points for onboarding or via the legacy writer", () => {
+    const onboarding = read("convex/onboarding.ts");
+    const gamification = read("convex/gamification.ts");
+    expect(onboarding).not.toContain('insert("xpEvents"');
+    expect(onboarding).not.toContain("onboarding_complete");
+    expect(gamification).toContain("XP_AWARDS_DISABLED");
+    expect(gamification.match(/XP_STATUS_DISABLED/g)).toHaveLength(3);
+    expect(gamification).toContain("LEARNING_STREAK_STATUS_DISABLED");
+    expect(gamification.match(/GAMIFIED_BADGES_DISABLED/g)).toHaveLength(2);
   });
 });

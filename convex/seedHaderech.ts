@@ -1,5 +1,5 @@
 /**
- * seedHaderech.ts — Seed the main "הדרך" course with all 75 lessons.
+ * seedHaderech.ts — Seed "הדרך": 75 progress-bearing lessons and one optional practice.
  *
  * This mutation reads from seedCourseData.ts and inserts the full course
  * structure into the Convex database.
@@ -79,6 +79,16 @@ export const seedHaderechCourse = internalMutation({
             phaseNumber: lesson.phaseNumber,
             phaseName: lesson.phaseName,
             scriptIndex: lesson.scriptIndex,
+            contentKey: lesson.contentKey,
+            learnerAvailability: lesson.learnerAvailability ?? "required",
+            completionAffectsProgress:
+              lesson.completionAffectsProgress ?? true,
+            assessmentOrScoring: lesson.assessmentOrScoring,
+            personalDisclosureRequired:
+              lesson.personalDisclosureRequired ?? false,
+            relationshipOrPartnerRequired:
+              lesson.relationshipOrPartnerRequired ?? false,
+            learnerAlternatives: lesson.learnerAlternatives,
             pdfUrl: lesson.pdfUrl,
             createdAt: now,
             updatedAt: now,

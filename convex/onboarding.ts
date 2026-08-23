@@ -118,33 +118,15 @@ export const completeOnboarding = mutation({
       });
     }
 
-    // Award 50 XP for completing onboarding
-    // Find the user in users table by clerkId
+    // Onboarding choices update private preferences only. They do not award
+    // status points or turn self-disclosure into a gamified event.
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
     if (user) {
-      // Check if onboarding XP was already awarded
-      const existingXp = await ctx.db
-        .query("xpEvents")
-        .withIndex("by_user_type", (q) =>
-          q.eq("userId", user._id).eq("type", "onboarding_complete")
-        )
-        .first();
-
-      if (!existingXp) {
-        await ctx.db.insert("xpEvents", {
-          userId: user._id,
-          type: "onboarding_complete",
-          points: 50,
-          description: "השלמת שאלון היכרות",
-          createdAt: now,
-        });
-      }
-
-      // Also update user preferences with onboarding data
+      // Update user preferences with onboarding data.
       const currentPrefs = user.preferences ?? {};
       await ctx.db.patch(user._id, {
         preferences: {

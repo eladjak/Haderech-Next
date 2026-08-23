@@ -520,7 +520,9 @@ function CompletionScreen({
         </h2>
 
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-300/20 px-5 py-2">
-          <span className="text-lg font-bold text-accent-500">+50 XP</span>
+          <span className="text-sm font-semibold text-accent-600">
+            הבחירות נשמרו לחשבון שלך
+          </span>
           <span className="text-sm text-gray-600">על השלמת ההיכרות</span>
         </div>
 

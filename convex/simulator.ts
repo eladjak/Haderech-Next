@@ -57,13 +57,18 @@ async function getSimulatorAccessFacts(
     .query("courseEntitlements")
     .withIndex("by_user", (q) => q.eq("userId", user._id))
     .collect();
-  const hasTrustedEntitlement =
-    SIMULATOR_TRIAL_POLICY.entitlementScope === "any_active_course" &&
-    entitlements.some(
-      (entitlement) =>
-        entitlement.status === "active" &&
-        (entitlement.validUntil === undefined || entitlement.validUntil > now),
-    );
+  const activeEntitlements = entitlements.filter(
+    (entitlement) =>
+      entitlement.status === "active" &&
+      (entitlement.validUntil === undefined || entitlement.validUntil > now),
+  );
+  const entitledCourses = await Promise.all(
+    activeEntitlements.map((entitlement) => ctx.db.get(entitlement.courseId)),
+  );
+  const hasTrustedEntitlement = entitledCourses.some(
+    (course) =>
+      course?.title.trim() === SIMULATOR_TRIAL_POLICY.entitlementCourseTitle,
+  );
   const usage = await ctx.db
     .query("simulatorTrialUsage")
     .withIndex("by_user", (q) => q.eq("userId", user.clerkId))

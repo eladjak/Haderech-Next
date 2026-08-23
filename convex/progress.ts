@@ -22,6 +22,10 @@ export const updateWatchTime = mutation({
       args.lessonId,
       args.courseId
     );
+    const lesson = await ctx.db.get(args.lessonId);
+    if (lesson?.completionAffectsProgress === false) {
+      return { optionalPractice: true as const, progressWritten: false as const };
+    }
 
     const existing = await ctx.db
       .query("progress")
@@ -125,10 +129,10 @@ export const getCourseCompletion = query({
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
     await requireCourseContentAccess(ctx, args.courseId);
-    const lessons = await ctx.db
+    const lessons = (await ctx.db
       .query("lessons")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .collect();
+      .collect()).filter((lesson) => lesson.completionAffectsProgress !== false);
 
     if (lessons.length === 0) return 0;
 
@@ -139,7 +143,10 @@ export const getCourseCompletion = query({
       )
       .collect();
 
-    const completedCount = progress.filter((p) => p.completed).length;
+    const progressLessonIds = new Set(lessons.map((lesson) => lesson._id));
+    const completedCount = progress.filter(
+      (item) => item.completed && progressLessonIds.has(item.lessonId)
+    ).length;
     return Math.round((completedCount / lessons.length) * 100);
   },
 });
@@ -156,6 +163,10 @@ export const updateProgress = mutation({
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
     await requireLessonCourseAccess(ctx, args.lessonId, args.courseId);
+    const lesson = await ctx.db.get(args.lessonId);
+    if (lesson?.completionAffectsProgress === false) {
+      throw new Error("OPTIONAL_PRACTICE_DOES_NOT_AFFECT_PROGRESS");
+    }
     const now = Date.now();
     const completed = args.progressPercent >= 90;
 
@@ -202,6 +213,10 @@ export const markComplete = mutation({
   handler: async (ctx, args) => {
     await requireSelfOrAdmin(ctx, args.userId);
     await requireLessonCourseAccess(ctx, args.lessonId, args.courseId);
+    const lesson = await ctx.db.get(args.lessonId);
+    if (lesson?.completionAffectsProgress === false) {
+      throw new Error("OPTIONAL_PRACTICE_DOES_NOT_AFFECT_PROGRESS");
+    }
     const now = Date.now();
 
     const existing = await ctx.db
