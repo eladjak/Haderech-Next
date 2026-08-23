@@ -1,0 +1,128 @@
+- generic [active] [ref=f2e1]:
+  - link "דלג לתוכן הראשי" [ref=f2e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - alert [ref=f2e3]
+  - generic [ref=f2e4]:
+    - banner [ref=f2e5]:
+      - generic [ref=f2e6]:
+        - link "הדרך by אומנות הקשר" [ref=f2e7] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f2e8]:
+            - generic [ref=f2e9]: הדרך
+            - generic [ref=f2e10]: by אומנות הקשר
+        - navigation "ניווט ראשי" [ref=f2e11]:
+          - link "קורסים" [ref=f2e12] [cursor=pointer]:
+            - /url: /courses
+          - link "בלוג" [ref=f2e13] [cursor=pointer]:
+            - /url: /blog
+          - link "מחירים" [ref=f2e14] [cursor=pointer]:
+            - /url: /pricing
+        - link "חיפוש" [ref=f2e16] [cursor=pointer]:
+          - /url: /search
+    - main [ref=f2e19]:
+      - generic [ref=f2e20]:
+        - link "חזרה לכלים" [ref=f2e21] [cursor=pointer]:
+          - /url: /tools
+        - generic [ref=f2e24]:
+          - generic [ref=f2e25]: ✍️
+          - paragraph [ref=f2e26]: מעבדת למידה מקומית
+          - heading "רפלקציה אחרי דייט" [level=1] [ref=f2e27]
+          - paragraph [ref=f2e28]: עשר דקות כדי להבין את החוויה שלך ולבחור צעד קטן — בלי לדרג את המפגש ובלי לנסות לקרוא את המחשבות של האדם האחר.
+        - complementary "פרטיות ושימוש בטוח" [ref=f2e29]:
+          - heading "התשובות נשארות בלשונית הזו" [level=2] [ref=f2e30]
+          - paragraph [ref=f2e31]: הכלי אינו שולח או שומר את התשובות. רענון או סגירת הלשונית ימחקו אותן. עדיף לא לכתוב שמות, כתובות, צילומי מסך או פרטים מזהים של אדם אחר. כל שאלה היא רשות, ואפשר לעצור בכל רגע.
+        - navigation "שלבי התרגול" [ref=f2e32]:
+          - paragraph [ref=f2e33]: שלב 1 מתוך 3
+          - list [ref=f2e34]:
+            - listitem [ref=f2e35]:
+              - generic [ref=f2e36]: 1 / 3
+              - text: בחירה
+            - listitem [ref=f2e37]:
+              - generic [ref=f2e38]: 2 / 3
+              - text: התבוננות
+            - listitem [ref=f2e39]:
+              - generic [ref=f2e40]: 3 / 3
+              - text: בדיקה
+        - generic [ref=f2e41]:
+          - heading "מה חשוב לי להבין הפעם?" [level=2] [ref=f2e42]
+          - paragraph [ref=f2e43]: בחירת מוקד אחד עוזרת להתבונן בלי להפוך את המפגש למבחן.
+          - group "אפשר לבחור מוקד אחד. אין כאן תשובה נכונה." [ref=f2e44]:
+            - generic [ref=f2e46]:
+              - generic [ref=f2e47] [cursor=pointer]:
+                - radio "הנוכחות שלי מה עזר לי להיות בשיחה, ומה הרחיק אותי ממנה?" [ref=f2e48]
+                - generic [ref=f2e49]:
+                  - generic [ref=f2e50]: הנוכחות שלי
+                  - generic [ref=f2e51]: מה עזר לי להיות בשיחה, ומה הרחיק אותי ממנה?
+              - generic [ref=f2e52] [cursor=pointer]:
+                - radio "נוחות וקצב באילו רגעים הרגשתי נינוחות, עומס או צורך להאט?" [ref=f2e53]
+                - generic [ref=f2e54]:
+                  - generic [ref=f2e55]: נוחות וקצב
+                  - generic [ref=f2e56]: באילו רגעים הרגשתי נינוחות, עומס או צורך להאט?
+              - generic [ref=f2e57] [cursor=pointer]:
+                - radio "הדדיות ובחירה האם היה מקום לשאלות, להעדפות, ל׳לא׳ ולשינוי דעת?" [ref=f2e58]
+                - generic [ref=f2e59]:
+                  - generic [ref=f2e60]: הדדיות ובחירה
+                  - generic [ref=f2e61]: האם היה מקום לשאלות, להעדפות, ל׳לא׳ ולשינוי דעת?
+              - generic [ref=f2e62] [cursor=pointer]:
+                - radio "הפעם הבאה איזה דבר אחד כדאי לשמור, לשנות או לברר?" [ref=f2e63]
+                - generic [ref=f2e64]:
+                  - generic [ref=f2e65]: הפעם הבאה
+                  - generic [ref=f2e66]: איזה דבר אחד כדאי לשמור, לשנות או לברר?
+          - generic [ref=f2e67]:
+            - button "להתבוננות" [disabled] [ref=f2e69]
+            - button "ניקוי התרגול" [ref=f2e70]
+          - status [ref=f2e71]
+        - paragraph [ref=f2e72]: הכלי נועד ללמידה עצמית ואינו אבחון, טיפול או המלצה אם להמשיך בקשר. הבחירה נשארת שלך ויכולה להשתנות.
+    - contentinfo [ref=f2e73]:
+      - generic [ref=f2e74]:
+        - generic [ref=f2e75]:
+          - generic [ref=f2e76]:
+            - link "אומנות הקשר הדרך" [ref=f2e77] [cursor=pointer]:
+              - /url: /
+              - img "אומנות הקשר" [ref=f2e78]
+              - generic [ref=f2e79]: הדרך
+            - paragraph [ref=f2e80]: פרויקט של אומנות הקשר
+            - paragraph [ref=f2e81]: תוכנית "הדרך" של אומנות הקשר.12 שבועות, 6 שלבים, 75 שיעורים ו-8 מסמכי PDF לתרגול.
+          - navigation "ניווט תחתון" [ref=f2e82]:
+            - generic [ref=f2e83]: תוכנית
+            - link "הקורסים" [ref=f2e84] [cursor=pointer]:
+              - /url: /courses
+            - link "עדויות" [ref=f2e85] [cursor=pointer]:
+              - /url: /testimonials
+            - link "בלוג" [ref=f2e86] [cursor=pointer]:
+              - /url: /blog
+            - link "האזור שלי" [ref=f2e87] [cursor=pointer]:
+              - /url: /dashboard
+            - link "תעודות" [ref=f2e88] [cursor=pointer]:
+              - /url: /certificates
+            - link "טבלת מובילים" [ref=f2e89] [cursor=pointer]:
+              - /url: /student/leaderboard
+          - navigation "משאבים" [ref=f2e90]:
+            - link "צ'אט AI" [ref=f2e92] [cursor=pointer]:
+              - /url: /chat
+            - link "סימולטור דייטים" [ref=f2e93] [cursor=pointer]:
+              - /url: /simulator
+            - link "ספרייה" [ref=f2e94] [cursor=pointer]:
+              - /url: /resources
+            - link "אודות" [ref=f2e95] [cursor=pointer]:
+              - /url: /about
+            - link "עזרה" [ref=f2e96] [cursor=pointer]:
+              - /url: /help
+            - link "צרו קשר" [ref=f2e97] [cursor=pointer]:
+              - /url: /contact
+          - generic [ref=f2e98]:
+            - generic [ref=f2e99]: עקבו אחרינו
+            - link "אינסטגרם" [ref=f2e100] [cursor=pointer]:
+              - /url: https://www.instagram.com/omanut_hakesher
+            - link "פייסבוק" [ref=f2e103] [cursor=pointer]:
+              - /url: https://www.facebook.com/omanuthakesher
+            - link "יוטיוב" [ref=f2e106] [cursor=pointer]:
+              - /url: https://www.youtube.com/@omanuthakesher
+            - link "אומנות הקשר" [ref=f2e110] [cursor=pointer]:
+              - /url: https://www.ohlove.co.il
+        - generic [ref=f2e111]:
+          - paragraph [ref=f2e112]: © 2026 הדרך - אומנות הקשר. כל הזכויות שמורות.
+          - paragraph [ref=f2e113]:
+            - text: נבנה עם
+            - generic "אהבה" [ref=f2e114]: ♥
+            - text: באמצעות Next.js & Convex

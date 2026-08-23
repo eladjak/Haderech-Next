@@ -1,0 +1,126 @@
+- generic [active] [ref=f7e1]:
+  - link "דלג לתוכן הראשי" [ref=f7e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - alert [ref=f7e3]
+  - generic [ref=f7e4]:
+    - banner [ref=f7e5]:
+      - generic [ref=f7e6]:
+        - link "הדרך by אומנות הקשר" [ref=f7e7] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f7e8]:
+            - generic [ref=f7e9]: הדרך
+            - generic [ref=f7e10]: by אומנות הקשר
+        - navigation "ניווט ראשי" [ref=f7e11]:
+          - link "קורסים" [ref=f7e12] [cursor=pointer]:
+            - /url: /courses
+          - link "בלוג" [ref=f7e13] [cursor=pointer]:
+            - /url: /blog
+          - link "מחירים" [ref=f7e14] [cursor=pointer]:
+            - /url: /pricing
+        - link "חיפוש" [ref=f7e16] [cursor=pointer]:
+          - /url: /search
+    - main [ref=f7e19]:
+      - generic [ref=f7e20]:
+        - heading "כלי דייטינג" [level=1] [ref=f7e21]
+        - paragraph [ref=f7e22]: כלי כתיבה ורפלקציה מוגבלים. זמינות, פרטיות ומגבלות מוצגות בכל כלי בנפרד.
+        - 'img "איור: נוף גבעות בשעת דמדומים ומעליו מרחפים בשורה מצפן, מפתח, פנס ואבן חלקה" [ref=f7e23]'
+        - generic [ref=f7e25]:
+          - link "צ'אט AI מאמן" [ref=f7e26] [cursor=pointer]:
+            - /url: /chat
+          - link "סימולטור דייטים" [ref=f7e29] [cursor=pointer]:
+            - /url: /simulator
+        - heading "כלים נוספים" [level=2] [ref=f7e32]
+        - generic [ref=f7e33]:
+          - generic [ref=f7e34]:
+            - generic [ref=f7e35]: חדש
+            - heading "בונה פרופיל דייטינג" [level=3] [ref=f7e39]
+            - paragraph [ref=f7e40]: אשף 6 שלבים לכתיבת טיוטה וסקירה מקומית. מדד המילוי אינו ציון איכות או תחזית להתאמות.
+            - link "התחל" [ref=f7e41] [cursor=pointer]:
+              - /url: /tools/dating-profile
+          - generic [ref=f7e44]:
+            - generic [ref=f7e45]: מקומי
+            - heading "בונה ביו מקומי" [level=3] [ref=f7e49]
+            - paragraph [ref=f7e50]: שלוש טיוטות עריכות שנוצרות בדפדפן; הפרטים אינם נשלחים לספק AI.
+            - link "התחל" [ref=f7e51] [cursor=pointer]:
+              - /url: /tools/profile-builder
+          - generic [ref=f7e54]:
+            - generic [ref=f7e55]: בקרוב
+            - heading "משוב על תמונות (תכנון)" [level=3] [ref=f7e60]
+            - paragraph [ref=f7e61]: כלי עתידי בלבד; לא נאספות תמונות ואין כרגע ניתוח, דירוג או הבטחה לשיפור.
+            - paragraph [ref=f7e62]: יהיה זמין בקרוב
+          - generic [ref=f7e63]:
+            - generic [ref=f7e64]: בקרוב
+            - heading "מתכנן דייטים" [level=3] [ref=f7e69]
+            - paragraph [ref=f7e70]: כלי עתידי להצעת רעיונות כלליים, בלי לבקש כתובת מדויקת או להסיק העדפה של אדם אחר.
+            - paragraph [ref=f7e71]: יהיה זמין בקרוב
+          - generic [ref=f7e72]:
+            - generic [ref=f7e73]: מקומי
+            - heading "רפלקציה אחרי דייט" [level=3] [ref=f7e77]
+            - paragraph [ref=f7e78]: "תרגול פרטי ומקומי: מה בחרתי לנסות, מה קרה ומה אשמור או אשנה. בלי ניקוד ובלי לנתח אדם אחר."
+            - link "התחל" [ref=f7e79] [cursor=pointer]:
+              - /url: /tools/date-report
+          - generic [ref=f7e82]:
+            - generic [ref=f7e83]: מקומי
+            - heading "פותחי שיחה" [level=3] [ref=f7e87]
+            - paragraph [ref=f7e88]: מאגר מקומי של ניסוחים מכבדים לפי סיטואציה וטון; שום תוכן אינו נשלח לספק AI.
+            - link "התחל" [ref=f7e89] [cursor=pointer]:
+              - /url: /tools/conversation-starters
+          - generic [ref=f7e92]:
+            - generic [ref=f7e93]: חדש
+            - heading "תרגיל רפלקציה על ערכים" [level=3] [ref=f7e97]
+            - paragraph [ref=f7e98]: סמן/י העדפות שעולות כרגע וקבל/י סיכום פשוט. זה אינו מבחן התאמה או אבחון.
+            - link "התחל" [ref=f7e99] [cursor=pointer]:
+              - /url: /tools/values-quiz
+    - contentinfo [ref=f7e102]:
+      - generic [ref=f7e103]:
+        - generic [ref=f7e104]:
+          - generic [ref=f7e105]:
+            - link "אומנות הקשר הדרך" [ref=f7e106] [cursor=pointer]:
+              - /url: /
+              - img "אומנות הקשר" [ref=f7e107]
+              - generic [ref=f7e108]: הדרך
+            - paragraph [ref=f7e109]: פרויקט של אומנות הקשר
+            - paragraph [ref=f7e110]: תוכנית "הדרך" של אומנות הקשר.12 שבועות, 6 שלבים, 75 שיעורים ו-8 מסמכי PDF לתרגול.
+          - navigation "ניווט תחתון" [ref=f7e111]:
+            - generic [ref=f7e112]: תוכנית
+            - link "הקורסים" [ref=f7e113] [cursor=pointer]:
+              - /url: /courses
+            - link "עדויות" [ref=f7e114] [cursor=pointer]:
+              - /url: /testimonials
+            - link "בלוג" [ref=f7e115] [cursor=pointer]:
+              - /url: /blog
+            - link "האזור שלי" [ref=f7e116] [cursor=pointer]:
+              - /url: /dashboard
+            - link "תעודות" [ref=f7e117] [cursor=pointer]:
+              - /url: /certificates
+            - link "טבלת מובילים" [ref=f7e118] [cursor=pointer]:
+              - /url: /student/leaderboard
+          - navigation "משאבים" [ref=f7e119]:
+            - link "צ'אט AI" [ref=f7e121] [cursor=pointer]:
+              - /url: /chat
+            - link "סימולטור דייטים" [ref=f7e122] [cursor=pointer]:
+              - /url: /simulator
+            - link "ספרייה" [ref=f7e123] [cursor=pointer]:
+              - /url: /resources
+            - link "אודות" [ref=f7e124] [cursor=pointer]:
+              - /url: /about
+            - link "עזרה" [ref=f7e125] [cursor=pointer]:
+              - /url: /help
+            - link "צרו קשר" [ref=f7e126] [cursor=pointer]:
+              - /url: /contact
+          - generic [ref=f7e127]:
+            - generic [ref=f7e128]: עקבו אחרינו
+            - link "אינסטגרם" [ref=f7e129] [cursor=pointer]:
+              - /url: https://www.instagram.com/omanut_hakesher
+            - link "פייסבוק" [ref=f7e132] [cursor=pointer]:
+              - /url: https://www.facebook.com/omanuthakesher
+            - link "יוטיוב" [ref=f7e135] [cursor=pointer]:
+              - /url: https://www.youtube.com/@omanuthakesher
+            - link "אומנות הקשר" [ref=f7e139] [cursor=pointer]:
+              - /url: https://www.ohlove.co.il
+        - generic [ref=f7e140]:
+          - paragraph [ref=f7e141]: © 2026 הדרך - אומנות הקשר. כל הזכויות שמורות.
+          - paragraph [ref=f7e142]:
+            - text: נבנה עם
+            - generic "אהבה" [ref=f7e143]: ♥
+            - text: באמצעות Next.js & Convex

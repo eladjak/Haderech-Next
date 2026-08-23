@@ -1,0 +1,95 @@
+- generic [ref=f4e1]:
+  - link "דלג לתוכן הראשי" [ref=f4e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f4e3]:
+    - banner [ref=f4e4]:
+      - generic [ref=f4e5]:
+        - link "הדרך" [ref=f4e6] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f4e9]:
+          - link "חיפוש" [ref=f4e10] [cursor=pointer]:
+            - /url: /search
+          - button "פתיחת תפריט ניווט" [ref=f4e13]
+    - region [ref=f4e15]:
+      - generic [ref=f4e16]:
+        - generic [ref=f4e17]: למידה שמשנה חיים
+        - heading "הקורסים שלנו" [level=1] [ref=f4e18]
+        - paragraph [ref=f4e19]: קורסים מקצועיים בתחום התקשורת הזוגית והאישית - לומדים, מתאמנים, ומשנים
+        - generic [ref=f4e73]:
+          - generic [ref=f4e76]: "1"
+          - text: קורסים זמינים
+    - main [active] [ref=f4e20]:
+      - generic [ref=f4e22]:
+        - generic [ref=f4e23]: חיפוש קורסים
+        - searchbox "חיפוש קורסים" [ref=f4e24]
+      - group "סינון קורסים" [ref=f4e77]:
+        - button "הכל" [pressed] [ref=f4e78]
+        - button "זוגיות" [ref=f4e79]
+        - button "מתחילים" [ref=f4e80]
+        - button "מתקדמים" [ref=f4e81]
+        - button "מומחים" [ref=f4e82]
+      - 'link "קורס: הדרך - אומנות הקשר" [ref=f4e84] [cursor=pointer]':
+        - /url: /courses/j97emmz66m735s1p5wdha6ad3989wqy0
+        - img "הדרך - אומנות הקשר" [ref=f4e86]
+        - generic [ref=f4e87]:
+          - generic [ref=f4e88]:
+            - generic [ref=f4e89]: זוגיות
+            - generic [ref=f4e90]: מתחילים
+          - heading "הדרך - אומנות הקשר" [level=3] [ref=f4e91]
+          - paragraph [ref=f4e92]: תוכנית מקיפה בת 12 שבועות למציאת זוגיות משמעותית. מהעבודה הפנימית ועד ליצירת חיבור אמיתי - תהליך מובנה ומוכח שמלווה אתכם צעד אחרי צעד. 75 שיעורי וידאו, 8 מסמכי PDF נלווים, תרגילים מעשיים, ותמיכה קהילתית.
+          - generic [ref=f4e93]: 24 שעות
+    - contentinfo [ref=f4e30]:
+      - generic [ref=f4e31]:
+        - generic [ref=f4e32]:
+          - generic [ref=f4e33]:
+            - link "אומנות הקשר הדרך" [ref=f4e34] [cursor=pointer]:
+              - /url: /
+              - img "אומנות הקשר" [ref=f4e35]
+              - generic [ref=f4e36]: הדרך
+            - paragraph [ref=f4e37]: פרויקט של אומנות הקשר
+            - paragraph [ref=f4e38]: תוכנית "הדרך" של אומנות הקשר.12 שבועות שישנו לך את חיי הזוגיות.
+          - navigation "ניווט תחתון" [ref=f4e39]:
+            - generic [ref=f4e40]: תוכנית
+            - link "הקורסים" [ref=f4e41] [cursor=pointer]:
+              - /url: /courses
+            - link "עדויות" [ref=f4e42] [cursor=pointer]:
+              - /url: /testimonials
+            - link "בלוג" [ref=f4e43] [cursor=pointer]:
+              - /url: /blog
+            - link "האזור שלי" [ref=f4e44] [cursor=pointer]:
+              - /url: /dashboard
+            - link "תעודות" [ref=f4e45] [cursor=pointer]:
+              - /url: /certificates
+            - link "טבלת מובילים" [ref=f4e46] [cursor=pointer]:
+              - /url: /student/leaderboard
+          - navigation "משאבים" [ref=f4e47]:
+            - link "צ'אט AI" [ref=f4e49] [cursor=pointer]:
+              - /url: /chat
+            - link "סימולטור דייטים" [ref=f4e50] [cursor=pointer]:
+              - /url: /simulator
+            - link "ספרייה" [ref=f4e51] [cursor=pointer]:
+              - /url: /resources
+            - link "אודות" [ref=f4e52] [cursor=pointer]:
+              - /url: /about
+            - link "עזרה" [ref=f4e53] [cursor=pointer]:
+              - /url: /help
+            - link "צרו קשר" [ref=f4e54] [cursor=pointer]:
+              - /url: /contact
+          - generic [ref=f4e55]:
+            - generic [ref=f4e56]: עקבו אחרינו
+            - link "אינסטגרם" [ref=f4e57] [cursor=pointer]:
+              - /url: https://www.instagram.com/omanut_hakesher
+            - link "פייסבוק" [ref=f4e60] [cursor=pointer]:
+              - /url: https://www.facebook.com/omanuthakesher
+            - link "יוטיוב" [ref=f4e63] [cursor=pointer]:
+              - /url: https://www.youtube.com/@omanuthakesher
+            - link "אומנות הקשר" [ref=f4e67] [cursor=pointer]:
+              - /url: https://www.ohlove.co.il
+        - generic [ref=f4e68]:
+          - paragraph [ref=f4e69]: © 2026 הדרך - אומנות הקשר. כל הזכויות שמורות.
+          - paragraph [ref=f4e70]:
+            - text: נבנה עם
+            - generic "אהבה" [ref=f4e71]: ♥
+            - text: באמצעות Next.js & Convex
+  - button "Open Next.js Dev Tools" [ref=f4e102] [cursor=pointer]
+  - alert [ref=f4e72]

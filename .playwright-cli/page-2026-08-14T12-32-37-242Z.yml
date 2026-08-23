@@ -1,0 +1,99 @@
+- generic [active] [ref=e1]:
+  - link "דלג לתוכן הראשי" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "הדרך by אומנות הקשר" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7]:
+            - generic [ref=e8]: הדרך
+            - generic [ref=e9]: by אומנות הקשר
+        - navigation "ניווט ראשי" [ref=e10]:
+          - link "קורסים" [ref=e11] [cursor=pointer]:
+            - /url: /courses
+          - link "בלוג" [ref=e12] [cursor=pointer]:
+            - /url: /blog
+          - link "מחירים" [ref=e13] [cursor=pointer]:
+            - /url: /pricing
+          - link "האזור שלי" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+          - link "יומי" [ref=e15] [cursor=pointer]:
+            - /url: /daily
+          - link "קהילה" [ref=e16] [cursor=pointer]:
+            - /url: /community
+          - link "צ'אט AI" [ref=e17] [cursor=pointer]:
+            - /url: /chat
+          - link "סימולטור" [ref=e18] [cursor=pointer]:
+            - /url: /simulator
+          - link "כלים" [ref=e19] [cursor=pointer]:
+            - /url: /tools
+          - link "ייעוץ אישי" [ref=e20] [cursor=pointer]:
+            - /url: /mentoring
+        - generic [ref=e21]:
+          - link "חיפוש" [ref=e22] [cursor=pointer]:
+            - /url: /search
+          - generic [ref=e25]: Demo Admin
+    - region [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]: למידה שמשנה חיים
+        - heading "הקורסים שלנו" [level=1] [ref=e29]
+        - paragraph [ref=e30]: קורסים מקצועיים בתחום התקשורת הזוגית והאישית - לומדים, מתאמנים, ומשנים
+    - main [ref=e31]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: חיפוש קורסים
+        - searchbox "חיפוש קורסים" [ref=e35]
+      - status "הקורסים נטענים" [ref=e36]
+    - contentinfo [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - link "אומנות הקשר הדרך" [ref=e45] [cursor=pointer]:
+              - /url: /
+              - img "אומנות הקשר" [ref=e46]
+              - generic [ref=e47]: הדרך
+            - paragraph [ref=e48]: פרויקט של אומנות הקשר
+            - paragraph [ref=e49]: תוכנית "הדרך" של אומנות הקשר.12 שבועות שישנו לך את חיי הזוגיות.
+          - navigation "ניווט תחתון" [ref=e50]:
+            - generic [ref=e51]: תוכנית
+            - link "הקורסים" [ref=e52] [cursor=pointer]:
+              - /url: /courses
+            - link "עדויות" [ref=e53] [cursor=pointer]:
+              - /url: /testimonials
+            - link "בלוג" [ref=e54] [cursor=pointer]:
+              - /url: /blog
+            - link "האזור שלי" [ref=e55] [cursor=pointer]:
+              - /url: /dashboard
+            - link "תעודות" [ref=e56] [cursor=pointer]:
+              - /url: /certificates
+            - link "טבלת מובילים" [ref=e57] [cursor=pointer]:
+              - /url: /student/leaderboard
+          - navigation "משאבים" [ref=e58]:
+            - link "צ'אט AI" [ref=e60] [cursor=pointer]:
+              - /url: /chat
+            - link "סימולטור דייטים" [ref=e61] [cursor=pointer]:
+              - /url: /simulator
+            - link "ספרייה" [ref=e62] [cursor=pointer]:
+              - /url: /resources
+            - link "אודות" [ref=e63] [cursor=pointer]:
+              - /url: /about
+            - link "עזרה" [ref=e64] [cursor=pointer]:
+              - /url: /help
+            - link "צרו קשר" [ref=e65] [cursor=pointer]:
+              - /url: /contact
+          - generic [ref=e66]:
+            - generic [ref=e67]: עקבו אחרינו
+            - link "אינסטגרם" [ref=e68] [cursor=pointer]:
+              - /url: https://www.instagram.com/omanut_hakesher
+            - link "פייסבוק" [ref=e71] [cursor=pointer]:
+              - /url: https://www.facebook.com/omanuthakesher
+            - link "יוטיוב" [ref=e74] [cursor=pointer]:
+              - /url: https://www.youtube.com/@omanuthakesher
+            - link "אומנות הקשר" [ref=e78] [cursor=pointer]:
+              - /url: https://www.ohlove.co.il
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: © 2026 הדרך - אומנות הקשר. כל הזכויות שמורות.
+          - paragraph [ref=e81]:
+            - text: נבנה עם
+            - generic "אהבה" [ref=e82]: ♥
+            - text: באמצעות Next.js & Convex
