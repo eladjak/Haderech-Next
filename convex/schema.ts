@@ -57,6 +57,34 @@ export default defineSchema({
     .index("by_course_order", ["courseId", "order"])
     .index("by_week", ["courseId", "weekNumber"]),
 
+  // Versioned, reversible records for reviewed course-content migrations.
+  // These are written only by internal staging/maintenance mutations.
+  courseContentMigrations: defineTable({
+    migrationKey: v.string(),
+    migrationVersion: v.string(),
+    sourceDigest: v.string(),
+    candidateDigest: v.string(),
+    planHash: v.string(),
+    preStateHash: v.string(),
+    expectedPostStateHash: v.string(),
+    state: v.union(v.literal("applied"), v.literal("rolled_back")),
+    courseId: v.id("courses"),
+    targetLessonId: v.optional(v.id("lessons")),
+    targetWasInserted: v.boolean(),
+    targetBefore: v.optional(v.any()),
+    shiftedLessons: v.array(
+      v.object({
+        lessonId: v.id("lessons"),
+        previousOrder: v.number(),
+      }),
+    ),
+    protectedProgressRows: v.number(),
+    appliedAt: v.number(),
+    rolledBackAt: v.optional(v.number()),
+  })
+    .index("by_key_version", ["migrationKey", "migrationVersion"])
+    .index("by_state", ["state"]),
+
   // משתמשים (מסונכרן עם Clerk)
   users: defineTable({
     clerkId: v.string(),
