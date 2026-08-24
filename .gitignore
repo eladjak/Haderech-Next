@@ -51,6 +51,9 @@ next-env.d.ts
 # clerk configuration (can include secrets)
 /.clerk/
 
+# Local STG-1 identity bindings (provider IDs; never commit)
+/.stg1/
+
 .vercel
 .env*.local
 

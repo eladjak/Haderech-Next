@@ -1,0 +1,173 @@
+/**
+ * EPHEMERAL STAGING OVERLAY ONLY.
+ *
+ * This file is copied into a disposable Convex source tree, uploaded only to
+ * Development deployment content-dog-757, executed once, and then removed by
+ * re-uploading the base application tree. It must never live in convex/ in the
+ * release worktree and must never remain in the deployed function manifest.
+ */
+
+import { v } from "convex/values";
+import { internalMutation } from "./_generated/server";
+import {
+  STG1_FIXTURE_CONFIRMATION,
+  type Stg1IdentityMap,
+} from "./lib/stg1FixturePlan";
+import {
+  assertStg1FixtureWrite,
+  inspectAccessPlan,
+  inspectContainmentPlan,
+  loadAccessContext,
+} from "./stg1Fixtures";
+
+const identitiesValidator = v.object({
+  U0: v.string(),
+  A: v.string(),
+  B: v.string(),
+  E: v.string(),
+  X: v.string(),
+  ADMIN: v.string(),
+  IMPOSTOR: v.string(),
+});
+
+export const applySyntheticAccess = internalMutation({
+  args: {
+    identities: identitiesValidator,
+    confirmFixture: v.literal(STG1_FIXTURE_CONFIRMATION),
+    confirmPlanHash: v.string(),
+  },
+  handler: async (ctx, args) => {
+    assertStg1FixtureWrite(args.confirmFixture);
+    const identities = args.identities as Stg1IdentityMap;
+    const plan = await inspectAccessPlan(ctx, identities);
+    if (args.confirmPlanHash !== plan.planHash) {
+      throw new Error("STG1_ACCESS_OVERLAY:STALE_PLAN_HASH");
+    }
+    if (plan.status === "already_applied") return plan;
+    if (plan.status !== "ready") {
+      throw new Error(
+        `STG1_ACCESS_OVERLAY:PREVIEW_NOT_READY:${plan.conflicts.join(",")}`,
+      );
+    }
+    const context = await loadAccessContext(ctx, identities);
+    if (!context.admin || !context.course || context.conflicts.length > 0) {
+      throw new Error("STG1_ACCESS_OVERLAY:CONTEXT_DRIFT");
+    }
+    const now = Date.now();
+    if (context.admin.role !== "admin") {
+      await ctx.db.patch(context.admin._id, {
+        role: "admin",
+        updatedAt: now,
+      });
+    }
+    for (const item of context.rows) {
+      const expected = item.expected;
+      if (!item.existing) {
+        if (expected.kind === "community") {
+          await ctx.db.insert("communityEntitlements", {
+            userId: expected.userId,
+            accessBasis: expected.accessBasis,
+            status: expected.status,
+            source: expected.source,
+            sourceReference: expected.sourceReference,
+            grantedBy: expected.grantedBy,
+            grantedAt: now,
+            validUntil: expected.validUntil,
+            revokedAt: expected.revokedAt,
+          });
+        } else {
+          await ctx.db.insert("courseEntitlements", {
+            userId: expected.userId,
+            courseId: expected.courseId,
+            status: expected.status,
+            source: expected.source,
+            sourceReference: expected.sourceReference,
+            grantedBy: expected.grantedBy,
+            grantedAt: now,
+            validUntil: expected.validUntil,
+            revokedAt: expected.revokedAt,
+          });
+        }
+      } else if (!item.valueExact) {
+        await ctx.db.patch(item.existing.row._id, {
+          status: expected.status,
+          validUntil: expected.validUntil,
+          revokedAt: expected.revokedAt,
+        });
+      }
+    }
+    const postcheck = await inspectAccessPlan(ctx, identities);
+    if (postcheck.status !== "already_applied") {
+      throw new Error("STG1_ACCESS_OVERLAY:POSTCHECK_FAILED");
+    }
+    return {
+      success: true,
+      status: "applied" as const,
+      writes: plan.writes,
+      providerIdsIncludedInResult: false,
+      personalDataIncludedInResult: false,
+      postcheck: {
+        status: postcheck.status,
+        expectedPostCounts: postcheck.expectedPostCounts,
+      },
+    };
+  },
+});
+
+export const containSyntheticAccess = internalMutation({
+  args: {
+    identities: identitiesValidator,
+    confirmFixture: v.literal(STG1_FIXTURE_CONFIRMATION),
+    confirmPlanHash: v.string(),
+    confirmContainment: v.literal("CONTAIN_STG1_SYNTHETIC_ACCESS"),
+  },
+  handler: async (ctx, args) => {
+    assertStg1FixtureWrite(args.confirmFixture);
+    const identities = args.identities as Stg1IdentityMap;
+    const plan = await inspectContainmentPlan(ctx, identities);
+    if (args.confirmPlanHash !== plan.planHash) {
+      throw new Error("STG1_CONTAINMENT_OVERLAY:STALE_PLAN_HASH");
+    }
+    if (plan.status === "already_contained") return plan;
+    if (plan.status !== "ready") {
+      throw new Error(
+        `STG1_CONTAINMENT_OVERLAY:PREVIEW_NOT_READY:${plan.conflicts.join(",")}`,
+      );
+    }
+    const context = await loadAccessContext(ctx, identities);
+    if (!context.admin || context.conflicts.length > 0) {
+      throw new Error("STG1_CONTAINMENT_OVERLAY:CONTEXT_DRIFT");
+    }
+    const now = Date.now();
+    for (const item of context.rows) {
+      if (item.existing?.row.status === "active" && item.ownershipExact) {
+        await ctx.db.patch(item.existing.row._id, {
+          status: "revoked",
+          revokedAt: now,
+        });
+      }
+    }
+    if (context.admin.role === "admin") {
+      await ctx.db.patch(context.admin._id, {
+        role: "student",
+        updatedAt: now,
+      });
+    }
+    const postcheck = await inspectContainmentPlan(ctx, identities);
+    if (postcheck.status !== "already_contained") {
+      throw new Error("STG1_CONTAINMENT_OVERLAY:POSTCHECK_FAILED");
+    }
+    return {
+      success: true,
+      status: "contained" as const,
+      writes: plan.writes,
+      deletes: 0,
+      providerIdsIncludedInResult: false,
+      personalDataIncludedInResult: false,
+      postcheck: {
+        status: postcheck.status,
+        expectedPostCounts: postcheck.expectedPostCounts,
+      },
+    };
+  },
+});

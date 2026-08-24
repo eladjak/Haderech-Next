@@ -1,0 +1,25 @@
+{
+  "manifestVersion": "1.0",
+  "environment": "convex-development-cloud",
+  "teamReference": "l-d-y-qvbvbyts",
+  "project": "haderech-next-staging",
+  "deploymentName": "content-dog-757",
+  "deploymentReference": "dev/l-d-y-qvbvbyts",
+  "deployKeyPrefix": "dev:content-dog-757|",
+  "cloudUrl": "https://content-dog-757.convex.cloud",
+  "httpActionsUrl": "https://content-dog-757.convex.site",
+  "uploadedSchemaFunctionsSourceSha": "2698408be7e08390da071fd13eb46272c2ddad78",
+  "allowedWrapperModes": [
+    "staging-preview",
+    "staging-apply",
+    "staging-rollback"
+  ],
+  "forbidden": {
+    "production": true,
+    "sharedLegacyDeployment": "colorless-guanaco-894",
+    "pushBeforeRun": true,
+    "realUsers": true,
+    "commerce": true,
+    "realAiProvider": true
+  }
+}

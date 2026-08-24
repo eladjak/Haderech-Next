@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "fixtureVersion": "stg1-v1",
+  "deploymentName": "content-dog-757",
+  "disposition": "NOT_RUN",
+  "sequence": [
+    {
+      "id": "E00",
+      "action": "inspect-empty-state",
+      "mode": "read-only",
+      "requiredPredicate": "backendInspected=true and all fixture/payment counts are zero",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E01",
+      "action": "negative-target-control",
+      "mode": "local",
+      "requiredPredicate": "wrong deployment and wrong scoped key both fail before CLI execution",
+      "status": "PASS_LOCAL"
+    },
+    {
+      "id": "E02",
+      "action": "preview-legacy-course",
+      "mode": "read-only",
+      "requiredPredicate": "status=ready, writes=76, fresh planHash",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E03",
+      "action": "seed-legacy-course",
+      "mode": "write-staging-only",
+      "requiredPredicate": "1 course, 75 required, 0 optional, 0 markers",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E04",
+      "action": "preview-apply-verify-receiving-practice",
+      "mode": "write-staging-only",
+      "requiredPredicate": "75 required, 1 optional, contained=true, version marker applied",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E05",
+      "action": "seed-seven-synthetic-identities",
+      "mode": "write-staging-only",
+      "requiredPredicate": "7 mapped users, 0 admins, no returned provider IDs or personal data",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E06",
+      "action": "ephemeral-overlay-apply-synthetic-access-and-restore-base",
+      "mode": "write-staging-only",
+      "requiredPredicate": "A/B dedicated community, E active course, X expired course, ADMIN only admin; stg1AccessWriter absent before and after",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E07",
+      "action": "role-privacy-community-simulator-payment-negative-matrix",
+      "mode": "preview-browser-and-api",
+      "requiredPredicate": "all positive and deliberately failing controls recorded without content or PII",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E08",
+      "action": "ephemeral-overlay-contain-synthetic-access-and-restore-base",
+      "mode": "write-staging-only",
+      "requiredPredicate": "0 active fixture grants, 0 synthetic admins, no broad delete; stg1AccessWriter absent after restore",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E09",
+      "action": "rollback-receiving-practice",
+      "mode": "write-staging-only",
+      "requiredPredicate": "75 required, 0 optional, marker rolled_back; re-preview fails closed on same version",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E10",
+      "action": "final-state-readback",
+      "mode": "read-only",
+      "requiredPredicate": "payments/subscriptions still zero; target and revision match evidence pack",
+      "status": "NOT_RUN"
+    }
+  ],
+  "proofBoundary": "A passing local fixture planner is not evidence that the Convex backend or Preview behavior passed. Cloud steps remain NOT_RUN until provider read-back is attached."
+}

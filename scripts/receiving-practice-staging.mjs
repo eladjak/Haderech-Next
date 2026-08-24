@@ -10,6 +10,10 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  STG1_TARGET,
+  validateStg1TargetFile,
+} from "./lib/stg1-target-guard.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, "..");
@@ -65,9 +69,11 @@ const envFile = valueAfter("--env-file");
 
 if (needsBackend) {
   if (!envFile) fail(`${mode} requires --env-file <isolated-staging-env-file>.`);
-  const envBase = path.basename(envFile).toLowerCase();
-  if (!envBase.includes("staging") || envBase === ".env.local") {
-    fail("The env filename must explicitly include 'staging' and cannot be .env.local.");
+  try {
+    const target = validateStg1TargetFile(envFile, STG1_TARGET.deploymentName);
+    process.stdout.write(`${JSON.stringify({ mode, ...target }, null, 2)}\n`);
+  } catch (error) {
+    fail(error instanceof Error ? error.message : "STG1_TARGET_GUARD:UNKNOWN_ERROR");
   }
 }
 if (argv.filter((arg) => ["--apply", "--rollback", "--inspect-staging"].includes(arg)).length > 1) {
@@ -92,7 +98,14 @@ if (!needsBackend) {
 }
 
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-const baseArgs = ["convex", "run", "--env-file", envFile];
+const baseArgs = [
+  "convex",
+  "run",
+  "--env-file",
+  envFile,
+  "--deployment",
+  STG1_TARGET.deploymentName,
+];
 function extractJson(output) {
   const end = output.lastIndexOf("}");
   for (let start = output.indexOf("{"); start >= 0 && end > start; start = output.indexOf("{", start + 1)) {

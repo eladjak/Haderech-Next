@@ -43,9 +43,16 @@ changes the digest.
 
 ## Isolated staging runbook
 
-Prerequisites: use a dedicated staging deployment and a dedicated env file whose
-filename contains `staging`; make a provider-side staging backup/export and record
-its identifier before applying. Do not use `.env.local` or a production deployment.
+Prerequisites: use the target frozen in
+[`stg1-target-manifest.json`](./stg1-target-manifest.json) and a dedicated env
+file whose filename contains `staging`; make a provider-side staging backup/export
+and record its identifier before applying. Do not use `.env.local` or a production
+deployment. The env file must contain a deployment-scoped `CONVEX_DEPLOY_KEY`
+whose non-secret prefix is exactly `dev:content-dog-757|`. The wrapper validates
+that prefix without printing the key, validates any selected deployment/public
+URL, and also passes `--deployment content-dog-757` explicitly to every
+`convex run`. A filename or confirmation flag alone is not accepted as target
+proof.
 
 Read-only preview:
 

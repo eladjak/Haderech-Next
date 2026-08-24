@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "1.0",
+  "fixtureVersion": "stg1-v1",
+  "deploymentName": "content-dog-757",
+  "identities": {
+    "U0": "user_REPLACE_WITH_SYNTHETIC_CLERK_ID",
+    "A": "user_REPLACE_WITH_SYNTHETIC_CLERK_ID",
+    "B": "user_REPLACE_WITH_SYNTHETIC_CLERK_ID",
+    "E": "user_REPLACE_WITH_SYNTHETIC_CLERK_ID",
+    "X": "user_REPLACE_WITH_SYNTHETIC_CLERK_ID",
+    "ADMIN": "user_REPLACE_WITH_SYNTHETIC_CLERK_ID",
+    "IMPOSTOR": "user_REPLACE_WITH_SYNTHETIC_CLERK_ID"
+  }
+}

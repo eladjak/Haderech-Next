@@ -1,0 +1,109 @@
+{
+  "manifestVersion": "1.0",
+  "fixtureVersion": "stg1-v1",
+  "deploymentName": "content-dog-757",
+  "canonicalCourseTitle": "הדרך - אומנות הקשר",
+  "writePredicates": {
+    "SEED_ENABLED": "true",
+    "STG1_FIXTURES_ENABLED": "content-dog-757:stg1-v1",
+    "STG1_DEPLOYMENT_NAME": "content-dog-757",
+    "literalConfirmation": "STG1_CONTENT_DOG_757_V1",
+    "freshPlanHashRequired": true,
+    "explicitCliDeploymentRequired": "content-dog-757"
+  },
+  "phases": [
+    {
+      "phase": "empty-baseline",
+      "expected": {
+        "courses": 0,
+        "lessons": 0,
+        "migrationMarkers": 0,
+        "users": 0,
+        "courseEntitlements": 0,
+        "communityEntitlements": 0,
+        "payments": 0,
+        "subscriptions": 0
+      }
+    },
+    {
+      "phase": "legacy-course-seeded",
+      "expected": {
+        "courses": 1,
+        "requiredLessons": 75,
+        "optionalLessons": 0,
+        "migrationMarkers": 0
+      }
+    },
+    {
+      "phase": "receiving-practice-applied",
+      "expected": {
+        "courses": 1,
+        "requiredLessons": 75,
+        "optionalLessons": 1,
+        "migrationMarkersApplied": 1
+      }
+    },
+    {
+      "phase": "identities-seeded-before-access",
+      "expected": {
+        "users": 7,
+        "admins": 0,
+        "personalData": 0
+      }
+    },
+    {
+      "phase": "synthetic-access-applied",
+      "expected": {
+        "admins": 1,
+        "communityEntitlements": 2,
+        "activeCommunityEntitlements": 2,
+        "courseEntitlements": 2,
+        "activeCourseEntitlements": 1,
+        "expiredCourseEntitlements": 1
+      }
+    },
+    {
+      "phase": "synthetic-access-contained",
+      "expected": {
+        "admins": 0,
+        "activeCommunityEntitlements": 0,
+        "activeCourseEntitlements": 0,
+        "fixtureRowsDeleted": 0,
+        "fixtureRowsRetainedForAudit": 4,
+        "syntheticUsersRetained": 7
+      }
+    },
+    {
+      "phase": "receiving-practice-rolled-back",
+      "expected": {
+        "requiredLessons": 75,
+        "optionalLessons": 0,
+        "migrationMarkersRolledBack": 1
+      }
+    }
+  ],
+  "forbidden": {
+    "production": true,
+    "realUsers": true,
+    "personalData": true,
+    "applicationReleaseTreeGrantWriter": true,
+    "ephemeralGrantWriterLeftDeployed": true,
+    "paymentSideEffects": true,
+    "realAiProvider": true,
+    "broadDelete": true,
+    "convexRunPush": true
+  },
+  "ephemeralAccessOverlay": {
+    "allowedDeployment": "content-dog-757",
+    "functionModule": "stg1AccessWriter",
+    "requiredLifecycleEvidence": [
+      "absent-before",
+      "present-during",
+      "mutation-postcheck-passed",
+      "base-tree-restored",
+      "absent-after"
+    ],
+    "productionForbidden": true,
+    "broadDeleteForbidden": true
+  }
+}
