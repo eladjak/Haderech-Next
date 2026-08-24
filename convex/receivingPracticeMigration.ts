@@ -18,7 +18,7 @@ import {
 } from "./lib/receivingPracticeMigrationPlan";
 
 export const RECEIVING_PRACTICE_SOURCE_DIGEST =
-  "sha256:a49d80556069c77a3c0d7a358d34d6674c7303ac53effd2b96b54ef1ed4993ba";
+  "sha256:160d45adaf1d2c3fd83db048c4e871c0b3653e1ad29d1078029ae280b34fce5a";
 export const RECEIVING_PRACTICE_CANDIDATE_DIGEST =
   "sha256:85b6c8e4a75c3e1c9ea354db56829995fad44ddeb64c11169721d81adeaafadb";
 
@@ -371,13 +371,13 @@ export const applyReceivingPracticeMigration = internalMutation({
     const targetDocument = plan.targetLessonId
       ? byId.get(plan.targetLessonId)
       : undefined;
-    const targetBefore = targetDocument
-      ? Object.fromEntries(
-          Object.entries(targetDocument).filter(
-            ([key]) => key !== "_id" && key !== "_creationTime",
-          ),
-        )
-      : undefined;
+    let targetBefore;
+    if (targetDocument) {
+      const { _id: targetId, _creationTime: targetCreationTime, ...snapshot } = targetDocument;
+      void targetId;
+      void targetCreationTime;
+      targetBefore = snapshot;
+    }
     const canonicalFields = {
       ...canonicalCandidate(),
       order: plan.desiredOrder,

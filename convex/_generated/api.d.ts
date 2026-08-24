@@ -73,6 +73,7 @@ import type * as progress from "../progress.js";
 import type * as pushNotifications from "../pushNotifications.js";
 import type * as quizResults from "../quizResults.js";
 import type * as quizzes from "../quizzes.js";
+import type * as receivingPracticeMigration from "../receivingPracticeMigration.js";
 import type * as resources from "../resources.js";
 import type * as reviews from "../reviews.js";
 import type * as scheduledTasks from "../scheduledTasks.js";
@@ -169,6 +170,7 @@ declare const fullApi: ApiFromModules<{
   pushNotifications: typeof pushNotifications;
   quizResults: typeof quizResults;
   quizzes: typeof quizzes;
+  receivingPracticeMigration: typeof receivingPracticeMigration;
   resources: typeof resources;
   reviews: typeof reviews;
   scheduledTasks: typeof scheduledTasks;

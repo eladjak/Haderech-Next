@@ -1,0 +1,33 @@
+{
+  "manifestVersion": "1.0",
+  "purpose": "AP-3 canonical release archive policy",
+  "source": "a clean committed Git tree",
+  "include": [
+    "**"
+  ],
+  "exclude": [
+    {
+      "pattern": ".playwright-cli/**",
+      "reason": "Recorded local browser diagnostics are not runtime inputs"
+    },
+    {
+      "pattern": "playwright-report/**",
+      "reason": "Generated test report is not a runtime input"
+    },
+    {
+      "pattern": "test-results/**",
+      "reason": "Generated test state is not a runtime input"
+    }
+  ],
+  "expectedTrackedExclusionCountAtBaseline": 39,
+  "deleteTrackedOrUserFiles": false,
+  "packageManager": {
+    "canonical": "npm",
+    "evidence": [
+      "package-lock.json has existed since the initial commit",
+      ".github/workflows/ci.yml runs npm ci and npm run",
+      "vercel.json declares npm install"
+    ],
+    "lockfileMigrationAuthorized": false
+  }
+}

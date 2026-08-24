@@ -158,10 +158,19 @@ describe("receiving-practice staging migration", () => {
   });
 
   it("pins the reviewed payload digest and staging-only wrapper", () => {
-    const payload = fs.readFileSync(
+    const payloadText = fs.readFileSync(
       path.resolve(process.cwd(), "convex/receivingPracticeMigrationData.json"),
+      "utf8",
     );
-    const digest = `sha256:${createHash("sha256").update(payload).digest("hex")}`;
+    const payload = JSON.parse(payloadText);
+    const lfPayload = JSON.parse(payloadText.replace(/\r\n/g, "\n"));
+    const crlfPayload = JSON.parse(
+      payloadText.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n"),
+    );
+    expect(stableStringify(lfPayload)).toBe(stableStringify(crlfPayload));
+    const digest = `sha256:${createHash("sha256")
+      .update(stableStringify(payload))
+      .digest("hex")}`;
     const mutation = fs.readFileSync(
       path.resolve(process.cwd(), "convex/receivingPracticeMigration.ts"),
       "utf8",
@@ -171,7 +180,18 @@ describe("receiving-practice staging migration", () => {
       "utf8",
     );
     expect(digest).toBe(
-      "sha256:a49d80556069c77a3c0d7a358d34d6674c7303ac53effd2b96b54ef1ed4993ba",
+      "sha256:160d45adaf1d2c3fd83db048c4e871c0b3653e1ad29d1078029ae280b34fce5a",
+    );
+    const crlfPayloadText = `${JSON.stringify(payload, null, 2).replace(/\n/g, "\r\n")}\r\n`;
+    const lfPayloadText = `${JSON.stringify(payload, null, 2)}\n`;
+    const digestParsed = (source: string) =>
+      `sha256:${createHash("sha256")
+        .update(stableStringify(JSON.parse(source)))
+        .digest("hex")}`;
+    expect(digestParsed(crlfPayloadText)).toBe(digest);
+    expect(digestParsed(lfPayloadText)).toBe(digest);
+    expect(digestParsed(JSON.stringify({ ...payload, courseTitle: "tampered" }))).not.toBe(
+      digest,
     );
     expect(mutation).toContain(digest);
     expect(mutation).toContain(
@@ -212,6 +232,8 @@ describe("receiving-practice staging migration", () => {
     expect(mutation).toContain("STALE_PLAN_HASH");
     expect(mutation).toContain("POSTCHECK_FAILED");
     expect(wrapper).toContain(digest);
+    expect(wrapper).toContain("stableStringify(data)");
+    expect(wrapper).not.toContain("update(sourceBytes)");
     expect(wrapper).toContain("Production is not supported");
     expect(wrapper).toContain("--confirm-isolated-staging");
     expect(wrapper).toContain("--confirm-plan-hash");

@@ -8,7 +8,7 @@ or a database write merely because local tests pass.
 
 - Migration key: `oh.course.migration.receiving-practice`
 - Version: `2026-08-23.v1`
-- Payload digest: `sha256:a49d80556069c77a3c0d7a358d34d6674c7303ac53effd2b96b54ef1ed4993ba`
+- Canonical parsed-JSON digest: `sha256:160d45adaf1d2c3fd83db048c4e871c0b3653e1ad29d1078029ae280b34fce5a`
 - Course: `הדרך - אומנות הקשר`
 - Lesson: `5.3.2` / `oh.course.lesson.receiving-practice`
 
@@ -20,6 +20,26 @@ node scripts/receiving-practice-staging.mjs --dry-run
 
 This verifies the frozen payload bytes and prints the contract. It deliberately
 reports `backendInspected: false`.
+
+The digest is computed after parsing JSON and recursively sorting object keys.
+Whitespace and LF/CRLF checkout conversion therefore cannot change it. Arrays
+retain their authored order, so semantically meaningful list reordering still
+changes the digest.
+
+## Reproducible release notes
+
+- `convex/_generated/api.d.ts` contains the migration module in the same sorted
+  import/module map format as the existing generated file. It was updated and
+  reviewed offline; no Convex CLI, provider, deployment, or codegen command was
+  run to produce it.
+- npm is the canonical package manager for this release candidate: the repository
+  began with `package-lock.json`, CI uses `npm ci`, and `vercel.json` uses
+  `npm install`. The later `pnpm-lock.yaml` remains tracked historical input but
+  is not a release authority. This remediation deliberately does not rewrite or
+  remove either lockfile and does not pin a new npm version.
+- The release archive exclusions are declared in
+  [`ap3-release-manifest.json`](./ap3-release-manifest.json). Tracked browser and
+  test-result artifacts remain untouched in Git and in the user's worktree.
 
 ## Isolated staging runbook
 
@@ -44,7 +64,7 @@ Apply exactly once (the mutation re-runs the same checks atomically):
 
 ```powershell
 $planHash = "<PLAN_HASH_FROM_THE_IMMEDIATELY_PRECEDING_PREVIEW>"
-node scripts/receiving-practice-staging.mjs --apply --env-file .env.isolated-staging --confirm-isolated-staging --confirm-version 2026-08-23.v1 --confirm-source-digest sha256:a49d80556069c77a3c0d7a358d34d6674c7303ac53effd2b96b54ef1ed4993ba --confirm-plan-hash $planHash
+node scripts/receiving-practice-staging.mjs --apply --env-file .env.isolated-staging --confirm-isolated-staging --confirm-version 2026-08-23.v1 --confirm-source-digest sha256:160d45adaf1d2c3fd83db048c4e871c0b3653e1ad29d1078029ae280b34fce5a --confirm-plan-hash $planHash
 ```
 
 Then repeat the read-only preview. It must return `already_applied`, `writes: 0`,
@@ -74,7 +94,7 @@ target pre-existed, or deletes a newly inserted target only if it has no progres
 It restores each shifted order only if no post-migration order drift is detected.
 
 ```powershell
-node scripts/receiving-practice-staging.mjs --rollback --env-file .env.isolated-staging --confirm-isolated-staging --confirm-version 2026-08-23.v1 --confirm-source-digest sha256:a49d80556069c77a3c0d7a358d34d6674c7303ac53effd2b96b54ef1ed4993ba --confirm-rollback ROLLBACK_RECEIVING_PRACTICE
+node scripts/receiving-practice-staging.mjs --rollback --env-file .env.isolated-staging --confirm-isolated-staging --confirm-version 2026-08-23.v1 --confirm-source-digest sha256:160d45adaf1d2c3fd83db048c4e871c0b3653e1ad29d1078029ae280b34fce5a --confirm-rollback ROLLBACK_RECEIVING_PRACTICE
 ```
 
 If rollback fails closed because the new lesson already has progress or another

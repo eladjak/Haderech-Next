@@ -15,7 +15,20 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, "..");
 const dataPath = path.join(projectRoot, "convex", "receivingPracticeMigrationData.json");
 const argv = process.argv.slice(2);
-const expectedDigest = "sha256:a49d80556069c77a3c0d7a358d34d6674c7303ac53effd2b96b54ef1ed4993ba";
+const expectedDigest = "sha256:160d45adaf1d2c3fd83db048c4e871c0b3653e1ad29d1078029ae280b34fce5a";
+
+function stableStringify(value) {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableStringify(item)).join(",")}]`;
+  }
+  return `{${Object.keys(value)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+    .join(",")}}`;
+}
 
 function valueAfter(flag) {
   const at = argv.indexOf(flag);
@@ -34,11 +47,12 @@ if (argv.includes("--prod") || argv.includes("--production")) {
 }
 
 const sourceBytes = fs.readFileSync(dataPath);
-const actualDigest = `sha256:${createHash("sha256").update(sourceBytes).digest("hex")}`;
+const data = JSON.parse(sourceBytes.toString("utf8"));
+const canonicalPayload = stableStringify(data);
+const actualDigest = `sha256:${createHash("sha256").update(canonicalPayload).digest("hex")}`;
 if (actualDigest !== expectedDigest) {
   fail(`Canonical migration payload drift: expected ${expectedDigest}, got ${actualDigest}.`);
 }
-const data = JSON.parse(sourceBytes.toString("utf8"));
 const mode = argv.includes("--apply")
   ? "staging-apply"
   : argv.includes("--rollback")
