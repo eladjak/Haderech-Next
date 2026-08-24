@@ -50,7 +50,7 @@ and record its identifier before applying. Do not use `.env.local` or a producti
 deployment. The env file must contain a deployment-scoped `CONVEX_DEPLOY_KEY`
 whose non-secret prefix is exactly `dev:content-dog-757|`. The wrapper validates
 that prefix without printing the key, validates any selected deployment/public
-URL, and also passes `--deployment content-dog-757` explicitly to every
+URL, and also passes `--deployment-name content-dog-757` explicitly to every
 `convex run`. A filename or confirmation flag alone is not accepted as target
 proof.
 
@@ -62,6 +62,10 @@ node scripts/receiving-practice-staging.mjs --inspect-staging --env-file .env.is
 
 Proceed only when preview returns `status: "ready"` (or `already_applied` for a
 verified rerun), has no conflicts, and the reported digest/version match this file.
+`contentWrites` counts lesson inserts/patches, `markerWrites` counts the durable
+migration marker, and `totalWrites` is their sum. The legacy `writes` field is a
+backward-compatible alias for `contentWrites`; do not report it as the total DB
+write count.
 Copy its `planHash`. That SHA-256 binds the course/target IDs, candidate SHA-256,
 all relevant pre-state rows, progress/quiz/attempt counts, and the expected
 `75 required + 1 optional` post-state. Any concurrent state change causes apply

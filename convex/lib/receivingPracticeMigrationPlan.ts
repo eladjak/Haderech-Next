@@ -27,7 +27,11 @@ export type ReceivingPracticePlan = {
   desiredOrder?: number;
   shiftedLessonIds: string[];
   protectedProgressRows: number;
+  /** Backward-compatible alias for contentWrites. */
   writes: number;
+  contentWrites: number;
+  markerWrites: number;
+  totalWrites: number;
   expectedRequiredLessonCount: number;
   expectedOptionalLessonCount: number;
   expectedTotalLessonCount: number;
@@ -150,6 +154,9 @@ export function planReceivingPracticeMigration(
       shiftedLessonIds: [],
       protectedProgressRows: input.targetProgressRows,
       writes: 0,
+      contentWrites: 0,
+      markerWrites: 0,
+      totalWrites: 0,
       expectedRequiredLessonCount: 75,
       expectedOptionalLessonCount: 1,
       expectedTotalLessonCount: 76,
@@ -167,6 +174,9 @@ export function planReceivingPracticeMigration(
         shiftedLessonIds: [],
         protectedProgressRows: input.targetProgressRows,
         writes: 0,
+        contentWrites: 0,
+        markerWrites: 0,
+        totalWrites: 0,
         expectedRequiredLessonCount: 75,
         expectedOptionalLessonCount: 1,
         expectedTotalLessonCount: 76,
@@ -181,6 +191,9 @@ export function planReceivingPracticeMigration(
       shiftedLessonIds: [],
       protectedProgressRows: input.targetProgressRows,
       writes: 0,
+      contentWrites: 0,
+      markerWrites: 0,
+      totalWrites: 0,
       expectedRequiredLessonCount: 75,
       expectedOptionalLessonCount: 1,
       expectedTotalLessonCount: 76,
@@ -194,6 +207,8 @@ export function planReceivingPracticeMigration(
         .sort((left, right) => right.order - left.order)
         .map((lesson) => lesson.id)
     : [];
+  const contentWrites = shiftedLessonIds.length + 1;
+  const markerWrites = 1;
 
   return {
     status: "ready",
@@ -203,7 +218,10 @@ export function planReceivingPracticeMigration(
     desiredOrder,
     shiftedLessonIds,
     protectedProgressRows: input.targetProgressRows,
-    writes: shiftedLessonIds.length + 1,
+    writes: contentWrites,
+    contentWrites,
+    markerWrites,
+    totalWrites: contentWrites + markerWrites,
     expectedRequiredLessonCount: 75,
     expectedOptionalLessonCount: 1,
     expectedTotalLessonCount: 76,

@@ -293,7 +293,7 @@ try {
       "run",
       "--env-file",
       envFile,
-      "--deployment",
+      "--deployment-name",
       STG1_TARGET.deploymentName,
     ];
     const previewFunction = applyMode

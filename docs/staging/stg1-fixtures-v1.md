@@ -31,7 +31,7 @@ Every persistent fixture mutation is internal and requires all of the following:
 4. Literal confirmation `STG1_CONTENT_DOG_757_V1`.
 5. The fresh `planHash` returned by the immediately preceding preview.
 6. The local runner validates a deployment-scoped key prefix and passes
-   `--deployment content-dog-757` to every `convex run`.
+   `--deployment-name content-dog-757` to every `convex run`.
 
 The write environment flags must be removed or disabled after the rehearsal.
 Their presence is not proof of the target; the CLI target guard and provider

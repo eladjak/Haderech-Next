@@ -8,6 +8,7 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -17,6 +18,12 @@ import {
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, "..");
+const require = createRequire(import.meta.url);
+const convexEntry = path.join(
+  path.dirname(require.resolve("convex/package.json")),
+  "bin",
+  "main.js",
+);
 const dataPath = path.join(projectRoot, "convex", "receivingPracticeMigrationData.json");
 const argv = process.argv.slice(2);
 const expectedDigest = "sha256:160d45adaf1d2c3fd83db048c4e871c0b3653e1ad29d1078029ae280b34fce5a";
@@ -97,13 +104,12 @@ if (!needsBackend) {
   process.exit(0);
 }
 
-const npx = process.platform === "win32" ? "npx.cmd" : "npx";
 const baseArgs = [
-  "convex",
+  convexEntry,
   "run",
   "--env-file",
   envFile,
-  "--deployment",
+  "--deployment-name",
   STG1_TARGET.deploymentName,
 ];
 function extractJson(output) {
@@ -121,7 +127,7 @@ function extractJson(output) {
 function run(functionName, args, capture = false) {
   const command = [...baseArgs, functionName];
   if (args) command.push(JSON.stringify(args));
-  const result = spawnSync(npx, command, {
+  const result = spawnSync(process.execPath, command, {
     cwd: projectRoot,
     encoding: capture ? "utf8" : undefined,
     stdio: capture ? ["ignore", "pipe", "inherit"] : "inherit",

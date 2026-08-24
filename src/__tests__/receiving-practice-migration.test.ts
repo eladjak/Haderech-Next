@@ -50,6 +50,9 @@ describe("receiving-practice staging migration", () => {
       insertTarget: true,
       desiredOrder: 31,
       writes: 45,
+      contentWrites: 45,
+      markerWrites: 1,
+      totalWrites: 46,
     });
     expect(plan.shiftedLessonIds).toHaveLength(44);
     expect(plan.shiftedLessonIds[0]).toBe("lesson-74");
@@ -69,6 +72,7 @@ describe("receiving-practice staging migration", () => {
     expect(plan.status).toBe("conflict");
     expect(plan.conflicts).toContain("DUPLICATE_SCRIPT_INDEX:2");
     expect(plan.writes).toBe(0);
+    expect(plan.totalWrites).toBe(0);
   });
 
   it("fails closed when an existing optional-practice row has attempts", () => {
@@ -153,6 +157,9 @@ describe("receiving-practice staging migration", () => {
       status: "already_applied",
       protectedProgressRows: 7,
       writes: 0,
+      contentWrites: 0,
+      markerWrites: 0,
+      totalWrites: 0,
       shiftedLessonIds: [],
     });
   });
@@ -237,6 +244,11 @@ describe("receiving-practice staging migration", () => {
     expect(wrapper).toContain("Production is not supported");
     expect(wrapper).toContain("--confirm-isolated-staging");
     expect(wrapper).toContain("--confirm-plan-hash");
+    expect(wrapper).toContain('"--deployment-name"');
+    expect(wrapper).not.toMatch(/"--deployment",/u);
+    expect(wrapper).toContain('require.resolve("convex/package.json")');
+    expect(wrapper).toContain("spawnSync(process.execPath");
+    expect(wrapper).not.toContain('"npx.cmd"');
     expect(wrapper).toContain("verifyReceivingPracticeMigration");
     expect(wrapper).not.toContain('convexArgs.push("--prod")');
   });

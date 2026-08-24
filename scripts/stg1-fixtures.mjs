@@ -5,6 +5,7 @@
 
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -14,6 +15,12 @@ import {
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(moduleDir, "..");
+const require = createRequire(import.meta.url);
+const convexEntry = path.join(
+  path.dirname(require.resolve("convex/package.json")),
+  "bin",
+  "main.js",
+);
 const localIdentityRoot = path.resolve(projectRoot, ".stg1");
 const argv = process.argv.slice(2);
 const FIXTURE_VERSION = "stg1-v1";
@@ -168,13 +175,12 @@ if (!needsBackend) {
   process.exit(0);
 }
 
-const npx = process.platform === "win32" ? "npx.cmd" : "npx";
 const baseArgs = [
-  "convex",
+  convexEntry,
   "run",
   "--env-file",
   envFile,
-  "--deployment",
+  "--deployment-name",
   STG1_TARGET.deploymentName,
 ];
 
@@ -197,7 +203,7 @@ function extractJson(output) {
 function run(functionName, args) {
   const command = [...baseArgs, functionName];
   if (args) command.push(JSON.stringify(args));
-  const result = spawnSync(npx, command, {
+  const result = spawnSync(process.execPath, command, {
     cwd: projectRoot,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],

@@ -25,7 +25,13 @@ describe("STG-1 fixture containment contract", () => {
     expect(fixtureSource).toContain("STG1_DEPLOYMENT_NAME");
     expect(fixtureSource).toContain("SEED_ENABLED");
     expect(fixtureSource).toContain("STALE_PLAN_HASH");
-    expect(runnerSource).toContain('"--deployment"');
+    expect(runnerSource).toContain('"--deployment-name"');
+    expect(runnerSource).not.toMatch(/"--deployment",/u);
+    expect(runnerSource).toContain('require.resolve("convex/package.json")');
+    expect(runnerSource).toContain("spawnSync(process.execPath");
+    expect(runnerSource).not.toContain('"npx.cmd"');
+    expect(overlayRunner).toContain('"--deployment-name"');
+    expect(overlayRunner).not.toMatch(/"--deployment",/u);
     expect(runnerSource).toContain("STG1_TARGET.deploymentName");
     expect(runnerSource).not.toContain('command.push("--push")');
   });
