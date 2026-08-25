@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertProductionServiceConfiguration,
   getAppUrl,
+  getClerkHealthProbeBaseUrl,
   getClerkIssuerFromPublishableKey,
   getConvexDeploymentUrl,
 } from "@/lib/service-config";
@@ -33,6 +34,22 @@ describe("service configuration", () => {
     ).toBe("https://example.clerk.accounts.dev");
   });
 
+  it("routes the Clerk health probe through the canonical Frontend API proxy", () => {
+    expect(
+      getClerkHealthProbeBaseUrl(
+        clerkKey("live", "clerk.example.com"),
+        "https://example.com/__clerk",
+      ),
+    ).toBe("https://example.com/__clerk");
+
+    expect(() =>
+      getClerkHealthProbeBaseUrl(
+        clerkKey("live", "clerk.example.com"),
+        "https://example.com/not-clerk",
+      ),
+    ).toThrow();
+  });
+
   it("rejects non-HTTPS or local production app URLs", () => {
     expect(() => getAppUrl("http://example.com", true)).toThrow();
     expect(() => getAppUrl("https://localhost", true)).toThrow();
@@ -47,6 +64,7 @@ describe("service configuration", () => {
         NEXT_PUBLIC_CONVEX_URL: convex,
         PRODUCTION_CONVEX_URL: convex,
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: clerkKey("live", "clerk.example.com"),
+        NEXT_PUBLIC_CLERK_PROXY_URL: "https://example.com/__clerk",
         CLERK_SECRET_KEY: "sk_live_fixture",
         NEXT_PUBLIC_CLERK_SIGN_IN_URL: "/sign-in",
         NEXT_PUBLIC_CLERK_SIGN_UP_URL: "/sign-up",
@@ -59,6 +77,8 @@ describe("service configuration", () => {
   it.each([
     { name: "development Clerk publishable key", patch: { NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: clerkKey("test", "example.clerk.accounts.dev") } },
     { name: "development Clerk secret key", patch: { CLERK_SECRET_KEY: "sk_test_fixture" } },
+    { name: "missing Clerk proxy", patch: { NEXT_PUBLIC_CLERK_PROXY_URL: undefined } },
+    { name: "foreign Clerk proxy origin", patch: { NEXT_PUBLIC_CLERK_PROXY_URL: "https://other.example.com/__clerk" } },
     { name: "unconfirmed Convex deployment", patch: { PRODUCTION_CONVEX_URL: "https://other-otter-456.convex.cloud" } },
     { name: "whitespace-tainted Convex URL", patch: { NEXT_PUBLIC_CONVEX_URL: "https://steady-otter-123.convex.cloud\n" } },
   ])("fails closed for $name", ({ patch }) => {
@@ -70,6 +90,7 @@ describe("service configuration", () => {
         NEXT_PUBLIC_CONVEX_URL: convex,
         PRODUCTION_CONVEX_URL: convex,
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: clerkKey("live", "clerk.example.com"),
+        NEXT_PUBLIC_CLERK_PROXY_URL: "https://example.com/__clerk",
         CLERK_SECRET_KEY: "sk_live_fixture",
         NEXT_PUBLIC_CLERK_SIGN_IN_URL: "/sign-in",
         NEXT_PUBLIC_CLERK_SIGN_UP_URL: "/sign-up",

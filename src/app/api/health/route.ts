@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   assertProductionServiceConfiguration,
   getAppUrl,
-  getClerkIssuerFromPublishableKey,
+  getClerkHealthProbeBaseUrl,
   getConvexDeploymentUrl,
 } from "@/lib/service-config";
 import type { ServiceConfigEnv } from "@/lib/service-config";
@@ -60,10 +60,11 @@ export async function GET() {
       await fetchOk(`${url}/version`);
     }),
     clerk: await check(async () => {
-      const issuer = getClerkIssuerFromPublishableKey(
-        process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+      const clerkFrontendApi = getClerkHealthProbeBaseUrl(
+        process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+        process.env.NEXT_PUBLIC_CLERK_PROXY_URL,
       );
-      await fetchOk(`${issuer}/.well-known/openid-configuration`);
+      await fetchOk(`${clerkFrontendApi}/.well-known/openid-configuration`);
     }),
     app_url: await check(() => {
       getAppUrl(process.env.NEXT_PUBLIC_APP_URL, production);

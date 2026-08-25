@@ -4,6 +4,7 @@ export type ServiceConfigEnv = {
   NEXT_PUBLIC_CONVEX_URL?: string;
   PRODUCTION_CONVEX_URL?: string;
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?: string;
+  NEXT_PUBLIC_CLERK_PROXY_URL?: string;
   CLERK_SECRET_KEY?: string;
   NEXT_PUBLIC_CLERK_SIGN_IN_URL?: string;
   NEXT_PUBLIC_CLERK_SIGN_UP_URL?: string;
@@ -75,6 +76,29 @@ export function getClerkIssuerFromPublishableKey(value: string | undefined): str
   return `https://${hostname}`;
 }
 
+export function getClerkHealthProbeBaseUrl(
+  publishableKey: string | undefined,
+  proxyUrl?: string,
+): string {
+  if (proxyUrl === undefined) {
+    return getClerkIssuerFromPublishableKey(publishableKey);
+  }
+
+  const raw = requiredTrimmed(proxyUrl, "NEXT_PUBLIC_CLERK_PROXY_URL");
+  const url = new URL(raw);
+  if (
+    url.protocol !== "https:" ||
+    url.pathname !== "/__clerk" ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error(
+      "NEXT_PUBLIC_CLERK_PROXY_URL must be an HTTPS origin followed by /__clerk.",
+    );
+  }
+  return url.toString().replace(/\/$/u, "");
+}
+
 export function assertProductionServiceConfiguration(
   env: ServiceConfigEnv = process.env as ServiceConfigEnv
 ): void {
@@ -91,7 +115,7 @@ export function assertProductionServiceConfiguration(
     );
   }
 
-  getAppUrl(env.NEXT_PUBLIC_APP_URL, true);
+  const appUrl = getAppUrl(env.NEXT_PUBLIC_APP_URL, true);
 
   const publishableKey = requiredTrimmed(
     env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
@@ -104,7 +128,18 @@ export function assertProductionServiceConfiguration(
   if (!secretKey.startsWith("sk_live_")) {
     throw new Error("Vercel Production requires a Clerk sk_live_ secret key.");
   }
-  getClerkIssuerFromPublishableKey(publishableKey);
+  const clerkProxyUrl = getClerkHealthProbeBaseUrl(
+    publishableKey,
+    requiredTrimmed(
+      env.NEXT_PUBLIC_CLERK_PROXY_URL,
+      "NEXT_PUBLIC_CLERK_PROXY_URL",
+    ),
+  );
+  if (new URL(clerkProxyUrl).origin !== appUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_CLERK_PROXY_URL must use the NEXT_PUBLIC_APP_URL origin.",
+    );
+  }
   requiredLocalPath(env.NEXT_PUBLIC_CLERK_SIGN_IN_URL, "NEXT_PUBLIC_CLERK_SIGN_IN_URL");
   requiredLocalPath(env.NEXT_PUBLIC_CLERK_SIGN_UP_URL, "NEXT_PUBLIC_CLERK_SIGN_UP_URL");
   requiredLocalPath(
