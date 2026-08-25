@@ -250,6 +250,10 @@ describe("receiving-practice staging migration", () => {
     expect(wrapper).toContain("spawnSync(process.execPath");
     expect(wrapper).not.toContain('"npx.cmd"');
     expect(wrapper).toContain("verifyReceivingPracticeMigration");
+    expect(wrapper).toContain("verifyReceivingPracticeRollback");
+    expect(wrapper).toContain("sameVersionApplyBlocked");
+    expect(mutation).toContain("MIGRATION_VERSION_ALREADY_ROLLED_BACK");
+    expect(mutation).toContain("documentIdsIncludedInResult: false");
     expect(wrapper).not.toContain('convexArgs.push("--prod")');
   });
 });

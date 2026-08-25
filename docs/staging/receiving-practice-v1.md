@@ -112,3 +112,16 @@ If rollback fails closed because the new lesson already has progress or another
 lesson's order drifted, stop. Preserve the marker and data, compare with the
 recorded staging backup/export, and prepare a new reviewed migration; do not
 manually delete rows.
+
+The wrapper immediately runs the sanitized
+`verifyReceivingPracticeRollback` query after rollback and exits non-zero unless
+it proves all of the following together: one exact `rolled_back` version state,
+75 required lessons, zero optional lessons, 75 total lessons, and a same-version
+planner conflict `MIGRATION_VERSION_ALREADY_ROLLED_BACK`. The read-back returns no
+lesson/course/document IDs, content or personal data.
+
+The same sanitized read-back can be repeated without a write:
+
+```powershell
+node scripts/receiving-practice-staging.mjs --verify-rollback --env-file .env.isolated-staging
+```

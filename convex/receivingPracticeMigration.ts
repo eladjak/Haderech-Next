@@ -460,6 +460,44 @@ export const verifyReceivingPracticeMigration = internalQuery({
   },
 });
 
+export const verifyReceivingPracticeRollback = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const result = await inspect(ctx);
+    const requiredLessonCount =
+      "requiredLessonCount" in result ? result.requiredLessonCount : null;
+    const optionalLessonCount =
+      "optionalLessonCount" in result ? result.optionalLessonCount : null;
+    const totalLessonCount =
+      "currentLessonCount" in result ? result.currentLessonCount : null;
+    const exactRolledBackConflict =
+      result.status === "conflict" &&
+      result.conflicts.length === 1 &&
+      result.conflicts[0] === "MIGRATION_VERSION_ALREADY_ROLLED_BACK";
+    const contained =
+      exactRolledBackConflict &&
+      requiredLessonCount === 75 &&
+      optionalLessonCount === 0 &&
+      totalLessonCount === 75;
+    return {
+      migrationVersion: migrationData.migrationVersion,
+      sourceDigest: RECEIVING_PRACTICE_SOURCE_DIGEST,
+      backendInspected: true,
+      status: result.status,
+      conflicts: result.conflicts,
+      markerState: exactRolledBackConflict ? ("rolled_back" as const) : null,
+      requiredLessonCount,
+      optionalLessonCount,
+      totalLessonCount,
+      sameVersionApplyBlocked: exactRolledBackConflict,
+      contained,
+      contentIncludedInResult: false,
+      documentIdsIncludedInResult: false,
+      personalDataIncludedInResult: false,
+    };
+  },
+});
+
 export const rollbackReceivingPracticeMigration = internalMutation({
   args: {
     confirmMigrationVersion: v.string(),

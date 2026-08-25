@@ -68,6 +68,8 @@ const mode = argv.includes("--apply")
   ? "staging-apply"
   : argv.includes("--rollback")
     ? "staging-rollback"
+    : argv.includes("--verify-rollback")
+      ? "staging-rollback-verification"
     : argv.includes("--inspect-staging")
       ? "staging-preview"
       : "offline-dry-run";
@@ -83,8 +85,14 @@ if (needsBackend) {
     fail(error instanceof Error ? error.message : "STG1_TARGET_GUARD:UNKNOWN_ERROR");
   }
 }
-if (argv.filter((arg) => ["--apply", "--rollback", "--inspect-staging"].includes(arg)).length > 1) {
-  fail("Choose exactly one of --inspect-staging, --apply, or --rollback.");
+if (
+  argv.filter((arg) =>
+    ["--apply", "--rollback", "--verify-rollback", "--inspect-staging"].includes(arg),
+  ).length > 1
+) {
+  fail(
+    "Choose exactly one of --inspect-staging, --apply, --rollback, or --verify-rollback.",
+  );
 }
 
 const plan = {
@@ -141,11 +149,19 @@ function run(functionName, args, capture = false) {
 }
 
 const inspectedPlan = run(
-  "receivingPracticeMigration:previewReceivingPracticeMigration",
+  mode === "staging-rollback-verification"
+    ? "receivingPracticeMigration:verifyReceivingPracticeRollback"
+    : "receivingPracticeMigration:previewReceivingPracticeMigration",
   undefined,
   true,
 );
 if (mode === "staging-preview") process.exit(0);
+if (mode === "staging-rollback-verification") {
+  if (!inspectedPlan.contained || !inspectedPlan.sameVersionApplyBlocked) {
+    fail("Rollback verification did not prove the exact contained final state.");
+  }
+  process.exit(0);
+}
 
 const confirmedVersion = valueAfter("--confirm-version");
 const confirmedDigest = valueAfter("--confirm-source-digest");
@@ -186,4 +202,19 @@ if (mode === "staging-apply") {
     confirmSourceDigest: actualDigest,
     confirmRollback: "ROLLBACK_RECEIVING_PRACTICE",
   });
+  const rollbackPostcheck = run(
+    "receivingPracticeMigration:verifyReceivingPracticeRollback",
+    undefined,
+    true,
+  );
+  if (
+    !rollbackPostcheck.contained ||
+    !rollbackPostcheck.sameVersionApplyBlocked ||
+    rollbackPostcheck.markerState !== "rolled_back" ||
+    rollbackPostcheck.requiredLessonCount !== 75 ||
+    rollbackPostcheck.optionalLessonCount !== 0 ||
+    rollbackPostcheck.totalLessonCount !== 75
+  ) {
+    fail("Rollback postcheck did not prove the exact contained final state.");
+  }
 }

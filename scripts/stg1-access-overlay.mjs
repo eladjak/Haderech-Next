@@ -14,6 +14,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { ConvexHttpClient } from "convex/browser";
+import { makeFunctionReference } from "convex/server";
 import {
   STG1_TARGET,
   validateStg1TargetFile,
@@ -158,20 +160,39 @@ function runProcess(command, args, options = {}) {
   return result;
 }
 
-function extractJson(output) {
-  const end = output.lastIndexOf("}");
-  for (
-    let start = output.indexOf("{");
-    start >= 0 && end > start;
-    start = output.indexOf("{", start + 1)
-  ) {
-    try {
-      return JSON.parse(output.slice(start, end + 1));
-    } catch {
-      // Try the next opening brace if the CLI printed a prefix.
+function readEnvFile(envFile) {
+  return Object.fromEntries(
+    fs
+      .readFileSync(envFile, "utf8")
+      .split(/\r?\n/u)
+      .filter((line) => line && !line.startsWith("#"))
+      .map((line) => {
+        const separator = line.indexOf("=");
+        if (separator < 1) abort("STG1_OVERLAY_ENV_FILE_INVALID");
+        return [line.slice(0, separator), line.slice(separator + 1)];
+      }),
+  );
+}
+
+async function probeInternalWriter(client, functionName) {
+  try {
+    await client.mutation(makeFunctionReference(functionName), {});
+    abort("STG1_OVERLAY_PROBE_UNEXPECTEDLY_SUCCEEDED");
+  } catch (error) {
+    const message = String(error instanceof Error ? error.message : error);
+    if (message.includes("STG1_OVERLAY_PROBE_UNEXPECTEDLY_SUCCEEDED")) {
+      throw error;
     }
+    if (/Could not find|not found|does not exist/iu.test(message)) return false;
+    if (
+      /ArgumentValidationError|validator|missing the required field/iu.test(
+        message,
+      )
+    ) {
+      return true;
+    }
+    abort("STG1_OVERLAY_PROBE_INDETERMINATE");
   }
-  abort("STG1_CONVEX_RESULT_NOT_JSON");
 }
 
 function readIdentityBinding(identityFile) {
@@ -264,6 +285,12 @@ try {
     if (!envFileInput) abort("STG1_OVERLAY_ENV_FILE_REQUIRED");
     const envFile = path.resolve(projectRoot, envFileInput);
     validateStg1TargetFile(envFile, STG1_TARGET.deploymentName);
+    const environment = readEnvFile(envFile);
+    const deployKey = environment.CONVEX_DEPLOY_KEY;
+    const cloudUrl = environment.NEXT_PUBLIC_CONVEX_URL;
+    if (!deployKey || !cloudUrl) abort("STG1_OVERLAY_ENV_FILE_INCOMPLETE");
+    const convexClient = new ConvexHttpClient(cloudUrl);
+    convexClient.setAdminAuth(deployKey);
     const identities = readIdentityBinding(valueAfter("--identity-map"));
     if (!argv.includes("--confirm-isolated-staging")) {
       abort("STG1_OVERLAY_ISOLATED_STAGING_CONFIRMATION_REQUIRED");
@@ -289,41 +316,22 @@ try {
       "bin",
       "main.js",
     );
-    const baseRunArgs = [
-      "run",
-      "--env-file",
-      envFile,
-      "--deployment-name",
-      STG1_TARGET.deploymentName,
-    ];
     const previewFunction = applyMode
       ? "stg1Fixtures:previewSyntheticAccessFixtures"
       : "stg1Fixtures:previewSyntheticAccessContainment";
-    const previewResult = runProcess(
-      process.execPath,
-      [convexEntry, ...baseRunArgs, previewFunction, JSON.stringify({ identities })],
-      { print: false },
+    const plan = await convexClient.query(
+      makeFunctionReference(previewFunction),
+      { identities },
     );
-    const plan = extractJson(previewResult.stdout);
     if (valueAfter("--confirm-plan-hash") !== plan.planHash) {
       abort(`STG1_OVERLAY_STALE_PLAN_HASH:${plan.planHash}`);
     }
 
-    const specArgs = [
-      "function-spec",
-      "--env-file",
-      envFile,
-      "--deployment-name",
-      STG1_TARGET.deploymentName,
-    ];
-    const beforeSpec = runProcess(process.execPath, [convexEntry, ...specArgs], {
-      print: false,
-    }).stdout;
-    if (beforeSpec.includes("stg1AccessWriter")) {
+    const writerFunction = applyMode
+      ? "stg1AccessWriter:applySyntheticAccess"
+      : "stg1AccessWriter:containSyntheticAccess";
+    if (await probeInternalWriter(convexClient, writerFunction)) {
       abort("STG1_OVERLAY_ALREADY_PRESENT_BEFORE_UPLOAD");
-    }
-    if (!beforeSpec.includes("stg1Fixtures")) {
-      abort("STG1_BASE_FIXTURE_MODULE_NOT_DEPLOYED");
     }
 
     const devArgs = [
@@ -343,18 +351,10 @@ try {
     try {
       runProcess(process.execPath, [convexEntry, ...devArgs], { cwd: candidate });
       overlayUploaded = true;
-      const duringSpec = runProcess(
-        process.execPath,
-        [convexEntry, ...specArgs],
-        { print: false },
-      ).stdout;
-      if (!duringSpec.includes("stg1AccessWriter")) {
+      if (!(await probeInternalWriter(convexClient, writerFunction))) {
         abort("STG1_OVERLAY_NOT_VISIBLE_AFTER_UPLOAD");
       }
 
-      const writerFunction = applyMode
-        ? "stg1AccessWriter:applySyntheticAccess"
-        : "stg1AccessWriter:containSyntheticAccess";
       const writerArgs = {
         identities,
         confirmFixture: FIXTURE_CONFIRMATION,
@@ -363,19 +363,15 @@ try {
           ? { confirmContainment: "CONTAIN_STG1_SYNTHETIC_ACCESS" }
           : {}),
       };
-      runProcess(process.execPath, [
-        convexEntry,
-        ...baseRunArgs,
-        writerFunction,
-        JSON.stringify(writerArgs),
-      ]);
-
-      const postPreview = runProcess(
-        process.execPath,
-        [convexEntry, ...baseRunArgs, previewFunction, JSON.stringify({ identities })],
-        { print: false },
+      await convexClient.mutation(
+        makeFunctionReference(writerFunction),
+        writerArgs,
       );
-      const postPlan = extractJson(postPreview.stdout);
+
+      const postPlan = await convexClient.query(
+        makeFunctionReference(previewFunction),
+        { identities },
+      );
       const expectedStatus = applyMode ? "already_applied" : "already_contained";
       if (postPlan.status !== expectedStatus) {
         abort(`STG1_OVERLAY_POSTCHECK_FAILED:${postPlan.status}`);
@@ -388,16 +384,8 @@ try {
       fs.rmSync(overlayFile);
       runProcess(process.execPath, [convexEntry, ...devArgs], { cwd: candidate });
       baseRestored = true;
-      const afterSpec = runProcess(
-        process.execPath,
-        [convexEntry, ...specArgs],
-        { print: false },
-      ).stdout;
-      if (afterSpec.includes("stg1AccessWriter")) {
+      if (await probeInternalWriter(convexClient, writerFunction)) {
         abort("STG1_OVERLAY_STILL_VISIBLE_AFTER_RESTORE");
-      }
-      if (!afterSpec.includes("stg1Fixtures")) {
-        abort("STG1_BASE_MODULE_MISSING_AFTER_RESTORE");
       }
       process.stdout.write(
         `${JSON.stringify(

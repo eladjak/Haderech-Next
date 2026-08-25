@@ -68,6 +68,8 @@
         "admins": 0,
         "activeCommunityEntitlements": 0,
         "activeCourseEntitlements": 0,
+        "revokedCommunityEntitlements": 2,
+        "revokedCourseEntitlements": 2,
         "fixtureRowsDeleted": 0,
         "fixtureRowsRetainedForAudit": 4,
         "syntheticUsersRetained": 7
@@ -78,6 +80,7 @@
       "expected": {
         "requiredLessons": 75,
         "optionalLessons": 0,
+        "migrationMarkersApplied": 0,
         "migrationMarkersRolledBack": 1
       }
     }

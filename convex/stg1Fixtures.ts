@@ -798,15 +798,27 @@ export const inspectStg1FixtureState = internalQuery({
           (lesson) => lesson.completionAffectsProgress === false,
         ).length,
         migrationMarkers: markers.length,
+        appliedMigrationMarkers: markers.filter(
+          (marker) => marker.state === "applied",
+        ).length,
+        rolledBackMigrationMarkers: markers.filter(
+          (marker) => marker.state === "rolled_back",
+        ).length,
         users: users.length,
         admins: users.filter((user) => user.role === "admin").length,
         courseEntitlements: courseEntitlements.length,
         activeCourseEntitlements: courseEntitlements.filter(
           (row) => row.status === "active",
         ).length,
+        revokedCourseEntitlements: courseEntitlements.filter(
+          (row) => row.status === "revoked",
+        ).length,
         communityEntitlements: communityEntitlements.length,
         activeCommunityEntitlements: communityEntitlements.filter(
           (row) => row.status === "active",
+        ).length,
+        revokedCommunityEntitlements: communityEntitlements.filter(
+          (row) => row.status === "revoked",
         ).length,
         simulatorTrialUsage: simulatorTrialUsage.length,
         communityTopics: communityTopics.length,

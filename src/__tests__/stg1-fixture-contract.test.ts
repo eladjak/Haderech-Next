@@ -30,7 +30,7 @@ describe("STG-1 fixture containment contract", () => {
     expect(runnerSource).toContain('require.resolve("convex/package.json")');
     expect(runnerSource).toContain("spawnSync(process.execPath");
     expect(runnerSource).not.toContain('"npx.cmd"');
-    expect(overlayRunner).toContain('"--deployment-name"');
+    expect(overlayRunner).toContain("validateStg1TargetFile");
     expect(overlayRunner).not.toMatch(/"--deployment",/u);
     expect(runnerSource).toContain("STG1_TARGET.deploymentName");
     expect(runnerSource).not.toContain('command.push("--push")');
@@ -53,6 +53,16 @@ describe("STG-1 fixture containment contract", () => {
     expect(overlayRunner).toContain("STG1_OVERLAY_ALREADY_PRESENT_BEFORE_UPLOAD");
     expect(overlayRunner).toContain("STG1_OVERLAY_STILL_VISIBLE_AFTER_RESTORE");
     expect(overlayRunner).toContain("STG1_OVERLAY_RESTORE_FAILED");
+    expect(overlayRunner).toContain("probeInternalWriter");
+    expect(overlayRunner).toContain("ConvexHttpClient");
+    expect(overlayRunner).not.toContain('"function-spec"');
+  });
+
+  it("distinguishes final rollback and revocation states in E10 readback", () => {
+    expect(fixtureSource).toContain("appliedMigrationMarkers");
+    expect(fixtureSource).toContain("rolledBackMigrationMarkers");
+    expect(fixtureSource).toContain("revokedCourseEntitlements");
+    expect(fixtureSource).toContain("revokedCommunityEntitlements");
   });
 
   it("keeps actual identity bindings in the ignored local directory", () => {

@@ -71,14 +71,14 @@
       "id": "E09",
       "action": "rollback-receiving-practice",
       "mode": "write-staging-only",
-      "requiredPredicate": "75 required, 0 optional, marker rolled_back; re-preview fails closed on same version",
+      "requiredPredicate": "sanitized postcheck proves 75 required, 0 optional, marker rolled_back and exact MIGRATION_VERSION_ALREADY_ROLLED_BACK same-version conflict",
       "status": "NOT_RUN"
     },
     {
       "id": "E10",
       "action": "final-state-readback",
       "mode": "read-only",
-      "requiredPredicate": "payments/subscriptions still zero; target and revision match evidence pack",
+      "requiredPredicate": "18/18 adjudicator checks pass: exact target/revision/Git SHA, 75/0 content, one rolled-back marker, 7 banned Clerk fixtures, 4 revoked grants, zero active admin/payment/community/user state, overlay absent, flags/keys/temp files cleaned, Production untouched",
       "status": "NOT_RUN"
     }
   ],
