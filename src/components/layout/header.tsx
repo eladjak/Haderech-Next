@@ -72,7 +72,7 @@ export function Header() {
           />
           <div className="flex flex-col">
             <span className="text-base font-bold leading-tight text-blue-500 dark:text-white">הדרך</span>
-            <span className="hidden text-[10px] leading-tight text-zinc-400 sm:block dark:text-zinc-500">
+            <span className="hidden text-[10px] font-medium leading-tight text-zinc-700 sm:block dark:text-zinc-300">
               by אומנות הקשר
             </span>
           </div>

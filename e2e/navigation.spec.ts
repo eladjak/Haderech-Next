@@ -114,5 +114,8 @@ test.describe("Navigation", () => {
     await expect(footer.locator('a[href="/about"]')).toBeVisible();
     await expect(footer.locator('a[href="/help"]')).toBeVisible();
     await expect(footer.locator('a[href="/contact"]')).toBeVisible();
+    await expect(footer.locator('a[href="/privacy"]')).toBeVisible();
+    await expect(footer.locator('a[href="/terms"]')).toBeVisible();
+    await expect(footer.locator('a[href="/accessibility"]')).toBeVisible();
   });
 });

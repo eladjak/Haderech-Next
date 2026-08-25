@@ -23,7 +23,6 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, "..");
 
 const args = process.argv.slice(2);
 const urlIdx = args.indexOf("--url");

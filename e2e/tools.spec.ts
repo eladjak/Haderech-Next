@@ -17,7 +17,7 @@ test.describe("Tools Page", () => {
 
   test("should display the page description", async ({ page }) => {
     const description = page.locator(
-      "text=כלים חכמים שעוזרים לך בכל שלב בדרך לזוגיות",
+      "text=כלי כתיבה ורפלקציה מוגבלים",
     );
     await expect(description).toBeVisible();
   });
@@ -36,7 +36,7 @@ test.describe("Tools Page", () => {
   test("should display available tools with links", async ({ page }) => {
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 3, name: "בונה פרופיל דייטינג" })).toBeVisible();
-    await expect(main.getByRole("heading", { level: 3, name: "בונה ביו AI" })).toBeVisible();
+    await expect(main.getByRole("heading", { level: 3, name: "בונה ביו מקומי" })).toBeVisible();
 
     const profileLink = main.locator('a[href="/tools/profile-builder"]');
     await expect(profileLink).toBeVisible();
@@ -52,7 +52,7 @@ test.describe("Tools Page", () => {
     await expect(conversationLink).toBeVisible();
 
     // Values quiz - available tool
-    const valuesQuiz = main.getByRole("heading", { level: 3, name: "מבחן ערכים" });
+    const valuesQuiz = main.getByRole("heading", { level: 3, name: "תרגיל רפלקציה על ערכים" });
     await expect(valuesQuiz).toBeVisible();
 
     const valuesLink = main.locator('a[href="/tools/values-quiz"]');
@@ -63,20 +63,16 @@ test.describe("Tools Page", () => {
     page,
   }) => {
     // Photo analyzer - coming soon
-    const photoAnalyzer = page.locator("h3", { hasText: "ניתוח תמונות" });
+    const photoAnalyzer = page.locator("h3", { hasText: "משוב על תמונות (תכנון)" });
     await expect(photoAnalyzer).toBeVisible();
 
     // Date planner - coming soon
     const datePlanner = page.locator("h3", { hasText: "מתכנן דייטים" });
     await expect(datePlanner).toBeVisible();
 
-    // Date report - coming soon
-    const dateReport = page.locator("h3", { hasText: "ניתוח דייט" });
-    await expect(dateReport).toBeVisible();
-
     // Coming soon text should be visible for unavailable tools
     const comingSoonTexts = page.locator("text=יהיה זמין בקרוב");
-    await expect(comingSoonTexts).toHaveCount(3);
+    await expect(comingSoonTexts).toHaveCount(2);
   });
 
   test("should display badges on tool cards", async ({ page }) => {
@@ -86,7 +82,7 @@ test.describe("Tools Page", () => {
 
     // "Coming soon" badges
     const comingSoonBadges = page.locator("text=בקרוב");
-    expect(await comingSoonBadges.count()).toBeGreaterThanOrEqual(3);
+    expect(await comingSoonBadges.count()).toBeGreaterThanOrEqual(2);
   });
 
   test("should display all seven tool cards", async ({ page }) => {
@@ -94,12 +90,12 @@ test.describe("Tools Page", () => {
     await expect(toolCards).toHaveCount(7);
     await expect(toolCards).toHaveText([
       "בונה פרופיל דייטינג",
-      "בונה ביו AI",
-      "ניתוח תמונות",
+      "בונה ביו מקומי",
+      "משוב על תמונות (תכנון)",
       "מתכנן דייטים",
-      "ניתוח דייט",
+      "רפלקציה אחרי דייט",
       "פותחי שיחה",
-      "מבחן ערכים",
+      "תרגיל רפלקציה על ערכים",
     ]);
   });
 

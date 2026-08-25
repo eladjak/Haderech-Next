@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "כלים",
   description:
     "כלים מעשיים לשיפור חיי הדייטינג שלכם: מחוללי שיחות, בנאי פרופיל, חידון ערכים ועוד. הכלים החינמיים שיעזרו לכם להצליח בדייטינג.",
+  alternates: { canonical: "/tools" },
   openGraph: {
     title: "כלים | הדרך - אומנות הקשר",
     description:

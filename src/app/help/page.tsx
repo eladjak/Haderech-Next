@@ -293,7 +293,7 @@ export default function HelpPage() {
 
         {/* Quick Links */}
         <section className="container mx-auto px-4 py-10">
-          <h2 className="mb-5 text-center text-sm font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+              <h2 className="mb-5 text-center text-sm font-semibold tracking-wide text-zinc-700 uppercase dark:text-zinc-300">
             קישורים מהירים
           </h2>
           <div className="mx-auto grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

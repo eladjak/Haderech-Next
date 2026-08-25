@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "כלי AI לתרגול",
   description:
     "כלי AI בעברית לתרגול חשיבה ושיחות על היכרות ותקשורת. התשובות עלולות להיות שגויות ואינן תחליף לטיפול, לייעוץ מקצועי או לשיקול דעתכם.",
+  alternates: { canonical: "/chat" },
   openGraph: {
     title: "כלי AI לתרגול | הדרך - אומנות הקשר",
     description:

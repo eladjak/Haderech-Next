@@ -1,6 +1,18 @@
 import { test, expect } from "@playwright/test";
+import { source as axeSource } from "axe-core";
 
-const PUBLIC_ROUTES = ["/", "/courses", "/about", "/faq", "/help", "/pricing"];
+const PUBLIC_ROUTES = [
+  "/",
+  "/courses",
+  "/about",
+  "/faq",
+  "/help",
+  "/pricing",
+  "/contact",
+  "/privacy",
+  "/terms",
+  "/accessibility",
+];
 
 test.describe("Public accessibility contracts", () => {
   test("declares Hebrew RTL and exposes one main landmark", async ({ page }) => {
@@ -16,6 +28,7 @@ test.describe("Public accessibility contracts", () => {
   test("skip link is first in keyboard order and moves focus to content", async ({ page }) => {
     await page.goto("/");
     const skipLink = page.getByRole("link", { name: "דלג לתוכן הראשי" });
+    await expect(skipLink).toHaveAttribute("data-hydrated", "true");
 
     await page.keyboard.press("Tab");
     await expect(skipLink).toBeFocused();
@@ -23,6 +36,48 @@ test.describe("Public accessibility contracts", () => {
 
     await page.keyboard.press("Enter");
     await expect(page.locator("main#main-content")).toBeFocused();
+  });
+
+  test("public and auth surfaces have no automated WCAG A/AA violations", async ({ page }) => {
+    for (const route of [...PUBLIC_ROUTES, "/sign-in", "/sign-up"]) {
+      await page.goto(route);
+      await page.addScriptTag({ content: axeSource });
+      const violations = await page.evaluate(async () => {
+        const axe = (window as typeof window & {
+          axe: { run: (root: Document, options: object) => Promise<{ violations: unknown[] }> };
+        }).axe;
+        const result = await axe.run(document, {
+          runOnly: {
+            type: "tag",
+            values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"],
+          },
+        });
+        return result.violations;
+      });
+      expect(violations, `${route} has Axe violations`).toEqual([]);
+    }
+  });
+
+  test("Clerk auth cards hydrate without browser page errors", async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+
+    for (const route of ["/sign-in", "/sign-up"]) {
+      await page.goto(route);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    }
+
+    expect(pageErrors).toEqual([]);
+  });
+
+  test("route metadata does not canonicalize public pages to home", async ({ page }) => {
+    for (const route of ["/about", "/courses", "/faq", "/help", "/pricing", "/contact"]) {
+      await page.goto(route);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        new RegExp(`${route.replace("/", "\\/")}$`)
+      );
+    }
   });
 
   test("course search and filter controls have names and state", async ({ page }) => {

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "בלוג",
   description:
     "מאמרים, טיפים ותובנות על דייטינג, זוגיות וצמיחה אישית מצוות הדרך - אומנות הקשר.",
+  alternates: { canonical: "/blog" },
   openGraph: {
     title: "בלוג | הדרך - אומנות הקשר",
     description:

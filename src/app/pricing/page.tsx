@@ -800,7 +800,7 @@ export default function PricingPage() {
                   </div>
                 ))}
               </div>
-              <p className="mb-8 text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+              <p className="mb-8 text-sm leading-relaxed text-blue-700 dark:text-zinc-300">
                 פתיחת חשבון אינה הוכחת תשלום ואינה מבטיחה גישה לתוכן בתשלום.
                 אל תמסרו פרטי תשלום מחוץ לעמוד סליקה מאובטח שמציג סיכום הזמנה מלא.
               </p>

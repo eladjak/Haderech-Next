@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "קורסים",
   description:
     "גלו את מגוון הקורסים שלנו ללמידת דייטינג וזוגיות. מקורסי התחלה ועד שיפור מיומנויות מתקדמות - כל הכלים לבניית קשר אמיתי.",
+  alternates: { canonical: "/courses" },
   openGraph: {
     title: "קורסים | הדרך - אומנות הקשר",
     description:

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "אודות",
   description:
     "הכירו את הדרך - אומנות הקשר. הפלטפורמה שנוצרה כדי לעזור לכם למצוא אהבה אמיתית. הסיפור שלנו, הערכים שלנו והמשימה שלנו.",
+  alternates: { canonical: "/about" },
   openGraph: {
     title: "אודות | הדרך - אומנות הקשר",
     description:

@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 import { assertDemoModeConfiguration } from "./src/lib/production-config";
+import { assertProductionServiceConfiguration } from "./src/lib/service-config";
 
 const demoModeAuthorizedForClient = assertDemoModeConfiguration();
+assertProductionServiceConfiguration();
 
 const nextConfig: NextConfig = {
   env: {

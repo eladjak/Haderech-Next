@@ -70,18 +70,14 @@ test.describe("Authentication Flow", () => {
     ).not.toBeVisible();
   });
 
-  test("should have sign-up CTA links on the landing page", async ({
+  test("should keep landing CTAs on the approved availability path", async ({
     page,
   }) => {
     await page.goto("/");
 
-    // Hero section sign-up link
-    const heroSignUp = page.locator('a[href="/sign-up"]').first();
-    await expect(heroSignUp).toBeVisible();
-
-    // Multiple sign-up CTAs exist on the landing page
-    const signUpLinks = page.locator('a[href="/sign-up"]');
-    expect(await signUpLinks.count()).toBeGreaterThanOrEqual(2);
+    const hero = page.locator('section[aria-labelledby="hero-heading"]');
+    await expect(hero.getByRole("link", { name: "בדקו זמינות" })).toHaveAttribute("href", "/contact");
+    await expect(hero.locator('a[href="/sign-up"]')).toHaveCount(0);
   });
 
   test("should have a dedicated sign-in page", async ({ page }) => {

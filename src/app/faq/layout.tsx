@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "שאלות נפוצות",
   description:
     "תשובות לשאלות הנפוצות ביותר על הדרך - אומנות הקשר. קורסים, כלי AI, סימולטור דייטים, מנויים, פרטיות ועוד.",
+  alternates: { canonical: "/faq" },
   openGraph: {
     title: "שאלות נפוצות | הדרך - אומנות הקשר",
     description:

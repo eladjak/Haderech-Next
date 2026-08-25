@@ -116,6 +116,7 @@ export default function ToolsPage() {
           </p>
           <Image
             src="/images/illustrations/header-tools.webp"
+            priority
             alt="איור: נוף גבעות בשעת דמדומים ומעליו מרחפים בשורה מצפן, מפתח, פנס ואבן חלקה"
             width={1536}
             height={1024}
