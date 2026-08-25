@@ -107,6 +107,18 @@ export function parseConvexEnvironmentNames(source) {
   return new Set(names);
 }
 
+export function extractRuntimeConvexHosts(source) {
+  const withoutSdkExample = String(source).replace(
+    /ConvexReactClient requires a URL like ['"]https:\/\/[a-z0-9-]+\.convex\.cloud['"]/giu,
+    "ConvexReactClient requires a URL",
+  );
+  return new Set(
+    [...withoutSdkExample.matchAll(/https:\/\/([a-z0-9-]+\.convex\.cloud)/giu)].map(
+      (match) => match[1].toLowerCase(),
+    ),
+  );
+}
+
 function hasAll(source, fragments) {
   return fragments.every((fragment) => String(source).includes(fragment));
 }

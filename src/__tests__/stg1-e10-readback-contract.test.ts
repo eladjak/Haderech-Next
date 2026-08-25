@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { STG1_E07_EXPECTED_CHECK_IDS } from "../../scripts/lib/stg1-final-audit.mjs";
 import {
+  extractRuntimeConvexHosts,
   extractJsonObjects,
   findLastJsonObject,
   parseConvexEnvironmentNames,
@@ -36,6 +37,21 @@ describe("STG-1 E10 read-only collector contract", () => {
     );
     expect([...names].sort()).toEqual(["CLERK_JWT_ISSUER_DOMAIN", "OTHER"]);
     expect(JSON.stringify([...names])).not.toContain("issuer.example");
+  });
+
+  it("ignores the Convex SDK example URL but still detects a foreign runtime", () => {
+    const target = "https://content-dog-757.convex.cloud";
+    const sdkExample =
+      "ConvexReactClient requires a URL like 'https://happy-otter-123.convex.cloud'";
+    expect([...extractRuntimeConvexHosts(`${target}\n${sdkExample}`)]).toEqual([
+      "content-dog-757.convex.cloud",
+    ]);
+    expect(
+      [...extractRuntimeConvexHosts(`${target}\nhttps://foreign-runtime.convex.cloud`)].sort(),
+    ).toEqual([
+      "content-dog-757.convex.cloud",
+      "foreign-runtime.convex.cloud",
+    ]);
   });
 
   it("recognizes exact E03 and E04 execution evidence", () => {

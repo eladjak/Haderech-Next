@@ -18,6 +18,7 @@ import { makeFunctionReference } from "convex/server";
 import { evaluateStg1FinalBundle } from "./lib/stg1-final-audit.mjs";
 import {
   buildPhaseEvidence,
+  extractRuntimeConvexHosts,
   findLastJsonObject,
   parseConvexEnvironmentNames,
   redactReadbackOutput,
@@ -173,11 +174,7 @@ async function inspectLivePreviewSurface() {
     if (response.ok) bodies.push(await response.text());
   }
   const surface = bodies.join("\n");
-  const convexHosts = new Set(
-    [...surface.matchAll(/https:\/\/([a-z0-9-]+\.convex\.cloud)/giu)].map(
-      (match) => match[1].toLowerCase(),
-    ),
-  );
+  const convexHosts = extractRuntimeConvexHosts(surface);
   if (convexHosts.size !== 1 || !convexHosts.has(convexHost)) {
     throw new Error("STG1_E10:PREVIEW_CONVEX_RUNTIME_TARGET_MISMATCH");
   }
