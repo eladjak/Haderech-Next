@@ -41,6 +41,23 @@ test.describe("Public accessibility contracts", () => {
   test("public and auth surfaces have no automated WCAG A/AA violations", async ({ page }) => {
     for (const route of [...PUBLIC_ROUTES, "/sign-in", "/sign-up"]) {
       await page.goto(route);
+      await expect(page.getByRole("link", { name: "דלג לתוכן הראשי" })).toHaveAttribute(
+        "data-hydrated",
+        "true",
+      );
+      // Exercise the real `whileInView` path before scanning the complete DOM.
+      // Axe otherwise measures off-screen Framer Motion elements in their
+      // transient fade-in state, which is not a user-visible resting state.
+      await page.evaluate(async () => {
+        const viewportStep = Math.max(Math.floor(window.innerHeight * 0.75), 400);
+        const pageHeight = document.documentElement.scrollHeight;
+        for (let top = 0; top < pageHeight; top += viewportStep) {
+          window.scrollTo({ top, behavior: "instant" });
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+        }
+        window.scrollTo({ top: pageHeight, behavior: "instant" });
+        await new Promise((resolve) => window.setTimeout(resolve, 700));
+      });
       await page.addScriptTag({ content: axeSource });
       const violations = await page.evaluate(async () => {
         const axe = (window as typeof window & {

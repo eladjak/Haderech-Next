@@ -48,7 +48,7 @@ const PHASES = [
     color: "from-brand-400 to-brand-600",
     bg: "bg-brand-50 dark:bg-brand-100/10",
     border: "border-brand-200 dark:border-brand-200/25",
-    text: "text-brand-600 dark:text-brand-300",
+    text: "text-brand-700 dark:text-brand-300",
   },
   {
     num: 2,
@@ -68,7 +68,7 @@ const PHASES = [
     color: "from-accent-400 to-accent-500",
     bg: "bg-amber-50 dark:bg-amber-50/10",
     border: "border-amber-100 dark:border-amber-100/20",
-    text: "text-accent-500 dark:text-accent-300",
+    text: "text-teal-700 dark:text-teal-300",
   },
   {
     num: 4,
@@ -78,7 +78,7 @@ const PHASES = [
     color: "from-rose-400 to-brand-500",
     bg: "bg-rose-50 dark:bg-rose-50/10",
     border: "border-rose-100 dark:border-rose-100/20",
-    text: "text-rose-600 dark:text-rose-400",
+    text: "text-rose-700 dark:text-rose-300",
   },
   {
     num: 5,
@@ -88,7 +88,7 @@ const PHASES = [
     color: "from-purple-400 to-purple-600",
     bg: "bg-purple-50 dark:bg-purple-50/10",
     border: "border-purple-100 dark:border-purple-100/20",
-    text: "text-purple-600 dark:text-purple-400",
+    text: "text-purple-700 dark:text-purple-300",
   },
   {
     num: 6,
@@ -98,7 +98,7 @@ const PHASES = [
     color: "from-emerald-400 to-emerald-600",
     bg: "bg-emerald-50 dark:bg-emerald-50/10",
     border: "border-emerald-100 dark:border-emerald-100/20",
-    text: "text-emerald-600 dark:text-emerald-400",
+    text: "text-emerald-700 dark:text-emerald-300",
   },
 ];
 
@@ -122,7 +122,7 @@ const VALUES = [
     title: "כבוד",
     desc: "כבוד לעצמך, לפרטנר ולתהליך. כל אדם בדרכו, בקצב שלו – ואנחנו כאן לליוות, לא לשפוט.",
     color: "bg-amber-50 dark:bg-amber-50/10 border-amber-100 dark:border-amber-100/20",
-    badge: "text-accent-500 dark:text-accent-300 bg-amber-100 dark:bg-amber-100/20",
+    badge: "text-teal-800 dark:text-teal-200 bg-amber-100 dark:bg-amber-100/20",
   },
 ];
 
@@ -415,7 +415,7 @@ export default function AboutPage() {
                     </span>
                   </div>
 
-                  <div className={`mb-0.5 text-xs font-medium uppercase tracking-wider opacity-60 ${phase.text}`}>
+                  <div className={`mb-0.5 text-xs font-medium uppercase tracking-wider ${phase.text}`}>
                     {phase.subtitle}
                   </div>
                   <h3 className={`mb-2 text-xl font-bold ${phase.text}`}>
@@ -506,7 +506,7 @@ export default function AboutPage() {
               variants={stagger}
             >
               <motion.div variants={fadeIn}>
-                <span className="mb-3 inline-block rounded-lg bg-accent-300/20 px-3 py-1 text-sm font-semibold text-accent-500 dark:bg-accent-300/15 dark:text-accent-300">
+                <span className="mb-3 inline-block rounded-lg bg-accent-300/20 px-3 py-1 text-sm font-semibold text-teal-800 dark:bg-accent-300/15 dark:text-teal-200">
                   למה דווקא אנחנו?
                 </span>
               </motion.div>
