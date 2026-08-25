@@ -25,7 +25,7 @@ export default function StudentError({
           </svg>
         </div>
         <h1 className="mb-3 text-2xl font-bold text-blue-500 dark:text-white">שגיאה באזור האישי</h1>
-        <p className="mb-8 max-w-md text-blue-500/60 dark:text-zinc-400">לא הצלחנו לטעון את המידע שלך. נסו שוב.</p>
+        <p className="mb-8 max-w-md text-blue-500/75 dark:text-zinc-400">לא הצלחנו לטעון את המידע שלך. נסו שוב.</p>
         <div className="flex gap-4">
           <button type="button" onClick={reset} className="rounded-full bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:brightness-110">
             נסה שוב

@@ -130,16 +130,16 @@ function CoachWelcome({
       <h2 className="mb-1 text-base font-bold text-blue-600 dark:text-white">
         כלי ה-AI שלי
       </h2>
-      <p className="mb-1 text-xs text-blue-500/50 dark:text-zinc-400">
+      <p className="mb-1 text-xs text-blue-500/75 dark:text-zinc-400">
         כלי אוטומטי • עלול לטעות
       </p>
 
       {isCoach ? (
-        <p className="mb-6 max-w-xs text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+        <p className="mb-6 max-w-xs text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
           שלום! אני כאן בשבילך. מה עובר עליך? ספר לי ונתחיל לעבוד יחד.
         </p>
       ) : (
-        <p className="mb-6 max-w-xs text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+        <p className="mb-6 max-w-xs text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
           {mode === "practice"
             ? "מוכן/ה לתרגל? בחר סיטואציה ונתחיל את הסימולציה."
             : "ספר לי על הדייט או המצב שרוצה לנתח. אני כאן לעזור."}
@@ -319,7 +319,7 @@ function ChatPageContent() {
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-blue-100/40 bg-white text-blue-500/60 shadow-sm transition-colors hover:text-brand-500 md:hidden dark:border-zinc-700 dark:bg-zinc-800"
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-blue-100/40 bg-white text-blue-500/75 shadow-sm transition-colors hover:text-brand-500 md:hidden dark:border-zinc-700 dark:bg-zinc-800"
               aria-label="פתח היסטוריית שיחות"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -338,7 +338,7 @@ function ChatPageContent() {
                   <p className="truncate text-sm font-semibold text-blue-500 dark:text-white">
                     {activeSession.title ?? modeConfig.label}
                   </p>
-                  <p className="text-xs text-blue-500/50 dark:text-zinc-500">
+                  <p className="text-xs text-blue-500/75 dark:text-zinc-500">
                     {modeConfig.description}
                   </p>
                 </div>
@@ -352,7 +352,7 @@ function ChatPageContent() {
                   <p className="text-sm font-semibold text-blue-500 dark:text-white">
                     כלי AI - אומנות הקשר
                   </p>
-                  <p className="text-xs text-blue-500/50 dark:text-zinc-500">
+                  <p className="text-xs text-blue-500/75 dark:text-zinc-500">
                     תרגול אוטומטי המבוסס על תכני הקורס
                   </p>
                 </div>
@@ -410,7 +410,7 @@ function ChatPageContent() {
                 <h1 className="mb-2 text-2xl font-bold text-blue-500 dark:text-white">
                   כלי ה-AI זמין לתרגול
                 </h1>
-                <p className="mb-8 max-w-sm text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+                <p className="mb-8 max-w-sm text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
                   זהו כלי AI, לא אדם, מטפל או שירות חירום. התוכן עשוי להישלח
                   ל-Gemini או Anthropic, ולכן אין להזין פרטים מזהים או מידע
                   רגיש. המשוב עלול לטעות ואינו אבחון או הבטחה לתוצאה.
@@ -436,7 +436,7 @@ function ChatPageContent() {
                           <p className="text-sm font-semibold text-blue-500 dark:text-white">
                             {config.label}
                           </p>
-                          <p className="mt-0.5 text-xs text-blue-500/50 dark:text-zinc-400">
+                          <p className="mt-0.5 text-xs text-blue-500/75 dark:text-zinc-400">
                             {config.description}
                           </p>
                         </div>
@@ -504,7 +504,7 @@ function ChatPageContent() {
             <h2 className="mb-1 text-lg font-bold text-blue-500 dark:text-white">
               שיחה חדשה
             </h2>
-            <p className="mb-5 text-sm text-blue-500/60 dark:text-zinc-400">
+            <p className="mb-5 text-sm text-blue-500/75 dark:text-zinc-400">
               בחר את סוג השיחה שתרצה
             </p>
             <div className="space-y-3">
@@ -526,7 +526,7 @@ function ChatPageContent() {
                       <p className="text-sm font-semibold text-blue-500 dark:text-white">
                         {config.label}
                       </p>
-                      <p className="text-xs text-blue-500/50 dark:text-zinc-400">
+                      <p className="text-xs text-blue-500/75 dark:text-zinc-400">
                         {config.description}
                       </p>
                     </div>
@@ -537,7 +537,7 @@ function ChatPageContent() {
             <button
               type="button"
               onClick={() => setShowModeSelector(false)}
-              className="mt-4 w-full rounded-xl border border-blue-100/40 py-2.5 text-sm text-blue-500/60 transition-colors hover:bg-blue-50/50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+              className="mt-4 w-full rounded-xl border border-blue-100/40 py-2.5 text-sm text-blue-500/75 transition-colors hover:bg-blue-50/50 dark:border-zinc-700 dark:hover:bg-zinc-800"
             >
               ביטול
             </button>

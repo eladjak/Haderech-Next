@@ -105,7 +105,7 @@ export function ChatSidebar({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-blue-500/40 transition-colors hover:bg-brand-50 hover:text-brand-500 md:hidden dark:hover:bg-zinc-800"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-blue-500/75 transition-colors hover:bg-brand-50 hover:text-brand-500 md:hidden dark:hover:bg-zinc-800"
             aria-label="סגור תפריט"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -137,7 +137,7 @@ export function ChatSidebar({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                 </svg>
               </div>
-              <p className="text-xs text-blue-500/50 dark:text-zinc-500">
+              <p className="text-xs text-blue-500/75 dark:text-zinc-500">
                 אין שיחות עדיין.
                 <br />
                 התחל שיחה חדשה!
@@ -162,7 +162,7 @@ export function ChatSidebar({
                       className={`flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-lg ${
                         session._id === activeSessionId
                           ? "bg-brand-100 text-brand-600 dark:bg-brand-100/20 dark:text-brand-300"
-                          : "bg-blue-50 text-blue-500/60 dark:bg-zinc-700 dark:text-zinc-400"
+                          : "bg-blue-50 text-blue-500/75 dark:bg-zinc-700 dark:text-zinc-400"
                       }`}
                     >
                       {MODE_ICONS[session.mode]}
@@ -180,11 +180,11 @@ export function ChatSidebar({
                         {session.title ?? MODE_LABELS[session.mode]}
                       </p>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-xs text-blue-500/40 dark:text-zinc-500">
+                        <span className="text-xs text-blue-500/75 dark:text-zinc-500">
                           {formatDate(session.updatedAt)}
                         </span>
                         <span className="h-1 w-1 rounded-full bg-blue-500/20 dark:bg-zinc-600" aria-hidden="true" />
-                        <span className="text-xs text-blue-500/40 dark:text-zinc-500">
+                        <span className="text-xs text-blue-500/75 dark:text-zinc-500">
                           {session.messageCount} הודעות
                         </span>
                       </div>
@@ -198,7 +198,7 @@ export function ChatSidebar({
                         onDeleteSession(session._id);
                       }}
                       aria-label={`מחק שיחה: ${session.title ?? MODE_LABELS[session.mode]}`}
-                      className="flex-shrink-0 hidden h-6 w-6 items-center justify-center rounded-lg text-blue-500/30 transition-colors hover:bg-red-50 hover:text-red-500 group-hover:flex dark:hover:bg-red-500/10"
+                      className="flex-shrink-0 hidden h-6 w-6 items-center justify-center rounded-lg text-blue-500/75 transition-colors hover:bg-red-50 hover:text-red-500 group-hover:flex dark:hover:bg-red-500/10"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />

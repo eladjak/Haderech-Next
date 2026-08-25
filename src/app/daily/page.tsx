@@ -434,7 +434,7 @@ export default function DailyPage() {
                   <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
                     ציטוט השראה
                   </span>
-                  <p className="mt-0.5 text-[10px] text-blue-600/70 dark:text-blue-500/70">
+                  <p className="mt-0.5 text-[10px] text-blue-600/70 dark:text-blue-500/75">
                     {displayContent.quote.category}
                   </p>
                 </div>

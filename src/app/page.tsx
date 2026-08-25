@@ -82,7 +82,7 @@ export default function Home() {
 
             <motion.p
               variants={fadeIn}
-              className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-500/70 dark:text-zinc-400"
+              className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-500/75 dark:text-zinc-400"
             >
               תוכנית &quot;הדרך&quot; של אומנות הקשר היא מסלול למידה ותרגול בן
               12 שבועות. היא כוללת שיעורים, מסמכי תרגול וכלי AI אוטומטיים
@@ -132,19 +132,19 @@ export default function Home() {
               variants={fadeIn}
               className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
             >
-              <span className="flex items-center gap-1.5 text-sm text-blue-500/70 dark:text-zinc-400">
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/75 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
                 12 שבועות
               </span>
-              <span className="flex items-center gap-1.5 text-sm text-blue-500/70 dark:text-zinc-400">
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/75 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
                 75 שיעורים
               </span>
-              <span className="flex items-center gap-1.5 text-sm text-blue-500/70 dark:text-zinc-400">
+              <span className="flex items-center gap-1.5 text-sm text-blue-500/75 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                 </svg>
@@ -154,7 +154,7 @@ export default function Home() {
 
             <motion.p
               variants={fadeIn}
-              className="mt-4 text-sm text-blue-500/70 dark:text-zinc-400"
+              className="mt-4 text-sm text-blue-500/75 dark:text-zinc-400"
             >
               הרכישה והגישה לתוכן בתשלום אינן פתוחות כרגע; פתיחת חשבון לבדה
               אינה מקנה הרשאה לקורס.
@@ -201,7 +201,7 @@ export default function Home() {
             <h2 id="values-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               אמת. כלים. כבוד.
             </h2>
-            <p className="text-blue-500/60 dark:text-zinc-400">
+            <p className="text-blue-500/75 dark:text-zinc-400">
               שלושת הערכים שמנחים כל מה שאנחנו עושים
             </p>
           </motion.div>
@@ -392,7 +392,7 @@ export default function Home() {
             <h2 id="tools-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
               ארגז הכלים שלך לדייטינג
             </h2>
-            <p className="text-blue-500/60 dark:text-zinc-400">
+            <p className="text-blue-500/75 dark:text-zinc-400">
               כלים מעשיים שתוכל להשתמש בהם כבר היום
             </p>
           </motion.div>
@@ -503,7 +503,7 @@ export default function Home() {
             <h2 id="availability-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white">
               הרכישה המקוונת עדיין לא פתוחה
             </h2>
-            <p className="mx-auto mb-6 max-w-xl leading-relaxed text-blue-500/70 dark:text-zinc-400">
+            <p className="mx-auto mb-6 max-w-xl leading-relaxed text-blue-500/75 dark:text-zinc-400">
               המחירים והמסלולים טרם אושרו, ואין כרגע מסלול תשלום או הרשאת תוכן
               פעילים. פתיחת חשבון לבדה אינה מקנה גישה לקורס בתשלום.
             </p>
@@ -642,7 +642,7 @@ function FeatureCard({
       <h3 className="mb-2 text-lg font-bold text-blue-500 dark:text-white">
         {title}
       </h3>
-      <p className="text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+      <p className="text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
         {description}
       </p>
     </motion.div>
@@ -675,7 +675,7 @@ function EcosystemCard({
       <span className="mb-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-50/50 dark:text-brand-300">
         {badge}
       </span>
-      <p className="text-xs leading-relaxed text-blue-500/60 dark:text-zinc-400">
+      <p className="text-xs leading-relaxed text-blue-500/75 dark:text-zinc-400">
         {description}
       </p>
     </motion.div>
@@ -705,7 +705,7 @@ function ToolCard({
         <h3 className="mb-1.5 text-base font-semibold text-blue-500 dark:text-white">
           {title}
         </h3>
-        <p className="mb-3 text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+        <p className="mb-3 text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
           {description}
         </p>
         <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-500 transition-colors group-hover:text-brand-600">
@@ -757,7 +757,7 @@ function PhaseCard({
         {title}
       </h3>
       <p className="mb-1 text-xs font-medium text-brand-500">{weeks}</p>
-      <p className="text-xs leading-relaxed text-blue-500/50 dark:text-zinc-400">
+      <p className="text-xs leading-relaxed text-blue-500/75 dark:text-zinc-400">
         {description}
       </p>
     </motion.div>
@@ -835,7 +835,7 @@ function SuccessStoriesSection() {
               </svg>
 
               {/* Story text - truncated to 3 lines */}
-              <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-blue-500/70 dark:text-zinc-400">
+              <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
                 {story.story}
               </p>
 
@@ -939,13 +939,13 @@ function FeaturedBlogSection() {
               </h3>
 
               {/* Excerpt - 2 lines */}
-              <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-blue-500/60 dark:text-zinc-400">
+              <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
                 {post.excerpt}
               </p>
 
               {/* Read time + link */}
               <div className="flex items-center justify-between">
-                <span className="text-xs text-blue-500/70 dark:text-zinc-400">
+                <span className="text-xs text-blue-500/75 dark:text-zinc-400">
                   {post.readTime} דקות קריאה
                 </span>
                 <Link

@@ -11,7 +11,7 @@ export default function OfflinePage() {
         <h1 className="mb-4 text-2xl font-bold text-blue-500 dark:text-white">
           אין חיבור לאינטרנט
         </h1>
-        <p className="mb-8 text-blue-500/60 dark:text-zinc-400">
+        <p className="mb-8 text-blue-500/75 dark:text-zinc-400">
           נראה שאין חיבור לאינטרנט כרגע. בדוק את החיבור שלך ונסה שוב.
         </p>
         <button

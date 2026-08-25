@@ -86,7 +86,7 @@ export function TopicSuggestions({
 }: TopicSuggestionsProps) {
   return (
     <div className="w-full" dir="rtl">
-      <p className="mb-3 text-xs font-medium text-blue-500/50 dark:text-zinc-500">
+      <p className="mb-3 text-xs font-medium text-blue-500/75 dark:text-zinc-500">
         נושאים נפוצים
       </p>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">

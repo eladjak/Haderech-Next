@@ -120,7 +120,7 @@ export function ChatInput({ onSend, isLoading, disabled }: ChatInputProps) {
 
         {/* Footer: hint + char count */}
         <div className="mt-2 flex items-center justify-between" dir="rtl">
-          <p className="text-xs text-blue-500/40 dark:text-zinc-500">
+          <p className="text-xs text-blue-500/75 dark:text-zinc-500">
             Enter לשליחה • Shift+Enter לשורה חדשה
           </p>
           {isNearLimit && (
