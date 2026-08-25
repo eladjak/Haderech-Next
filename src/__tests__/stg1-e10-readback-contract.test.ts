@@ -69,6 +69,24 @@ describe("STG-1 E10 read-only collector contract", () => {
     ).toBe(true);
     expect(
       validatePhaseArtifact(
+        "E05",
+        JSON.stringify({
+          stage: "E05",
+          deploymentName: "content-dog-757",
+          fixtureVersion: "stg1-v1",
+          identitySeed: {
+            insertedUsers: 7,
+            mappedUsers: 7,
+            exactUsers: 7,
+            postStatus: "already_seeded",
+            providerIdsIncludedInResult: false,
+            personalDataIncludedInResult: false,
+          },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      validatePhaseArtifact(
         "E04",
         [
           "## Execution result — completed",

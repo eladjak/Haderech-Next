@@ -144,6 +144,19 @@ export function validatePhaseArtifact(id, source) {
   }
   if (id === "E05") {
     try {
+      const parsed = JSON.parse(String(source));
+      if (parsed?.stage === "E05" && parsed?.identitySeed) {
+        return (
+          parsed.deploymentName === "content-dog-757" &&
+          parsed.fixtureVersion === "stg1-v1" &&
+          parsed.identitySeed.insertedUsers === 7 &&
+          parsed.identitySeed.mappedUsers === 7 &&
+          parsed.identitySeed.exactUsers === 7 &&
+          parsed.identitySeed.postStatus === "already_seeded" &&
+          parsed.identitySeed.providerIdsIncludedInResult === false &&
+          parsed.identitySeed.personalDataIncludedInResult === false
+        );
+      }
       const result = findLastJsonObject(
         source,
         (value) => value?.status === "seeded" || value?.status === "already_seeded",
