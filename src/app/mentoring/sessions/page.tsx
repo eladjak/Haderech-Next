@@ -12,7 +12,7 @@ import {
   STATUS_COLORS,
   InteractiveStarRating,
   StarRating,
-} from "../page";
+} from "@/components/mentoring/session-ui";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 type Tab = "upcoming" | "past";
@@ -135,8 +135,18 @@ function SessionCard({ session }: { session: SessionData }) {
 
       <div className="mt-3 flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
         <span className="flex items-center gap-1">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           {session.duration} דקות
         </span>
@@ -165,8 +175,18 @@ function SessionCard({ session }: { session: SessionData }) {
 
       {isUpcoming && (
         <div className="mt-3 flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500">
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+            />
           </svg>
           {session.status === "pending"
             ? "ממתין לאישור המאמן/ת"
@@ -181,7 +201,7 @@ function SessionsContent() {
   const sessions = useQuery(api.mentoring.getStudentSessions);
   const [activeTab, setActiveTab] = useState<Tab>("upcoming");
 
-  const now = Date.now();
+  const [now] = useState(Date.now);
   const { upcoming, past } = useMemo(() => {
     if (!sessions) return { upcoming: [], past: [] };
     const up: SessionData[] = [];

@@ -80,7 +80,6 @@ interface NotificationGroup {
 }
 
 function groupNotifications(items: NotificationDoc[]): NotificationGroup[] {
-  const now = Date.now();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todayMs = todayStart.getTime();

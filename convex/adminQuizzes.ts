@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authGuard";
+import { assertValidQuizPassingScore } from "./lib/quizAssessmentPolicy";
 
 // שליפת בחנים לפי קורס (admin)
 export const listByCourse = query({
@@ -71,6 +72,7 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    assertValidQuizPassingScore(args.passingScore);
     const quizId = await ctx.db.insert("quizzes", {
       lessonId: args.lessonId,
       courseId: args.courseId,
@@ -107,6 +109,9 @@ export const update = mutation({
     const { id, ...updates } = args;
     const existing = await ctx.db.get(id);
     if (!existing) throw new Error("Quiz not found");
+    if (updates.passingScore !== undefined) {
+      assertValidQuizPassingScore(updates.passingScore);
+    }
 
     const patchData: Record<string, unknown> = {};
     if (updates.title !== undefined) patchData.title = updates.title;

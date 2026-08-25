@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -15,9 +15,20 @@ import { NotificationBell } from "@/components/notifications/notification-bell";
 import { SearchButton } from "@/components/layout/search-button";
 import { DEMO_MODE } from "@/components/providers/demo-provider";
 
+function SignedInContent({ children }: { children: React.ReactNode }) {
+  if (DEMO_MODE) return <>{children}</>;
+  return <SignedIn>{children}</SignedIn>;
+}
+
+function SignedOutContent({ children }: { children: React.ReactNode }) {
+  if (DEMO_MODE) return null;
+  return <SignedOut>{children}</SignedOut>;
+}
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,9 +42,21 @@ export function Header() {
     setMobileMenuOpen(false);
   }, []);
 
-  // In demo mode, show all signed-in content directly
-  const SignedInWrapper = DEMO_MODE ? ({ children }: { children: React.ReactNode }) => <>{children}</> : SignedIn;
-  const SignedOutWrapper = DEMO_MODE ? ({ children }: { children: React.ReactNode }) => <span className="hidden">{children}</span> : SignedOut;
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const menu = document.getElementById("mobile-nav-menu");
+    menu?.querySelector<HTMLElement>("a, button")?.focus();
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMobileMenuOpen(false);
+      mobileMenuButtonRef.current?.focus();
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [mobileMenuOpen]);
 
   return (
     <header className={`sticky top-0 z-50 w-full border-b ${scrolled ? "border-brand-100/80 bg-white/90 shadow-sm shadow-brand-500/5 dark:border-zinc-700 dark:bg-zinc-950/90" : "border-brand-100/40 bg-white/70 dark:border-zinc-800/60 dark:bg-zinc-950/70"} glass`}>
@@ -41,7 +64,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/images/haderech-logo-square.jpg"
-            alt="הדרך"
+            alt=""
             width={40}
             height={40}
             className="h-9 w-9 rounded-lg md:h-10 md:w-10"
@@ -60,7 +83,7 @@ export function Header() {
           <NavLink href="/courses">קורסים</NavLink>
           <NavLink href="/blog">בלוג</NavLink>
           <NavLink href="/pricing">מחירים</NavLink>
-          <SignedInWrapper>
+          <SignedInContent>
             <NavLink href="/dashboard">האזור שלי</NavLink>
             <NavLink href="/daily">יומי</NavLink>
             <NavLink href="/community">קהילה</NavLink>
@@ -68,7 +91,7 @@ export function Header() {
             <NavLink href="/simulator">סימולטור</NavLink>
             <NavLink href="/tools">כלים</NavLink>
             <NavLink href="/mentoring">ייעוץ אישי</NavLink>
-          </SignedInWrapper>
+          </SignedInContent>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -78,7 +101,7 @@ export function Header() {
               Demo Admin
             </span>
           )}
-          <SignedOutWrapper>
+          <SignedOutContent>
             <SignInButton mode="modal">
               <button className="hidden rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 hover:bg-zinc-50 md:inline-flex dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800">
                 התחברות
@@ -89,8 +112,8 @@ export function Header() {
                 הרשמה חינמית
               </button>
             </SignUpButton>
-          </SignedOutWrapper>
-          <SignedInWrapper>
+          </SignedOutContent>
+          <SignedInContent>
             {!DEMO_MODE && <NotificationBell />}
             {!DEMO_MODE && (
               <UserButton
@@ -102,24 +125,25 @@ export function Header() {
                 }}
               />
             )}
-          </SignedInWrapper>
+          </SignedInContent>
 
           {/* Mobile Menu Button */}
           <button
+            ref={mobileMenuButtonRef}
             type="button"
             className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-100 md:hidden dark:text-zinc-400 dark:hover:bg-zinc-800"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-nav-menu"
-            aria-label="תפריט ניווט"
+            aria-label={mobileMenuOpen ? "סגירת תפריט ניווט" : "פתיחת תפריט ניווט"}
           >
             {mobileMenuOpen ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="18" x2="21" y2="18" />
@@ -132,17 +156,15 @@ export function Header() {
       {/* Mobile Menu */}
       <div
         id="mobile-nav-menu"
-        role="navigation"
-        aria-label="תפריט ניווט נייד"
-        aria-hidden={!mobileMenuOpen}
+        hidden={!mobileMenuOpen}
         className={`border-t border-brand-100/40 bg-white/95 glass px-4 md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 overflow-hidden transition-opacity duration-200 ease-out ${mobileMenuOpen ? "max-h-[80vh] py-4 opacity-100" : "max-h-0 py-0 opacity-0 pointer-events-none"}`}
       >
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col gap-1" aria-label="תפריט ניווט נייד">
             <MobileNavLink href="/search" onClick={closeMobileMenu}>חיפוש</MobileNavLink>
             <MobileNavLink href="/courses" onClick={closeMobileMenu}>קורסים</MobileNavLink>
             <MobileNavLink href="/blog" onClick={closeMobileMenu}>בלוג</MobileNavLink>
             <MobileNavLink href="/pricing" onClick={closeMobileMenu}>מחירים</MobileNavLink>
-            <SignedInWrapper>
+            <SignedInContent>
               <MobileNavLink href="/dashboard" onClick={closeMobileMenu}>האזור שלי</MobileNavLink>
               <MobileNavLink href="/daily" onClick={closeMobileMenu}>תוכן יומי</MobileNavLink>
               <MobileNavLink href="/community" onClick={closeMobileMenu}>קהילה</MobileNavLink>
@@ -153,8 +175,8 @@ export function Header() {
               <MobileNavLink href="/notifications" onClick={closeMobileMenu}>התראות</MobileNavLink>
               <MobileNavLink href="/student/dashboard" onClick={closeMobileMenu}>מעקב התקדמות</MobileNavLink>
               <MobileNavLink href="/certificates" onClick={closeMobileMenu}>תעודות</MobileNavLink>
-            </SignedInWrapper>
-            <SignedOutWrapper>
+            </SignedInContent>
+            <SignedOutContent>
               <div className="flex gap-3 pt-3">
                 <SignInButton mode="modal">
                   <button className="flex-1 min-h-[44px] rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900">
@@ -167,7 +189,7 @@ export function Header() {
                   </button>
                 </SignUpButton>
               </div>
-            </SignedOutWrapper>
+            </SignedOutContent>
           </nav>
       </div>
     </header>

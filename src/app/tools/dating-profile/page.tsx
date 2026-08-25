@@ -71,30 +71,30 @@ const RELATIONSHIP_VALUES_OPTIONS = [
 const PHOTO_TIPS = [
   {
     number: 1,
-    title: "תמונת פנים ברורה עם חיוך",
-    desc: "תמונה ראשית - חייבת להיות ברורה, תאורה טובה, חיוך אמיתי. לא תמונת קבוצה ולא תמונה מרחוק.",
-    do: "פנים ברורות, עיניים פתוחות, חיוך אמיתי, תאורה טובה",
+    title: "תמונה ברורה שנוח לך לפרסם",
+    desc: "אפשר לבחור תמונת פנים ברורה בתאורה נוחה. חיוך, קשר עין וחשיפת פנים מלאה אינם חובה.",
+    do: "תמונה שמייצגת אותך ושבדקת בה פרטים מזהים ומטא-דאטה",
     dont: "תמונת קבוצה, תמונה עם פנים מוסתרות, פילטרים קיצוניים",
   },
   {
     number: 2,
     title: "תמונת גוף מלא בפעילות",
-    desc: "הראה את עצמך בפעולה - ריצה, בישול, ספורט. מעביר שיש לך חיים פעילים ומעניינים.",
-    do: "פעילות אמיתית, תנועה, חיוך טבעי",
+    desc: "תמונה בפעילות יכולה להוסיף הקשר, בלי להוכיח דבר על האופי או אורח החיים.",
+    do: "פעילות שנוח לך לפרסם, בלי פרטי מיקום רגישים",
     dont: "עמידה קפואה לצלמה, תמונה עם אפקטים, פוזה מלאכותית",
   },
   {
     number: 3,
-    title: "תמונה חברתית עם חברים",
-    desc: "תמונה עם אנשים אחרים מראה שיש לך מעגל חברתי חם. אבל ודא שניתן לזהות אותך בקלות.",
-    do: "קבוצה קטנה, אתה בולט, אירוע חברתי",
-    dont: "תמונת קבוצה גדולה שקשה לזהות בה אותך",
+    title: "תמונה עם אנשים אחרים — רק בהסכמה",
+    desc: "אין צורך בתמונה חברתית. אם בוחרים אחת, בקשו הסכמה מכל מי שמזוהה וטשטשו ילדים ופרטים אישיים.",
+    do: "הסכמה מפורשת וטשטוש של מי שלא ביקש להופיע",
+    dont: "פרסום אנשים, ילדים, תגי שם או מיקום בלי רשות",
   },
   {
     number: 4,
     title: "תמונה שמספרת סיפור",
-    desc: "תמונה שמגלה משהו ייחודי עליך - עם חיית מחמד, בטיול מיוחד, בפעילות תחביב.",
-    do: "תחביב אמיתי, מקום מיוחד, רגע אותנטי",
+    desc: "אפשר לבחור תמונה שנותנת הקשר לתחביב או לחיית מחמד, כל עוד היא אינה חושפת מידע שלא התכוונת לפרסם.",
+    do: "תוכן שנוח לך שיהיה ציבורי גם מחוץ לאפליקציה",
     dont: "תמונה גנרית ללא סיפור, תמונת 'מירון'",
   },
 ];
@@ -317,8 +317,11 @@ export default function DatingProfileBuilderPage() {
             </div>
             <h1 className="mb-1 text-3xl font-bold text-zinc-900 dark:text-white">בונה פרופיל דייטינג</h1>
             <p className="text-zinc-500 dark:text-zinc-400">
-              בנה פרופיל דייטינג שמבטא אותך באמת ומושך את ההתאמה הנכונה
+              כלי לניסוח טיוטה שמייצגת אתכם; הוא אינו מנבא התאמות או הצלחה באפליקציה
             </p>
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+              הטיוטה נשמרת בחשבון. אל תכניסו כתובת מדויקת, טלפון, מקום עבודה מדויק, מידע רפואי או מיני, סיפור טראומטי או פרטים של אדם אחר. לפני פרסום באפליקציה חיצונית, בדקו גם את הגדרות הפרטיות שלה.
+            </div>
           </div>
 
           {/* Step indicator */}
@@ -889,20 +892,20 @@ export default function DatingProfileBuilderPage() {
                                 strokeDasharray={`${2 * Math.PI * 40}`}
                                 strokeDashoffset={`${2 * Math.PI * 40 * (1 - analysisResult.score / 100)}`}
                                 strokeLinecap="round"
-                                className={`transition-all duration-1000 ${analysisResult.score >= 70 ? "text-green-500" : analysisResult.score >= 40 ? "text-amber-500" : "text-rose-500"}`}
+                                className="text-brand-500 transition-all duration-1000"
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-zinc-900 dark:text-white">{analysisResult.score}</span>
-                              <span className="text-xs text-zinc-500">/100</span>
+                              <span className="text-2xl font-bold text-zinc-900 dark:text-white">{analysisResult.score}%</span>
+                              <span className="text-xs text-zinc-500">מילוי</span>
                             </div>
                           </div>
                           <div>
-                            <p className={`mb-1 text-lg font-bold ${analysisResult.score >= 70 ? "text-green-600 dark:text-green-400" : analysisResult.score >= 40 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"}`}>
-                              {analysisResult.score >= 70 ? "פרופיל מצוין!" : analysisResult.score >= 40 ? "פרופיל טוב" : "יש מה לשפר"}
+                            <p className="mb-1 text-lg font-bold text-zinc-900 dark:text-white">
+                              מדד מילוי טיוטה
                             </p>
                             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                              ציון שלמות ואיכות הפרופיל שלך
+                              בדיקה טכנית של שדות שמולאו — לא ציון איכות ולא תחזית להתאמות
                             </p>
                           </div>
                         </div>
@@ -966,7 +969,7 @@ export default function DatingProfileBuilderPage() {
                             href="/chat"
                             className="flex-1 rounded-xl bg-gradient-to-l from-rose-500 to-pink-600 px-4 py-3 text-center text-sm font-semibold text-white shadow-md shadow-rose-500/15 transition-all hover:opacity-90"
                           >
-                            שתף עם מאמן ←
+                            פתח כלי AI לרפלקציה ←
                           </Link>
                         </div>
                       </div>

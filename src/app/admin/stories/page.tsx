@@ -116,7 +116,7 @@ export default function AdminStoriesPage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            ניהול סיפורי הצלחה
+            ניהול עדויות משתתפים
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             אישור, הצגה בראשי ומחיקת סיפורים

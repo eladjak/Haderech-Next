@@ -10,6 +10,7 @@ import { fallbackAvatar } from "@/lib/fallback-avatar";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import type { Id } from "@/../convex/_generated/dataModel";
+import { StarRating } from "@/components/mentoring/session-ui";
 
 interface MentorData {
   _id: Id<"mentors">;
@@ -24,85 +25,6 @@ interface MentorData {
   totalSessions: number;
   userImage: string | null;
 }
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "ממתין לאישור",
-  confirmed: "מאושר",
-  completed: "הושלם",
-  cancelled: "בוטל",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-  confirmed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
-  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
-  cancelled: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
-};
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-0.5" dir="ltr">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          className={`h-4 w-4 ${
-            star <= Math.round(rating)
-              ? "text-accent-400 fill-accent-400"
-              : "text-zinc-300 dark:text-zinc-600"
-          }`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-      <span className="mr-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-        {rating.toFixed(1)}
-      </span>
-    </div>
-  );
-}
-
-function InteractiveStarRating({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  const [hover, setHover] = useState(0);
-
-  return (
-    <div className="flex items-center gap-1" dir="ltr">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          className="focus:outline-none"
-          onMouseEnter={() => setHover(star)}
-          onMouseLeave={() => setHover(0)}
-          onClick={() => onChange(star)}
-          aria-label={`${star} כוכבים`}
-        >
-          <svg
-            className={`h-7 w-7 transition-colors ${
-              star <= (hover || value)
-                ? "text-accent-400 fill-accent-400"
-                : "text-zinc-300 dark:text-zinc-600"
-            }`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function getNextDays(count: number): Date[] {
   const days: Date[] = [];
   const today = new Date();
@@ -196,7 +118,11 @@ function BookingModal({
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
           <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">
@@ -245,8 +171,18 @@ function BookingModal({
             className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
             aria-label="סגור"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -391,7 +327,6 @@ function BookingModal({
     </div>
   );
 }
-
 function MentorCard({ mentor }: { mentor: MentorData }) {
   const [showBooking, setShowBooking] = useState(false);
 
@@ -401,9 +336,12 @@ function MentorCard({ mentor }: { mentor: MentorData }) {
         {/* Avatar + Name */}
         <div className="mb-4 flex items-center gap-4">
           {mentor.imageUrl || mentor.userImage ? (
-            <img
+            <Image
               src={mentor.imageUrl ?? mentor.userImage ?? ""}
               alt={mentor.displayName}
+              width={56}
+              height={56}
+              unoptimized
               className="h-14 w-14 rounded-full object-cover ring-2 ring-brand-100 dark:ring-zinc-700"
             />
           ) : (
@@ -445,14 +383,34 @@ function MentorCard({ mentor }: { mentor: MentorData }) {
         {/* Price + Sessions */}
         <div className="mb-5 flex items-center justify-between text-sm">
           <div className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             {mentor.sessionDuration} דקות
           </div>
           <div className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+              />
             </svg>
             {mentor.totalSessions} פגישות
           </div>
@@ -512,10 +470,11 @@ export default function MentoringPage() {
             </svg>
           </div>
           <h1 className="mb-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl dark:text-white">
-            ייעוץ אישי 1-על-1
+            ליווי אישי
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-            קבלו הכוונה אישית ממאמנים מנוסים בתחום הדייטינג והזוגיות
+            האפשרות לתאם פגישה אינה פעילה עד שנשלים אימות של נותני השירות,
+            ההכשרה, התנאים והפרטיות
           </p>
           <Image
             src="/images/illustrations/home-cta.webp"
@@ -593,10 +552,11 @@ export default function MentoringPage() {
               </svg>
             </div>
             <h3 className="mb-2 text-lg font-bold text-zinc-900 dark:text-white">
-              עדיין אין מאמנים
+              הזמנת פגישות אינה פתוחה כרגע
             </h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              מאמנים חדשים יתווספו בקרוב. חזרו שוב!
+              לא נציג נותני שירות ולא נאסוף בקשות או הערות לפגישה לפני שכל זהות,
+              הכשרה, מחיר, זמינות ומדיניות פרטיות יאומתו בכתב.
             </p>
           </div>
         ) : (
@@ -618,8 +578,8 @@ export default function MentoringPage() {
                   d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
                 />
               ),
-              title: "מאמנים מוסמכים",
-              desc: "כל המאמנים שלנו עברו הכשרה ייעודית ובעלי ניסיון מוכח בתחום הדייטינג והזוגיות.",
+              title: "בחירה מושכלת",
+              desc: "לפני תיאום פגישה, בדקו מי המאמן או המאמנת, מה הכשרתם, מה ניסיונם ומה גבולות השירות. אל תניחו שמדובר בטיפול מוסמך אלא אם הוצגו פרטים ניתנים לאימות.",
             },
             {
               icon: (
@@ -629,8 +589,8 @@ export default function MentoringPage() {
                   d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
                 />
               ),
-              title: "פרטיות מלאה",
-              desc: "כל השיחות חסויות לחלוטין. מה שנאמר בפגישה נשאר בפגישה.",
+              title: "תיאום ציפיות לפרטיות",
+              desc: "לפני הפגישה בקשו הסבר כתוב על תיעוד, שמירה, גישה וחריגים לסודיות. אל תשתפו מידע רגיש לפני שהמדיניות ברורה לכם.",
             },
             {
               icon: (
@@ -640,8 +600,8 @@ export default function MentoringPage() {
                   d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
                 />
               ),
-              title: "גישה אישית",
-              desc: "כל פגישה מותאמת אישית לצרכים שלכם. אין גישה אחת שמתאימה לכולם.",
+              title: "שירות שאינו פעיל",
+              desc: "אין כרגע הבטחה לליווי, למחיר, לזמינות או לתוצאה. פגישות קיימות, אם ישנן בחשבון, נשארות נגישות דרך מסך הפגישות.",
             },
           ].map((item) => (
             <div
@@ -674,5 +634,3 @@ export default function MentoringPage() {
     </div>
   );
 }
-
-export { STATUS_LABELS, STATUS_COLORS, InteractiveStarRating, StarRating };

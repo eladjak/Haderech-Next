@@ -117,18 +117,18 @@ export function ProfilePreview({
           </div>
         )}
 
-        {/* Score */}
+        {/* Draft completeness only; not a quality or matching score. */}
         {score !== undefined && score > 0 && (
           <div className="mt-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
             <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-              <span>ציון פרופיל</span>
-              <span className={`font-semibold ${score >= 70 ? "text-green-600 dark:text-green-400" : score >= 40 ? "text-amber-600 dark:text-amber-400" : "text-red-500 dark:text-red-400"}`}>
-                {score}/100
+              <span>מילוי טיוטה</span>
+              <span className="font-semibold text-brand-600 dark:text-brand-400">
+                {score}%
               </span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
               <div
-                className={`h-full rounded-full transition-all duration-700 ${score >= 70 ? "bg-green-500" : score >= 40 ? "bg-amber-500" : "bg-red-500"}`}
+                className="h-full rounded-full bg-brand-500 transition-all duration-700"
                 style={{ width: `${score}%` }}
               />
             </div>

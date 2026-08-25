@@ -34,17 +34,17 @@ test.describe("Courses Page", () => {
     await expect(searchInput).toHaveValue("תקשורת");
   });
 
-  test("should have a level filter dropdown", async ({ page }) => {
-    const levelFilter = page.locator('select[aria-label="סינון לפי רמה"]');
-    await expect(levelFilter).toBeVisible();
+  test("should expose keyboard-operable pressed-state filters", async ({ page }) => {
+    const filters = page.getByRole("group", { name: "סינון קורסים" });
+    await expect(filters).toBeVisible();
 
-    // Should have the default "all levels" option
-    await expect(levelFilter.locator("option", { hasText: "כל הרמות" })).toHaveCount(1);
-
-    // Should have level options
-    await expect(levelFilter.locator("option", { hasText: "מתחילים" })).toHaveCount(1);
-    await expect(levelFilter.locator("option", { hasText: "מתקדמים" })).toHaveCount(1);
-    await expect(levelFilter.locator("option", { hasText: "מומחים" })).toHaveCount(1);
+    const all = filters.getByRole("button", { name: "הכל", exact: true });
+    const beginners = filters.getByRole("button", { name: "מתחילים", exact: true });
+    await expect(all).toHaveAttribute("aria-pressed", "true");
+    await beginners.focus();
+    await page.keyboard.press("Enter");
+    await expect(beginners).toHaveAttribute("aria-pressed", "true");
+    await expect(all).toHaveAttribute("aria-pressed", "false");
   });
 
   test("should display course cards or empty state", async ({ page }) => {
@@ -64,12 +64,13 @@ test.describe("Courses Page", () => {
   });
 
   test("should have header and footer", async ({ page }) => {
-    await expect(page.locator("header")).toBeVisible();
-    await expect(page.locator("footer")).toBeVisible();
+    await expect(page.getByRole("banner").first()).toBeVisible();
+    await expect(page.getByRole("contentinfo").first()).toBeVisible();
   });
 
   test("should display main content area", async ({ page }) => {
     const main = page.locator("main#main-content");
     await expect(main).toBeVisible();
+    await expect(main).toHaveAttribute("tabindex", "-1");
   });
 });

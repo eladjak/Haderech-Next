@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { timeAgoHe } from "./time-ago";
 import {
@@ -39,9 +40,12 @@ function AuthorAvatar({
   const sizeClasses = size === "md" ? "h-10 w-10 text-sm" : "h-6 w-6 text-xs";
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
-        alt={name}
+        alt=""
+        width={40}
+        height={40}
+        unoptimized
         className={`${sizeClasses} rounded-full object-cover`}
       />
     );

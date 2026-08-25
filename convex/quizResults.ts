@@ -1,6 +1,15 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSelfOrAdmin } from "./lib/authGuard";
+import {
+  requireCourseContentAccess,
+  requireSelfOrAdmin,
+} from "./lib/authGuard";
+import { toQuizAttemptSummary } from "./lib/authorizationPolicy";
+import {
+  averagePassedQuizScore,
+  bestPassedQuizAttempt,
+} from "./lib/quizAssessmentPolicy";
+import { submitLearnerQuizAttempt } from "./lib/quizSubmission";
 
 // שליפת כל הניסיונות של משתמש בבוחן מסוים
 export const getAttemptsByUserAndQuiz = query({
@@ -9,12 +18,17 @@ export const getAttemptsByUserAndQuiz = query({
     quizId: v.id("quizzes"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    await requireSelfOrAdmin(ctx, args.userId);
+    const quiz = await ctx.db.get(args.quizId);
+    if (!quiz) return [];
+    await requireCourseContentAccess(ctx, quiz.courseId);
+    const attempts = await ctx.db
       .query("quizAttempts")
       .withIndex("by_user_quiz", (q) =>
         q.eq("userId", args.userId).eq("quizId", args.quizId)
       )
       .collect();
+    return attempts.map(toQuizAttemptSummary);
   },
 });
 
@@ -25,12 +39,15 @@ export const getAttemptsByUserAndCourse = query({
     courseId: v.id("courses"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    await requireSelfOrAdmin(ctx, args.userId);
+    await requireCourseContentAccess(ctx, args.courseId);
+    const attempts = await ctx.db
       .query("quizAttempts")
       .withIndex("by_user_course", (q) =>
         q.eq("userId", args.userId).eq("courseId", args.courseId)
       )
       .collect();
+    return attempts.map(toQuizAttemptSummary);
   },
 });
 
@@ -40,13 +57,17 @@ export const getAllAttemptsByUser = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const attempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
 
-    // Filter by userId since we can't query by userId alone on this index
-    return attempts.filter((a) => a.userId === args.userId);
+    const courseIds = [...new Set(attempts.map((attempt) => attempt.courseId))];
+    for (const courseId of courseIds) {
+      await requireCourseContentAccess(ctx, courseId);
+    }
+    return attempts.map(toQuizAttemptSummary);
   },
 });
 
@@ -57,6 +78,10 @@ export const getBestScore = query({
     quizId: v.id("quizzes"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
+    const quiz = await ctx.db.get(args.quizId);
+    if (!quiz) return null;
+    await requireCourseContentAccess(ctx, quiz.courseId);
     const attempts = await ctx.db
       .query("quizAttempts")
       .withIndex("by_user_quiz", (q) =>
@@ -64,11 +89,9 @@ export const getBestScore = query({
       )
       .collect();
 
-    if (attempts.length === 0) return null;
-
-    return attempts.reduce((best, attempt) =>
-      attempt.score > best.score ? attempt : best
-    );
+    const best = bestPassedQuizAttempt(attempts);
+    if (!best) return null;
+    return toQuizAttemptSummary(best);
   },
 });
 
@@ -82,64 +105,7 @@ export const submitEnhancedAttempt = mutation({
     answers: v.array(v.number()),
     timeTakenSeconds: v.number(), // זמן שלקח בשניות
   },
-  handler: async (ctx, args) => {
-    await requireSelfOrAdmin(ctx, args.userId);
-    // שליפת השאלות
-    const questions = await ctx.db
-      .query("quizQuestions")
-      .withIndex("by_quiz", (q) => q.eq("quizId", args.quizId))
-      .collect();
-
-    if (questions.length === 0) {
-      throw new Error("Quiz has no questions");
-    }
-
-    // חישוב ציון
-    const sortedQuestions = [...questions].sort((a, b) => a.order - b.order);
-    let correctCount = 0;
-    for (let i = 0; i < sortedQuestions.length; i++) {
-      if (args.answers[i] === sortedQuestions[i].correctIndex) {
-        correctCount++;
-      }
-    }
-
-    const score = Math.round((correctCount / sortedQuestions.length) * 100);
-
-    // שליפת ציון מעבר
-    const quiz = await ctx.db.get(args.quizId);
-    if (!quiz) throw new Error("Quiz not found");
-
-    const passed = score >= quiz.passingScore;
-
-    const attemptId = await ctx.db.insert("quizAttempts", {
-      userId: args.userId,
-      quizId: args.quizId,
-      lessonId: args.lessonId,
-      courseId: args.courseId,
-      answers: args.answers,
-      score,
-      passed,
-      attemptedAt: Date.now(),
-    });
-
-    // ספירת כמה ניסיונות היו למשתמש בבוחן
-    const allAttempts = await ctx.db
-      .query("quizAttempts")
-      .withIndex("by_user_quiz", (q) =>
-        q.eq("userId", args.userId).eq("quizId", args.quizId)
-      )
-      .collect();
-
-    return {
-      attemptId,
-      score,
-      passed,
-      correctCount,
-      totalQuestions: sortedQuestions.length,
-      attemptNumber: allAttempts.length,
-      timeTakenSeconds: args.timeTakenSeconds,
-    };
-  },
+  handler: submitLearnerQuizAttempt,
 });
 
 // סיכום ביצועי בחנים של משתמש
@@ -148,15 +114,19 @@ export const getUserQuizSummary = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     // שליפת כל הניסיונות
     const allAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_quiz")
+      .withIndex("by_user_quiz", (q) => q.eq("userId", args.userId))
       .collect();
 
-    const userAttempts = allAttempts.filter((a) => a.userId === args.userId);
+    const courseIds = [...new Set(allAttempts.map((attempt) => attempt.courseId))];
+    for (const courseId of courseIds) {
+      await requireCourseContentAccess(ctx, courseId);
+    }
 
-    if (userAttempts.length === 0) {
+    if (allAttempts.length === 0) {
       return {
         totalAttempts: 0,
         totalPassed: 0,
@@ -166,15 +136,17 @@ export const getUserQuizSummary = query({
       };
     }
 
-    const totalPassed = userAttempts.filter((a) => a.passed).length;
-    const averageScore = Math.round(
-      userAttempts.reduce((sum, a) => sum + a.score, 0) / userAttempts.length
-    );
-    const bestScore = Math.max(...userAttempts.map((a) => a.score));
-    const uniqueQuizzes = new Set(userAttempts.map((a) => a.quizId)).size;
+    const passedAttempts = allAttempts.filter((attempt) => attempt.passed);
+    const totalPassed = passedAttempts.length;
+    const averageScore = averagePassedQuizScore(allAttempts) ?? 0;
+    const bestScore =
+      passedAttempts.length > 0
+        ? Math.max(...passedAttempts.map((attempt) => attempt.score))
+        : 0;
+    const uniqueQuizzes = new Set(allAttempts.map((a) => a.quizId)).size;
 
     return {
-      totalAttempts: userAttempts.length,
+      totalAttempts: allAttempts.length,
       totalPassed,
       averageScore,
       bestScore,

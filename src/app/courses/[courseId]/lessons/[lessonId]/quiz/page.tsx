@@ -8,6 +8,7 @@ import { useCallback } from "react";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
+import { CourseSafetyNotice } from "@/components/course/course-safety-notice";
 import type { Id } from "@/../convex/_generated/dataModel";
 
 export default function QuizPage() {
@@ -59,7 +60,7 @@ export default function QuizPage() {
         answers,
       });
     },
-    [convexUser?._id, quiz?._id, submitAttempt, lessonId, courseId]
+    [convexUser, quiz, submitAttempt, lessonId, courseId]
   );
 
   // Determine next lesson for navigation
@@ -213,6 +214,8 @@ export default function QuizPage() {
               שיעור: {lesson.title}
             </p>
           </div>
+
+          <CourseSafetyNotice />
 
           {/* Quiz Player */}
           {quizQuestions && quizQuestions.length > 0 ? (

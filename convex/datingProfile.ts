@@ -56,6 +56,50 @@ export const saveProfile = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
+    if (
+      args.age !== undefined &&
+      (!Number.isInteger(args.age) || args.age < 18 || args.age > 100)
+    ) {
+      throw new Error("Dating profile is available to adults only");
+    }
+    const boundedStrings: Array<[string, string | undefined, number]> = [
+      ["displayName", args.displayName, 80],
+      ["location", args.location, 120],
+      ["genderIdentity", args.genderIdentity, 80],
+      ["bio", args.bio, 1200],
+      ["idealPartner", args.idealPartner, 1200],
+    ];
+    for (const [field, value, max] of boundedStrings) {
+      if (value !== undefined && value.length > max) {
+        throw new Error(`${field} is too long`);
+      }
+    }
+    const boundedLists: Array<[string, string[] | undefined]> = [
+      ["interests", args.interests],
+      ["customInterests", args.customInterests],
+      ["dealBreakers", args.dealBreakers],
+      ["relationshipValues", args.relationshipValues],
+    ];
+    for (const [field, values] of boundedLists) {
+      if (values && (values.length > 20 || values.some((value) => value.length > 100))) {
+        throw new Error(`${field} contains too much data`);
+      }
+    }
+    if (
+      args.completenessScore !== undefined &&
+      (!Number.isInteger(args.completenessScore) ||
+        args.completenessScore < 0 ||
+        args.completenessScore > 100)
+    ) {
+      throw new Error("Invalid draft completeness value");
+    }
+    if (
+      args.currentStep !== undefined &&
+      (!Number.isInteger(args.currentStep) || args.currentStep < 1 || args.currentStep > 6)
+    ) {
+      throw new Error("Invalid profile step");
+    }
+
     const existing = await ctx.db
       .query("datingProfiles")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
@@ -94,17 +138,17 @@ export const getProfileTips = query({
       1: {
         title: "טיפים למידע הבסיסי",
         items: [
-          { icon: "🎯", text: "שם תצוגה אמיתי מגביר אמון ב-40% לעומת כינויים" },
-          { icon: "📍", text: "הוסף עיר (לא כתובת מדויקת) - זה עוזר למציאת התאמות קרובות" },
-          { icon: "❤️", text: "הגדר בבירור מה אתה מחפש - זה חוסך אי הבנות" },
+          { icon: "🎯", text: "בחרו שם תצוגה שנוח לכם לפרסם; אין צורך בשם מלא" },
+          { icon: "📍", text: "אם מוסיפים מיקום, הסתפקו בעיר או באזור — לא בכתובת מדויקת" },
+          { icon: "❤️", text: "אפשר לציין מה מחפשים, בלי להבטיח התאמה או לחשוף מידע רגיש" },
         ],
       },
       2: {
-        title: "3 סודות לביו מושלם",
+        title: "שלוש הצעות לביו ברור",
         items: [
           { icon: "✨", text: "פתח עם משפט שפותח שיחה - שאלה, עובדה מעניינת, או אנקדוטה" },
           { icon: "🎭", text: "הראה אישיות, לא רשימת תכונות. 'אוהב לבשל' < 'מגדל אינסטגרם של שגיאות המטבח שלי'" },
-          { icon: "💡", text: "סיים עם קריאה לפעולה עדינה - 'שאל אותי על...' או 'בוא נגלה מה משותף לנו'" },
+          { icon: "💡", text: "אפשר לסיים בנושא שקל לפתוח עליו שיחה; אין חובה לקריאה לפעולה" },
         ],
         example: {
           good: "מהנדס שחולם על מסעדה משלו. בסופי שבוע אפשר למצוא אותי בשוק האיכרים, מחפש את הגבינה המושלמת. שאל אותי על הדיסאסטר הכי גדול שלי במטבח.",
@@ -114,10 +158,10 @@ export const getProfileTips = query({
       3: {
         title: "למה תחביבים חשובים בפרופיל?",
         items: [
-          { icon: "🤝", text: "תחביבים משותפים מגדילים סיכוי להתאמה ב-60%" },
-          { icon: "💬", text: "הם פותחי שיחה מצוינים - אנשים יכתבו לך על תחביבים" },
-          { icon: "🎯", text: "מקסימום 8-10 תחביבים - יותר מדי נראה לא אמין" },
-          { icon: "⭐", text: "בחר תחביבים שאתה באמת עושה, לא שרוצה לעשות" },
+          { icon: "🤝", text: "תחביבים יכולים לתת נושאים לשיחה; אין דרך להבטיח התאמה" },
+          { icon: "💬", text: "בחרו רק פרטים שנוח לכם שיהיו ציבוריים" },
+          { icon: "🎯", text: "רשימה קצרה וקונקרטית בדרך כלל קלה יותר לקריאה" },
+          { icon: "⭐", text: "אין צורך להציג תחביב או אורח חיים שאינם שלכם" },
         ],
       },
       4: {
@@ -125,24 +169,24 @@ export const getProfileTips = query({
         items: [
           { icon: "🌟", text: "היה ספציפי אך לא מגביל - תאר איך אתם מרגישים ביחד, לא רשימת דרישות" },
           { icon: "❤️", text: "ערכים משותפים > תכונות חיצוניות. ציין מה חשוב לך עמוק" },
-          { icon: "🚫", text: "הגבלות ודיל-ברייקרים עדיף לשמור בינך לבין עצמך בשלב הראשון" },
+          { icon: "🚫", text: "גבולות חשובים אינם משחק; אפשר לנסח אותם בכבוד ולבחור מה לפרסם" },
         ],
       },
       5: {
         title: "אסטרטגיית תמונות מנצחת",
         items: [
-          { icon: "😊", text: "תמונת פנים ברורה עם חיוך - חייבת להיות תמונה ראשונה" },
-          { icon: "🏃", text: "תמונה בפעילות שאוהב - מראה שיש לך חיים מלאים" },
-          { icon: "👥", text: "תמונה חברתית (עם חברים) - מוכיחה שיש לך מעגל חברתי" },
-          { icon: "📖", text: "תמונה 'שמספרת סיפור' - בטיול, בישול, עם חיית מחמד" },
+          { icon: "😊", text: "בחרו תמונה ברורה שנוח לכם לפרסם; חיוך אינו חובה" },
+          { icon: "🏃", text: "תמונה בפעילות יכולה להוסיף הקשר, אבל אינה הוכחה לאופי" },
+          { icon: "👥", text: "אל תפרסמו אנשים אחרים בלי הסכמתם, וטשטשו ילדים ופרטים מזהים" },
+          { icon: "📖", text: "בדקו גם מיקום, תגיות ומטא-דאטה לפני העלאה" },
         ],
       },
       6: {
-        title: "טיפים לפרופיל מושלם",
+        title: "בדיקה לפני פרסום",
         items: [
-          { icon: "✅", text: "פרופיל מלא מקבל פי 3 יותר התאמות" },
-          { icon: "🔄", text: "עדכן את הפרופיל כל חודש-חודשיים עם תוכן טרי" },
-          { icon: "💬", text: "שתף עם מאמן - נקודת מבט חיצונית תמיד עוזרת" },
+          { icon: "✅", text: "מדד המילוי בודק שדות בלבד; הוא אינו חוזה התאמות או הצלחה" },
+          { icon: "🔄", text: "עדכנו רק כשמשהו השתנה או כשהטיוטה כבר אינה מייצגת אתכם" },
+          { icon: "💬", text: "אם מבקשים משוב מאדם מהימן, הסירו קודם מידע פרטי שלא נחוץ" },
         ],
       },
     };
@@ -187,7 +231,10 @@ export const analyzeProfile = mutation({
       section: "מידע בסיסי",
       points: basicPoints,
       max: 25,
-      tip: basicPoints < 20 ? "השלם את שם, גיל ומיקום לשיפור ניכר" : "מצוין!",
+      tip:
+        basicPoints < 20
+          ? "אפשר להשלים שדות שנחוצים לטיוטה; מיקום מדויק אינו נדרש"
+          : "רוב שדות הבסיס מולאו",
     });
     totalScore += basicPoints;
 
@@ -197,17 +244,17 @@ export const analyzeProfile = mutation({
     if (bio.length >= 50) bioPoints += 10;
     if (bio.length >= 150) bioPoints += 10;
     if (bio.length >= 250) bioPoints += 5;
-    if (bio.includes("?") || bio.includes("!")) bioPoints += 5; // has personality
+    if (bio.length > 0 && bio.length <= 1200) bioPoints += 5;
     breakdown.push({
       section: "ביוגרפיה",
       points: bioPoints,
       max: 30,
       tip:
         bio.length < 50
-          ? "כתוב לפחות 50 תווים - ביו ריק פוגע קשות בסיכויים"
+          ? "אפשר להוסיף כמה פרטים לא רגישים שיעזרו להבין את הטיוטה"
           : bio.length < 150
-            ? "הרחב את הביו - 150+ תווים מקבלים הרבה יותר התאמות"
-            : "ביו מצוין!",
+            ? "אפשר להרחיב, אבל אורך אינו מנבא התאמות"
+            : "הביו מכיל מספיק טקסט לבדיקה טכנית",
     });
     totalScore += bioPoints;
 
@@ -223,8 +270,8 @@ export const analyzeProfile = mutation({
       max: 20,
       tip:
         allInterests.length < 4
-          ? "הוסף לפחות 4 תחביבים לשיפור הפרופיל"
-          : "כמות תחביבים מצוינת!",
+          ? "תחביבים הם שדה אופציונלי; הוסיפו רק מה שנוח לפרסם"
+          : "נוספו כמה נושאים אפשריים לשיחה",
     });
     totalScore += interestPoints;
 
@@ -239,25 +286,25 @@ export const analyzeProfile = mutation({
       max: 15,
       tip:
         lookingPoints < 7
-          ? "תאר מה אתה מחפש - זה עוזר למציאת התאמות אמיתיות"
-          : "מצוין!",
+          ? "אפשר לתאר העדפות וגבולות בלי למסור פרטים רגישים"
+          : "נוספו פרטים על העדפות וערכים",
     });
     totalScore += lookingPoints;
 
     // Quality tips
     const qualityTips: string[] = [];
     if (bio.length < 100)
-      qualityTips.push("הביו שלך קצר מדי. כוון לפחות 150 תווים עם פרטים מעניינים.");
+      qualityTips.push("אפשר להוסיף לביו כמה פרטים לא רגישים; אין אורך שמבטיח ביצועים.");
     if (allInterests.length < 5)
-      qualityTips.push("הוסף יותר תחביבים - הם פותחי שיחה מעולים.");
+      qualityTips.push("אפשר להוסיף תחביבים כנושאי שיחה, אבל זה שדה אופציונלי.");
     if (!args.location)
-      qualityTips.push("הוסף מיקום - משפר ניכר את רלוונטיות ההתאמות.");
+      qualityTips.push("אם מוסיפים מיקום, הסתפקו בעיר או אזור ולא בכתובת.");
     if ((args.relationshipValues ?? []).length < 2)
-      qualityTips.push("בחר ערכי זוגיות שחשובים לך - זה עוזר למציאת התאמה אמיתית.");
+      qualityTips.push("אפשר לציין ערכים שחשובים לכם בלי להציג אותם כמבחן התאמה.");
     if (totalScore >= 80)
-      qualityTips.push("פרופיל מעולה! אתה בעשירייה העליונה של הפרופילים.");
+      qualityTips.push("רוב שדות הטיוטה מולאו. המדד אינו מדרג איכות ואינו מנבא התאמות.");
     else if (totalScore >= 60)
-      qualityTips.push("פרופיל טוב - עם כמה שיפורים קטנים תגיע לרמה הגבוהה.");
+      qualityTips.push("חלק גדול משדות הטיוטה מולא; אפשר להשאיר שדות אופציונליים ריקים.");
 
     return {
       score: Math.min(100, totalScore),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -44,73 +44,73 @@ interface ValueInfo {
 const VALUE_INFO: Record<ValueKey, ValueInfo> = {
   communication: {
     label: "תקשורת",
-    description: "שיחות עמוקות, כנות ופתיחות הדדית הם הבסיס לכל.",
+    description: "בתשובות שבחרת הופיעה העדפה לשיחה, כנות ובהירות הדדית.",
     color: "#3B82F6",
     emoji: "💬",
   },
   trust: {
     label: "אמון",
-    description: "ביטחון, יציבות ואמינות הם הדברים הכי חשובים לך.",
+    description: "בתשובות שבחרת הופיעה העדפה לאמינות, עקביות ותחושת ביטחון.",
     color: "#8B5CF6",
     emoji: "🤝",
   },
   freedom: {
     label: "חופש אישי",
-    description: "מרחב אישי ועצמאות הם חיוניים לך גם בתוך זוגיות.",
+    description: "בתשובות שבחרת הופיעה העדפה למרחב, בחירה ועצמאות בתוך קשר.",
     color: "#10B981",
     emoji: "🕊️",
   },
   family: {
     label: "משפחה",
-    description: "בניית בית, ילדים וקשרים משפחתיים חזקים הם מרכזיים.",
+    description: "בתשובות שבחרת הופיעה העדפה לבית ולקשרי משפחה; מבנה המשפחה יכול להיראות בדרכים שונות.",
     color: "#F59E0B",
     emoji: "👨‍👩‍👧‍👦",
   },
   career: {
     label: "קריירה",
-    description: "שאיפות מקצועיות, הצלחה ותמיכה בצמיחה אישית.",
+    description: "בתשובות שבחרת הופיעה העדפה לעשייה מקצועית ולתמיכה במטרות אישיות.",
     color: "#6366F1",
     emoji: "💼",
   },
   adventure: {
     label: "הרפתקאות",
-    description: "חוויות חדשות, טיולים ורגעים בלתי נשכחים יחד.",
+    description: "בתשובות שבחרת הופיעה העדפה לחידוש, חוויות וגמישות.",
     color: "#EF4444",
     emoji: "🏔️",
   },
   stability: {
     label: "יציבות",
-    description: "שגרה, תכנון לטווח ארוך ובסיס כלכלי ורגשי איתן.",
+    description: "בתשובות שבחרת הופיעה העדפה לשגרה, תכנון ויציבות מעשית או רגשית.",
     color: "#14B8A6",
     emoji: "⚓",
   },
   romance: {
     label: "רומנטיקה",
-    description: "רגעים מיוחדים, מחוות אהבה ושמירה על הניצוץ.",
+    description: "בתשובות שבחרת הופיעה העדפה למחוות חיבה ולזמן זוגי מיוחד.",
     color: "#EC4899",
     emoji: "🌹",
   },
   growth: {
     label: "צמיחה",
-    description: "ללמוד יחד, להתפתח ולתמוך בחלומות זה של זה.",
+    description: "בתשובות שבחרת הופיעה העדפה ללמידה ולתמיכה הדדית במטרות.",
     color: "#84CC16",
     emoji: "🌱",
   },
   humor: {
     label: "הומור",
-    description: "צחוק, קלילות ויכולת לשחק יחד הם המפתח לאושר.",
+    description: "בתשובות שבחרת הופיעה העדפה להומור, קלילות ומשחקיות.",
     color: "#F97316",
     emoji: "😄",
   },
   intimacy: {
     label: "אינטימיות",
-    description: "קרבה רגשית ופיזית, חיבור עמוק ופגיעות הדדית.",
+    description: "בתשובות שבחרת הופיעה העדפה לקרבה רגשית או פיזית שנוצרת בהדדיות ובהסכמה.",
     color: "#DB2777",
     emoji: "💕",
   },
   spirituality: {
     label: "רוחניות",
-    description: "ערכים משותפים, אמונה ומשמעות עמוקה יותר בחיים.",
+    description: "בתשובות שבחרת הופיעה העדפה למשמעות, אמונה או שיחה על השקפת עולם.",
     color: "#7C3AED",
     emoji: "✨",
   },
@@ -119,7 +119,7 @@ const VALUE_INFO: Record<ValueKey, ValueInfo> = {
 const QUESTIONS: Question[] = [
   {
     id: 1,
-    text: "שאתם נסגרים בדירה ביחד לסוף שבוע - מה הכי מפתה אתכם?",
+    text: "אם הייתם בוחרים להעביר סוף שבוע יחד — איזו אפשרות מושכת אתכם כרגע?",
     options: [
       { text: "שיחות עמוקות עד השעות הקטנות", values: { communication: 3, intimacy: 2 } },
       { text: "טיול ספונטני לאן שיוביל הלב", values: { adventure: 3, freedom: 1 } },
@@ -169,9 +169,9 @@ const QUESTIONS: Question[] = [
   },
   {
     id: 6,
-    text: "מה לדעתכם ה'דבק' שמחזיק זוגות לאורך שנים?",
+    text: "איזה מרכיב הייתם רוצים במיוחד לטפח בקשר לאורך זמן?",
     options: [
-      { text: "כבוד הדדי ואמון מוחלט", values: { trust: 3, communication: 2 } },
+      { text: "כבוד הדדי ואמון שנבנה לאורך זמן", values: { trust: 3, communication: 2 } },
       { text: "הומור ויכולת לצחוק יחד גם בקשיים", values: { humor: 3, intimacy: 1 } },
       { text: "ערכים משותפים ומטרות בחיים", values: { spirituality: 3, family: 2 } },
       { text: "עדכון מתמיד - לא לקחת זה את זה כמובן מאליו", values: { romance: 3, growth: 2 } },
@@ -189,21 +189,21 @@ const QUESTIONS: Question[] = [
   },
   {
     id: 8,
-    text: "בן/בת הזוג רוצה לבלות ערב עם חברים ללא כם. מה תרגישו?",
+    text: "אדם בקשר רוצה לבלות ערב עם חברים בלעדיכם. איזו תגובה הכי קרובה למה שאתם מרגישים כרגע?",
     options: [
       { text: "מצוין! גם לי מגיע זמן לעצמי", values: { freedom: 3, trust: 1 } },
       { text: "בסדר גמור - בטחון הוא הבסיס", values: { trust: 3, stability: 1 } },
-      { text: "אשמח לדעת מה מתוכנן ועם מי", values: { communication: 2, trust: 2 } },
+      { text: "אם צריך, נתאם ציפיות מעשיות בלי לדרוש דיווח", values: { communication: 2, trust: 2 } },
       { text: "יצטער/צטערת קצת - אני אוהב/ת להיות ביחד", values: { romance: 2, intimacy: 2 } },
     ],
   },
   {
     id: 9,
-    text: "מה הגדרתכם לרומנטיקה אמיתית?",
+    text: "איזו מחווה מרגישה לכם רומנטית יותר כרגע?",
     options: [
       { text: "הפתעות ספונטניות ומחוות מיוחדות", values: { romance: 3, adventure: 1 } },
       { text: "נוכחות מלאה - להיות שם כשצריך", values: { intimacy: 3, trust: 2 } },
-      { text: "לדעת בדיוק מה האחר/ת צריך/ה ולהביא את זה", values: { communication: 3, intimacy: 2 } },
+      { text: "לשאול מה האחר/ת צריך/ה ולהקשיב לתשובה", values: { communication: 3, intimacy: 2 } },
       { text: "לחגוג יחד כל ניצחון קטן בחיים", values: { humor: 2, romance: 2 } },
     ],
   },
@@ -211,7 +211,7 @@ const QUESTIONS: Question[] = [
     id: 10,
     text: "בסוף יום קשה, מה הכי מנחם אתכם?",
     options: [
-      { text: "חיבוק ארוך בלי מילים", values: { intimacy: 3, romance: 2 } },
+      { text: "חיבוק, אם הוא רצוי ומתאים באותו רגע", values: { intimacy: 3, romance: 2 } },
       { text: "לשפוך את הלב ולקבל אוזן קשבת", values: { communication: 3, trust: 1 } },
       { text: "בדיחה שישברו את המתח", values: { humor: 3, freedom: 1 } },
       { text: "לדעת שיש תוכנית ושהכל ייפתר", values: { stability: 3, trust: 2 } },
@@ -219,12 +219,12 @@ const QUESTIONS: Question[] = [
   },
   {
     id: 11,
-    text: "מה יגרום לכם לאהוב יותר את בן/בת הזוג שלכם?",
+    text: "איזו התנהגות הייתם מעריכים במיוחד בקשר?",
     options: [
       { text: "כשהוא/היא גדל/ה ומתפתח/ת כל הזמן", values: { growth: 3, career: 1 } },
       { text: "כשהוא/היא מוקסם/ת ממשפחה ורוצה לבנות", values: { family: 3, stability: 1 } },
       { text: "כשהוא/היא נאמן/ה ועקבי/ת", values: { trust: 3, stability: 2 } },
-      { text: "כשהוא/היא מסוגל/ת לפגיעות ופתיחות", values: { intimacy: 3, communication: 2 } },
+      { text: "פתיחות מבחירה, בלי חובה לחשוף מעבר למה שנוח", values: { intimacy: 3, communication: 2 } },
     ],
   },
   {
@@ -233,7 +233,7 @@ const QUESTIONS: Question[] = [
     options: [
       { text: "שיחה מעמיקה עד שמגיעים להחלטה משותפת", values: { communication: 3, trust: 2 } },
       { text: "כל אחד מביע דעה ואז מגיעים לפשרה", values: { freedom: 2, stability: 2 } },
-      { text: "מי שיודע יותר - מוביל", values: { trust: 2, career: 2 } },
+      { text: "נבדוק למי יש ידע רלוונטי, ונחליט יחד", values: { trust: 2, career: 2 } },
       { text: "לפי מה שטוב למשפחה כולה", values: { family: 3, stability: 2 } },
     ],
   },
@@ -249,19 +249,19 @@ const QUESTIONS: Question[] = [
   },
   {
     id: 14,
-    text: "מה היה אומר עליכם הפרטנר האידיאלי אחרי שנה יחד?",
+    text: "איך הייתם רוצים לתאר קשר שטוב לכם אחרי שנה?",
     options: [
-      { text: "שהוא/היא עשה/תה אותי לגרסה טובה יותר של עצמי", values: { growth: 3, spirituality: 1 } },
-      { text: "שהוא/היא הפך/הפכה לחבר הכי טוב שלי", values: { humor: 2, intimacy: 2, communication: 2 } },
-      { text: "שהוא/היא תמיד שם/שמה בשבילי", values: { trust: 3, stability: 2 } },
-      { text: "שהחיים שלנו הם הרפתקה אחת ארוכה ומגניבה", values: { adventure: 3, romance: 2 } },
+      { text: "תמכנו זה בזו בצמיחה בלי לנסות לעצב אחד את השנייה", values: { growth: 3, spirituality: 1 } },
+      { text: "יש בינינו חברות, הומור ויכולת לדבר", values: { humor: 2, intimacy: 2, communication: 2 } },
+      { text: "יכולנו לבקש תמיכה ולכבד גם מגבלות", values: { trust: 3, stability: 2 } },
+      { text: "יצרנו יחד חוויות חדשות שמתאימות לשנינו", values: { adventure: 3, romance: 2 } },
     ],
   },
   {
     id: 15,
-    text: "איזה משפט מתאר לכם הכי טוב את הזוגיות שאתם רוצים?",
+    text: "איזה משפט הכי קרוב לסוג הקשר שהייתם רוצים כרגע?",
     options: [
-      { text: "שני אנשים שלמים שבוחרים זה בזה כל יום מחדש", values: { freedom: 2, trust: 2, growth: 1 } },
+      { text: "שני אנשים שיכולים להיעזר זה בזו ולשמור גם על בחירה ועצמאות", values: { freedom: 2, trust: 2, growth: 1 } },
       { text: "בית חם, ילדים, ושגרה שמחה ביחד", values: { family: 3, stability: 3 } },
       { text: "שותפים לחיים שתמיד מצחיקים זה את זה", values: { humor: 3, communication: 1 } },
       { text: "אהבה גדולה שמתחדשת כל הזמן", values: { romance: 3, intimacy: 2 } },
@@ -276,21 +276,33 @@ const QUESTIONS: Question[] = [
 export default function ValuesQuizPage() {
   const [phase, setPhase] = useState<"intro" | "quiz" | "results">("intro");
   const [currentQ, setCurrentQ] = useState(0);
-  const [scores, setScores] = useState<Record<ValueKey, number>>({
-    communication: 0, trust: 0, freedom: 0, family: 0, career: 0, adventure: 0,
-    stability: 0, romance: 0, growth: 0, humor: 0, intimacy: 0, spirituality: 0,
-  });
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [answers, setAnswers] = useState<Array<number | null>>(
+    () => Array(QUESTIONS.length).fill(null),
+  );
+
+  const scores = useMemo<Record<ValueKey, number>>(() => {
+    const next: Record<ValueKey, number> = {
+      communication: 0, trust: 0, freedom: 0, family: 0, career: 0, adventure: 0,
+      stability: 0, romance: 0, growth: 0, humor: 0, intimacy: 0, spirituality: 0,
+    };
+
+    answers.forEach((optionIndex, questionIndex) => {
+      if (optionIndex === null) return;
+      const option = QUESTIONS[questionIndex]?.options[optionIndex];
+      if (!option) return;
+      for (const [key, value] of Object.entries(option.values)) {
+        next[key as ValueKey] += value ?? 0;
+      }
+    });
+
+    return next;
+  }, [answers]);
 
   const handleStart = useCallback(() => {
     setPhase("quiz");
     setCurrentQ(0);
-    setScores({
-      communication: 0, trust: 0, freedom: 0, family: 0, career: 0, adventure: 0,
-      stability: 0, romance: 0, growth: 0, humor: 0, intimacy: 0, spirituality: 0,
-    });
-    setAnswers([]);
+    setAnswers(Array(QUESTIONS.length).fill(null));
     setSelectedOption(null);
   }, []);
 
@@ -300,20 +312,11 @@ export default function ValuesQuizPage() {
 
   const handleNext = useCallback(() => {
     if (selectedOption === null) return;
-
-    const question = QUESTIONS[currentQ];
-    const option = question.options[selectedOption];
-
-    // Accumulate scores
-    setScores((prev) => {
-      const next = { ...prev };
-      for (const [key, val] of Object.entries(option.values)) {
-        next[key as ValueKey] = (next[key as ValueKey] ?? 0) + (val ?? 0);
-      }
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[currentQ] = selectedOption;
       return next;
     });
-
-    setAnswers((prev) => [...prev, selectedOption]);
     setSelectedOption(null);
 
     if (currentQ < QUESTIONS.length - 1) {
@@ -323,15 +326,31 @@ export default function ValuesQuizPage() {
     }
   }, [selectedOption, currentQ]);
 
+  const handleSkip = useCallback(() => {
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[currentQ] = null;
+      return next;
+    });
+    setSelectedOption(null);
+
+    if (currentQ < QUESTIONS.length - 1) {
+      setCurrentQ((prev) => prev + 1);
+    } else {
+      setPhase("results");
+    }
+  }, [currentQ]);
+
   const handleRestart = useCallback(() => {
     setPhase("intro");
     setCurrentQ(0);
     setSelectedOption(null);
-    setAnswers([]);
+    setAnswers(Array(QUESTIONS.length).fill(null));
   }, []);
 
   const topValues = Object.entries(scores)
     .sort(([, a], [, b]) => b - a)
+    .filter(([, score]) => score > 0)
     .slice(0, 5)
     .map(([key, score]) => ({
       key: key as ValueKey,
@@ -344,10 +363,10 @@ export default function ValuesQuizPage() {
   const progressPercent = Math.round(((currentQ) / QUESTIONS.length) * 100);
 
   const handleShare = useCallback(async () => {
-    const text = `גיליתי את הערכים הכי חשובים לי בזוגיות דרך "מבחן ערכים" של הדרך!\n\nהערכים המובילים שלי:\n${topValues
+    const text = `בתרגיל רפלקציה קצר סימנתי כמה העדפות שחשובות לי כרגע. זה אינו מבחן או אבחון, והן יכולות להשתנות.\n\nהנושאים שקיבלו יותר משקל בתשובות שלי:\n${topValues
       .slice(0, 3)
       .map((v, i) => `${i + 1}. ${v.emoji} ${v.label}`)
-      .join("\n")}\n\nגלה את הערכים שלך: הדרך.co.il/tools/values-quiz`;
+      .join("\n")}`;
     try {
       await navigator.share({ text });
     } catch {
@@ -387,38 +406,42 @@ export default function ValuesQuizPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                   </svg>
                 </div>
-                <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-white">מבחן ערכים</h1>
+                <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-white">תרגיל רפלקציה על ערכים</h1>
                 <p className="mb-6 text-zinc-500 dark:text-zinc-400">
-                  15 שאלות שיחשפו לך את הערכים הכי חשובים בזוגיות ואת מה שאתה/את באמת מחפש/ת.
+                  15 שאלות שיעזרו לך לחשוב מה חשוב לך כרגע בקשר. אפשר לדלג על כל שאלה.
                 </p>
 
                 <div className="mb-8 rounded-2xl border border-zinc-100 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900/60">
-                  <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">מה תגלה:</h2>
+                  <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">מה יוצג:</h2>
                   <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
                     <li className="flex items-center gap-2">
                       <span className="text-pink-500">✦</span>
-                      5 הערכים החשובים ביותר לך בזוגיות
+                      עד חמישה נושאים שקיבלו יותר משקל בתשובות שבחרת
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-pink-500">✦</span>
-                      הסבר אישי על כל ערך ומה הוא אומר עלייך
+                      ניסוח קצר לרפלקציה — לא קביעה על האישיות שלך
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-pink-500">✦</span>
-                      ויזואליזציה של פרופיל הערכים שלך
+                      המחשה של ניקוד פשוט, לא שאלון מקצועי או מדעי
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-pink-500">✦</span>
-                      אפשרות לשתף עם פרטנר
+                      אפשרות לשתף רק אם זה נוח ומתאים לך
                     </li>
                   </ul>
+                  <p className="mt-4 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+                    התרגיל לא עבר תיקוף פסיכולוגי, אינו מודד התאמה ואינו מנבא הצלחה בקשר.
+                    התוצאה מושפעת רק מהאפשרויות המוגבלות שבחרת כאן ויכולה להשתנות.
+                  </p>
                 </div>
 
                 <button
                   onClick={handleStart}
                   className="w-full rounded-xl bg-gradient-to-l from-pink-500 to-red-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-pink-500/20 transition-all hover:opacity-90"
                 >
-                  ❤️ התחל את המבחן
+                  ❤️ התחלת התרגיל
                 </button>
               </motion.div>
             )}
@@ -481,12 +504,19 @@ export default function ValuesQuizPage() {
                   {currentQ < QUESTIONS.length - 1 ? "השאלה הבאה ←" : "סיים וראה תוצאות ✨"}
                 </button>
 
+                <button
+                  onClick={handleSkip}
+                  className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-200"
+                >
+                  {currentQ < QUESTIONS.length - 1 ? "דלג/י על השאלה" : "דלג/י וסיים/י"}
+                </button>
+
                 {/* Back button */}
                 {currentQ > 0 && (
                   <button
                     onClick={() => {
                       setCurrentQ((prev) => prev - 1);
-                      setSelectedOption(answers[currentQ - 1] ?? null);
+                      setSelectedOption(answers[currentQ - 1]);
                     }}
                     className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
                   >
@@ -507,15 +537,21 @@ export default function ValuesQuizPage() {
                 <div className="mb-6 text-center">
                   <div className="mb-2 text-5xl">🌟</div>
                   <h2 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-white">
-                    פרופיל הערכים שלך
+                    תמונת מצב מהתשובות שבחרת
                   </h2>
                   <p className="text-zinc-500 dark:text-zinc-400">
-                    אלו הערכים הכי חשובים לך בזוגיות
+                    זהו ניקוד רפלקטיבי פשוט — לא דירוג קבוע של הערכים שלך
                   </p>
                 </div>
 
                 {/* Top values bars */}
                 <div className="mb-6 space-y-3">
+                  {topValues.length === 0 && (
+                    <p className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                      דילגת על כל השאלות, ולכן אין מה לסכם — וזה בסדר גמור. אפשר לחזור
+                      לתרגיל רק אם מתחשק לך.
+                    </p>
+                  )}
                   {topValues.map((value, i) => (
                     <motion.div
                       key={value.key}
@@ -528,7 +564,7 @@ export default function ValuesQuizPage() {
                         <div className="flex items-center gap-2">
                           <span className="text-xl">{value.emoji}</span>
                           <span className="font-semibold text-zinc-900 dark:text-white">
-                            {i === 0 && <span className="ml-1.5 text-xs font-normal text-pink-500">ערך מוביל</span>}
+                            {i === 0 && <span className="ml-1.5 text-xs font-normal text-pink-500">קיבל יותר משקל</span>}
                             {value.label}
                           </span>
                         </div>
@@ -552,17 +588,24 @@ export default function ValuesQuizPage() {
 
                 {/* Action buttons */}
                 <div className="space-y-2.5">
-                  <button
-                    onClick={handleShare}
-                    className="w-full rounded-xl bg-gradient-to-l from-pink-500 to-red-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-pink-500/20 transition-all hover:opacity-90"
-                  >
-                    📤 שתף את התוצאות
-                  </button>
+                  {topValues.length > 0 && (
+                    <>
+                      <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+                        לפני שיתוף, כדאי לקרוא את הטקסט ולוודא שנוח לך לחשוף את ההעדפות האלה.
+                      </p>
+                      <button
+                        onClick={handleShare}
+                        className="w-full rounded-xl bg-gradient-to-l from-pink-500 to-red-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-pink-500/20 transition-all hover:opacity-90"
+                      >
+                        📤 שתף/י רק אם מתאים לך
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={handleRestart}
                     className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600"
                   >
-                    🔄 עשה את המבחן שוב
+                    🔄 התחלת התרגיל מחדש
                   </button>
                   <Link
                     href="/tools/conversation-starters"

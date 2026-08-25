@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
@@ -201,9 +202,9 @@ export function CourseReviews({ courseId }: CourseReviewsProps) {
       {!clerkUser && (
         <div className="mb-8 rounded-xl border border-zinc-100 bg-zinc-50 p-5 text-center dark:border-zinc-800 dark:bg-zinc-900">
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            <a href="/sign-in" className="text-brand-600 underline dark:text-brand-400">
+            <Link href="/sign-in" className="text-brand-600 underline dark:text-brand-400">
               התחבר
-            </a>{" "}
+            </Link>{" "}
             כדי לכתוב ביקורת
           </p>
         </div>

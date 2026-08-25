@@ -1,5 +1,5 @@
 /**
- * seedHaderech.ts — Seed the main "הדרך" course with all 75 lessons.
+ * seedHaderech.ts — Seed "הדרך": 75 progress-bearing lessons and one optional practice.
  *
  * This mutation reads from seedCourseData.ts and inserts the full course
  * structure into the Convex database.
@@ -11,7 +11,7 @@
  * To re-seed, first run `seedHaderech:clearHaderechCourse`.
  */
 
-import { internalMutation, mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { SEED_COURSES } from "./seedCourseData";
 import { assertSeedAllowed } from "./lib/seedGuard";
 
@@ -64,8 +64,8 @@ export const seedHaderechCourse = internalMutation({
 
       // Insert lessons — flatten across all modules
       let globalOrder = 0;
-      for (const module of courseData.modules) {
-        for (const lesson of module.lessons) {
+      for (const courseModule of courseData.modules) {
+        for (const lesson of courseModule.lessons) {
           await ctx.db.insert("lessons", {
             courseId,
             title: lesson.title,
@@ -79,6 +79,16 @@ export const seedHaderechCourse = internalMutation({
             phaseNumber: lesson.phaseNumber,
             phaseName: lesson.phaseName,
             scriptIndex: lesson.scriptIndex,
+            contentKey: lesson.contentKey,
+            learnerAvailability: lesson.learnerAvailability ?? "required",
+            completionAffectsProgress:
+              lesson.completionAffectsProgress ?? true,
+            assessmentOrScoring: lesson.assessmentOrScoring,
+            personalDisclosureRequired:
+              lesson.personalDisclosureRequired ?? false,
+            relationshipOrPartnerRequired:
+              lesson.relationshipOrPartnerRequired ?? false,
+            learnerAlternatives: lesson.learnerAlternatives,
             pdfUrl: lesson.pdfUrl,
             createdAt: now,
             updatedAt: now,
@@ -151,15 +161,18 @@ export const updateHaderechLessons = internalMutation({
       .collect();
 
     // Build a lookup by scriptIndex
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lessonByScriptIndex = new Map<string, any>(
-      existingLessons
-        .filter((l: any) => l.scriptIndex)
-        .map((l: any) => [l.scriptIndex as string, l])
-    );
+    const lessonByScriptIndex = new Map<
+      string,
+      (typeof existingLessons)[number]
+    >();
+    for (const lesson of existingLessons) {
+      if (lesson.scriptIndex) {
+        lessonByScriptIndex.set(lesson.scriptIndex, lesson);
+      }
+    }
 
-    for (const module of haderechData.modules) {
-      for (const seedLesson of module.lessons) {
+    for (const courseModule of haderechData.modules) {
+      for (const seedLesson of courseModule.lessons) {
         const existing = lessonByScriptIndex.get(seedLesson.scriptIndex);
 
         if (existing) {

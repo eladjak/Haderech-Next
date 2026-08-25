@@ -9,7 +9,7 @@ const TOOLS = [
   {
     id: "dating-profile",
     title: "בונה פרופיל דייטינג",
-    description: "אשף 6 שלבים לבניית פרופיל דייטינג מלא עם טיפים, ניתוח ציון, וסקירת פרופיל חיה.",
+    description: "אשף 6 שלבים לכתיבת טיוטה וסקירה מקומית. מדד המילוי אינו ציון איכות או תחזית להתאמות.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -21,8 +21,8 @@ const TOOLS = [
   },
   {
     id: "profile-builder",
-    title: "בונה ביו AI",
-    description: "AI כותב לך ביו מקצועי לפרופיל דייטינג - מותאם לפלטפורמה, לאישיות שלך ולמה שאתה מחפש.",
+    title: "בונה ביו מקומי",
+    description: "שלוש טיוטות עריכות שנוצרות בדפדפן; הפרטים אינם נשלחים לספק AI.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -30,12 +30,12 @@ const TOOLS = [
     ),
     href: "/tools/profile-builder",
     available: true,
-    badge: "AI",
+    badge: "מקומי",
   },
   {
     id: "photo-analyzer",
-    title: "ניתוח תמונות",
-    description: "AI שמנתח את התמונות שלך ונותן טיפים לשיפור - זוויות, תאורה, ביטוי, לבוש.",
+    title: "משוב על תמונות (תכנון)",
+    description: "כלי עתידי בלבד; לא נאספות תמונות ואין כרגע ניתוח, דירוג או הבטחה לשיפור.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -49,7 +49,7 @@ const TOOLS = [
   {
     id: "date-planner",
     title: "מתכנן דייטים",
-    description: "קבל המלצות מותאמות אישית לדייט - מיקום, פעילות, שעה, ואווירה.",
+    description: "כלי עתידי להצעת רעיונות כלליים, בלי לבקש כתובת מדויקת או להסיק העדפה של אדם אחר.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -62,21 +62,21 @@ const TOOLS = [
   },
   {
     id: "date-report",
-    title: "ניתוח דייט",
-    description: "אחרי כל דייט, ספר ל-AI מה קרה וקבל ניתוח מקצועי עם נקודות חוזק ושיפור.",
+    title: "רפלקציה אחרי דייט",
+    description: "תרגול פרטי ומקומי: מה בחרתי לנסות, מה קרה ומה אשמור או אשנה. בלי ניקוד ובלי לנתח אדם אחר.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
       </svg>
     ),
     href: "/tools/date-report",
-    available: false,
-    badge: "בקרוב",
+    available: true,
+    badge: "מקומי",
   },
   {
     id: "conversation-starters",
     title: "פותחי שיחה",
-    description: "AI מייצר פותחי שיחה מותאמים למצב - דייט ראשון, אפליקציה, מפגש חברתי.",
+    description: "מאגר מקומי של ניסוחים מכבדים לפי סיטואציה וטון; שום תוכן אינו נשלח לספק AI.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
@@ -84,12 +84,12 @@ const TOOLS = [
     ),
     href: "/tools/conversation-starters",
     available: true,
-    badge: "חדש",
+    badge: "מקומי",
   },
   {
     id: "values-quiz",
-    title: "מבחן ערכים",
-    description: "גלה את הערכים הכי חשובים לך בזוגיות ומה חיוני שיהיה משותף עם הפרטנר.",
+    title: "תרגיל רפלקציה על ערכים",
+    description: "סמן/י העדפות שעולות כרגע וקבל/י סיכום פשוט. זה אינו מבחן התאמה או אבחון.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -106,13 +106,13 @@ export default function ToolsPage() {
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
       <Header />
 
-      <main className="container mx-auto px-4 py-12">
+      <main id="main-content" className="container mx-auto px-4 py-12">
         <div className="mx-auto max-w-4xl">
           <h1 className="mb-2 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
             כלי דייטינג
           </h1>
           <p className="mb-8 text-lg text-zinc-500 dark:text-zinc-400">
-            כלים חכמים שעוזרים לך בכל שלב בדרך לזוגיות
+            כלי כתיבה ורפלקציה מוגבלים. זמינות, פרטיות ומגבלות מוצגות בכל כלי בנפרד.
           </p>
           <Image
             src="/images/illustrations/header-tools.webp"

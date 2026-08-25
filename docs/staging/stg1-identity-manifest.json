@@ -1,0 +1,90 @@
+{
+  "manifestVersion": "1.0",
+  "fixtureVersion": "stg1-v1",
+  "deploymentName": "content-dog-757",
+  "dataClassification": "synthetic-non-pii",
+  "providerIdsIncluded": false,
+  "credentialsIncluded": false,
+  "identities": [
+    {
+      "alias": "ANON",
+      "providerAccountRequired": false,
+      "convexUserRowRequired": false,
+      "initialRole": null,
+      "communityAccess": "deny-unauthenticated",
+      "simulatorAccess": "deny-mutation",
+      "adminAccess": "deny"
+    },
+    {
+      "alias": "U0",
+      "providerAccountRequired": true,
+      "convexUserRowRequired": true,
+      "initialRole": "student",
+      "communityAccess": "deny-entitlement-missing",
+      "simulatorAccess": "trial-5",
+      "adminAccess": "deny"
+    },
+    {
+      "alias": "A",
+      "providerAccountRequired": true,
+      "convexUserRowRequired": true,
+      "initialRole": "student",
+      "communityAccess": "allow-dedicated-book-entitlement",
+      "simulatorAccess": "trial-5",
+      "adminAccess": "deny"
+    },
+    {
+      "alias": "B",
+      "providerAccountRequired": true,
+      "convexUserRowRequired": true,
+      "initialRole": "student",
+      "communityAccess": "allow-dedicated-guidance-entitlement",
+      "simulatorAccess": "trial-5",
+      "adminAccess": "deny"
+    },
+    {
+      "alias": "E",
+      "providerAccountRequired": true,
+      "convexUserRowRequired": true,
+      "initialRole": "student",
+      "communityAccess": "deny-entitlement-missing",
+      "simulatorAccess": "allow-trusted-course-entitlement",
+      "adminAccess": "deny"
+    },
+    {
+      "alias": "X",
+      "providerAccountRequired": true,
+      "convexUserRowRequired": true,
+      "initialRole": "student",
+      "communityAccess": "deny-entitlement-missing",
+      "simulatorAccess": "trial-5-not-full",
+      "adminAccess": "deny"
+    },
+    {
+      "alias": "ADMIN",
+      "providerAccountRequired": true,
+      "convexUserRowRequired": true,
+      "initialRole": "student",
+      "testRoleAfterAccessApply": "admin",
+      "communityAccess": "allow-admin",
+      "simulatorAccess": "allow-admin",
+      "adminAccess": "allow"
+    },
+    {
+      "alias": "IMPOSTOR",
+      "providerAccountRequired": true,
+      "convexUserRowRequired": true,
+      "initialRole": "student",
+      "communityAccess": "deny-entitlement-missing",
+      "simulatorAccess": "trial-5",
+      "adminAccess": "deny-uniformly"
+    }
+  ],
+  "isolationAssertions": [
+    "A cannot read or mutate B-owned resources",
+    "B cannot read or mutate A-owned resources",
+    "E course entitlement does not substitute for community entitlement",
+    "X expired entitlement does not provide full simulator access",
+    "IMPOSTOR receives no identifier oracle from admin or cross-user endpoints"
+  ]
+}

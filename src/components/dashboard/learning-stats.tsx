@@ -31,7 +31,7 @@ export function LearningStats() {
       color: "emerald" as const,
     },
     {
-      label: "זמן צפייה",
+      label: "זמן למידה מתועד",
       value: formatWatchTime(overview.totalWatchTime),
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -39,17 +39,6 @@ export function LearningStats() {
         </svg>
       ),
       color: "blue" as const,
-    },
-    {
-      label: "רצף למידה",
-      value: `${overview.level}`,
-      sublabel: `${overview.totalXp} XP`,
-      icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
-        </svg>
-      ),
-      color: "amber" as const,
     },
   ];
 
@@ -68,11 +57,6 @@ export function LearningStats() {
       border: "border-blue-200/50 dark:border-blue-800/30",
       bg: "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30",
       iconBg: "bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400",
-    },
-    amber: {
-      border: "border-amber-200/50 dark:border-amber-800/30",
-      bg: "bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/50 dark:to-amber-900/30",
-      iconBg: "bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400",
     },
   };
 
@@ -93,7 +77,7 @@ export function LearningStats() {
                 {stat.icon}
               </span>
             </div>
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+            <p className="tabular-nums text-2xl font-bold text-zinc-900 dark:text-white">
               {stat.value}
               {stat.suffix && (
                 <span className="text-sm font-normal text-zinc-400 dark:text-zinc-500">
@@ -101,11 +85,6 @@ export function LearningStats() {
                 </span>
               )}
             </p>
-            {stat.sublabel && (
-              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                {stat.sublabel}
-              </p>
-            )}
           </div>
         );
       })}

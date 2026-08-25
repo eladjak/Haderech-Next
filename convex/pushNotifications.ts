@@ -1,11 +1,15 @@
-import { query, mutation, internalAction } from "./_generated/server";
+import {
+  mutation,
+  internalAction,
+  internalQuery,
+} from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { internal } from "./_generated/api";
 
 // ─── Queries ─────────────────────────────────────────────────
 
 // שליפת ה-subscriptions של המשתמש הנוכחי
-export const getSubscriptions = query({
+export const getSubscriptions = internalQuery({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -20,7 +24,7 @@ export const getSubscriptions = query({
 });
 
 // שליפת subscriptions לפי userId (לשימוש פנימי ב-action)
-export const getSubscriptionsByUserId = query({
+export const getSubscriptionsByUserId = internalQuery({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -31,23 +35,10 @@ export const getSubscriptionsByUserId = query({
   },
 });
 
-// שליפת כל ה-subscriptions (למנהל - לשליחה כללית)
-export const listAllSubscriptions = query({
+// Secret-bearing subscription rows are available only to server-side actions.
+export const listAllSubscriptions = internalQuery({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    // בדיקת הרשאות מנהל
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user || user.role !== "admin") {
-      throw new Error("Admin access required");
-    }
-
     return await ctx.db
       .query("pushSubscriptions")
       .filter((q) => q.eq(q.field("active"), true))
@@ -79,6 +70,9 @@ export const saveSubscription = mutation({
       .unique();
 
     if (existing) {
+      if (existing.userId !== userId) {
+        throw new Error("RESOURCE_OWNERSHIP_REQUIRED");
+      }
       // עדכן את הרשומה הקיימת
       await ctx.db.patch(existing._id, {
         p256dh: args.p256dh,
@@ -166,7 +160,7 @@ export const sendNotification = internalAction({
   handler: async (ctx, args): Promise<{ sent: number; reason?: string; payload?: string; subscriptions?: { endpoint: string }[] }> => {
     // שליפת subscriptions של המשתמש
     const subscriptions = (await ctx.runQuery(
-      api.pushNotifications.getSubscriptionsByUserId,
+      internal.pushNotifications.getSubscriptionsByUserId,
       { userId: args.userId }
     )) as PushSubscriptionRow[];
 
@@ -232,7 +226,7 @@ export const broadcastNotification = internalAction({
   handler: async (ctx, args): Promise<{ sent: number; reason?: string; payload?: string }> => {
     // שליפת כל ה-subscriptions הפעילים
     const allSubscriptions = (await ctx.runQuery(
-      api.pushNotifications.listAllSubscriptions,
+      internal.pushNotifications.listAllSubscriptions,
       {}
     )) as PushSubscriptionRow[];
 

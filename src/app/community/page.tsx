@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import { api } from "@/../convex/_generated/api";
 import { fallbackAvatar } from "@/lib/fallback-avatar";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { MyCommunityBlocks } from "@/components/community/my-community-blocks";
 
 type Category =
   | "all"
@@ -34,7 +35,7 @@ interface CommunityTopicView {
 const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: "all", label: "הכל", emoji: "🌟" },
   { value: "dating-tips", label: "טיפים", emoji: "💡" },
-  { value: "success-stories", label: "סיפורי הצלחה", emoji: "💕" },
+  { value: "success-stories", label: "שיתופים מהדרך", emoji: "💕" },
   { value: "questions", label: "שאלות", emoji: "❓" },
   { value: "advice", label: "עצות", emoji: "🎯" },
   { value: "general", label: "כללי", emoji: "💬" },
@@ -43,7 +44,7 @@ const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
 const CATEGORY_LABELS: Record<string, string> = {
   general: "כללי",
   "dating-tips": "טיפים",
-  "success-stories": "סיפורי הצלחה",
+  "success-stories": "שיתופים מהדרך",
   questions: "שאלות",
   advice: "עצות",
 };
@@ -82,10 +83,8 @@ type TopicCategory =
 
 function NewTopicModal({
   onClose,
-  onSuccess,
 }: {
   onClose: () => void;
-  onSuccess: () => void;
 }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -101,7 +100,6 @@ function NewTopicModal({
     setLoading(true);
     try {
       await createTopic({ title, content, category });
-      onSuccess();
       onClose();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "אירעה שגיאה");
@@ -343,11 +341,9 @@ function TopicCard({ topic }: { topic: CommunityTopicView }) {
 }
 
 export default function CommunityPage() {
-  const { user } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const topics = useQuery(
     api.community.listTopics,
@@ -364,7 +360,7 @@ export default function CommunityPage() {
         t.content.toLowerCase().includes(q) ||
         (t.authorName ?? "").toLowerCase().includes(q)
     );
-  }, [topics, searchQuery, refreshKey]);
+  }, [topics, searchQuery]);
 
   return (
     <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
@@ -400,6 +396,10 @@ export default function CommunityPage() {
             מקום לשתף, ללמוד ולהתחבר עם אנשים בדרך לאהבה
           </p>
         </motion.div>
+
+        <SignedIn>
+          <MyCommunityBlocks />
+        </SignedIn>
 
         {/* Toolbar */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -543,7 +543,6 @@ export default function CommunityPage() {
         {showNewTopicModal && (
           <NewTopicModal
             onClose={() => setShowNewTopicModal(false)}
-            onSuccess={() => setRefreshKey((k) => k + 1)}
           />
         )}
       </AnimatePresence>

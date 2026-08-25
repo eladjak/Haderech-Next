@@ -37,7 +37,7 @@ export default function ChatError({
           </svg>
         </div>
         <h1 className="mb-3 text-2xl font-bold text-zinc-900 dark:text-white">
-          משהו השתבש בצ'אט
+          משהו השתבש בצ&apos;אט
         </h1>
         <p className="mb-8 max-w-md text-zinc-600 dark:text-zinc-400">
           {error.message || "אירעה שגיאה בעת טעינת צ'אט. נסה שוב."}

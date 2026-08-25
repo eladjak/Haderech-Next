@@ -25,9 +25,12 @@ export async function embedQuery(
   const q = text.trim();
   if (q.length < 4) return null;
   try {
-    const res = await fetch(`${EMBED_ENDPOINT}?key=${geminiKey}`, {
+    const res = await fetch(EMBED_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": geminiKey,
+      },
       body: JSON.stringify({
         model: `models/${EMBED_MODEL}`,
         content: { parts: [{ text: q.slice(0, 1500) }] },

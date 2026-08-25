@@ -8,6 +8,7 @@ import { api } from "@/../convex/_generated/api";
 import { Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CERTIFICATE_SCOPE_NOTICE } from "@/lib/certificate-truth";
 
 // ─── Print-friendly certificate HTML builder ──────────────────────────────────
 
@@ -90,6 +91,7 @@ function buildPrintHTML(
     font-weight: 900;
   }
   .meta { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .scope { max-width: 760px; margin: 8px auto 0; font-size: 10px; line-height: 1.5; color: #777; }
   .cert-num { font-size: 11px; color: #ccc; margin-top: 12px; letter-spacing: 1px; }
 </style>
 </head>
@@ -101,13 +103,14 @@ function buildPrintHTML(
   <div class="corner br"></div>
   <div class="logo">הדרך</div>
   <div class="subtitle">תעודת סיום</div>
-  <div class="presents">מוענקת בגאווה ל-</div>
+  <div class="presents">מתעדת כי</div>
   <div class="name">${userName}</div>
-  <div class="completed">אשר/ה סיים/ה בהצלחה את הקורס</div>
+  <div class="completed">השלים/ה את מסלול הלמידה בקורס</div>
   <div class="course">${courseName}</div>
   <div class="divider"></div>
   <div class="seal">HD</div>
   <div class="meta">השלמה: ${completionPercent}% &nbsp;&bull;&nbsp; ${formattedDate}</div>
+  <div class="scope">${CERTIFICATE_SCOPE_NOTICE}</div>
   <div class="cert-num">מספר תעודה: ${certificateNumber}</div>
 </div>
 </body>
@@ -121,18 +124,16 @@ function useShareCertificate() {
 
   const share = useCallback(
     async (courseName: string) => {
-      const text = `קיבלתי תעודת סיום על הקורס "${courseName}" בהדרך!`;
-      const url = window.location.href;
+      const text = `השלמתי את מסלול הלמידה בקורס "${courseName}" בפלטפורמת הדרך. ${CERTIFICATE_SCOPE_NOTICE}`;
 
       try {
         if (navigator.share) {
           await navigator.share({
-            title: "תעודת סיום - הדרך",
+            title: "סיכום השלמת מסלול - הדרך",
             text,
-            url,
           });
         } else {
-          await navigator.clipboard.writeText(`${text}\n${url}`);
+          await navigator.clipboard.writeText(text);
           setCopyState("copied");
           setTimeout(() => setCopyState("idle"), 2500);
         }
@@ -306,7 +307,7 @@ export default function CertificateViewPage() {
 
               {/* Subtitle */}
               <p className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
-                מוענקת בגאווה ל-
+                מתעדת כי
               </p>
 
               {/* User name */}
@@ -316,7 +317,7 @@ export default function CertificateViewPage() {
 
               {/* Course description */}
               <p className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
-                אשר/ה סיים/ה בהצלחה את הקורס
+                השלים/ה את מסלול הלמידה בקורס
               </p>
 
               {/* Course name */}
@@ -358,6 +359,9 @@ export default function CertificateViewPage() {
               <p className="text-xs tracking-wider text-zinc-400 dark:text-zinc-600">
                 מספר תעודה: {certificate.certificateNumber}
               </p>
+              <p className="mx-auto mt-4 max-w-2xl text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+                {CERTIFICATE_SCOPE_NOTICE}
+              </p>
             </div>
 
             {/* Bottom gradient bar */}
@@ -374,7 +378,7 @@ export default function CertificateViewPage() {
               type="button"
               onClick={() => share(certificate.courseName)}
               className="inline-flex h-11 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-              aria-label="שתף תעודה"
+              aria-label="שתף סיכום השלמה"
             >
               {copyState === "copied" ? (
                 <>
@@ -410,7 +414,7 @@ export default function CertificateViewPage() {
                       d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
                     />
                   </svg>
-                  שתף תעודה
+                  שתף סיכום
                 </>
               )}
             </button>

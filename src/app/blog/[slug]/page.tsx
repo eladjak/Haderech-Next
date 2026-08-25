@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -224,8 +225,8 @@ export default function BlogPostPage() {
     return (
       <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
         <Header />
-        <main className="container mx-auto max-w-3xl px-4 py-10">
-          <div className="space-y-4">
+        <main id="main-content" tabIndex={-1} className="container mx-auto max-w-3xl px-4 py-10">
+          <div className="space-y-4" role="status" aria-label="המאמר נטען">
             <div className="h-8 w-48 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
             <div className="h-12 w-full animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
             <div className="h-6 w-64 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
@@ -249,7 +250,7 @@ export default function BlogPostPage() {
     return (
       <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
         <Header />
-        <main className="container mx-auto flex max-w-3xl flex-col items-center justify-center px-4 py-20 text-center">
+        <main id="main-content" tabIndex={-1} className="container mx-auto flex max-w-3xl flex-col items-center justify-center px-4 py-20 text-center">
           <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
             <svg
               className="h-10 w-10 text-zinc-400"
@@ -293,20 +294,20 @@ export default function BlogPostPage() {
   // Determine display values depending on source
   const displayDate = isSanitySource
     ? (sanityPost?.publishedAt ?? "")
-    : formatDate((post as any).createdAt);
+    : formatDate(convexPost?.createdAt ?? 0);
   const displayAuthor = isSanitySource
     ? "צוות הדרך"
-    : ((post as any).authorName ?? "צוות הדרך");
+    : (convexPost?.authorName ?? "צוות הדרך");
   const displayReadTime = post.readTime ?? "";
-  const displayViews = isSanitySource ? null : (post as any).views;
-  const displayTags = isSanitySource ? [] : ((post as any).tags ?? []);
+  const displayViews = isSanitySource ? null : convexPost?.views;
+  const displayTags = isSanitySource ? [] : (convexPost?.tags ?? []);
   const displayFeaturedImage = isSanitySource ? sanityPost?.featuredImage : null;
 
   return (
     <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
       <Header />
 
-      <main className="container mx-auto max-w-3xl px-4 py-10">
+      <main id="main-content" tabIndex={-1} className="container mx-auto max-w-3xl px-4 py-10">
         <motion.article
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -314,7 +315,7 @@ export default function BlogPostPage() {
           {/* Breadcrumb */}
           <nav
             className="mb-6 flex items-center gap-2 text-sm text-zinc-400 dark:text-zinc-500"
-            aria-label="breadcrumb"
+            aria-label="פירורי לחם"
           >
             <Link
               href="/blog"
@@ -335,9 +336,12 @@ export default function BlogPostPage() {
           {/* Featured Image */}
           {displayFeaturedImage && (
             <div className="mb-6 overflow-hidden rounded-2xl">
-              <img
+              <Image
                 src={displayFeaturedImage}
                 alt={post.title}
+                width={1200}
+                height={630}
+                unoptimized
                 className="h-auto w-full object-cover"
               />
             </div>

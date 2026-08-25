@@ -18,8 +18,8 @@ const MODE_CONFIG: Record<
   { label: string; description: string; icon: React.ReactNode; color: string }
 > = {
   coach: {
-    label: "מאמן אישי",
-    description: "קבל ייעוץ אישי מהמאמן שלך",
+    label: "כלי AI לתרגול",
+    description: "קבל משוב אוטומטי מוגבל המבוסס על תכני הקורס",
     color: "from-brand-500 to-brand-600",
     icon: (
       <svg
@@ -39,8 +39,8 @@ const MODE_CONFIG: Record<
     ),
   },
   practice: {
-    label: "סימולטור דייט",
-    description: "התאמן על שיחות היכרות",
+    label: "תרגול שיחה בדיוני",
+    description: "תרגל ניסוחים מול דמות AI שאינה אדם אמיתי",
     color: "from-blue-500 to-blue-600",
     icon: (
       <svg
@@ -60,8 +60,8 @@ const MODE_CONFIG: Record<
     ),
   },
   analysis: {
-    label: "ניתוח דייט",
-    description: "נתח שיחות ומצבים שקרו לך",
+    label: "ניתוח טקסט ב-AI",
+    description: "קבל שאלות רפלקציה אוטומטיות שעלולות לטעות",
     color: "from-accent-400 to-accent-500",
     icon: (
       <svg
@@ -128,10 +128,10 @@ function CoachWelcome({
       </div>
 
       <h2 className="mb-1 text-base font-bold text-blue-600 dark:text-white">
-        המאמן שלי
+        כלי ה-AI שלי
       </h2>
       <p className="mb-1 text-xs text-blue-500/75 dark:text-zinc-400">
-        15+ שנות ניסיון • 461 זוגות
+        כלי אוטומטי • עלול לטעות
       </p>
 
       {isCoach ? (
@@ -224,7 +224,7 @@ function ChatPageContent() {
         setShowModeSelector(false);
         setIsSidebarOpen(false);
         setError(null);
-      } catch (e) {
+      } catch {
         setError("שגיאה ביצירת שיחה חדשה");
       }
     },
@@ -243,7 +243,7 @@ function ChatPageContent() {
           sessionId = await createSession({ userId, mode: "coach" });
           setActiveSessionId(sessionId);
           setError(null);
-        } catch (e) {
+        } catch {
           setError("שגיאה ביצירת שיחה חדשה");
           return;
         }
@@ -257,7 +257,7 @@ function ChatPageContent() {
           userMessage: content,
           userId,
         });
-      } catch (e) {
+      } catch {
         setError("שגיאה בשליחת ההודעה. נסה שוב.");
       } finally {
         setIsLoading(false);
@@ -274,7 +274,7 @@ function ChatPageContent() {
         if (activeSessionId === sessionId) {
           setActiveSessionId(null);
         }
-      } catch (e) {
+      } catch {
         setError("שגיאה במחיקת השיחה");
       }
     },
@@ -350,10 +350,10 @@ function ChatPageContent() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-blue-500 dark:text-white">
-                    מאמן AI - אומנות הקשר
+                    כלי AI - אומנות הקשר
                   </p>
                   <p className="text-xs text-blue-500/75 dark:text-zinc-500">
-                    15+ שנות ניסיון, 461 זוגות
+                    תרגול אוטומטי המבוסס על תכני הקורס
                   </p>
                 </div>
               </div>
@@ -408,10 +408,12 @@ function ChatPageContent() {
                 </div>
 
                 <h1 className="mb-2 text-2xl font-bold text-blue-500 dark:text-white">
-                  המאמן שלך כאן
+                  כלי ה-AI זמין לתרגול
                 </h1>
                 <p className="mb-8 max-w-sm text-sm leading-relaxed text-blue-500/75 dark:text-zinc-400">
-                  15+ שנות ניסיון בליווי זוגות. כאן בשבילך כדי לעזור, לייעץ ולהכין אותך לאהבה שמגיע לך.
+                  זהו כלי AI, לא אדם, מטפל או שירות חירום. התוכן עשוי להישלח
+                  ל-Gemini או Anthropic, ולכן אין להזין פרטים מזהים או מידע
+                  רגיש. המשוב עלול לטעות ואינו אבחון או הבטחה לתוצאה.
                 </p>
 
                 {/* Mode selector cards */}

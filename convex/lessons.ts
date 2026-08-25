@@ -1,12 +1,15 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAdmin } from "./lib/authGuard";
+import { requireAdmin, requireCourseContentAccess } from "./lib/authGuard";
 
 // שליפת שיעור לפי ID
 export const getById = query({
   args: { id: v.id("lessons") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const lesson = await ctx.db.get(args.id);
+    if (!lesson) return null;
+    await requireCourseContentAccess(ctx, lesson.courseId);
+    return lesson;
   },
 });
 
@@ -14,6 +17,7 @@ export const getById = query({
 export const listByCourse = query({
   args: { courseId: v.id("courses") },
   handler: async (ctx, args) => {
+    await requireCourseContentAccess(ctx, args.courseId);
     return await ctx.db
       .query("lessons")
       .withIndex("by_course_order", (q) => q.eq("courseId", args.courseId))

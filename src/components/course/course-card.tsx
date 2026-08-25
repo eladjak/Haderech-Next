@@ -30,6 +30,7 @@ interface CourseCardProps {
   category?: string;
   level?: string;
   estimatedHours?: number;
+  imagePriority?: boolean;
 }
 
 export function CourseCard({
@@ -44,6 +45,7 @@ export function CourseCard({
   category,
   level,
   estimatedHours,
+  imagePriority = false,
 }: CourseCardProps) {
   return (
     <Link
@@ -58,6 +60,7 @@ export function CourseCard({
             src={imageUrl}
             alt={title}
             fill
+            priority={imagePriority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition-transform duration-200 group-hover:scale-105"
           />

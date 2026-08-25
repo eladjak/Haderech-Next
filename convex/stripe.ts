@@ -1,6 +1,14 @@
 import { action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
+const LEGACY_STRIPE_AVAILABLE: boolean = false;
+
+function requireLegacyStripeAvailable(): void {
+  if (!LEGACY_STRIPE_AVAILABLE) {
+    throw new Error("Legacy Stripe integration is disabled");
+  }
+}
+
 /**
  * @deprecated Phase 14 (2026-05-14): Migrated to Sumit (convex/sumit.ts).
  * This file is retained ONLY to satisfy existing imports / generated types.
@@ -19,13 +27,12 @@ export const createCheckoutSession = action({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+    void args;
 
-    // Deprecated — point user back to pricing with a notice.
     return {
-      url: `/pricing?checkout=pending&plan=${args.plan}`,
-      message:
-        "מערכת התשלומים בתהליך החלפה ל-Sumit (ספק תשלומים ישראלי). חזור בקרוב.",
-      status: "deprecated" as const,
+      url: null,
+      message: "הרכישה אינה זמינה. לא נוצרה עסקה ולא נפתח תהליך תשלום.",
+      status: "unavailable" as const,
     };
   },
 });
@@ -51,6 +58,7 @@ export const handleSubscriptionUpdate = internalMutation({
     currentPeriodEnd: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    requireLegacyStripeAvailable();
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
@@ -103,6 +111,7 @@ export const recordPayment = internalMutation({
     stripePaymentIntentId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    requireLegacyStripeAvailable();
     await ctx.db.insert("payments", {
       userId: args.userId,
       amount: args.amount,

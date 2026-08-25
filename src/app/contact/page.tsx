@@ -24,8 +24,8 @@ const CONTACT_INFO = [
   {
     emoji: "📧",
     label: "מייל",
-    value: "support@haderech.co.il",
-    href: "mailto:support@haderech.co.il",
+    value: "haderech@ohlove.co.il",
+    href: "mailto:haderech@ohlove.co.il",
   },
   {
     emoji: "⏱️",
@@ -78,7 +78,6 @@ export default function ContactPage() {
         email: form.email,
         subject: form.subject,
         message: form.message,
-        userId: user?.id,
       });
       setSubmitted(true);
     } catch (err) {

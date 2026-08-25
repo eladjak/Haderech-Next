@@ -37,14 +37,14 @@ interface SessionFeedbackProps {
 }
 
 const RADAR_LABELS: Array<{ key: keyof SkillRadarView; label: string }> = [
-  { key: "initiative", label: "יוזמה" },
-  { key: "emotion", label: "הבעת רגש" },
-  { key: "courage", label: "אומץ וגבולות" },
-  { key: "depth", label: "עומק ופגיעות" },
-  { key: "leading", label: "הובלה" },
+  { key: "initiative", label: "בהירות ותזמון" },
+  { key: "emotion", label: "ביטוי עצמי" },
+  { key: "courage", label: "גבולות וכבוד" },
+  { key: "depth", label: "הקשבה והקשר" },
+  { key: "leading", label: "הדדיות" },
 ];
 
-/** SVG polyline of the connection meter across the conversation. */
+/** SVG polyline of the fictional scenario-response meter. */
 function ConnectionGraph({
   log,
 }: {
@@ -69,7 +69,7 @@ function ConnectionGraph({
         viewBox={`0 0 ${W} ${H}`}
         className="h-20 w-full"
         role="img"
-        aria-label="גרף מד החיבור לאורך השיחה"
+        aria-label="גרף מד התגובה הבדיוני של התרחיש"
       >
         <line
           x1={PAD}
@@ -99,73 +99,7 @@ function ConnectionGraph({
   );
 }
 
-function ScoreRing({ score }: { score: number }) {
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (score / 100) * circumference;
-
-  const color =
-    score >= 80
-      ? "#10b981"
-      : score >= 60
-        ? "#f59e0b"
-        : score >= 40
-          ? "#f97316"
-          : "#ef4444";
-
-  return (
-    <div className="relative flex h-28 w-28 items-center justify-center">
-      <svg
-        className="-rotate-90"
-        width="112"
-        height="112"
-        viewBox="0 0 112 112"
-        aria-hidden="true"
-      >
-        <circle
-          cx="56"
-          cy="56"
-          r={radius}
-          stroke="currentColor"
-          strokeWidth="8"
-          fill="none"
-          className="text-zinc-100 dark:text-zinc-800"
-        />
-        <circle
-          cx="56"
-          cy="56"
-          r={radius}
-          stroke={color}
-          strokeWidth="8"
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          style={{ transition: "stroke-dashoffset 1s ease" }}
-        />
-      </svg>
-      <div className="absolute flex flex-col items-center">
-        <span className="text-2xl font-bold text-zinc-900 dark:text-white">
-          {score}
-        </span>
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">מתוך 100</span>
-      </div>
-    </div>
-  );
-}
-
-function getScoreLabel(score: number): string {
-  if (score >= 90) return "מדהים!";
-  if (score >= 80) return "מצוין";
-  if (score >= 70) return "טוב מאוד";
-  if (score >= 60) return "טוב";
-  if (score >= 50) return "סביר";
-  if (score >= 40) return "יש מה לשפר";
-  return "המשך להתאמן";
-}
-
 export function SessionFeedback({
-  score,
   feedback,
   strengths,
   improvements,
@@ -181,28 +115,33 @@ export function SessionFeedback({
     <div className="flex flex-col gap-6">
       {/* Score section */}
       <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-zinc-900">
-        <ScoreRing score={score} />
         <div>
           <p className="text-xl font-bold text-zinc-900 dark:text-white">
-            {getScoreLabel(score)}
+            משוב אוטומטי לתרגיל
           </p>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             {feedback}
           </p>
+          <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+            זהו ניתוח של שיחה בדיונית בידי AI. הוא עלול לטעות ואינו אבחון,
+            מדד למשיכה או התאמה, תחזית לדייט, או ציון לערך וליכולת שלך. פרטיות,
+            סירוב, תשובה קצרה ועצירה הן בחירות תקינות.
+          </p>
         </div>
       </div>
 
-      {/* Connection arc — how the persona's connection moved (Phase 22) */}
+      {/* Fictional scenario-response arc; not attraction or consent. */}
       {connectionLog && connectionLog.length >= 2 && (
         <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-zinc-900">
           <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
             <span aria-hidden="true">💗</span>
-            מד החיבור לאורך השיחה
+            מד תגובת התרחיש הבדיוני
           </h3>
           <ConnectionGraph log={connectionLog} />
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            סיימת על {connectionLog[connectionLog.length - 1]?.connection}/100 —
-            כל תגובה שלך הזיזה את המד. שים לב איפה עלית ואיפה איבדת גובה.
+            הערך האחרון הוא {connectionLog[connectionLog.length - 1]?.connection}/100.
+            זהו מנגנון משחק פנימי בלבד; הוא אינו מודד משיכה, התאמה, הסכמה או
+            תגובה צפויה של אדם אמיתי.
           </p>
         </div>
       )}
@@ -228,7 +167,7 @@ export function SessionFeedback({
                 </p>
                 {m.better && (
                   <p className="mt-1 text-xs leading-relaxed text-emerald-700 dark:text-emerald-400">
-                    <span className="font-semibold">מה היה עובד: </span>
+                    <span className="font-semibold">חלופה אפשרית: </span>
                     {m.better}
                   </p>
                 )}
@@ -238,12 +177,12 @@ export function SessionFeedback({
         </div>
       )}
 
-      {/* Skill radar — 5 axes mapped to the 5 course phases (Phase 22) */}
+      {/* Text-only feedback axes; not a validated psychometric instrument. */}
       {skillRadar && (
         <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-zinc-900">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
             <span aria-hidden="true">📊</span>
-            רדאר הכישורים שלך
+            מדדי טקסט בתרחיש
           </h3>
           <div className="flex flex-col gap-2.5">
             {RADAR_LABELS.map(({ key, label }) => (
@@ -269,6 +208,10 @@ export function SessionFeedback({
               </div>
             ))}
           </div>
+          <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+            המדדים מבוססים על סימנים פשוטים בטקסט ואינם כלי מקצועי או מדעי.
+            אין להסיק מהם על אישיות, כשירות זוגית או התנהגות מחוץ לתרגיל.
+          </p>
         </div>
       )}
 
@@ -328,7 +271,7 @@ export function SessionFeedback({
                 />
               </svg>
             </span>
-            נקודות לשיפור
+            אפשרויות לתרגול
           </h3>
           <ul className="flex flex-col gap-2">
             {improvements.map((improvement, i) => (
@@ -351,7 +294,7 @@ export function SessionFeedback({
             <>
               <h3 className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                 <span aria-hidden="true">🎯</span>
-                התרגיל שלך לפעם הבאה
+                הצעה אופציונלית לתרגול
               </h3>
               <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
                 {drill}
@@ -365,7 +308,7 @@ export function SessionFeedback({
             >
               <span aria-hidden="true">📖</span>
               <span className="min-w-0 flex-1">
-                השיעור שמלמד בדיוק את זה: {recommendedLesson.title}
+                שיעור קשור שכדאי לעיין בו: {recommendedLesson.title}
               </span>
               <svg
                 className="h-4 w-4 flex-shrink-0 -scale-x-100"

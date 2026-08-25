@@ -1,5 +1,11 @@
-import { query, mutation, internalQuery } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireCourseContentAccess } from "./lib/authGuard";
+
+// Course reviews may still be used inside the entitled course experience, but
+// they are not public marketing proof until completion, provenance and explicit
+// publication consent are represented and verified in data.
+const VERIFIED_PUBLIC_TESTIMONIALS_AVAILABLE = false;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUERIES
@@ -9,6 +15,7 @@ import { v } from "convex/values";
 export const getCourseReviews = query({
   args: { courseId: v.id("courses") },
   handler: async (ctx, args) => {
+    await requireCourseContentAccess(ctx, args.courseId);
     const reviews = await ctx.db
       .query("courseReviews")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
@@ -46,6 +53,7 @@ export const getReviewsByCourse = query({
     ),
   },
   handler: async (ctx, args) => {
+    await requireCourseContentAccess(ctx, args.courseId);
     const reviews = await ctx.db
       .query("courseReviews")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
@@ -79,6 +87,7 @@ export const getReviewsByCourse = query({
 export const getReviewStats = query({
   args: { courseId: v.id("courses") },
   handler: async (ctx, args) => {
+    await requireCourseContentAccess(ctx, args.courseId);
     const reviews = await ctx.db
       .query("courseReviews")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
@@ -148,6 +157,7 @@ export const getUserReview = query({
 export const getCourseRating = query({
   args: { courseId: v.id("courses") },
   handler: async (ctx, args) => {
+    await requireCourseContentAccess(ctx, args.courseId);
     const reviews = await ctx.db
       .query("courseReviews")
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
@@ -168,6 +178,8 @@ export const getCourseRating = query({
 export const getFeaturedTestimonials = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
+    if (!VERIFIED_PUBLIC_TESTIMONIALS_AVAILABLE) return [];
+
     const limit = args.limit ?? 12;
 
     const allReviews = await ctx.db.query("courseReviews").collect();
@@ -267,6 +279,10 @@ export const hasVoted = query({
 export const getGlobalStats = query({
   args: {},
   handler: async (ctx) => {
+    if (!VERIFIED_PUBLIC_TESTIMONIALS_AVAILABLE) {
+      return { totalReviews: 0, averageRating: 0, wouldRecommendPercent: 0 };
+    }
+
     const allReviews = await ctx.db.query("courseReviews").collect();
 
     if (allReviews.length === 0) {

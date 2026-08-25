@@ -4,11 +4,20 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { Suspense, useState, useCallback, useEffect, useMemo } from "react";
+import {
+  Fragment,
+  Suspense,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { api } from "@/../convex/_generated/api";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
+import { CourseSafetyNotice } from "@/components/course/course-safety-notice";
 import { LessonContent } from "@/components/lesson/lesson-content";
+import { LessonPdfResource } from "@/components/lesson/lesson-pdf-resource";
 import { LessonAdvisor } from "@/components/lesson/lesson-advisor";
 import { LessonNotes } from "@/components/lesson/lesson-notes";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
@@ -146,17 +155,21 @@ function LearnContent() {
 
   const { lessons, ...course } = courseWithLessons;
   const publishedLessons = lessons.filter((l) => l.published);
+  const progressLessons = publishedLessons.filter(
+    (lesson) => lesson.completionAffectsProgress !== false,
+  );
+  const progressLessonIds = new Set(progressLessons.map((lesson) => lesson._id));
 
   // Build progress map
   const progressMap = new Map(
     (courseProgress ?? []).map((p) => [p.lessonId, p])
   );
   const completedCount = (courseProgress ?? []).filter(
-    (p) => p.completed
+    (p) => p.completed && progressLessonIds.has(p.lessonId),
   ).length;
   const completionPercent =
-    publishedLessons.length > 0
-      ? Math.round((completedCount / publishedLessons.length) * 100)
+    progressLessons.length > 0
+      ? Math.round((completedCount / progressLessons.length) * 100)
       : 0;
 
   // Default to first lesson if none selected
@@ -177,7 +190,7 @@ function LearnContent() {
       : null;
 
   const courseComplete =
-    publishedLessons.length > 0 && completedCount >= publishedLessons.length;
+    progressLessons.length > 0 && completedCount >= progressLessons.length;
 
   const isCurrentLessonComplete =
     activeLessonId !== null &&
@@ -219,8 +232,8 @@ function LearnContent() {
         <h2 className="font-semibold text-zinc-900 dark:text-white">
           {course.title}
         </h2>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          {completedCount}/{publishedLessons.length} שיעורים הושלמו
+        <p className="tabular-nums mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          {completedCount}/{progressLessons.length} שיעורי ליבה הושלמו
         </p>
         {completionPercent > 0 && (
           <div className="mt-2">
@@ -234,47 +247,70 @@ function LearnContent() {
           const isActive = lesson._id === activeLessonId;
           const lessonProgress = progressMap.get(lesson._id);
           const isComplete = lessonProgress?.completed === true;
+          const previousLesson = publishedLessons[index - 1];
+          const startsPhase =
+            lesson.phaseNumber !== undefined &&
+            previousLesson?.phaseNumber !== lesson.phaseNumber;
+          const startsWeek =
+            lesson.weekNumber !== undefined &&
+            previousLesson?.weekNumber !== lesson.weekNumber;
 
           return (
-            <Link
-              key={lesson._id}
-              href={`/courses/${courseId}/learn?lesson=${lesson._id}`}
-              onClick={closeMobileSidebar}
-              aria-current={isActive ? "page" : undefined}
-              className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
-                isActive
-                  ? "bg-zinc-200 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-white"
-                  : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <span
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
-                  isComplete
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                    : "bg-zinc-300 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300"
+            <Fragment key={lesson._id}>
+              {startsPhase && (
+                <div className="mb-2 mt-5 px-3 first:mt-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
+                    שלב {lesson.phaseNumber} מתוך 6
+                  </p>
+                  <p className="mt-0.5 text-sm font-bold text-zinc-900 dark:text-white">
+                    {lesson.phaseName ?? `שלב ${lesson.phaseNumber}`}
+                  </p>
+                </div>
+              )}
+              {startsWeek && (
+                <p className="mb-1 mt-3 px-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  שבוע {lesson.weekNumber}
+                </p>
+              )}
+              <Link
+                href={`/courses/${courseId}/learn?lesson=${lesson._id}`}
+                onClick={closeMobileSidebar}
+                aria-current={isActive ? "page" : undefined}
+                className={`mb-1 flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+                  isActive
+                    ? "bg-zinc-200 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-white"
+                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
                 }`}
               >
-                {isComplete ? (
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                    aria-label="הושלם"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4.5 12.75l6 6 9-13.5"
-                    />
-                  </svg>
-                ) : (
-                  index + 1
-                )}
-              </span>
-              <span className="truncate">{lesson.title}</span>
-            </Link>
+                <span
+                  className={`tabular-nums flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
+                    isComplete
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                      : "bg-zinc-300 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300"
+                  }`}
+                >
+                  {isComplete ? (
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      aria-label="הושלם"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 12.75l6 6 9-13.5"
+                      />
+                    </svg>
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+                <span className="truncate">{lesson.title}</span>
+              </Link>
+            </Fragment>
           );
         })}
       </nav>
@@ -359,14 +395,35 @@ function LearnContent() {
         {activeLesson ? (
           <div className="mx-auto max-w-4xl p-6 md:p-10">
             {/* Lesson number badge */}
-            <div className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
-              שיעור {currentIndex + 1} מתוך {publishedLessons.length}
+            <div className="tabular-nums mb-2 flex flex-wrap items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+              <span>
+                שיעור {currentIndex + 1} מתוך {publishedLessons.length}
+              </span>
+              {activeLesson.phaseNumber && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>
+                    שלב {activeLesson.phaseNumber} מתוך 6
+                    {activeLesson.phaseName
+                      ? `: ${activeLesson.phaseName}`
+                      : ""}
+                  </span>
+                </>
+              )}
+              {activeLesson.weekNumber && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>שבוע {activeLesson.weekNumber}</span>
+                </>
+              )}
             </div>
 
             {/* Lesson Title */}
             <h1 className="mb-6 text-2xl font-bold text-zinc-900 md:text-3xl dark:text-white">
               {activeLesson.title}
             </h1>
+
+            <CourseSafetyNotice />
 
             {/* Video Player */}
             {activeLesson.videoUrl && (
@@ -382,10 +439,10 @@ function LearnContent() {
             )}
 
             {!activeLesson.videoUrl && (
-              <div className="mb-8 flex aspect-video items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-900">
-                <div className="text-center">
+              <div className="mb-6 flex items-center gap-3 rounded-2xl bg-zinc-50 p-4 shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-zinc-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-zinc-800">
                   <svg
-                    className="mx-auto mb-2 h-12 w-12 text-zinc-300 dark:text-zinc-600"
+                    className="h-5 w-5 text-zinc-400 dark:text-zinc-500"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -398,20 +455,15 @@ function LearnContent() {
                       d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
                     />
                   </svg>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    וידאו עדיין לא הועלה
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                    השיעור זמין לקריאה ולתרגול
+                  </p>
+                  <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                    אין וידאו לשיעור הזה כרגע; התוכן המלא מופיע מיד בהמשך.
                   </p>
                 </div>
-              </div>
-            )}
-
-            {/* Mark as complete button */}
-            {convexUser && (
-              <div className="mb-8">
-                <LessonCompleteButton
-                  isCompleted={isCurrentLessonComplete}
-                  onMarkComplete={handleMarkComplete}
-                />
               </div>
             )}
 
@@ -419,6 +471,27 @@ function LearnContent() {
             {activeLesson.content && (
               <LessonContent content={activeLesson.content} className="mb-8" />
             )}
+
+            {activeLesson.completionAffectsProgress === false && (
+              <OptionalReceivingPractice
+                onSkip={() => {
+                  if (nextLesson) {
+                    router.push(
+                      `/courses/${courseId}/learn?lesson=${nextLesson._id}`,
+                    );
+                  }
+                }}
+              />
+            )}
+
+            <LessonPdfResource
+              pdfUrl={
+                "pdfUrl" in activeLesson ? activeLesson.pdfUrl : undefined
+              }
+              lessonTitle={activeLesson.title}
+              courseId={courseId}
+              lessonId={activeLesson._id}
+            />
 
             {/* Notes (self-managing collapsible) */}
             {convexUser && activeLessonId && (
@@ -438,7 +511,8 @@ function LearnContent() {
             )}
 
             {/* Quiz Section */}
-            {quiz && quizQuestions && quizQuestions.length > 0 && (
+            {activeLesson.assessmentOrScoring !== false &&
+              quiz && quizQuestions && quizQuestions.length > 0 && (
               <div className="mb-8">
                 <QuizPlayer
                   quizTitle={quiz.title}
@@ -450,6 +524,20 @@ function LearnContent() {
                   courseId={courseId}
                   lessonId={activeLessonId ?? undefined}
                   nextLessonId={nextLesson?._id}
+                />
+              </div>
+            )}
+
+            {/* Completion belongs after the lesson, its practice and optional quiz. */}
+            {convexUser && activeLesson.completionAffectsProgress !== false && (
+              <div className="mb-8 rounded-2xl bg-zinc-50 p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-zinc-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+                <p className="mb-3 text-sm text-zinc-600 dark:text-zinc-400">
+                  אחרי הקריאה והתרגול שמתאים לך, אפשר לשמור כאן את נקודת
+                  החזרה לשיעור הבא.
+                </p>
+                <LessonCompleteButton
+                  isCompleted={isCurrentLessonComplete}
+                  onMarkComplete={handleMarkComplete}
                 />
               </div>
             )}
@@ -489,39 +577,52 @@ function LearnContent() {
             )}
 
             {/* Navigation */}
-            <div className="flex items-center justify-between border-t border-zinc-200 pt-6 dark:border-zinc-800">
+            <nav
+              className="flex flex-col gap-3 border-t border-zinc-200 pt-6 sm:flex-row sm:items-stretch sm:justify-between dark:border-zinc-800"
+              aria-label="מעבר בין שיעורים"
+            >
               {prevLesson ? (
                 <Link
                   href={`/courses/${courseId}/learn?lesson=${prevLesson._id}`}
-                  className="flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                  className="flex min-h-12 flex-1 items-center gap-3 rounded-xl bg-white px-4 py-3 text-sm text-zinc-700 shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] hover:shadow-md active:scale-[0.96] dark:bg-zinc-900 dark:text-zinc-300 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
                 >
-                  <span>&larr;</span>
-                  <span className="max-w-[200px] truncate">
-                    {prevLesson.title}
+                  <span aria-hidden="true">→</span>
+                  <span className="min-w-0">
+                    <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                      השיעור הקודם
+                    </span>
+                    <span className="block truncate font-medium">
+                      {prevLesson.title}
+                    </span>
                   </span>
                 </Link>
               ) : (
-                <div />
+                <div className="hidden flex-1 sm:block" />
               )}
               {nextLesson ? (
                 <Link
                   href={`/courses/${courseId}/learn?lesson=${nextLesson._id}`}
-                  className="flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                  className="flex min-h-12 flex-1 items-center justify-end gap-3 rounded-xl bg-zinc-900 px-4 py-3 text-left text-sm text-white shadow-sm transition-[transform,box-shadow,background-color] hover:bg-zinc-800 hover:shadow-md active:scale-[0.96] dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
                 >
-                  <span className="max-w-[200px] truncate">
-                    {nextLesson.title}
+                  <span className="min-w-0">
+                    <span className="block text-xs text-zinc-300 dark:text-zinc-500">
+                      השיעור הבא
+                    </span>
+                    <span className="block truncate font-semibold">
+                      {nextLesson.title}
+                    </span>
                   </span>
-                  <span>&rarr;</span>
+                  <span aria-hidden="true">←</span>
                 </Link>
               ) : (
                 <Link
                   href={`/courses/${courseId}`}
-                  className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+                  className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-800 transition-[transform,background-color] hover:bg-emerald-200 active:scale-[0.96] dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
                 >
-                  סיימת את הקורס! חזרה לדף הקורס
+                  חזרה לסיכום ולתוכנית הקורס
                 </Link>
               )}
-            </div>
+            </nav>
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-center p-10">
@@ -536,6 +637,60 @@ function LearnContent() {
         )}
       </main>
     </div>
+  );
+}
+
+function OptionalReceivingPractice({ onSkip }: { onSkip: () => void }) {
+  const [choice, setChoice] = useState<"fictional" | "private" | null>(null);
+
+  return (
+    <section className="mb-8 rounded-3xl border border-sky-200 bg-sky-50/70 p-6 dark:border-sky-800 dark:bg-sky-950/20">
+      <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">
+        תרגול רשות — לא משפיע על ההתקדמות ואין בו ציון
+      </p>
+      <h2 className="mt-2 text-xl font-bold text-zinc-950 dark:text-white">
+        איך מתאים לך לתרגל?
+      </h2>
+      <p className="mt-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+        אין צורך בקשר, באדם נוסף או בחשיפה אישית. אפשר לבחור אפשרות אחת,
+        להחליף ביניהן או לדלג בלי שהשיעור יסומן כחסר.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => setChoice("fictional")}
+          className="min-h-11 rounded-xl border border-sky-300 bg-white px-4 py-3 text-sm font-semibold text-sky-900 hover:bg-sky-100 dark:border-sky-700 dark:bg-zinc-900 dark:text-sky-200"
+        >
+          לבחור תרחיש בדיוני
+        </button>
+        <button
+          type="button"
+          onClick={() => setChoice("private")}
+          className="min-h-11 rounded-xl border border-sky-300 bg-white px-4 py-3 text-sm font-semibold text-sky-900 hover:bg-sky-100 dark:border-sky-700 dark:bg-zinc-900 dark:text-sky-200"
+        >
+          לבחור חלופת כתיבה פרטית
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="min-h-11 rounded-xl px-4 py-3 text-sm font-semibold text-zinc-700 hover:bg-white dark:text-zinc-300 dark:hover:bg-zinc-900"
+        >
+          לדלג ולהמשיך
+        </button>
+      </div>
+      {choice === "fictional" && (
+        <div className="mt-5 rounded-2xl bg-white p-4 text-sm leading-7 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+          דמות בדיונית מקבלת הצעה לעזרה קטנה. כתבו שתי תגובות אפשריות:
+          אחת שמקבלת בתודה ואחת שמסרבת או מבקשת זמן. אין תשובה מדורגת.
+        </div>
+      )}
+      {choice === "private" && (
+        <div className="mt-5 rounded-2xl bg-white p-4 text-sm leading-7 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+          אפשר לכתוב לעצמך משפט קבלה ומשפט סירוב כלליים, בלי שם, אירוע או
+          פרט מזהה. הכתיבה נשארת אצלך ואין צורך להזין אותה למערכת.
+        </div>
+      )}
+    </section>
   );
 }
 

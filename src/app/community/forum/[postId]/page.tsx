@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CommunitySafetyActions } from "@/components/community/community-safety-actions";
 import { ReplyItem } from "@/components/forum/reply-item";
 import { TimeAgo } from "@/components/forum/time-ago";
 import {
@@ -38,9 +40,12 @@ function AuthorAvatar({
 
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
         alt={name}
+        width={56}
+        height={56}
+        unoptimized
         className={`${cls} rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900`}
       />
     );
@@ -138,7 +143,6 @@ function PageSkeleton() {
 
 export default function PostDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { user } = useUser();
   const postId = params.postId as Id<"communityTopics">;
 
@@ -329,6 +333,10 @@ export default function PostDetailPage() {
                     liked={isLiked}
                     onToggle={handleToggleLike}
                     size="md"
+                  />
+                  <CommunitySafetyActions
+                    targetType="topic"
+                    topicId={post._id}
                   />
                 </SignedIn>
                 <SignedOut>

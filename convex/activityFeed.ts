@@ -7,12 +7,11 @@ import { query } from "./_generated/server";
 // ==========================================
 
 type ActivityItem = {
-  type: "lesson" | "xp" | "badge" | "certificate" | "simulator" | "chat";
+  type: "lesson" | "certificate" | "simulator" | "chat";
   title: string;
   description: string;
   timestamp: number;
   icon: string;
-  xp?: number;
 };
 
 export const getActivityFeed = query({
@@ -48,47 +47,10 @@ export const getActivityFeed = query({
           : "השלמת שיעור בהצלחה",
         timestamp: p.completedAt,
         icon: "lesson",
-        xp: 10,
       });
     }
 
-    // 2. XP events
-    const xpEvents = await ctx.db
-      .query("xpEvents")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-
-    for (const xp of xpEvents) {
-      // Skip lesson_complete XP events to avoid duplicating lesson completions
-      if (xp.type === "lesson_complete") continue;
-      activities.push({
-        type: "xp",
-        title: xp.description,
-        description: `+${xp.points} XP`,
-        timestamp: xp.createdAt,
-        icon: "xp",
-        xp: xp.points,
-      });
-    }
-
-    // 3. Badges earned
-    const userBadges = await ctx.db
-      .query("userBadges")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-
-    for (const ub of userBadges) {
-      const badge = await ctx.db.get(ub.badgeId);
-      activities.push({
-        type: "badge",
-        title: `הישג חדש: ${badge?.title ?? "תג"}`,
-        description: badge?.description ?? "קיבלת הישג חדש!",
-        timestamp: ub.earnedAt,
-        icon: "badge",
-      });
-    }
-
-    // 4. Certificates earned
+    // 2. Course-completion certificates
     const certificates = await ctx.db
       .query("certificates")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
@@ -101,11 +63,10 @@ export const getActivityFeed = query({
         description: `סיימת את הקורס "${cert.courseName}" בהצלחה!`,
         timestamp: cert.issuedAt,
         icon: "certificate",
-        xp: 50,
       });
     }
 
-    // 5. Simulator sessions (userId is Clerk string)
+    // 3. Simulator sessions (userId is Clerk string)
     const simSessions = await ctx.db
       .query("simulatorSessions")
       .withIndex("by_user", (q) => q.eq("userId", identity.subject))
@@ -118,26 +79,26 @@ export const getActivityFeed = query({
           ? "הושלמה"
           : sim.status === "active"
             ? "בתהליך"
-            : "ננטשה";
+            : "נעצרה";
       activities.push({
         type: "simulator",
         title: `סימולציה: ${scenario?.title ?? "תרחיש"}`,
-        description: `${statusText}${sim.score ? ` - ציון ${sim.score}` : ""}`,
+        description: `${statusText} · תרגיל עם דמות AI בדיונית`,
         timestamp: sim.completedAt ?? sim.createdAt,
         icon: "simulator",
       });
     }
 
-    // 6. Chat sessions (userId is Clerk string)
+    // 4. Chat sessions (userId is Clerk string)
     const chatSessions = await ctx.db
       .query("chatSessions")
       .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .collect();
 
     const modeLabels: Record<string, string> = {
-      coach: "מאמן אישי",
-      practice: "סימולטור דייט",
-      analysis: "ניתוח שיחה",
+      coach: "כלי AI לרפלקציה",
+      practice: "תרגול שיחה בדיוני",
+      analysis: "ניתוח טקסט ב-AI",
     };
 
     for (const chat of chatSessions) {

@@ -1,17 +1,19 @@
-import { mutation, query } from "./_generated/server";
+import {
+  mutation,
+  query,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { v } from "convex/values";
 
 // ─── Helper ────────────────────────────────────────────────────────────────────
 
-async function requireAdmin(ctx: {
-  auth: { getUserIdentity: () => Promise<{ subject: string } | null> };
-  db: any;
-}) {
+async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Not authenticated");
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
     .unique();
   if (!user) throw new Error("User not found");
   if (user.role !== "admin") throw new Error("Admin access required");
@@ -27,7 +29,6 @@ export const submitMessage = mutation({
     email: v.string(),
     subject: v.string(),
     message: v.string(),
-    userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     if (!args.name.trim() || !args.email.trim() || !args.message.trim()) {
@@ -37,13 +38,15 @@ export const submitMessage = mutation({
       throw new Error("ההודעה קצרה מדי (מינימום 20 תווים)");
     }
 
+    const identity = await ctx.auth.getUserIdentity();
+
     const id = await ctx.db.insert("contactMessages", {
       name: args.name.trim(),
       email: args.email.trim(),
       subject: args.subject,
       message: args.message.trim(),
       status: "new",
-      userId: args.userId,
+      userId: identity?.subject,
       createdAt: Date.now(),
     });
 
@@ -70,7 +73,7 @@ export const listMessages = query({
       .collect();
 
     if (args.status) {
-      return all.filter((m: any) => m.status === args.status);
+      return all.filter((message) => message.status === args.status);
     }
 
     return all;
@@ -105,9 +108,9 @@ export const getStats = query({
     const all = await ctx.db.query("contactMessages").collect();
     return {
       total: all.length,
-      new: all.filter((m: any) => m.status === "new").length,
-      read: all.filter((m: any) => m.status === "read").length,
-      replied: all.filter((m: any) => m.status === "replied").length,
+      new: all.filter((message) => message.status === "new").length,
+      read: all.filter((message) => message.status === "read").length,
+      replied: all.filter((message) => message.status === "replied").length,
     };
   },
 });

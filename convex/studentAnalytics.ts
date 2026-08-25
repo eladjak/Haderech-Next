@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, type QueryCtx } from "./_generated/server";
 
 // ==========================================
 // Student Analytics - Phase 39
@@ -6,13 +6,13 @@ import { query } from "./_generated/server";
 // ==========================================
 
 // Helper: resolve user from auth identity
-async function resolveUser(ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> }; db: any }) {
+async function resolveUser(ctx: QueryCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return null;
 
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
     .unique();
 
   return user ? { user, identity } : null;
@@ -47,19 +47,6 @@ export const getStudentOverview = query({
       (sum, p) => sum + (p.watchTimeSeconds || 0),
       0
     );
-
-    // XP from xpEvents table
-    const xpEvents = await ctx.db
-      .query("xpEvents")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-    const totalXp = xpEvents.reduce((sum, e) => sum + e.points, 0);
-
-    // Badges from userBadges table
-    const badges = await ctx.db
-      .query("userBadges")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
 
     // Certificates
     const certificates = await ctx.db
@@ -134,11 +121,6 @@ export const getStudentOverview = query({
       });
     }
 
-    // Recent XP events (last 5)
-    const recentXpEvents = xpEvents
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, 5);
-
     // Total lessons across all courses
     let totalLessonsCount = 0;
     for (const enrollment of enrollments) {
@@ -154,11 +136,6 @@ export const getStudentOverview = query({
       completedLessons,
       totalLessons: totalLessonsCount,
       totalWatchTime,
-      totalXp,
-      level: Math.floor(totalXp / 100) + 1,
-      xpInCurrentLevel: totalXp % 100,
-      xpNeededForNextLevel: 100,
-      badgeCount: badges.length,
       certificateCount: certificates.length,
       chatSessionCount: allChatSessions.length,
       simSessionCount: allSimSessions.length,
@@ -166,7 +143,6 @@ export const getStudentOverview = query({
       courseProgress: courseProgress.sort(
         (a, b) => b.lastActivity - a.lastActivity
       ),
-      recentXpEvents,
     };
   },
 });
@@ -185,7 +161,7 @@ export const getContinueLearning = query({
 
     const enrollments = await ctx.db
       .query("enrollments")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     if (enrollments.length === 0) return null;
@@ -198,24 +174,26 @@ export const getContinueLearning = query({
 
       const lessons = await ctx.db
         .query("lessons")
-        .withIndex("by_course_order", (q: any) =>
+        .withIndex("by_course_order", (q) =>
           q.eq("courseId", enrollment.courseId)
         )
         .order("asc")
         .collect();
 
-      const publishedLessons = lessons.filter((l: any) => l.published);
+      const publishedLessons = lessons.filter((lesson) => lesson.published);
       if (publishedLessons.length === 0) continue;
 
       const progress = await ctx.db
         .query("progress")
-        .withIndex("by_user_course", (q: any) =>
+        .withIndex("by_user_course", (q) =>
           q.eq("userId", user._id).eq("courseId", enrollment.courseId)
         )
         .collect();
 
       const completedIds = new Set(
-        progress.filter((p: any) => p.completed).map((p: any) => p.lessonId)
+        progress
+          .filter((progressEntry) => progressEntry.completed)
+          .map((progressEntry) => progressEntry.lessonId)
       );
 
       const completedCount = completedIds.size;
@@ -228,13 +206,15 @@ export const getContinueLearning = query({
       if (percent === 100) continue;
 
       const nextLesson = publishedLessons.find(
-        (l: any) => !completedIds.has(l._id)
+        (lesson) => !completedIds.has(lesson._id)
       );
       if (!nextLesson) continue;
 
       const lastActivity =
         progress.length > 0
-          ? Math.max(...progress.map((p: any) => p.lastWatchedAt))
+          ? Math.max(
+              ...progress.map((progressEntry) => progressEntry.lastWatchedAt)
+            )
           : enrollment.enrolledAt;
 
       candidates.push({
@@ -283,7 +263,7 @@ export const getWeeklyGoal = query({
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const allProgress = await ctx.db
       .query("progress")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     // Sum watch time this week
@@ -361,29 +341,29 @@ export const getRecommendedCourses = query({
 
     const enrollments = await ctx.db
       .query("enrollments")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     const enrolledCourseIds = new Set(
-      enrollments.map((e: any) => e.courseId as string)
+      enrollments.map((enrollment) => enrollment.courseId)
     );
 
     const allCourses = await ctx.db
       .query("courses")
-      .withIndex("by_published", (q: any) => q.eq("published", true))
+      .withIndex("by_published", (q) => q.eq("published", true))
       .order("asc")
       .collect();
 
     const recommended = [];
 
     for (const course of allCourses) {
-      if (enrolledCourseIds.has(course._id as string)) continue;
+      if (enrolledCourseIds.has(course._id)) continue;
 
       const lessons = await ctx.db
         .query("lessons")
-        .withIndex("by_course", (q: any) => q.eq("courseId", course._id))
+        .withIndex("by_course", (q) => q.eq("courseId", course._id))
         .collect();
-      const publishedLessons = lessons.filter((l: any) => l.published);
+      const publishedLessons = lessons.filter((lesson) => lesson.published);
 
       recommended.push({
         _id: course._id as string,

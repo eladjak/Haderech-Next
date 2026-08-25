@@ -13,36 +13,45 @@ describe("scoreConversationHeuristic (free-degradation scorer)", () => {
     expect(r.feedback).toContain("0 הודעות");
   });
 
-  it("rewards a rich, curious, lengthy conversation with a higher score", () => {
-    const rich = scoreConversationHeuristic([
-      msg("היי, נעים מאוד! מה שלומך היום? ספרי לי קצת על עצמך בבקשה"),
-      msg("איך את מרגישה עם כל הבלגן של הדייטים האונליין האלה?"),
-      msg("מעניין מאוד. ולמה דווקא בחרת ללמוד את התחום הזה?"),
-      msg("אני ממש מתחבר לזה. איך נראה יום מושלם בשבילך?"),
+  it("rewards contextual, respectful language over pressure", () => {
+    const respectful = scoreConversationHeuristic([
+      msg("נשמע שזה היה יום עמוס. מתאים לך לספר מה היה חשוב לך בו?"),
+      msg("אני שומע. אפשר גם להחליף נושא אם נוח לך יותר."),
+      msg("מעניין, ולדעתי אפשר להתקדם בקצב שנוח לשנינו."),
     ]);
-    const sparse = scoreConversationHeuristic([msg("היי"), msg("אוקיי")]);
-    expect(rich.score).toBeGreaterThan(sparse.score);
-    expect(rich.score).toBeGreaterThanOrEqual(75);
+    const pressuring = scoreConversationHeuristic([
+      msg("את חייבת לענות ואין לך ברירה"),
+    ]);
+    expect(respectful.score).toBeGreaterThan(pressuring.score);
+    expect(respectful.score).toBeLessThanOrEqual(85);
   });
 
-  it("credits asking questions as a strength", () => {
+  it("credits a context-appropriate question as a possible strength", () => {
     const r = scoreConversationHeuristic([
       msg("מה את אוהבת לעשות בזמן הפנוי?"),
       msg("איך היה השבוע שלך?"),
       msg("ספרי לי עוד על הטיול שלך"),
     ]);
-    expect(r.strengths.some((s) => s.includes("שאלות"))).toBe(true);
+    expect(r.strengths.some((s) => s.includes("שאלה"))).toBe(true);
   });
 
-  it("suggests asking more questions when the user asked none", () => {
+  it("offers one optional question when the user asked none", () => {
     const r = scoreConversationHeuristic([
       msg("אוקיי."),
       msg("נחמד."),
       msg("בסדר גמור."),
     ]);
     expect(
-      r.improvements.some((i) => i.includes("שאלות"))
+      r.improvements.some((i) => i.includes("שאלה אחת"))
     ).toBe(true);
+  });
+
+  it("does not penalize a short answer or a clear stop", () => {
+    const short = scoreConversationHeuristic([msg("לא")]);
+    const stopped = scoreConversationHeuristic([msg("אני רוצה לעצור")]);
+    expect(short.score).toBeGreaterThanOrEqual(50);
+    expect(stopped.score).toBeGreaterThanOrEqual(short.score);
+    expect(stopped.feedback).toContain("עצירה אינן מורידות נקודות");
   });
 
   it("never returns more than 3 strengths / improvements", () => {

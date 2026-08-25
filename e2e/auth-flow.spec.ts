@@ -1,10 +1,23 @@
 import { test, expect } from "@playwright/test";
 
+async function skipSignedOutContractInDemo(page: import("@playwright/test").Page) {
+  // The demo badge is rendered after hydration. An immediate `isVisible()` can
+  // race that render and accidentally exercise a signed-out contract while the
+  // app is intentionally running with its demo auth bypass enabled.
+  const demoMode = await page
+    .getByText("Demo Admin", { exact: true })
+    .waitFor({ state: "visible", timeout: 3_000 })
+    .then(() => true)
+    .catch(() => false);
+  test.skip(demoMode, "Signed-out auth contracts require DEMO_MODE=false");
+}
+
 test.describe("Authentication Flow", () => {
   test("should display sign-in and sign-up buttons for unauthenticated users", async ({
     page,
   }) => {
     await page.goto("/");
+    await skipSignedOutContractInDemo(page);
 
     const header = page.locator("header");
 
@@ -21,10 +34,11 @@ test.describe("Authentication Flow", () => {
     page,
   }) => {
     await page.goto("/");
+    await skipSignedOutContractInDemo(page);
     await page.setViewportSize({ width: 375, height: 667 });
 
     // Open mobile menu
-    const menuButton = page.locator('button[aria-label="תפריט ניווט"]');
+    const menuButton = page.locator('button[aria-controls="mobile-nav-menu"]');
     await menuButton.click();
 
     const mobileMenu = page.locator("#mobile-nav-menu");
@@ -43,21 +57,17 @@ test.describe("Authentication Flow", () => {
   test("should redirect unauthenticated users from dashboard to sign-in", async ({
     page,
   }) => {
-    // Try to access a protected route
+    await page.goto("/");
+    await skipSignedOutContractInDemo(page);
     await page.goto("/dashboard");
 
-    // Clerk should redirect to sign-in or show a sign-in prompt
-    // The exact behavior depends on middleware config, so we check
-    // either a redirect happened or the page is not the dashboard
-    const url = page.url();
-    const isDashboard =
-      url.includes("/dashboard") &&
-      (await page.locator("text=האזור שלי").isVisible().catch(() => false));
-
-    // If we reached the dashboard with its content, auth is not enforced
-    // If we were redirected or see sign-in, auth is enforced
-    // Both are valid states depending on the auth configuration
-    expect(url).toBeTruthy();
+    // This assertion must fail if protected dashboard content is reachable.
+    // Demo-mode E2E runs should exclude this auth contract explicitly rather
+    // than treating an auth bypass as a valid production outcome.
+    await expect(page).not.toHaveURL(/\/dashboard(?:\/|\?|#|$)/);
+    await expect(
+      page.getByRole("heading", { name: /^(האזור שלי|שלום)/ }).first()
+    ).not.toBeVisible();
   });
 
   test("should have sign-up CTA links on the landing page", async ({
@@ -90,6 +100,7 @@ test.describe("Authentication Flow", () => {
     page,
   }) => {
     await page.goto("/");
+    await skipSignedOutContractInDemo(page);
 
     const nav = page.locator('nav[aria-label="ניווט ראשי"]');
 

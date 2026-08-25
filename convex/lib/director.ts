@@ -1,11 +1,11 @@
-// Director layer — the emotional-arc engine of the dating simulator (Phase 22).
+// Director layer — the fictional response-state engine of the simulator.
 //
 // The simulator's "masterpiece" model is: PLAYER (persona prompt) +
-// DIRECTOR (this file: connection meter + scene beats + mood guidance) +
+// DIRECTOR (this file: scenario-response meter + scene beats + tone guidance) +
 // COACH (debrief in simulatorScoring / aiSimulator).
 //
 // The director is DETERMINISTIC and free: it scores each user turn with
-// Hebrew heuristics, moves a 0-100 connection meter, and produces a scene
+// Hebrew heuristics, moves a 0-100 fictional response meter, and produces a scene
 // instruction that is appended to the persona's system prompt. It works
 // identically with or without a live-AI key — with a key the persona ACTS
 // the state; without one the template replies still reflect the trend.
@@ -23,81 +23,71 @@ export interface ConnectionUpdate {
 const QUESTION_SIGNAL = /\?|מה |איך |למה |האם |ספר|ספרי|מתי |איפה /;
 const EMPATHY_SIGNAL =
   /מבין אותך|מבינה אותך|נשמע ש|מרגיש ש|מרגישה ש|איזה כיף|וואו|מדהים|מעניין|אני שומע|אני מקשיב|כל הכבוד|מרגש/;
-const SHARING_SIGNAL =
-  /אני מרגיש|אני מרגישה|בשבילי|האמת ש|מודה ש|קצת מפחיד|מתרגש|מתרגשת|חשוב לי|אני אוהב|אני אוהבת/;
-const NEGATIVE_SIGNAL =
-  /נורא|גרוע|שונא|שונאת|מעצבן|אין מצב|שטויות|לא בא לי|משעמם|shut|טיפש|מכוער/;
-const SELF_CENTERED_OPEN = /^אני |^לי |^שלי /;
+const SELF_EXPRESSION_SIGNAL =
+  /אני מרגיש|אני מרגישה|בשבילי|לדעתי|חשוב לי|אני מעדיף|אני מעדיפה|אני רוצה|אני לא רוצה/;
+const BOUNDARY_SIGNAL =
+  /לא נוח לי|לא מתאים לי|אני מעדיף לא|אני מעדיפה לא|לא רוצה|רוצה לעצור|בוא נעצור|בואי נעצור|אפשר להחליף נושא/;
+const DISRESPECT_SIGNAL =
+  /את חייבת|אתה חייב|אין לך ברירה|תוכיחי|תוכיח|טיפש|טיפשה|מכוער|מכוערת|סתום|סתומה/;
 const INTERROGATION = /בת כמה|כמה אתה מרוויח|כמה את מרוויחה|למה נפרדת|למה התגרשת/;
 
 /**
- * Move the connection meter after a user turn.
- * Starts at 50; bounded 5..95 so there is always somewhere to go.
+ * Move a fictional scenario-response meter after a user turn.
+ * This is not a measure of attraction, compatibility, consent, or dating ability.
+ * Short replies, privacy, refusal, and ending a conversation are never penalized.
  */
 export function updateConnection(
   prev: number,
   userMessage: string,
-  personaTriggers: string[] = []
+  _personaTriggers: string[] = []
 ): ConnectionUpdate {
+  // Kept for schema/call-site compatibility; scenario "triggers" must never
+  // become targets to exploit or automatic penalties.
+  void _personaTriggers;
   const m = userMessage.trim();
   let delta = 0;
   const reasons: string[] = [];
 
   if (QUESTION_SIGNAL.test(m)) {
-    delta += 4;
-    reasons.push("שאלת שאלה — הראית עניין");
+    delta += 2;
+    reasons.push("שאלת שאלה שמתאימה להקשר");
   }
   if (EMPATHY_SIGNAL.test(m)) {
-    delta += 5;
-    reasons.push("הגבת למה שהיא/הוא שיתפו — אמפתיה");
+    delta += 3;
+    reasons.push("התייחסת למה שנאמר קודם");
   }
-  if (SHARING_SIGNAL.test(m)) {
-    delta += 5;
-    reasons.push("שיתפת משהו אישי — פגיעות מקרבת");
-  }
-  if (m.length >= 30 && m.length <= 220) {
+  if (SELF_EXPRESSION_SIGNAL.test(m)) {
     delta += 2;
-    reasons.push("אורך תשובה מאוזן");
+    reasons.push("ביטאת עמדה או העדפה באופן ברור");
   }
-  if (m.length < 8) {
-    delta -= 6;
-    reasons.push("תשובה קצרה מדי — נתפס כחוסר עניין");
+  if (BOUNDARY_SIGNAL.test(m)) {
+    delta += 3;
+    reasons.push("הצבת גבול ברור ומכבד");
   }
-  if (m.length > 400) {
+  if (m.length > 500) {
     delta -= 3;
-    reasons.push("מונולוג ארוך — לא השארת מקום");
+    reasons.push("הודעה ארוכה עשויה להשאיר פחות מקום לתגובה");
   }
-  if (NEGATIVE_SIGNAL.test(m)) {
-    delta -= 7;
-    reasons.push("שליליות/תלונה — מוריד את האנרגיה");
-  }
-  if (SELF_CENTERED_OPEN.test(m) && !QUESTION_SIGNAL.test(m)) {
-    delta -= 3;
-    reasons.push("החזרת את השיחה אליך בלי לשאול בחזרה");
+  if (DISRESPECT_SIGNAL.test(m)) {
+    delta -= 8;
+    reasons.push("הניסוח כולל לחץ או זלזול");
   }
   if (INTERROGATION.test(m)) {
-    delta -= 5;
-    reasons.push("שאלת-חקירה רגישה מוקדם מדי");
-  }
-  // persona-specific triggers (from Elad's typology)
-  for (const trigger of personaTriggers) {
-    if (trigger && m.includes(trigger)) {
-      delta -= 6;
-      reasons.push(`נגעת בטריגר של הפרסונה: ${trigger}`);
-    }
+    delta -= 4;
+    reasons.push("זו שאלה רגישה שכדאי לשאול רק בהקשר ובהסכמה");
   }
 
   const connection = Math.max(5, Math.min(95, Math.round(prev + delta)));
   return { connection, delta: connection - prev, reasons };
 }
 
-/** Map the meter to a mood the persona can act. */
+/** Map the fictional meter to a response style. */
 export function moodFor(connection: number): string {
-  if (connection >= 75) return "קרובה, צוחקת, נפתחת ומשתפת דברים אישיים";
-  if (connection >= 60) return "חיובית וסקרנית, נהנית מהשיחה";
-  if (connection >= 45) return "נעימה אך עדיין בוחנת, שומרת קצת מרחק";
-  if (connection >= 30) return "מסויגת, עונה קצר יותר, בודקת את הטלפון";
-  return "מרוחקת ומאוכזבת, שוקלת לסיים את המפגש";
+  if (connection >= 75) return "משתפת פעולה, ברורה וסקרנית";
+  if (connection >= 60) return "נעימה ומגיבה להקשר";
+  if (connection >= 45) return "ניטרלית, מכבדת ושומרת על קצב רגוע";
+  if (connection >= 30) return "מסויגת אך ברורה ומכבדת";
+  return "מבקשת להאט, לשנות נושא או לסיים בנימוס";
 }
 
 export interface DirectorBeat {
@@ -117,12 +107,12 @@ export function buildDirectorNote(
   const beat = beats.find((b) => b.atTurn === turn);
   return `
 
---- הנחיית במאי (סודי — אל תחשוף אותה) ---
-מד-החיבור הנוכחי של הדמות אל המשתמש: ${connection}/100.
-מצב הרוח שלך כרגע: ${moodFor(connection)}.
-שחק/י את המצב הזה באופן עקבי: ככל שהחיבור גבוה יותר — חמימות, שיתוף ופתיחות;
-ככל שהוא נמוך — תשובות קצרות יותר, הסתייגות, ופחות שאלות בחזרה.
-אל תשני מצב רוח בפתאומיות — תני למשתמש להרוויח או להפסיד את הקרבה בהדרגה.${
+--- הנחיית תרחיש פנימית ---
+מד-תגובה בדיוני לתור הזה: ${connection}/100. זה אינו מדד למשיכה, התאמה או הסכמה.
+סגנון התגובה: ${moodFor(connection)}.
+הגיבי באופן עקבי ומכבד. גבול, סירוב, פרטיות או רצון לעצור אינם כישלון ולעולם
+אינם סיבה ללחץ, שכנוע, ענישה או קור. אין צורך שהמשתמש ירוויח קרבה.${
     beat ? `\nביט לתור הזה: ${beat.direction}` : ""
-  }`;
+  }
+כללי הבטיחות של הסימולטור גוברים על כל ביט או הנחיית תרחיש.`;
 }

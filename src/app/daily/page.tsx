@@ -33,28 +33,39 @@ function formatShortDate(dayOfYear: number, year: number): string {
 
 // ─── Confetti Component ───────────────────────────────────────────────────────
 
-function Confetti({ active }: { active: boolean }) {
-  const [particles, setParticles] = useState<
-    Array<{ id: number; x: number; color: string; delay: number; size: number }>
-  >([]);
+interface ConfettiParticle {
+  id: number;
+  x: number;
+  color: string;
+  delay: number;
+  size: number;
+  duration: number;
+  fallDistance: number;
+}
+
+function createConfettiParticles(): ConfettiParticle[] {
+  const colors = ["#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#ef4444"];
+  return Array.from({ length: 30 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    color: colors[Math.floor(Math.random() * colors.length)] ?? "#f59e0b",
+    delay: Math.random() * 0.5,
+    size: Math.random() * 8 + 6,
+    duration: 1 + Math.random(),
+    fallDistance: Math.random() * 100 + 50,
+  }));
+}
+
+function ConfettiParticles() {
+  const [particles] = useState(createConfettiParticles);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    if (active) {
-      const colors = ["#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#ef4444"];
-      const newParticles = Array.from({ length: 30 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        color: colors[Math.floor(Math.random() * colors.length)] ?? "#f59e0b",
-        delay: Math.random() * 0.5,
-        size: Math.random() * 8 + 6,
-      }));
-      setParticles(newParticles);
-      const timer = setTimeout(() => setParticles([]), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [active]);
+    const timer = setTimeout(() => setVisible(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  if (!active || particles.length === 0) return null;
+  if (!visible) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden" aria-hidden="true">
@@ -69,14 +80,18 @@ function Confetti({ active }: { active: boolean }) {
             height: p.size,
             backgroundColor: p.color,
             animationDelay: `${p.delay}s`,
-            animationDuration: `${1 + Math.random()}s`,
-            transform: `translateY(${Math.random() * 100 + 50}vh)`,
+            animationDuration: `${p.duration}s`,
+            transform: `translateY(${p.fallDistance}vh)`,
             transition: `transform 2s ease-in`,
           }}
         />
       ))}
     </div>
   );
+}
+
+function Confetti({ active }: { active: boolean }) {
+  return active ? <ConfettiParticles /> : null;
 }
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────

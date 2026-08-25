@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
 import { SessionFeedback } from "./session-feedback";
+import { SimulatorAccessPanel } from "./simulator-access-panel";
 
 interface SimulatorChatProps {
   sessionId: Id<"simulatorSessions">;
@@ -13,6 +14,7 @@ interface SimulatorChatProps {
 
 export function SimulatorChat({ sessionId }: SimulatorChatProps) {
   const session = useQuery(api.simulator.getSession, { sessionId });
+  const access = useQuery(api.simulator.getAccessStatus);
   const sendMessage = useAction(api.simulator.sendMessage);
   const endSession = useAction(api.simulator.endSession);
 
@@ -33,10 +35,7 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
 
   // Show feedback once session is completed with score
   useEffect(() => {
-    if (
-      session?.status === "completed" &&
-      session.score !== undefined
-    ) {
+    if (session?.status === "completed" && session.score !== undefined) {
       setShowFeedback(true);
     }
   }, [session?.status, session?.score]);
@@ -52,7 +51,12 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
     try {
       await sendMessage({ sessionId, content: message });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בשליחת הודעה");
+      const message = err instanceof Error ? err.message : "";
+      setError(
+        message.includes("SIMULATOR_TRIAL_LOCKED")
+          ? "הניסיון החינמי הסתיים. אפשר לסיים את התרגול ולקבל סיכום בסיסי; המשך השימוש ייפתח עם מסלול הזכאות."
+          : message || "שגיאה בשליחת הודעה",
+      );
       setInputValue(message); // Restore input on error
     } finally {
       setIsSending(false);
@@ -118,9 +122,7 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
         <div className="h-10 w-10 animate-spin rounded-full border-3 border-brand-500 border-t-transparent" />
-        <p className="text-zinc-600 dark:text-zinc-400">
-          מנתח את השיחה שלך...
-        </p>
+        <p className="text-zinc-600 dark:text-zinc-400">מנתח את השיחה שלך...</p>
       </div>
     );
   }
@@ -141,6 +143,9 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
               <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                 {scenario.title}
               </p>
+              <p className="mt-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                דמות AI בדיונית · אין כאן מדד למשיכה, התאמה או הסכמה
+              </p>
             </div>
             {session.status === "active" && (
               <button
@@ -153,40 +158,6 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
               </button>
             )}
           </div>
-          {/* Live connection meter (Phase 22) — the director's emotional arc */}
-          {session.status === "active" &&
-            typeof session.currentConnection === "number" && (
-              <div className="mt-2 flex items-center gap-2">
-                <span
-                  className="text-xs text-zinc-500 dark:text-zinc-400"
-                  id="connection-meter-label"
-                >
-                  💗 חיבור
-                </span>
-                <div
-                  className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
-                  role="meter"
-                  aria-labelledby="connection-meter-label"
-                  aria-valuenow={session.currentConnection}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                >
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      session.currentConnection >= 65
-                        ? "bg-emerald-500"
-                        : session.currentConnection >= 40
-                          ? "bg-amber-500"
-                          : "bg-orange-500"
-                    }`}
-                    style={{ width: `${session.currentConnection}%` }}
-                  />
-                </div>
-                <span className="text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
-                  {session.currentConnection}
-                </span>
-              </div>
-            )}
         </div>
       )}
 
@@ -251,6 +222,12 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
       </div>
 
       {/* Error */}
+      {access && !access.hasFullAccess && (
+        <div className="mx-4 mb-2">
+          <SimulatorAccessPanel access={access} compact />
+        </div>
+      )}
+
       {error && (
         <div className="mx-4 mb-2 rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-400">
           {error}
@@ -258,7 +235,7 @@ export function SimulatorChat({ sessionId }: SimulatorChatProps) {
       )}
 
       {/* Input */}
-      {session.status === "active" && (
+      {session.status === "active" && access?.mode !== "locked" && (
         <div className="flex-shrink-0 border-t border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
           <div className="mx-auto flex max-w-2xl items-end gap-2">
             <textarea

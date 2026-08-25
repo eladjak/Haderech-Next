@@ -25,6 +25,9 @@ interface ConfettiParticle {
   color: string;
   size: number;
   rotation: number;
+  spinDirection: 1 | -1;
+  drift: number;
+  repeatDelay: number;
 }
 
 const CONFETTI_COLORS = [
@@ -45,6 +48,9 @@ function generateParticles(count: number): ConfettiParticle[] {
     color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
     size: 6 + Math.random() * 8,
     rotation: Math.random() * 360,
+    spinDirection: Math.random() > 0.5 ? 1 : -1,
+    drift: (Math.random() - 0.5) * 80,
+    repeatDelay: Math.random() * 2,
   }));
 }
 
@@ -73,15 +79,15 @@ function ConfettiCanvas() {
           animate={{
             y: ["0%", "110%"],
             opacity: [1, 1, 0],
-            rotate: [p.rotation, p.rotation + 360 * (Math.random() > 0.5 ? 1 : -1)],
-            x: [0, (Math.random() - 0.5) * 80],
+            rotate: [p.rotation, p.rotation + 360 * p.spinDirection],
+            x: [0, p.drift],
           }}
           transition={{
             duration: p.duration,
             delay: p.delay,
             ease: "easeIn",
             repeat: Infinity,
-            repeatDelay: Math.random() * 2,
+            repeatDelay: p.repeatDelay,
           }}
         />
       ))}
@@ -168,16 +174,39 @@ export function CourseCompletionModal({
   nextCourseName,
 }: CourseCompletionModalProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Trap focus and handle Escape
   useEffect(() => {
     if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", handleKey);
     closeRef.current?.focus();
-    return () => document.removeEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      previouslyFocused?.focus();
+    };
   }, [isOpen, onClose]);
 
   // Prevent body scroll when open
@@ -209,6 +238,7 @@ export function CourseCompletionModal({
 
           {/* Modal */}
           <div
+            ref={dialogRef}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
@@ -229,7 +259,7 @@ export function CourseCompletionModal({
                 ref={closeRef}
                 type="button"
                 onClick={onClose}
-                className="absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                className="absolute end-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
                 aria-label="סגור"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">

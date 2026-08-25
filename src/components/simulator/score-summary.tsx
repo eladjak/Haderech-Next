@@ -144,7 +144,7 @@ export function ScoreSummary({
         </div>
         <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
           <div className="flex items-center justify-between text-sm font-semibold">
-            <span className="text-zinc-700 dark:text-zinc-300">סה"כ</span>
+            <span className="text-zinc-700 dark:text-zinc-300">סה&quot;כ</span>
             <span className="tabular-nums text-zinc-900 dark:text-white">
               {totalScore}/{maxPossibleScore} ({percentScore}%)
             </span>

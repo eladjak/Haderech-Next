@@ -8,6 +8,7 @@ import {
   type LessonContext,
 } from "./lib/advisorTemplates";
 import { generateChat, readLlmKeys } from "./lib/llm";
+import { detectHighRisk, HIGH_RISK_RESPONSE } from "./lib/aiSafety";
 import {
   embedQuery,
   buildGroundingBlock,
@@ -16,6 +17,11 @@ import {
   MIN_SCORE,
   type RetrievedPassage,
 } from "./lib/retrieval";
+import {
+  requireCourseContentAccess,
+  requireIdentity,
+  requireSelfOrAdmin,
+} from "./lib/authGuard";
 
 // ============================================================
 // Smart Advisor — Phase 18
@@ -37,6 +43,8 @@ export const getLessonContext = query({
   handler: async (ctx, args) => {
     const lesson = await ctx.db.get(args.lessonId);
     if (!lesson) return null;
+    await requireCourseContentAccess(ctx, lesson.courseId);
+    if (args.userId) await requireSelfOrAdmin(ctx, args.userId);
 
     // Course lessons for progress denominator
     const allLessons = await ctx.db
@@ -101,6 +109,7 @@ export const getRecommendedScenario = query({
   handler: async (ctx, args) => {
     const lesson = await ctx.db.get(args.lessonId);
     if (!lesson) return null;
+    await requireCourseContentAccess(ctx, lesson.courseId);
 
     const profile = getPhaseProfile(lesson.phaseNumber);
 
@@ -184,12 +193,28 @@ export const ask = action({
   ): Promise<{
     reply: string;
     usedAi: boolean;
+    source: "live" | "template" | "safety";
     suggestSimulator: boolean;
     sources: string[];
   }> => {
+    const identity = await requireIdentity(ctx);
+    const isAdmin = await ctx.runQuery(api.users.isAdmin, {
+      clerkId: identity.subject,
+    });
+    if (!isAdmin) throw new Error("ADMIN_ACCESS_REQUIRED");
     const trimmed = args.message.trim();
     if (!trimmed) throw new Error("Message cannot be empty");
     if (trimmed.length > 2000) throw new Error("Message too long");
+
+    if (detectHighRisk(trimmed)) {
+      return {
+        reply: HIGH_RISK_RESPONSE,
+        usedAi: false,
+        source: "safety",
+        suggestSimulator: false,
+        sources: [],
+      };
+    }
 
     // Resolve lesson context (shared with simulator + course).
     let lessonContext: LessonContext | null = null;
@@ -249,6 +274,7 @@ export const ask = action({
     return {
       reply: ai?.text ?? template.text,
       usedAi: ai !== null,
+      source: ai !== null ? "live" : "template",
       suggestSimulator: template.suggestSimulator,
       sources: ai !== null ? sources : [],
     };

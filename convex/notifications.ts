@@ -6,6 +6,7 @@ import { v } from "convex/values";
 export const list = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     return await ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -18,6 +19,7 @@ export const list = query({
 export const countUnread = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.userId);
     const unread = await ctx.db
       .query("notifications")
       .withIndex("by_user_read", (q) =>

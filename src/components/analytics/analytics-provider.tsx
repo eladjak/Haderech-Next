@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { isAnalyticsConsentGranted } from "@/lib/analytics-consent";
 
 // Analytics event types
 export type AnalyticsEvent =
@@ -47,7 +48,11 @@ export type AnalyticsEvent =
 // Global analytics function
 export function trackEvent(event: AnalyticsEvent) {
   // Google Analytics 4
-  if (typeof window !== "undefined" && "gtag" in window) {
+  if (
+    typeof window !== "undefined" &&
+    isAnalyticsConsentGranted() &&
+    "gtag" in window
+  ) {
     (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
       "event",
       event.name,

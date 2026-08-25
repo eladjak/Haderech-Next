@@ -195,7 +195,7 @@ export default function AdminEmailsPage() {
                 מאת:
               </span>
               <span className="text-zinc-700 dark:text-zinc-300">
-                הדרך &lt;noreply@haderech.co.il&gt;
+                הדרך &lt;haderech@ohlove.co.il&gt;
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs">

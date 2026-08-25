@@ -16,7 +16,7 @@ export const FORUM_CATEGORIES: {
 }[] = [
   { value: "general", label: "כללי", emoji: "💬" },
   { value: "dating-tips", label: "טיפים", emoji: "💡" },
-  { value: "success-stories", label: "סיפורי הצלחה", emoji: "💕" },
+  { value: "success-stories", label: "שיתופים מהדרך", emoji: "💕" },
   { value: "questions", label: "שאלות", emoji: "❓" },
   { value: "advice", label: "עצות", emoji: "🎯" },
 ];
@@ -25,7 +25,7 @@ export const CATEGORY_LABELS: Record<ForumCategoryOrAll, string> = {
   all: "הכל",
   general: "כללי",
   "dating-tips": "טיפים",
-  "success-stories": "סיפורי הצלחה",
+  "success-stories": "שיתופים מהדרך",
   questions: "שאלות",
   advice: "עצות",
 };

@@ -44,6 +44,7 @@ export default function AdminCommentsPage() {
   const removeComment = useMutation(api.adminComments.remove);
 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [referenceTime] = useState(Date.now);
 
   // Use mock data if Convex returns undefined (not connected)
   const comments = commentsRaw ?? mockComments;
@@ -57,7 +58,7 @@ export default function AdminCommentsPage() {
   );
 
   const formatTime = (timestamp: number) => {
-    const diff = Date.now() - timestamp;
+    const diff = referenceTime - timestamp;
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return "עכשיו";
     if (minutes < 60) return `לפני ${minutes} דקות`;

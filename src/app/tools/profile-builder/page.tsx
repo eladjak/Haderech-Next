@@ -2,8 +2,6 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { useAction } from "convex/react";
-import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,6 +45,54 @@ const RELATIONSHIP_TYPES: { value: RelationshipType; label: string }[] = [
 const STEP_LABELS = ["פלטפורמה", "עלייך", "מחפש", "ביוגרפיה", "עריכה"];
 const TOTAL_STEPS = 5;
 
+const RELATIONSHIP_LABELS: Record<RelationshipType, string> = {
+  serious: "קשר רציני",
+  casual: "היכרות קלילה",
+  open: "היכרות בלי להגדיר מראש",
+  marriage: "קשר שמכוון למשפחה או נישואים",
+};
+
+const PLATFORM_LIMITS: Record<Platform, number> = {
+  tinder: 500,
+  bumble: 300,
+  hinge: 300,
+  okcupid: 1_000,
+  general: 400,
+};
+
+function cleanLocalField(value: string, maxLength = 240) {
+  return value.replace(/\s+/gu, " ").trim().slice(0, maxLength);
+}
+
+function truncateAtWord(value: string, maxLength: number) {
+  if (value.length <= maxLength) return value;
+  const candidate = value.slice(0, Math.max(0, maxLength - 1));
+  const lastSpace = candidate.lastIndexOf(" ");
+  const end = lastSpace > 40 ? lastSpace : candidate.length;
+  return `${candidate.slice(0, end).trim()}…`;
+}
+
+function buildLocalBios(data: FormData) {
+  const profession = cleanLocalField(data.profession, 120);
+  const hobbies = cleanLocalField(data.hobbies);
+  const thingsYouLove = cleanLocalField(data.thingsYouLove);
+  const partnerQualities = cleanLocalField(data.partnerQualities);
+  const relationship = data.lookingFor
+    ? RELATIONSHIP_LABELS[data.lookingFor]
+    : "היכרות שמתאימה לשני הצדדים";
+  const limit = PLATFORM_LIMITS[data.platform];
+  const detail = thingsYouLove ? ` דברים קטנים שעושים לי טוב: ${thingsYouLove}.` : "";
+  const qualities = partnerQualities
+    ? ` מעריכ/ה במיוחד ${partnerQualities}, בלי לצפות מאדם אחד להתאים לרשימה.`
+    : "";
+
+  return [
+    `עוסק/ת ב${profession}, ובזמן הפנוי נהנה/ית מ${hobbies}.${detail} כאן בשביל ${relationship}, בקצב שנעים לשני הצדדים.${qualities}`,
+    `כמה דברים עליי: ${hobbies}, סקרנות לגבי אנשים, ועיסוק ב${profession}.${detail} אשמח להכיר בכיוון של ${relationship} — בכנות, בהומור ובלי משחקים.${qualities}`,
+    `${hobbies} הם חלק טוב מהשבוע שלי, וביום־יום אני בתחום ${profession}. מחפש/ת ${relationship}. אם משהו כאן מסקרן אותך, אפשר להתחיל בשיחה פשוטה.${qualities}`,
+  ].map((bio) => truncateAtWord(bio, limit));
+}
+
 // -----------------------------------------------
 // Component
 // -----------------------------------------------
@@ -65,11 +111,8 @@ export default function ProfileBuilderPage() {
   const [bios, setBios] = useState<string[]>([]);
   const [selectedBioIndex, setSelectedBioIndex] = useState(0);
   const [editedBio, setEditedBio] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedBio, setCopiedBio] = useState(false);
-
-  const generateBio = useAction(api.tools.generateProfileBio);
 
   const handleNext = useCallback(() => {
     setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
@@ -79,33 +122,22 @@ export default function ProfileBuilderPage() {
     setStep((prev) => Math.max(prev - 1, 1));
   }, []);
 
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = useCallback(() => {
     if (!formData.age || !formData.profession || !formData.hobbies || !formData.lookingFor) return;
-
-    setIsLoading(true);
     setError(null);
 
-    try {
-      const result = await generateBio({
-        platform: formData.platform,
-        age: parseInt(formData.age, 10),
-        profession: formData.profession,
-        hobbies: formData.hobbies,
-        thingsYouLove: formData.thingsYouLove,
-        lookingFor: formData.lookingFor,
-        partnerQualities: formData.partnerQualities,
-      });
-      setBios(result);
-      setSelectedBioIndex(0);
-      setEditedBio(result[0] ?? "");
-      setStep(4);
-    } catch (err) {
-      setError("שגיאה ביצירת הביו. נסה שוב.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+    const age = Number(formData.age);
+    if (!Number.isSafeInteger(age) || age < 18 || age > 100) {
+      setError("הכלי מיועד למבוגרים בלבד. יש להזין גיל בין 18 ל־100; הגיל נשאר בדפדפן ואינו נכנס לביו.");
+      return;
     }
-  }, [generateBio, formData]);
+
+    const result = buildLocalBios(formData);
+    setBios(result);
+    setSelectedBioIndex(0);
+    setEditedBio(result[0] ?? "");
+    setStep(4);
+  }, [formData]);
 
   const handleSelectBio = useCallback(
     (index: number) => {
@@ -122,7 +154,9 @@ export default function ProfileBuilderPage() {
   }, [editedBio]);
 
   const isStep3Valid =
-    formData.age.trim() !== "" &&
+    Number.isSafeInteger(Number(formData.age)) &&
+    Number(formData.age) >= 18 &&
+    Number(formData.age) <= 100 &&
     formData.profession.trim() !== "" &&
     formData.hobbies.trim() !== "";
 
@@ -150,10 +184,17 @@ export default function ProfileBuilderPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
-            <h1 className="mb-1 text-3xl font-bold text-zinc-900 dark:text-white">בונה הפרופיל</h1>
+            <h1 className="mb-1 text-3xl font-bold text-zinc-900 dark:text-white">בונה ביו מקומי</h1>
             <p className="text-zinc-500 dark:text-zinc-400">
-              AI כותב לך ביו מקצועי שמושך תשומת לב
+              שלוש טיוטות עריכות שנוצרות בדפדפן — בלי לשלוח את הפרטים לספק AI
             </p>
+          </div>
+
+          <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-relaxed text-blue-900 dark:border-blue-400/25 dark:bg-blue-900/15 dark:text-blue-100">
+            הטיוטות מורכבות רק מהמידע שתקליד/י ונשארות במכשיר עד שתעתיק/י אותן.
+            אין להזין שם מלא, כתובת, מקום עבודה מדויק, פרטי קשר, מידע רפואי או מיני,
+            או מידע מזהה על אדם אחר. לפני פרסום, קוראים ועורכים — הכלי אינו יודע מה
+            “עובד” ואינו מבטיח עניין או התאמות.
           </div>
 
           {/* Step indicator */}
@@ -253,7 +294,7 @@ export default function ProfileBuilderPage() {
                       id="pb-age"
                       type="number"
                       min={18}
-                      max={99}
+                      max={100}
                       aria-required="true"
                       value={formData.age}
                       onChange={(e) => setFormData((prev) => ({ ...prev, age: e.target.value }))}
@@ -268,12 +309,13 @@ export default function ProfileBuilderPage() {
                     <input
                       id="pb-profession"
                       type="text"
+                      maxLength={120}
                       aria-required="true"
                       value={formData.profession}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, profession: e.target.value }))
                       }
-                      placeholder="מהנדס תוכנה, מעצב/ת גרפי, מורה..."
+                      placeholder="תחום כללי בלבד: תוכנה, עיצוב, הוראה..."
                       className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder-zinc-500 dark:focus:border-indigo-500"
                     />
                   </div>
@@ -284,6 +326,7 @@ export default function ProfileBuilderPage() {
                     <input
                       id="pb-hobbies"
                       type="text"
+                      maxLength={240}
                       aria-required="true"
                       value={formData.hobbies}
                       onChange={(e) =>
@@ -300,6 +343,7 @@ export default function ProfileBuilderPage() {
                     <textarea
                       id="pb-things"
                       rows={3}
+                      maxLength={240}
                       value={formData.thingsYouLove}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, thingsYouLove: e.target.value }))
@@ -318,7 +362,7 @@ export default function ProfileBuilderPage() {
                   </button>
                   <button
                     onClick={handleNext}
-                    disabled={!formData.age || !formData.profession || !formData.hobbies}
+                    disabled={!isStep3Valid}
                     className="flex-1 rounded-xl bg-gradient-to-l from-indigo-500 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-500/15 transition-all hover:opacity-90 disabled:opacity-40"
                   >
                     המשך ←
@@ -369,6 +413,7 @@ export default function ProfileBuilderPage() {
                     <textarea
                       id="pb-qualities"
                       rows={3}
+                      maxLength={240}
                       value={formData.partnerQualities}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, partnerQualities: e.target.value }))
@@ -394,20 +439,10 @@ export default function ProfileBuilderPage() {
                   </button>
                   <button
                     onClick={handleGenerate}
-                    disabled={!isStep3Valid || !formData.lookingFor || isLoading}
+                    disabled={!isStep3Valid || !formData.lookingFor}
                     className="flex-1 rounded-xl bg-gradient-to-l from-indigo-500 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-500/15 transition-all hover:opacity-90 disabled:opacity-40"
                   >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        יוצר ביו...
-                      </span>
-                    ) : (
-                      "✨ צור ביו"
-                    )}
+                    ✨ צור טיוטות מקומיות
                   </button>
                 </div>
               </motion.div>
@@ -431,8 +466,8 @@ export default function ProfileBuilderPage() {
 
                 <div className="mb-6 space-y-3">
                   {bios.map((bio, i) => {
-                    const labels = ["רציני ואמיתי", "קליל ומצחיק", "רומנטי ושירי"];
-                    const emojis = ["🎯", "😄", "🌹"];
+                    const labels = ["בהיר ומפורט", "קליל ושיחתי", "קצר וישיר"];
+                    const emojis = ["🎯", "💬", "✍️"];
                     return (
                       <button
                         key={i}
@@ -497,7 +532,7 @@ export default function ProfileBuilderPage() {
                     </svg>
                   </div>
                   <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                    הביו שלך מוכן!
+                    הטיוטה מוכנה לעריכה
                   </h2>
                 </div>
                 <p className="mb-5 text-sm text-zinc-500 dark:text-zinc-400">
@@ -559,7 +594,9 @@ export default function ProfileBuilderPage() {
 
                 <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-900 dark:bg-indigo-500/5">
                   <p className="text-xs leading-relaxed text-indigo-700 dark:text-indigo-400">
-                    <strong>טיפ:</strong> הביו הטוב ביותר הוא זה שמרגיש לך הכי אמיתי. אל תפחד/י לשנות, להוסיף, ולגרום לו להיות שלך באמת.
+                    <strong>טיפ:</strong> טיוטה טובה היא נקודת פתיחה, לא אמת מקצועית. מחק/י
+                    כל פרט שלא נוח לך לפרסם, בדוק/י שהניסוח נאמן לך, ואל תציג/י מידע
+                    של אדם אחר בלי רשותו.
                   </p>
                 </div>
               </motion.div>

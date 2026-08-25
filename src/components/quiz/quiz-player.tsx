@@ -2,13 +2,12 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
+import { learnerQuizSubmissionErrorMessage } from "@/lib/quiz-feedback";
 
 interface QuizQuestion {
   _id: string;
   question: string;
   options: string[];
-  correctIndex: number;
-  explanation?: string;
   order: number;
 }
 
@@ -17,10 +16,13 @@ interface QuizPlayerProps {
   questions: QuizQuestion[];
   passingScore: number;
   onSubmit: (answers: number[]) => Promise<{
-    score: number;
+    score: number | null;
     passed: boolean;
-    correctCount: number;
+    correctCount: number | null;
     totalQuestions: number;
+    attemptsRemaining: number;
+    retryAfterSeconds: number | null;
+    feedback: "passed" | "retry_after_cooldown" | "attempt_window_exhausted";
   }>;
   lastScore?: number | null;
   lastPassed?: boolean | null;
@@ -54,12 +56,16 @@ export function QuizPlayer({
     questions.map(() => ({ selected: null, submitted: false }))
   );
   const [result, setResult] = useState<{
-    score: number;
+    score: number | null;
     passed: boolean;
-    correctCount: number;
+    correctCount: number | null;
     totalQuestions: number;
+    attemptsRemaining: number;
+    retryAfterSeconds: number | null;
+    feedback: "passed" | "retry_after_cooldown" | "attempt_window_exhausted";
   } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [timerActive, setTimerActive] = useState(false);
   const [celebrationVisible, setCelebrationVisible] = useState(false);
@@ -68,7 +74,6 @@ export function QuizPlayer({
   const sortedQuestions = [...questions].sort((a, b) => a.order - b.order);
   const currentQuestion = sortedQuestions[currentIndex];
   const currentAnswer = answerStates[currentIndex];
-  const allSubmitted = answerStates.every((a) => a.submitted);
   const answeredCount = answerStates.filter((a) => a.selected !== null).length;
 
   // Timer logic
@@ -135,23 +140,35 @@ export function QuizPlayer({
 
   const handleFinalSubmit = useCallback(async () => {
     setSubmitting(true);
+    setSubmissionError(null);
     setTimerActive(false);
     const answers = answerStates.map((a) =>
-      a.selected !== null ? a.selected : 0
+      a.selected !== null ? a.selected : -1
     );
-    const submitResult = await onSubmit(answers);
-    setResult(submitResult);
-    setState("results");
-    if (submitResult.passed && submitResult.score >= 80) {
-      setCelebrationVisible(true);
+    try {
+      const submitResult = await onSubmit(answers);
+      setResult(submitResult);
+      setState("results");
+      if (
+        submitResult.passed &&
+        submitResult.score !== null &&
+        submitResult.score >= 80
+      ) {
+        setCelebrationVisible(true);
+      }
+    } catch (error) {
+      // No client-side grading fallback: transport/auth failures stay opaque.
+      setSubmissionError(learnerQuizSubmissionErrorMessage(error));
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   }, [answerStates, onSubmit]);
 
   const handleReset = useCallback(() => {
     setAnswerStates(questions.map(() => ({ selected: null, submitted: false })));
     setCurrentIndex(0);
     setResult(null);
+    setSubmissionError(null);
     setCelebrationVisible(false);
     setState("playing");
     setTimeLeft(TIMER_SECONDS);
@@ -159,6 +176,7 @@ export function QuizPlayer({
   }, [questions]);
 
   const handleStart = useCallback(() => {
+    setSubmissionError(null);
     setState("playing");
     setTimeLeft(TIMER_SECONDS);
     setTimerActive(true);
@@ -217,7 +235,7 @@ export function QuizPlayer({
           </div>
 
           {/* Previous score */}
-          {lastScore !== null && lastScore !== undefined && (
+          {lastPassed !== null && lastPassed !== undefined && (
             <div
               className={`mb-5 flex items-center gap-3 rounded-xl border p-4 ${
                 lastPassed
@@ -231,7 +249,9 @@ export function QuizPlayer({
               </div>
               <div>
                 <div className="text-sm font-medium text-zinc-900 dark:text-white">
-                  ניסיון קודם: {lastScore}%
+                  {lastScore !== null && lastScore !== undefined
+                    ? `ניסיון קודם: ${lastScore}%`
+                    : "ניסיון קודם: עדיין לא עבר"}
                 </div>
                 <div className="text-xs text-zinc-500 dark:text-zinc-400">
                   {lastPassed ? "עברת את הבוחן" : "לא הגעת לציון המעבר"}
@@ -244,7 +264,7 @@ export function QuizPlayer({
           <ul className="mb-6 space-y-2 text-sm text-zinc-600 dark:text-zinc-400" aria-label="הוראות הבוחן">
             <li className="flex items-center gap-2">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">1</span>
-              בחר תשובה ותקבל משוב מיידי
+              בחר תשובה; הציון יחושב בשרת בסיום הבוחן
             </li>
             <li className="flex items-center gap-2">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">2</span>
@@ -252,16 +272,21 @@ export function QuizPlayer({
             </li>
             <li className="flex items-center gap-2">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">3</span>
-              ניתן לנסות שוב כמה פעמים שתרצה
+              עד 3 הגשות ב־24 שעות, עם דקה בין הגשות
             </li>
           </ul>
 
           <button
             type="button"
             onClick={handleStart}
+            disabled={lastPassed === true}
             className="w-full rounded-xl bg-brand-500 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-600 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 active:scale-[0.98]"
           >
-            {lastScore !== null && lastScore !== undefined ? "נסה שוב" : "התחל בוחן"}
+            {lastPassed
+              ? "הבוחן הושלם"
+              : lastPassed === false
+                ? "נסה שוב"
+                : "התחל בוחן"}
           </button>
         </div>
       </div>
@@ -273,9 +298,9 @@ export function QuizPlayer({
   // ─────────────────────────────────────────────────────────────────────
   if (state === "results" && result) {
     const scoreColor =
-      result.score >= 80
+      result.score !== null && result.score >= 80
         ? "text-emerald-600 dark:text-emerald-400"
-        : result.score >= passingScore
+        : result.score !== null && result.score >= passingScore
           ? "text-blue-600 dark:text-blue-400"
           : "text-red-600 dark:text-red-400";
 
@@ -316,8 +341,15 @@ export function QuizPlayer({
               : "bg-gradient-to-b from-red-50 to-white dark:from-red-900/20 dark:to-zinc-900"
           }`}
         >
-          <div className={`mb-2 text-6xl font-black ${scoreColor}`} aria-label={`ציון: ${result.score} אחוז`}>
-            {result.score}%
+          <div
+            className={`mb-2 text-6xl font-black ${scoreColor}`}
+            aria-label={
+              result.score === null
+                ? "הבוחן עדיין לא עבר"
+                : `ציון: ${result.score} אחוז`
+            }
+          >
+            {result.score === null ? "עוד לא" : `${result.score}%`}
           </div>
           <div
             className={`mb-1 text-lg font-semibold ${
@@ -327,16 +359,25 @@ export function QuizPlayer({
             }`}
           >
             {result.passed
-              ? result.score >= 90
+              ? result.score !== null && result.score >= 90
                 ? "מצוין! עבודה נהדרת"
-                : result.score >= 80
+                : result.score !== null && result.score >= 80
                   ? "כל הכבוד! עברת"
                   : "עברת את הבוחן"
               : "לא הצלחת הפעם"}
           </div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {result.correctCount} מתוך {result.totalQuestions} שאלות נכונות
+            {result.correctCount === null
+              ? "הציון המדויק מוצג אחרי מעבר, כדי לשמור על הוגנות הבוחן."
+              : `${result.correctCount} מתוך ${result.totalQuestions} שאלות נכונות`}
           </p>
+          {!result.passed && (
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              {result.feedback === "attempt_window_exhausted"
+                ? "מכסת ההגשות להיום הסתיימה. אפשר לחזור מחר."
+                : `נשארו ${result.attemptsRemaining} הגשות בחלון הנוכחי; אפשר לנסות שוב אחרי דקה.`}
+            </p>
+          )}
 
           {/* Score bar */}
           <div className="mx-auto mt-4 max-w-xs">
@@ -345,9 +386,9 @@ export function QuizPlayer({
                 className={`h-full rounded-full transition-all duration-1000 ${
                   result.passed ? "bg-emerald-500" : "bg-red-500"
                 }`}
-                style={{ width: `${result.score}%` }}
+                style={{ width: `${result.score ?? 0}%` }}
                 role="progressbar"
-                aria-valuenow={result.score}
+                aria-valuenow={result.score ?? 0}
                 aria-valuemin={0}
                 aria-valuemax={100}
               />
@@ -368,49 +409,28 @@ export function QuizPlayer({
           <div className="space-y-3">
             {sortedQuestions.map((q, idx) => {
               const userAnswer = answerStates[idx].selected;
-              const isCorrect =
-                userAnswer !== null && userAnswer === q.correctIndex;
               return (
                 <div
                   key={q._id}
-                  className={`rounded-xl border p-4 ${
-                    isCorrect
-                      ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/10"
-                      : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10"
-                  }`}
+                  className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50"
                 >
                   <div className="mb-2 flex items-start gap-2">
                     <span
-                      className={`mt-0.5 shrink-0 text-sm ${isCorrect ? "text-emerald-600" : "text-red-600"}`}
-                      aria-label={isCorrect ? "תשובה נכונה" : "תשובה שגויה"}
+                      className="mt-0.5 shrink-0 text-sm text-brand-600 dark:text-brand-400"
+                      aria-label="תשובה שנשלחה לבדיקה"
                     >
-                      {isCorrect ? "✓" : "✗"}
+                      •
                     </span>
                     <p className="text-sm font-medium text-zinc-900 dark:text-white">
                       {idx + 1}. {q.question}
                     </p>
                   </div>
 
-                  {!isCorrect && (
-                    <div className="mt-2 space-y-1 pr-5">
-                      {userAnswer !== null && (
-                        <div className="flex items-center gap-2 text-xs text-red-700 dark:text-red-400">
-                          <span>תשובתך:</span>
-                          <span className="line-through">{q.options[userAnswer]}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400">
-                        <span>תשובה נכונה:</span>
-                        <span className="font-medium">{q.options[q.correctIndex]}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {q.explanation && (
-                    <p className="mt-2 pr-5 text-xs text-zinc-600 dark:text-zinc-400">
-                      {q.explanation}
-                    </p>
-                  )}
+                  <p className="mt-2 pr-5 text-xs text-zinc-600 dark:text-zinc-400">
+                    {userAnswer === null
+                      ? "לא נבחרה תשובה"
+                      : `תשובתך: ${q.options[userAnswer]}`}
+                  </p>
                 </div>
               );
             })}
@@ -418,14 +438,16 @@ export function QuizPlayer({
 
           {/* Actions */}
           <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={handleReset}
-              disabled={submitting}
-              className="flex-1 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 active:scale-[0.98] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-            >
-              נסה שוב
-            </button>
+            {!result.passed && result.attemptsRemaining > 0 && (
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={submitting}
+                className="flex-1 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 active:scale-[0.98] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              >
+                נסה שוב אחרי דקה
+              </button>
+            )}
             {courseId && nextLessonId && result.passed && (
               <Link
                 href={`/courses/${courseId}/lessons/${nextLessonId}`}
@@ -446,7 +468,6 @@ export function QuizPlayer({
   const isLastQuestion = currentIndex === sortedQuestions.length - 1;
   const isFeedback = state === "feedback";
   const selectedOption = currentAnswer.selected;
-  const correctOption = currentQuestion?.correctIndex;
 
   return (
     <div
@@ -513,24 +534,16 @@ export function QuizPlayer({
       <div className="flex gap-1 px-5 pt-4" role="navigation" aria-label="התקדמות בבוחן">
         {sortedQuestions.map((_, idx) => {
           const ans = answerStates[idx];
-          const isAnsweredCorrect =
-            ans.submitted &&
-            ans.selected === sortedQuestions[idx].correctIndex;
-          const isAnsweredWrong =
-            ans.submitted &&
-            ans.selected !== sortedQuestions[idx].correctIndex;
           return (
             <div
               key={idx}
-              aria-label={`שאלה ${idx + 1}${ans.submitted ? (isAnsweredCorrect ? " - נכון" : " - שגוי") : ""}`}
+              aria-label={`שאלה ${idx + 1}${ans.submitted ? " - נענתה" : ""}`}
               className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
                 idx === currentIndex
                   ? "bg-brand-500"
-                  : isAnsweredCorrect
-                    ? "bg-emerald-400"
-                    : isAnsweredWrong
-                      ? "bg-red-400"
-                      : "bg-zinc-200 dark:bg-zinc-700"
+                  : ans.submitted
+                    ? "bg-brand-300 dark:bg-brand-700"
+                    : "bg-zinc-200 dark:bg-zinc-700"
               }`}
             />
           );
@@ -556,32 +569,15 @@ export function QuizPlayer({
         >
           {currentQuestion?.options.map((option, optIdx) => {
             const isSelected = selectedOption === optIdx;
-            const isCorrectAnswer = optIdx === correctOption;
-            const isWrongSelected = isFeedback && isSelected && !isCorrectAnswer;
-            const isRightAnswer = isFeedback && isCorrectAnswer;
 
             let buttonClass =
               "relative w-full rounded-xl border px-4 py-3.5 text-right text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1 active:scale-[0.99]";
 
-            if (!isFeedback) {
-              // Playing state
-              buttonClass +=
-                isSelected
-                  ? " border-brand-500 bg-brand-50 text-brand-800 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-200"
-                  : " border-zinc-200 bg-white text-zinc-700 hover:border-brand-300 hover:bg-brand-50/50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-brand-700 dark:hover:bg-brand-900/10";
-            } else {
-              // Feedback state
-              if (isRightAnswer) {
-                buttonClass +=
-                  " border-emerald-500 bg-emerald-50 text-emerald-800 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-300";
-              } else if (isWrongSelected) {
-                buttonClass +=
-                  " border-red-500 bg-red-50 text-red-800 line-through dark:border-red-600 dark:bg-red-900/20 dark:text-red-300";
-              } else {
-                buttonClass +=
-                  " border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500";
-              }
-            }
+            buttonClass += isSelected
+              ? " border-brand-500 bg-brand-50 text-brand-800 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-200"
+              : isFeedback
+                ? " border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
+                : " border-zinc-200 bg-white text-zinc-700 hover:border-brand-300 hover:bg-brand-50/50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-brand-700 dark:hover:bg-brand-900/10";
 
             return (
               <button
@@ -593,28 +589,20 @@ export function QuizPlayer({
                 disabled={isFeedback}
                 role="radio"
                 aria-checked={isSelected}
-                aria-label={`${option}${isRightAnswer ? " - תשובה נכונה" : ""}${isWrongSelected ? " - תשובה שגויה" : ""}`}
+                aria-label={`${option}${isFeedback && isSelected ? " - נבחרה" : ""}`}
                 className={buttonClass}
               >
                 <div className="flex items-center gap-3">
                   {/* Option indicator */}
                   <span
                     className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition-colors ${
-                      !isFeedback && isSelected
+                      isSelected
                         ? "border-brand-500 bg-brand-500 text-white"
-                        : isFeedback && isRightAnswer
-                          ? "border-emerald-500 bg-emerald-500 text-white"
-                          : isFeedback && isWrongSelected
-                            ? "border-red-500 bg-red-500 text-white"
-                            : "border-zinc-300 text-zinc-500 dark:border-zinc-600"
+                        : "border-zinc-300 text-zinc-500 dark:border-zinc-600"
                     }`}
                     aria-hidden="true"
                   >
-                    {isFeedback && isRightAnswer
-                      ? "✓"
-                      : isFeedback && isWrongSelected
-                        ? "✗"
-                        : String.fromCharCode(65 + optIdx)}
+                    {String.fromCharCode(65 + optIdx)}
                   </span>
                   <span className="flex-1 text-right leading-snug">
                     {option}
@@ -625,52 +613,26 @@ export function QuizPlayer({
           })}
         </div>
 
-        {/* Feedback explanation */}
-        {isFeedback && currentQuestion?.explanation && (
+        {/* Selection receipt; grading remains server-side. */}
+        {isFeedback && (
           <div
-            className="mb-4 rounded-xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-900/20"
+            className="mb-4 flex items-center gap-3 rounded-xl bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
             role="status"
             aria-live="polite"
           >
-            <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-400">
-              <svg
-                className="h-3.5 w-3.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              הסבר
-            </div>
-            <p className="text-sm leading-relaxed text-blue-800 dark:text-blue-300">
-              {currentQuestion.explanation}
-            </p>
+            <span className="text-xl" aria-hidden="true">
+              ✓
+            </span>
+            {selectedOption === null
+              ? "לא נבחרה תשובה. הבדיקה תתבצע בשרת בסיום הבוחן."
+              : "התשובה נשמרה. הבדיקה תתבצע בשרת בסיום הבוחן."}
           </div>
         )}
 
-        {/* Feedback: correct/wrong banner */}
-        {isFeedback && (
-          <div
-            className={`mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold ${
-              selectedOption === correctOption
-                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-            }`}
-            role="status"
-            aria-live="assertive"
-          >
-            <span className="text-xl" aria-hidden="true">
-              {selectedOption === correctOption ? "🎯" : "💡"}
-            </span>
-            {selectedOption === correctOption
-              ? "מעולה! תשובה נכונה"
-              : `לא בדיוק. התשובה הנכונה: ${currentQuestion?.options[correctOption ?? 0]}`}
-          </div>
+        {submissionError && (
+          <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800 dark:bg-red-900/20 dark:text-red-300" role="alert">
+            {submissionError}
+          </p>
         )}
 
         {/* Navigation buttons */}

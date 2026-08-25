@@ -9,7 +9,9 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { VideoPlayer } from "@/components/lesson/video-player";
 import { LessonContent } from "@/components/lesson/lesson-content";
+import { LessonPdfResource } from "@/components/lesson/lesson-pdf-resource";
 import { LessonCompleteButton } from "@/components/course/lesson-complete-button";
+import { CourseSafetyNotice } from "@/components/course/course-safety-notice";
 import { LessonNotes } from "@/components/lesson/lesson-notes";
 import { LessonAdvisor } from "@/components/lesson/lesson-advisor";
 import { CommentsSection } from "@/components/lesson/comments-section";
@@ -36,12 +38,6 @@ export default function LessonPlayerPage() {
   const convexUser = useQuery(
     api.users.getByClerkId,
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
-  );
-
-  // Enrollment
-  const isEnrolled = useQuery(
-    api.enrollments.isEnrolled,
-    convexUser?._id ? { userId: convexUser._id, courseId } : "skip"
   );
 
   // Course progress
@@ -214,6 +210,8 @@ export default function LessonPlayerPage() {
             {lesson.title}
           </h1>
 
+          <CourseSafetyNotice />
+
           {/* Video Player or Placeholder */}
           {lesson.videoUrl ? (
             <div className="mb-8">
@@ -253,6 +251,13 @@ export default function LessonPlayerPage() {
               </div>
             </div>
           )}
+
+          <LessonPdfResource
+            pdfUrl={lesson.pdfUrl}
+            lessonTitle={lesson.title}
+            courseId={courseId}
+            lessonId={lessonId}
+          />
 
           {/* Action Bar: Mark Complete + Notes toggle */}
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">

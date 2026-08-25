@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useMutation, useQuery } from "convex/react";
 import { useUser, SignedIn } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { timeAgoHe } from "./time-ago";
+import { CommunitySafetyActions } from "@/components/community/community-safety-actions";
 
 interface ReplyItemProps {
   reply: {
     _id: Id<"communityReplies">;
+    userId: Id<"users">;
     content: string;
     authorName: string;
     authorImage?: string | null;
@@ -30,9 +33,12 @@ function AuthorAvatar({
 }) {
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
-        alt={name}
+        alt=""
+        width={40}
+        height={40}
+        unoptimized
         className="h-10 w-10 rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900"
       />
     );
@@ -119,6 +125,10 @@ export function ReplyItem({ reply, onDelete, index = 0 }: ReplyItemProps) {
         {/* Actions */}
         <div className="mt-1.5 flex items-center gap-2 px-2">
           <SignedIn>
+            <CommunitySafetyActions
+              targetType="reply"
+              replyId={reply._id}
+            />
             <button
               onClick={handleLike}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${

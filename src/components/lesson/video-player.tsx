@@ -69,6 +69,9 @@ export function VideoPlayer({
   const [isBuffering, setIsBuffering] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [showResumeBanner, setShowResumeBanner] = useState(
+    Boolean(initialProgress && initialProgress > 0 && initialProgress < 95)
+  );
 
   // Watch time tracking
   const {
@@ -83,7 +86,8 @@ export function VideoPlayer({
     setShowControls(true);
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {
-      if (videoRef.current && !videoRef.current.paused) {
+      const playerHasFocus = containerRef.current?.contains(document.activeElement);
+      if (videoRef.current && !videoRef.current.paused && !playerHasFocus) {
         setShowControls(false);
         setShowSpeedMenu(false);
       }
@@ -172,6 +176,7 @@ export function VideoPlayer({
       const resumeTime = (initialProgress / 100) * video.duration;
       video.currentTime = resumeTime;
       hasResumedRef.current = true;
+      setShowResumeBanner(false);
     }
   }, [initialProgress]);
 
@@ -212,12 +217,40 @@ export function VideoPlayer({
       if (!bar || !video || !video.duration) return;
 
       const rect = bar.getBoundingClientRect();
-      // RTL: clicking right side = start, left side = end
+      // Media timelines keep their conventional LTR direction in the RTL UI.
       const clickX = e.clientX - rect.left;
       const ratio = clickX / rect.width;
       seekTo(ratio * video.duration);
     },
     [seekTo]
+  );
+
+  const handleProgressBarKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      let targetTime: number | null = null;
+
+      switch (event.key) {
+        case "ArrowRight":
+          targetTime = currentTime + SEEK_STEP;
+          break;
+        case "ArrowLeft":
+          targetTime = currentTime - SEEK_STEP;
+          break;
+        case "Home":
+          targetTime = 0;
+          break;
+        case "End":
+          targetTime = duration;
+          break;
+        default:
+          return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      seekTo(targetTime);
+    },
+    [currentTime, duration, seekTo]
   );
 
   const handleProgressBarMouseDown = useCallback(
@@ -395,9 +428,10 @@ export function VideoPlayer({
       className="group relative aspect-video w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-lg"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onFocusCapture={resetHideTimer}
       onKeyDown={handleKeyDown}
       tabIndex={0}
-      role="application"
+      role="region"
       aria-label="נגן וידאו"
     >
       {/* Video Element */}
@@ -421,10 +455,7 @@ export function VideoPlayer({
       </video>
 
       {/* Resume banner */}
-      {initialProgress &&
-        initialProgress > 0 &&
-        initialProgress < 95 &&
-        !hasResumedRef.current && (
+      {showResumeBanner && initialProgress && (
           <div className="absolute top-3 right-3 z-20 rounded-lg bg-black/80 px-3 py-2 text-sm text-white backdrop-blur-sm">
             ממשיך מ-{initialProgress}%
           </div>
@@ -492,6 +523,8 @@ export function VideoPlayer({
 
       {/* Controls overlay */}
       <div
+        inert={showControls ? undefined : true}
+        aria-hidden={!showControls}
         className={`absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 pb-3 pt-12 transition-opacity duration-200 ${
           showControls ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -502,11 +535,14 @@ export function VideoPlayer({
           className="group/progress mb-3 h-1.5 cursor-pointer rounded-full bg-zinc-600 transition-all hover:h-2.5"
           onClick={handleProgressBarClick}
           onMouseDown={handleProgressBarMouseDown}
+          onKeyDown={handleProgressBarKeyDown}
           role="slider"
           aria-label="מיקום בוידאו"
           aria-valuenow={Math.round(progressPercent)}
           aria-valuemin={0}
           aria-valuemax={100}
+          aria-valuetext={`${formatTime(currentTime)} מתוך ${formatTime(duration)}`}
+          dir="ltr"
           tabIndex={0}
         >
           {/* Buffered */}

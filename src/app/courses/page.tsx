@@ -53,7 +53,7 @@ export default function CoursesPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-brand-100/20 bg-gradient-to-b from-brand-50/40 via-[var(--background)] to-[var(--background)] dark:border-zinc-800 dark:from-blue-50/5">
+      <section aria-labelledby="courses-heading" className="relative overflow-hidden border-b border-brand-100/20 bg-gradient-to-b from-brand-50/40 via-[var(--background)] to-[var(--background)] dark:border-zinc-800 dark:from-blue-50/5">
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
           <div className="absolute -top-12 right-1/4 h-64 w-64 rounded-full bg-brand-100/30 blur-3xl dark:bg-brand-100/10" />
           <div className="absolute top-8 left-1/3 h-48 w-48 rounded-full bg-blue-50/20 blur-3xl dark:bg-blue-100/5" />
@@ -62,7 +62,7 @@ export default function CoursesPage() {
           <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
             למידה שמשנה חיים
           </span>
-          <h1 className="mb-3 text-3xl font-black text-blue-500 dark:text-white md:text-4xl lg:text-5xl">
+          <h1 id="courses-heading" className="mb-3 text-3xl font-black text-blue-500 dark:text-white md:text-4xl lg:text-5xl">
             הקורסים שלנו
           </h1>
           <p className="mx-auto max-w-lg text-blue-500/75 dark:text-zinc-400">
@@ -82,7 +82,7 @@ export default function CoursesPage() {
         </ScrollReveal>
       </section>
 
-      <main id="main-content" className="container mx-auto px-4 py-10">
+      <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-10">
         {/* Search + Filters bar */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="relative max-w-md flex-1">
@@ -100,7 +100,11 @@ export default function CoursesPage() {
                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
               />
             </svg>
+            <label htmlFor="course-search" className="sr-only">
+              חיפוש קורסים
+            </label>
             <input
+              id="course-search"
               type="search"
               placeholder="חפש קורס..."
               value={searchQuery}
@@ -113,11 +117,12 @@ export default function CoursesPage() {
 
         {/* Category + Level filter pills */}
         {(categories.length > 0 || courses) && (
-          <div className="mb-8 flex flex-wrap gap-2">
+          <div className="mb-8 flex flex-wrap gap-2" role="group" aria-label="סינון קורסים">
             {/* "All" pill */}
             <button
               type="button"
               onClick={() => { setSelectedCategory("all"); setSelectedLevel("all"); }}
+              aria-pressed={selectedCategory === "all" && selectedLevel === "all"}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                 selectedCategory === "all" && selectedLevel === "all"
                   ? "bg-brand-500 text-white shadow-sm shadow-brand-500/20"
@@ -133,6 +138,7 @@ export default function CoursesPage() {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(selectedCategory === cat ? "all" : cat)}
+                aria-pressed={selectedCategory === cat}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                   selectedCategory === cat
                     ? "bg-brand-500 text-white shadow-sm shadow-brand-500/20"
@@ -145,7 +151,7 @@ export default function CoursesPage() {
 
             {/* Divider */}
             {categories.length > 0 && (
-              <div className="mx-1 hidden h-9 w-px self-center bg-brand-100/40 md:block dark:bg-zinc-700" />
+              <div aria-hidden="true" className="mx-1 hidden h-9 w-px self-center bg-brand-100/40 md:block dark:bg-zinc-700" />
             )}
 
             {/* Level pills */}
@@ -154,6 +160,7 @@ export default function CoursesPage() {
                 key={key}
                 type="button"
                 onClick={() => setSelectedLevel(selectedLevel === key ? "all" : key)}
+                aria-pressed={selectedLevel === key}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                   selectedLevel === key
                     ? "bg-blue-500 text-white shadow-sm shadow-blue-500/20"
@@ -168,17 +175,19 @@ export default function CoursesPage() {
 
         {/* Filtered result count */}
         {filteredCourses !== undefined && filteredCourses.length > 0 && (searchQuery || selectedCategory !== "all" || selectedLevel !== "all") && (
-          <p className="mb-4 text-sm text-blue-500/75 dark:text-zinc-500">
+          <p className="mb-4 text-sm text-blue-500/75 dark:text-zinc-500" role="status" aria-live="polite">
             {filteredCourses.length} תוצאות
           </p>
         )}
 
         {/* Loading state */}
         {filteredCourses === undefined && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="status" aria-label="הקורסים נטענים">
+            <span className="sr-only">הקורסים נטענים</span>
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
+                aria-hidden="true"
                 className="h-80 animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-800"
               />
             ))}
@@ -187,7 +196,7 @@ export default function CoursesPage() {
 
         {/* Empty state */}
         {filteredCourses !== undefined && filteredCourses.length === 0 && (
-          <div className="rounded-2xl bg-zinc-50 p-12 text-center dark:bg-zinc-900">
+          <div className="rounded-2xl bg-zinc-50 p-12 text-center dark:bg-zinc-900" role="status" aria-live="polite">
             {searchQuery ? (
               <>
                 <svg
@@ -232,7 +241,7 @@ export default function CoursesPage() {
         {/* Course grid */}
         {filteredCourses !== undefined && filteredCourses.length > 0 && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredCourses.map((course) => (
+            {filteredCourses.map((course, index) => (
               <CourseCard
                 key={course._id}
                 id={course._id}
@@ -242,6 +251,7 @@ export default function CoursesPage() {
                 category={course.category}
                 level={course.level}
                 estimatedHours={course.estimatedHours}
+                imagePriority={index === 0}
               />
             ))}
           </div>

@@ -1,4 +1,5 @@
-import { query } from "./_generated/server";
+import { query, type QueryCtx } from "./_generated/server";
+import { averagePassedQuizScore } from "./lib/quizAssessmentPolicy";
 
 // ==========================================
 // Student Progress - Phase 65
@@ -6,16 +7,13 @@ import { query } from "./_generated/server";
 // ==========================================
 
 // Helper: resolve user from Clerk identity
-async function resolveUser(ctx: {
-  auth: { getUserIdentity: () => Promise<{ subject: string } | null> };
-  db: any;
-}): Promise<{ user: any; identity: { subject: string } } | null> {
+async function resolveUser(ctx: QueryCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return null;
 
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
     .unique();
 
   return user ? { user, identity } : null;
@@ -35,19 +33,19 @@ export const getDetailedProgress = query({
 
     const enrollments = await ctx.db
       .query("enrollments")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     if (enrollments.length === 0) return [];
 
     const allProgress = await ctx.db
       .query("progress")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     const allQuizAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_course", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user_course", (q) => q.eq("userId", user._id))
       .collect();
 
     const results = [];
@@ -58,39 +56,35 @@ export const getDetailedProgress = query({
 
       const lessons = await ctx.db
         .query("lessons")
-        .withIndex("by_course", (q: any) => q.eq("courseId", course._id))
+        .withIndex("by_course", (q) => q.eq("courseId", course._id))
         .collect();
 
-      const publishedLessons = lessons.filter((l: any) => l.published);
+      const publishedLessons = lessons.filter((lesson) => lesson.published);
       const courseProgress = allProgress.filter(
-        (p: any) => p.courseId === course._id
+        (progressEntry) => progressEntry.courseId === course._id
       );
 
       const completedLessons = courseProgress.filter(
-        (p: any) => p.completed
+        (progressEntry) => progressEntry.completed
       ).length;
       const totalWatchSeconds = courseProgress.reduce(
-        (sum: number, p: any) => sum + (p.watchTimeSeconds || 0),
+        (sum, progressEntry) => sum + (progressEntry.watchTimeSeconds || 0),
         0
       );
       const lastActivity =
         courseProgress.length > 0
-          ? Math.max(...courseProgress.map((p: any) => p.lastWatchedAt))
+          ? Math.max(
+              ...courseProgress.map(
+                (progressEntry) => progressEntry.lastWatchedAt
+              )
+            )
           : enrollment.enrolledAt;
 
       // Quiz scores for this course
       const courseQuizAttempts = allQuizAttempts.filter(
-        (a: any) => a.courseId === course._id
+        (attempt) => attempt.courseId === course._id
       );
-      const avgQuizScore =
-        courseQuizAttempts.length > 0
-          ? Math.round(
-              courseQuizAttempts.reduce(
-                (sum: number, a: any) => sum + a.score,
-                0
-              ) / courseQuizAttempts.length
-            )
-          : null;
+      const avgQuizScore = averagePassedQuizScore(courseQuizAttempts);
 
       const percent =
         publishedLessons.length > 0
@@ -99,11 +93,13 @@ export const getDetailedProgress = query({
 
       // Next lesson to continue
       const completedIds = new Set(
-        courseProgress.filter((p: any) => p.completed).map((p: any) => p.lessonId)
+        courseProgress
+          .filter((progressEntry) => progressEntry.completed)
+          .map((progressEntry) => progressEntry.lessonId)
       );
       const nextLesson = publishedLessons
-        .sort((a: any, b: any) => a.order - b.order)
-        .find((l: any) => !completedIds.has(l._id));
+        .sort((a, b) => a.order - b.order)
+        .find((lesson) => !completedIds.has(lesson._id));
 
       results.push({
         courseId: course._id as string,
@@ -141,7 +137,7 @@ export const getLearningStreak = query({
 
     const allProgress = await ctx.db
       .query("progress")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     // Build a set of all active days (YYYY-MM-DD strings)
@@ -241,7 +237,7 @@ export const getWeeklyActivity = query({
 
     const allProgress = await ctx.db
       .query("progress")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     const hebrewDays = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
@@ -263,15 +259,19 @@ export const getWeeklyActivity = query({
       const dayEnd = dayStart + 86400000;
 
       const dayProgress = allProgress.filter(
-        (p: any) => p.lastWatchedAt >= dayStart && p.lastWatchedAt < dayEnd
+        (progressEntry) =>
+          progressEntry.lastWatchedAt >= dayStart &&
+          progressEntry.lastWatchedAt < dayEnd
       );
 
       days.push({
         label: hebrewDays[d.getDay()] ?? "",
         shortDate: `${d.getDate()}/${d.getMonth() + 1}`,
-        lessonsCompleted: dayProgress.filter((p: any) => p.completed).length,
+        lessonsCompleted: dayProgress.filter(
+          (progressEntry) => progressEntry.completed
+        ).length,
         watchTimeSeconds: dayProgress.reduce(
-          (sum: number, p: any) => sum + (p.watchTimeSeconds || 0),
+          (sum, progressEntry) => sum + (progressEntry.watchTimeSeconds || 0),
           0
         ),
         isToday: i === 0,
@@ -279,13 +279,13 @@ export const getWeeklyActivity = query({
     }
 
     const totalThisWeek = allProgress.filter(
-      (p: any) => p.lastWatchedAt > weekAgo
+      (progressEntry) => progressEntry.lastWatchedAt > weekAgo
     );
     const totalLessonsThisWeek = totalThisWeek.filter(
-      (p: any) => p.completed
+      (progressEntry) => progressEntry.completed
     ).length;
     const totalTimeThisWeek = totalThisWeek.reduce(
-      (sum: number, p: any) => sum + (p.watchTimeSeconds || 0),
+      (sum, progressEntry) => sum + (progressEntry.watchTimeSeconds || 0),
       0
     );
 
@@ -312,37 +312,41 @@ export const getAchievements = query({
     // Get user's stats
     const allProgress = await ctx.db
       .query("progress")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    const completedLessons = allProgress.filter((p: any) => p.completed).length;
+    const completedLessons = allProgress.filter(
+      (progressEntry) => progressEntry.completed
+    ).length;
 
     const allQuizAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_course", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user_course", (q) => q.eq("userId", user._id))
       .collect();
 
-    const passedQuizzes = allQuizAttempts.filter((a: any) => a.passed).length;
+    const passedQuizzes = allQuizAttempts.filter(
+      (attempt) => attempt.passed
+    ).length;
     const perfectQuizzes = allQuizAttempts.filter(
-      (a: any) => a.score === 100
+      (attempt) => attempt.passed && attempt.score === 100
     ).length;
 
     const enrollments = await ctx.db
       .query("enrollments")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     const certificates = await ctx.db
       .query("certificates")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     const xpEvents = await ctx.db
       .query("xpEvents")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
     const totalXp = xpEvents.reduce(
-      (sum: number, e: any) => sum + e.points,
+      (sum, event) => sum + event.points,
       0
     );
 
@@ -491,35 +495,39 @@ export const getSkillRadar = query({
 
     const allProgress = await ctx.db
       .query("progress")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    const completedLessons = allProgress.filter((p: any) => p.completed).length;
+    const completedLessons = allProgress.filter(
+      (progressEntry) => progressEntry.completed
+    ).length;
 
     const quizAttempts = await ctx.db
       .query("quizAttempts")
-      .withIndex("by_user_course", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user_course", (q) => q.eq("userId", user._id))
       .collect();
 
-    const passedQuizzes = quizAttempts.filter((a: any) => a.passed).length;
+    const passedQuizzes = quizAttempts.filter(
+      (attempt) => attempt.passed
+    ).length;
 
     const chatSessions = await ctx.db
       .query("chatSessions")
-      .withIndex("by_user", (q: any) => q.eq("userId", identity.subject))
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .collect();
 
     const simulatorSessions = await ctx.db
       .query("simulatorSessions")
-      .withIndex("by_user", (q: any) => q.eq("userId", identity.subject))
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .collect();
 
     const completedSimSessions = simulatorSessions.filter(
-      (s: any) => s.status === "completed"
+      (session) => session.status === "completed"
     );
     const avgSimScore =
       completedSimSessions.length > 0
         ? completedSimSessions.reduce(
-            (sum: number, s: any) => sum + (s.score ?? 0),
+            (sum, session) => sum + (session.score ?? 0),
             0
           ) / completedSimSessions.length
         : 0;
@@ -564,7 +572,7 @@ export const getSkillRadar = query({
     // Trust building: overall completions + certificates
     const certs = await ctx.db
       .query("certificates")
-      .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
     const trustLevel = Math.min(
       5,

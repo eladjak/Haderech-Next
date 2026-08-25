@@ -22,31 +22,40 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
   // טוען
   if (!clerkLoaded || me === undefined) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <main
+        id="main-content"
+        className="flex min-h-dvh items-center justify-center bg-zinc-50 dark:bg-zinc-950"
+      >
         <div className="text-center">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-600 dark:border-t-white" />
           <p className="mt-3 text-sm text-zinc-500">טוען...</p>
         </div>
-      </div>
+      </main>
     );
   }
 
   // משתמש לא נמצא (עדיין נוצר)
   if (me === null) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <main
+        id="main-content"
+        className="flex min-h-dvh items-center justify-center bg-zinc-50 dark:bg-zinc-950"
+      >
         <div className="text-center">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-600 dark:border-t-white" />
           <p className="mt-3 text-sm text-zinc-500">יוצר חשבון...</p>
         </div>
-      </div>
+      </main>
     );
   }
 
   // לא admin
   if (me.role !== "admin") {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <main
+        id="main-content"
+        className="flex min-h-dvh items-center justify-center bg-zinc-50 dark:bg-zinc-950"
+      >
         <div className="mx-auto max-w-md rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-950">
             <svg
@@ -78,7 +87,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
             חזרה לדשבורד
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 

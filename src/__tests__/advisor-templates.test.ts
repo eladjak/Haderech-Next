@@ -24,7 +24,8 @@ describe("getPhaseProfile", () => {
   it("returns the matching phase profile for a known phase", () => {
     expect(getPhaseProfile(1).name).toBe("גישה");
     expect(getPhaseProfile(3).name).toBe("משיכה ומעבר");
-    expect(getPhaseProfile(5).name).toBe("מחויבות");
+    expect(getPhaseProfile(5).name).toBe("אינטימיות");
+    expect(getPhaseProfile(6).name).toBe("מחויבות");
   });
 
   it("falls back to DEFAULT_PROFILE for unknown / missing phase", () => {
@@ -47,6 +48,10 @@ describe("buildAdvisorSystemPrompt", () => {
     const prompt = buildAdvisorSystemPrompt(null);
     expect(prompt).toContain("אומנות הקשר");
     expect(prompt).toContain('אמ"כ');
+    expect(prompt).toContain("אל תציג את עצמך כאדם");
+    expect(prompt).toContain("/course-safety");
+    expect(prompt).not.toContain("461");
+    expect(prompt).not.toContain("15+");
   });
 
   it("injects the lesson title, phase and progress when context is given", () => {
@@ -68,6 +73,7 @@ describe("buildTemplateReply (free-degradation brain)", () => {
     const r = buildTemplateReply("קיבלתי דחייה וזה כואב", ctx());
     expect(r.suggestSimulator).toBe(true);
     expect(r.text).toContain("דחייה");
+    expect(r.text).toContain('"לא" או אי-מענה');
   });
 
   it("summarizes the lesson with phase concepts", () => {

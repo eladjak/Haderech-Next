@@ -9,7 +9,6 @@ interface RatingDistributionProps {
 export function RatingDistribution({
   distribution,
   total,
-  average,
 }: RatingDistributionProps) {
   if (total === 0) return null;
 

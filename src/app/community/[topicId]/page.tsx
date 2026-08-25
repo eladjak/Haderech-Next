@@ -11,6 +11,7 @@ import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CommunitySafetyActions } from "@/components/community/community-safety-actions";
 
 interface CommunityReplyView {
   _id: Id<"communityReplies">;
@@ -19,13 +20,13 @@ interface CommunityReplyView {
   createdAt: number;
   authorName?: string;
   authorImage?: string | null;
-  userId?: string;
+  userId: Id<"users">;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
   general: "כללי",
   "dating-tips": "טיפים",
-  "success-stories": "סיפורי הצלחה",
+  "success-stories": "שיתופים מהדרך",
   questions: "שאלות",
   advice: "עצות",
 };
@@ -186,6 +187,10 @@ function ReplyItem({
               liked={isLiked !== undefined ? isLiked : serverLiked}
               onToggle={handleToggleLike}
             />
+            <CommunitySafetyActions
+              targetType="reply"
+              replyId={reply._id}
+            />
           </SignedIn>
           {currentUserId && (
             <button
@@ -312,10 +317,6 @@ export default function TopicDetailPage() {
     CATEGORY_COLORS[topic.category] ||
     "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300";
 
-  // Check if current user is the author (compare Clerk user IDs via the users table)
-  // topic.userId is a Convex user ID - we check ownership in backend, show delete for UI feedback
-  const isAdmin = false; // determined by backend
-
   return (
     <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950" dir="rtl">
       <Header />
@@ -391,6 +392,10 @@ export default function TopicDetailPage() {
                     liked={displayLiked}
                     onToggle={handleToggleLike}
                     size="md"
+                  />
+                  <CommunitySafetyActions
+                    targetType="topic"
+                    topicId={topic._id}
                   />
                 </SignedIn>
                 <SignedOut>

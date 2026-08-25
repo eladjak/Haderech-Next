@@ -65,8 +65,8 @@ body {
 
 /* Accessible focus ring */
 :focus-visible {
-  outline: 2px solid #2563EB;
-  outline-offset: 2px;
+  outline: 3px solid #2563EB;
+  outline-offset: 3px;
   border-radius: 4px;
 }
 
@@ -78,6 +78,16 @@ body {
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
+}
+
+#main-content:focus {
+  scroll-margin-block-start: 5rem;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
 }
 
 /* Animated gradient for hero */

@@ -5,7 +5,11 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { SUBSCRIPTION_TIERS, formatPrice } from "@/lib/pricing";
+import {
+  SUBSCRIPTION_TIERS,
+  PAID_PURCHASES_AVAILABLE,
+  formatPrice,
+} from "@/lib/pricing";
 
 // ---- Plan feature lists (Hebrew) ----
 
@@ -185,17 +189,16 @@ export default function BillingPage() {
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   {currentPlan === "free"
-                    ? "גרסה חינמית - שדרגו לגישה מלאה"
-                    : SUBSCRIPTION_TIERS.find((t) => t.id === currentPlan)
-                        ?.subtitle ?? ""}
+                    ? "לא נמצא מנוי בתשלום"
+                    : "רישום מנוי קיים במערכת — יש לאמת זכאות ותשלום מול התמיכה"}
                 </p>
               </div>
             </div>
 
             {/* Feature list */}
-            <ul className="mb-6 space-y-2">
-              {(PLAN_FEATURES[currentPlan] ?? PLAN_FEATURES.free).map(
-                (feature) => (
+            {PAID_PURCHASES_AVAILABLE ? (
+              <ul className="mb-6 space-y-2">
+                {(PLAN_FEATURES[currentPlan] ?? PLAN_FEATURES.free).map((feature) => (
                   <li
                     key={feature}
                     className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
@@ -216,33 +219,29 @@ export default function BillingPage() {
                     </svg>
                     {feature}
                   </li>
-                )
-              )}
-            </ul>
+                ))}
+              </ul>
+            ) : (
+              <p className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800 dark:border-amber-400/25 dark:bg-amber-900/15 dark:text-amber-200">
+                קטלוג המסלולים הוא טיוטה והרכישה חסומה. רישום בטבלת מנויים אינו
+                כשלעצמו הוכחת תשלום או זכאות לתוכן. לבירור גישה, חיוב או ביטול
+                יש לפנות לתמיכה ולקבל אישור כתוב.
+              </p>
+            )}
 
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/pricing"
                 className="inline-flex h-10 items-center rounded-full bg-gradient-to-l from-brand-500 to-brand-600 px-6 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
               >
-                {currentPlan === "free" ? "שדרג תוכנית" : "שנה תוכנית"}
+                בדיקת מצב הרכישה
               </Link>
               {currentPlan !== "free" && (
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex h-10 cursor-not-allowed items-center rounded-full border border-red-200 bg-red-50 px-6 text-sm font-medium text-red-700 opacity-60 dark:border-red-800 dark:bg-red-950 dark:text-red-400"
-                  title="ביטול ייכנס לתוקף בסוף תקופת החיוב"
-                >
-                  בטל מנוי
-                </button>
+                <Link href="/contact" className="inline-flex h-10 items-center rounded-full border border-red-200 bg-red-50 px-6 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+                  פנייה לבירור או ביטול
+                </Link>
               )}
             </div>
-            {currentPlan !== "free" && (
-              <p className="mt-3 text-xs text-zinc-400 dark:text-zinc-500">
-                * ביטול ייכנס לתוקף בסוף תקופת החיוב הנוכחית
-              </p>
-            )}
           </section>
 
           {/* ── Available Plans ── */}
@@ -250,7 +249,14 @@ export default function BillingPage() {
             <h2 className="mb-5 text-base font-semibold text-zinc-900 dark:text-white">
               תוכניות זמינות
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
+            {!PAID_PURCHASES_AVAILABLE ? (
+              <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-800 dark:border-amber-400/25 dark:bg-amber-900/15 dark:text-amber-200">
+                אין כרגע תוכניות זמינות לרכישה. המחירים, תקופות הגישה והתכונות
+                שהופיעו בעבר היו טיוטת מוצר ולא הצעה מאושרת.
+              </div>
+            ) : (
+              <>
+              <div className="grid gap-4 sm:grid-cols-2">
               {SUBSCRIPTION_TIERS.filter((t) => t.id !== "free").map((tier) => (
                 <div
                   key={tier.id}
@@ -307,8 +313,8 @@ export default function BillingPage() {
                   )}
                 </div>
               ))}
-            </div>
-            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
+              </div>
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-bold text-zinc-900 dark:text-white">
@@ -322,7 +328,9 @@ export default function BillingPage() {
                   {formatPrice(1197)}
                 </p>
               </div>
-            </div>
+              </div>
+              </>
+            )}
           </section>
 
           {/* ── Payment History ── */}

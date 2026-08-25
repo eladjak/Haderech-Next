@@ -1,22 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-async function requireAdmin(ctx: {
-  auth: { getUserIdentity: () => Promise<{ subject: string } | null> };
-  db: any;
-}) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("Not authenticated");
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) throw new Error("User not found");
-  if (user.role !== "admin") throw new Error("Admin access required");
-  return user;
-}
+import { requireAdmin } from "./lib/authGuard";
 
 // ─── Admin Queries ────────────────────────────────────────────────────────────
 
@@ -26,6 +10,7 @@ export const listAllTopics = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const limit = args.limit ?? 100;
 
     const topics = await ctx.db
@@ -35,7 +20,7 @@ export const listAllTopics = query({
       .take(limit);
 
     const enriched = await Promise.all(
-      topics.map(async (topic: any) => {
+      topics.map(async (topic) => {
         const user = await ctx.db.get(topic.userId);
         const u = user as
           | { name?: string; email?: string; imageUrl?: string }
@@ -50,8 +35,8 @@ export const listAllTopics = query({
     );
 
     return [
-      ...enriched.filter((t: any) => t.pinned),
-      ...enriched.filter((t: any) => !t.pinned),
+      ...enriched.filter((topic) => topic.pinned),
+      ...enriched.filter((topic) => !topic.pinned),
     ];
   },
 });
@@ -60,21 +45,22 @@ export const listAllTopics = query({
 export const getCommunityStats = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     const topics = await ctx.db.query("communityTopics").collect();
     const replies = await ctx.db.query("communityReplies").collect();
     const topicLikes = await ctx.db.query("communityTopicLikes").collect();
     const replyLikes = await ctx.db.query("communityReplyLikes").collect();
 
-    const pinnedCount = topics.filter((t: any) => t.pinned).length;
+    const pinnedCount = topics.filter((topic) => topic.pinned).length;
 
     // unique users who posted or replied
     const userIds = new Set<string>([
-      ...topics.map((t: any) => String(t.userId)),
-      ...replies.map((r: any) => String(r.userId)),
+      ...topics.map((topic) => String(topic.userId)),
+      ...replies.map((reply) => String(reply.userId)),
     ]);
 
     const categoryBreakdown = topics.reduce(
-      (acc: Record<string, number>, topic: any) => {
+      (acc: Record<string, number>, topic) => {
         acc[topic.category] = (acc[topic.category] ?? 0) + 1;
         return acc;
       },

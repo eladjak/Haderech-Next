@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -91,7 +92,12 @@ function applyFontSize(size: FontSize) {
 export default function SettingsPage() {
   const { user: clerkUser } = useUser();
   const prefs = useQuery(api.users.getPreferences);
-  const exportData = useQuery(api.users.exportUserData);
+  const [exportRequested, setExportRequested] = useState(false);
+  const exportData = useQuery(
+    api.users.exportUserData,
+    exportRequested ? {} : "skip"
+  );
+  const deletionRequest = useQuery(api.users.getAccountDeletionRequest);
 
   const updateNotifications = useMutation(
     api.users.updateNotificationPreferences
@@ -217,9 +223,10 @@ export default function SettingsPage() {
     }
   };
 
-  // Export user data
-  const handleExportData = () => {
-    if (!exportData) return;
+  // Export user data only after an explicit click. The settings page does not
+  // preload the user's full private archive in the background.
+  useEffect(() => {
+    if (!exportRequested || !exportData) return;
     const json = JSON.stringify(exportData, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -228,8 +235,11 @@ export default function SettingsPage() {
     a.download = `haderech-data-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    setExportRequested(false);
     showToast("הנתונים יוצאו בהצלחה");
-  };
+  }, [exportData, exportRequested, showToast]);
+
+  const handleExportData = () => setExportRequested(true);
 
   // Request account deletion
   const handleDeleteAccount = async () => {
@@ -237,11 +247,15 @@ export default function SettingsPage() {
       await requestDeletion();
       setDeletionDone(true);
       setShowDeleteConfirm(false);
-      showToast("בקשת המחיקה התקבלה. נצור איתך קשר בתוך 48 שעות.");
+      showToast(
+        "הבקשה נקלטה. לפני פעולה על החשבון נבצע אימות ונעדכן אתכם בהמשך הטיפול."
+      );
     } catch {
       showToast("שגיאה בשליחת הבקשה", "error");
     }
   };
+
+  const deletionPending = deletionDone || deletionRequest?.open === true;
 
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
@@ -260,7 +274,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <main className="container mx-auto px-4 py-12">
+      <main id="main-content" className="container mx-auto px-4 py-12">
         <div className="mx-auto max-w-2xl">
           {/* Page heading */}
           <div className="mb-10">
@@ -277,9 +291,12 @@ export default function SettingsPage() {
             <div className="flex items-center gap-5">
               <div className="relative">
                 {clerkUser?.imageUrl ? (
-                  <img
+                  <Image
                     src={clerkUser.imageUrl}
                     alt={clerkUser.fullName ?? ""}
+                    width={64}
+                    height={64}
+                    unoptimized
                     className="h-16 w-16 rounded-full object-cover ring-2 ring-brand-100 dark:ring-brand-900"
                   />
                 ) : (
@@ -591,16 +608,21 @@ export default function SettingsPage() {
                     ייצוא נתונים
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    הורידו את כל נתוני הפרופיל, ההתקדמות והציונים שלכם כ-JSON
+                    זהו ייצוא עצמי מסונן של נתונים שניתן לשייך לחשבון באופן
+                    מאומת: למידה, שיחות, סימולטור, קהילה, העדפות, פניות ונתוני
+                    חיוב מסוננים. בבחנים נכלל סיכום בטוח בלבד, ללא התשובות
+                    שנבחרו או ציון מספרי של ניסיון שלא עבר. בקשת גישה מלאה
+                    דורשת אימות זהות וטיפול ידני, כדי להגן גם על מפתח הבוחן ועל
+                    מידע של צדדים אחרים.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleExportData}
-                  disabled={!exportData}
+                  disabled={exportRequested}
                   className="flex-shrink-0 rounded-full border border-zinc-200 bg-white px-5 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 >
-                  ייצוא
+                  {exportRequested ? "מכין קובץ..." : "ייצוא"}
                 </button>
               </div>
 
@@ -609,24 +631,24 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                      מחיקת חשבון
+                      בקשת מחיקת חשבון
                     </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {deletionDone
-                        ? "בקשת המחיקה התקבלה. נצור איתך קשר תוך 48 שעות."
-                        : "פעולה זו בלתי הפיכה. כל הנתונים שלכם ימחקו לצמיתות."}
+                      {deletionPending
+                        ? "הבקשה התקבלה ונמצאת בטיפול. החשבון והנתונים לא נמחקו בשלב זה."
+                        : "הכפתור שולח בקשה לטיפול ידני; החשבון והנתונים לא נמחקים בלחיצה."}
                     </p>
                   </div>
-                  {!deletionDone && (
+                  {!deletionPending && (
                     <button
                       type="button"
                       onClick={() => setShowDeleteConfirm(true)}
                       className="flex-shrink-0 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900/50"
                     >
-                      מחיקה
+                      שליחת בקשה
                     </button>
                   )}
-                  {deletionDone && (
+                  {deletionPending && (
                     <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700 dark:bg-orange-950 dark:text-orange-400">
                       בטיפול
                     </span>
@@ -643,11 +665,12 @@ export default function SettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
             <h3 className="mb-2 text-lg font-bold text-zinc-900 dark:text-white">
-              אתם בטוחים?
+              לשלוח בקשת מחיקה?
             </h3>
             <p className="mb-6 text-sm text-zinc-600 dark:text-zinc-400">
-              מחיקת החשבון תמחק את כל הנתונים שלכם: התקדמות, הערות, תגובות
-              ותעודות. פעולה זו בלתי הפיכה.
+              השליחה אינה מוחקת את החשבון או את הנתונים מיד. הבקשה תועבר
+              לטיפול ידני. לפני כל פעולה בלתי הפיכה נבצע אימות זהות ונעדכן
+              אתכם לגבי המשך התהליך.
             </p>
             <div className="flex gap-3">
               <button
@@ -662,7 +685,7 @@ export default function SettingsPage() {
                 onClick={handleDeleteAccount}
                 className="flex-1 rounded-full bg-red-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
               >
-                כן, מחק את החשבון
+                כן, שלחו את הבקשה
               </button>
             </div>
           </div>

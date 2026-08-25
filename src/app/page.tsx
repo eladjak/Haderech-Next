@@ -19,12 +19,16 @@ const staggerContainer = {
   visible: { transition: { staggerChildren: 0.15 } },
 };
 
+// Stories may include historical seed/demo records. Keep the marketing surface
+// fail-closed until each item has provenance and publication consent.
+const VERIFIED_PUBLIC_STORIES_AVAILABLE: boolean = false;
+
 export default function Home() {
   return (
     <div className="min-h-dvh bg-[var(--background)]">
       <Header />
 
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
       {/* Hero Section */}
       <section className="relative overflow-hidden animate-hero-gradient" role="region" aria-labelledby="hero-heading">
         {/* Hero background image */}
@@ -33,6 +37,7 @@ export default function Home() {
             src="/images/hero.jpg"
             alt=""
             fill
+            sizes="100vw"
             className="object-cover opacity-12 dark:opacity-8"
             priority
           />
@@ -59,7 +64,7 @@ export default function Home() {
             <motion.div variants={fadeIn}>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-600 dark:border-brand-200/30 dark:bg-brand-50/50 dark:text-brand-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" aria-hidden="true" />
-                461 זוגות כבר מצאו אהבה
+                12 שבועות • 75 שיעורים • 8 מסמכי תרגול
               </div>
             </motion.div>
 
@@ -79,9 +84,9 @@ export default function Home() {
               variants={fadeIn}
               className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-500/75 dark:text-zinc-400"
             >
-              תוכנית "הדרך" של אומנות הקשר - 12 שבועות שישנו לך את חיי
-              הזוגיות. עם מאמן AI אישי, סימולטור דייטים, ארגז כלים אינטראקטיבי,
-              ומערכת גיימיפיקציה שתשאיר אותך בדרך.
+              תוכנית &quot;הדרך&quot; של אומנות הקשר היא מסלול למידה ותרגול בן
+              12 שבועות. היא כוללת שיעורים, מסמכי תרגול וכלי AI אוטומטיים
+              שעלולים לטעות ואינם תחליף לייעוץ מקצועי.
             </motion.p>
 
             <motion.div
@@ -115,10 +120,10 @@ export default function Home() {
                 </Link>
               </motion.div>
               <Link
-                href="/sign-up"
+                href="/contact"
                 className="inline-flex h-12 items-center justify-center rounded-xl border border-blue-500/20 bg-white px-8 text-base font-semibold text-blue-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 active:scale-[0.97] dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-brand-200/30 dark:hover:bg-brand-50/20"
               >
-                התחל בחינם
+                בדקו זמינות
               </Link>
             </motion.div>
 
@@ -131,19 +136,19 @@ export default function Home() {
                 <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
-                ללא התחייבות
+                12 שבועות
               </span>
               <span className="flex items-center gap-1.5 text-sm text-blue-500/75 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
-                גישה מיידית
+                75 שיעורים
               </span>
               <span className="flex items-center gap-1.5 text-sm text-blue-500/75 dark:text-zinc-400">
                 <svg className="h-4 w-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                 </svg>
-                ניסיון חינם
+                8 מסמכי תרגול
               </span>
             </motion.div>
 
@@ -151,7 +156,8 @@ export default function Home() {
               variants={fadeIn}
               className="mt-4 text-sm text-blue-500/75 dark:text-zinc-400"
             >
-              הצטרפו ל-1,000+ תלמידים שכבר שינו את חיי הדייטינג שלהם
+              הרכישה והגישה לתוכן בתשלום אינן פתוחות כרגע; פתיחת חשבון לבדה
+              אינה מקנה הרשאה לקורס.
             </motion.p>
           </motion.div>
         </div>
@@ -171,10 +177,10 @@ export default function Home() {
             viewport={{ once: true, margin: "-50px" }}
             variants={staggerContainer}
           >
-            <StatItem value="6+" label="קורסים" />
-            <StatItem value="90+" label="שיעורים" hasDivider />
-            <StatItem value="1000+" label="תלמידים" hasDivider />
-            <StatItem value="95%" label="שביעות רצון" hasDivider />
+            <StatItem value="12" label="שבועות" />
+            <StatItem value="75" label="שיעורים" hasDivider />
+            <StatItem value="8" label="מסמכי תרגול" hasDivider />
+            <StatItem value="6" label="שלבי למידה" hasDivider />
           </motion.div>
         </div>
       </section>
@@ -225,7 +231,7 @@ export default function Home() {
                 </svg>
               }
               title="אמת"
-              description='לא אגיד לך מה נעים לשמוע. אגיד לך מה אתה צריך לשמוע. ישר, בלי בולשיט.'
+              description="נבדיל בין עובדה, מקור, פרשנות והצעה לתרגול — ונאמר ביושר גם מה עדיין לא ידוע."
             />
             <FeatureCard
               iconBg="from-blue-500 to-blue-600"
@@ -251,7 +257,7 @@ export default function Home() {
                 </svg>
               }
               title="כלים"
-              description="כל פרק, כל מפגש, כל שיחה - כוללים משהו שאפשר ליישם כבר מחר בבוקר. לא תיאוריה מופשטת - כלים שעובדים."
+              description="התוכן מציע תרגילים מעשיים שאפשר לבחור, להתאים, לדלג עליהם או לעצור לפי ההקשר והגבולות שלך."
             />
             <FeatureCard
               iconBg="from-accent-400 to-accent-500"
@@ -272,7 +278,7 @@ export default function Home() {
                 </svg>
               }
               title="כבוד"
-              description="לא אטיף לך מוסר. באת לכאן כי אתה רוצה לשנות משהו - וזה לבד כבר אומר משהו על הערך שלך."
+              description="אין ציון לערך שלך ואין נוסחה אחת לזוגיות. בחירה, פרטיות, הסכמה ובטיחות קודמות לכל תרגיל."
             />
           </motion.div>
         </div>
@@ -321,19 +327,19 @@ export default function Home() {
             <EcosystemCard
               emoji="🎓"
               title='תוכנית "הדרך" - 12 שבועות'
-              description="90+ שיעורים, תרגילים, בחנים, PDF. מסע מובנה מ'מי אני' עד 'מוכן לזוגיות'."
+              description="75 שיעורים, בחנים ו-8 מסמכי תרגול במסלול מובנה בן 12 שבועות."
               badge="ליבה"
             />
             <EcosystemCard
               emoji="🤖"
-              title="מאמן AI אישי"
-              description="ליווי מותאם אישית, ניתוח דייטים, ייעוץ מבוסס הקורס."
+              title="כלי AI לתרגול"
+              description="תרגול ומשוב אוטומטי המבוסס על תכני הקורס; הוא עלול לטעות ואינו ייעוץ מקצועי."
               badge="AI"
             />
             <EcosystemCard
               emoji="🎭"
               title="סימולטור דייטים"
-              description="4 תרחישים, פרסונות מציאותיות, משוב בזמן אמת."
+              description="תרחישי תרגול עם דמויות בדיוניות ומשוב אוטומטי מוגבל."
               badge="AI"
             />
             <EcosystemCard
@@ -343,27 +349,27 @@ export default function Home() {
               badge="כלים"
             />
             <EcosystemCard
-              emoji="🏆"
-              title="XP, תגים ולוח מובילים"
-              description="צבור XP, עלה רמות, פתח תגי הישג, תחרה בלוח מובילים."
-              badge="גיימיפיקציה"
+              emoji="🧭"
+              title="התקדמות אישית בקורס"
+              description="מעקב פרטי אחר שיעורים ותרגולים, בלי דירוג מול אחרים ובלי להפוך קשרים למשחק."
+              badge="למידה בקצב שלך"
             />
             <EcosystemCard
               emoji="📅"
               title="טיפ יומי ואתגרים"
-              description="תוכן חדש כל יום - טיפים, אתגרים, השראה וציטוטים."
+              description="טיפים ואתגרי תרגול מתוך המאגר, שאפשר לבחור, לדלג עליהם או לעצור."
               badge="יומי"
             />
             <EcosystemCard
               emoji="📚"
               title="ספרייה עשירה"
-              description="ספרים, מאמרים, מחקרים, סרטונים - הכל לפי נושא ורמה."
+              description="מאמרים ומשאבים לפי נושא; זמינות ומקור מצוינים בכל פריט כשהם מאומתים."
               badge="משאבים"
             />
             <EcosystemCard
               emoji="👥"
               title="קהילה, ייעוץ ותעודות"
-              description="פורום, ייעוץ אישי, תעודות סיום, סיפורי הצלחה."
+              description="כלי קהילה ותיעוד סיום כאשר הם זמינים; תעודה אינה הסמכה מקצועית."
               badge="קהילה"
             />
           </motion.div>
@@ -400,19 +406,19 @@ export default function Home() {
             <ToolCard
               emoji="💬"
               title="בונה פרופיל דייטינג"
-              description="אשף 6 שלבים לבניית פרופיל מלא עם טיפים וציון AI"
+              description="טיוטת פרופיל בשישה שלבים עם הצעות AI שדורשות בדיקה שלך"
               href="/tools/dating-profile"
             />
             <ToolCard
               emoji="✍️"
               title="בונה ביו AI"
-              description="AI כותב לך ביו מקצועי מותאם לפלטפורמה ולאישיות שלך"
+              description="AI מציע טיוטת ביו; אין אבחון אישיות ואין הבטחה לביצועים בפלטפורמה"
               href="/tools/profile-builder"
             />
             <ToolCard
               emoji="💎"
               title="שאלון ערכים בזוגיות"
-              description="גלה מה באמת חשוב לך בזוגיות ומי מתאים לך"
+              description="כלי רפלקציה על העדפות וערכים, לא מבחן התאמה או אבחון"
               href="/tools/values-quiz"
             />
             <ToolCard
@@ -456,7 +462,7 @@ export default function Home() {
               6 שלבים למסע
             </span>
             <h2 id="how-it-works-heading" className="mb-12 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
-              איך תוכנית "הדרך" עובדת?
+              איך תוכנית &quot;הדרך&quot; עובדת?
             </h2>
           </motion.div>
           <h4 className="sr-only">שישה שלבי התוכנית לפי שבועות</h4>
@@ -471,96 +477,48 @@ export default function Home() {
             <PhaseCard step="2" color="from-blue-500 to-blue-600" title="תקשורת" weeks="שבועות 4-5" description="היכרות עצמית, רגשות, צרכים" image="/images/illustrations/step-2.webp" imageAlt="איור: שני אנשים עומדים זה מול זה על גבעה, ובועת דיבור רכה וריקה מרחפת ביניהם" />
             <PhaseCard step="3" color="from-accent-400 to-accent-500" title="משיכה" weeks="שבועות 6-9" description="אומץ, היכרויות, דייטים" image="/images/illustrations/step-3.webp" imageAlt="איור: שני שבילים מתפתלים על גבעות מתקרבים זה לזה, אדם הולך על כל אחד מהם, וזוהר חם במקום המפגש" />
             <PhaseCard step="4" color="from-brand-400 to-blue-500" title="חיבור" weeks="שבוע 10" description="כימיה, הקשבה, יצירת הזדמנויות" image="/images/illustrations/step-4.webp" imageAlt="איור: שני אנשים עומדים זה לצד זה על גבעה, ידיהם כמעט נוגעות, ומטילים צל משותף אחד" />
-            <PhaseCard step="5" color="from-blue-400 to-brand-400" title="אינטימיות" weeks="שבוע 11" description="פגיעות, קרבה, 36 שאלות להתאהבות" image="/images/illustrations/step-5.webp" imageAlt="איור: שני אנשים יושבים קרוב זה לזה על גבעה, מוקפים במעגל אחד של אור חם" />
-            <PhaseCard step="6" color="from-blue-500 to-brand-500" title="מחויבות" weeks="שבוע 12" description="החלטה, זוגיות רשמית, בניית עתיד" image="/images/illustrations/step-6.webp" imageAlt="איור: שני אנשים הולכים יחד במעלה שביל מתפתל לעבר שמש עולה, ובראש הגבעה נראית קשת" />
+            <PhaseCard step="5" color="from-blue-400 to-brand-400" title="אינטימיות" weeks="שבוע 11" description="קרבה מבחירה, פרטיות ושאלות שאפשר לדלג עליהן" image="/images/illustrations/step-5.webp" imageAlt="איור: שני אנשים יושבים קרוב זה לזה על גבעה, מוקפים במעגל אחד של אור חם" />
+            <PhaseCard step="6" color="from-blue-500 to-brand-500" title="מחויבות" weeks="שבוע 12" description="שיחה על ערכים, ציפיות ובחירה הדדית בלי לחץ" image="/images/illustrations/step-6.webp" imageAlt="איור: שני אנשים הולכים יחד במעלה שביל מתפתל לעבר שמש עולה, ובראש הגבעה נראית קשת" />
           </motion.div>
         </div>
       </section>
 
-      {/* Pricing Preview Section */}
-      <section className="border-t border-brand-100/30 bg-gradient-to-b from-[var(--background)] to-brand-50/20 py-20 dark:border-blue-100/10 dark:to-blue-50/5" role="region" aria-labelledby="pricing-heading">
+      {/* Purchase containment notice: paid offers are not yet approved or enabled. */}
+      <section
+        className="border-t border-brand-100/30 bg-gradient-to-b from-[var(--background)] to-brand-50/20 py-20 dark:border-blue-100/10 dark:to-blue-50/5"
+        role="region"
+        aria-labelledby="availability-heading"
+      >
         <div className="container mx-auto px-4">
           <motion.div
-            className="mx-auto mb-12 max-w-xl text-center"
+            className="mx-auto max-w-2xl rounded-2xl border border-brand-200/60 bg-white p-8 text-center shadow-sm dark:border-brand-500/20 dark:bg-zinc-900"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
           >
             <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
-              תוכניות ומחירים
+              זמינות והרשמה
             </span>
-            <h2 id="pricing-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
-              בחר את המסלול שלך
+            <h2 id="availability-heading" className="mb-4 text-3xl font-bold text-blue-500 dark:text-white">
+              הרכישה המקוונת עדיין לא פתוחה
             </h2>
-            <p className="text-blue-500/75 dark:text-zinc-400">
-              התחל בחינם, שדרג כשתרגיש מוכן
-            </p>
-          </motion.div>
-          <motion.div
-            className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-          >
-            <PricingCard
-              name="טעימה"
-              price="חינם"
-              period=""
-              description="5 שיעורים, 10 הודעות AI בחודש, 2 תרחישי סימולטור"
-              features={["5 שיעורים ראשונים", "מאמן AI - 10 הודעות", "2 תרחישי סימולטור", "ספריית מאמרים"]}
-              cta="התחל בחינם"
-              ctaHref="/sign-up"
-              highlighted={false}
-            />
-            <PricingCard
-              name="משנה"
-              price="₪149"
-              period="/חודש"
-              description="שינוי אמיתי: AI ללא הגבלה, סימולטור קולי, קהילה פעילה"
-              features={["כל 90+ השיעורים", "מאמן AI ללא הגבלה", "סימולטור קולי + וידאו", "קהילה + לוח מובילים", "תעודת סיום"]}
-              badge="הכי פופולרי"
-              cta="התחל תקופת ניסיון"
-              ctaHref="/sign-up"
-              highlighted={true}
-            />
-            <PricingCard
-              name="מוביל"
-              price="₪299"
-              period="/חודש"
-              description="VIP: קואצ׳ינג קבוצתי חי, מאסטרקלאסים בלעדיים, גישה מוקדמת"
-              features={["הכל במשנה +", "קואצ׳ינג קבוצתי עם אלעד", "מאסטרקלאסים בלעדיים", "דוחות AI מעמיקים", "תמיכה בעדיפות"]}
-              cta="הצטרף ל-VIP"
-              ctaHref="/sign-up"
-              highlighted={false}
-            />
-          </motion.div>
-          <motion.div
-            className="mt-8 flex flex-col items-center gap-3"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-          >
-            <p className="text-sm text-blue-500/75 dark:text-zinc-400">
-              חיסכון של עד 37% בתוכנית שנתית. ביטול בכל עת.
+            <p className="mx-auto mb-6 max-w-xl leading-relaxed text-blue-500/75 dark:text-zinc-400">
+              המחירים והמסלולים טרם אושרו, ואין כרגע מסלול תשלום או הרשאת תוכן
+              פעילים. פתיחת חשבון לבדה אינה מקנה גישה לקורס בתשלום.
             </p>
             <Link
-              href="/pricing"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 underline underline-offset-4 transition-colors hover:text-brand-600"
+              href="/contact"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-brand-200 px-6 text-sm font-semibold text-brand-600 transition-colors hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-zinc-800"
             >
-              ראה את כל התוכניות והפרטים המלאים
-              <svg className="h-3.5 w-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
+              בירור זמינות
             </Link>
           </motion.div>
         </div>
       </section>
 
       {/* Success Stories Section */}
-      <SuccessStoriesSection />
+      {VERIFIED_PUBLIC_STORIES_AVAILABLE && <SuccessStoriesSection />}
 
       {/* Featured Blog Posts Section */}
       <FeaturedBlogSection />
@@ -598,15 +556,15 @@ export default function Home() {
                 מוכנים להתחיל את המסע?
               </h2>
               <p className="mx-auto mb-8 max-w-md text-lg text-white/80">
-                461 זוגות כבר מצאו אהבה דרך אומנות הקשר. הצעד הראשון שלך
-                מתחיל כאן.
+                אפשר להכיר את מבנה התוכנית, לקרוא את חומרי ההסבר ולבחור אם
+                התרגול מתאים לך — בלי הבטחה לתוצאה קבועה.
               </p>
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link
-                  href="/sign-up"
+                  href="/contact"
                   className="inline-flex h-12 items-center justify-center rounded-xl bg-white px-8 text-base font-semibold text-brand-600 shadow-lg transition-all hover:bg-brand-50 hover:shadow-xl"
                 >
-                  התחל בחינם
+                  בדקו זמינות
                   <svg
                     className="mr-2 h-4 w-4 rotate-180"
                     fill="none"
@@ -806,71 +764,6 @@ function PhaseCard({
   );
 }
 
-function PricingCard({
-  name,
-  price,
-  period,
-  description,
-  features,
-  badge,
-  cta,
-  ctaHref,
-  highlighted,
-}: {
-  name: string;
-  price: string;
-  period: string;
-  description: string;
-  features: string[];
-  badge?: string;
-  cta: string;
-  ctaHref: string;
-  highlighted: boolean;
-}) {
-  return (
-    <motion.div
-      variants={fadeIn}
-      className={`relative flex flex-col rounded-2xl border p-6 transition-shadow duration-200 ${
-        highlighted
-          ? "shimmer-effect scale-[1.02] border-brand-300 bg-gradient-to-b from-brand-50/60 to-white shadow-xl shadow-brand-500/15 dark:border-brand-500/40 dark:from-brand-50/10 dark:to-blue-50/5 md:-my-2"
-          : "border-brand-100/30 bg-white hover:border-brand-200/50 hover:shadow-md dark:border-blue-100/10 dark:bg-blue-50/5"
-      }`}
-    >
-      {badge && (
-        <span className="absolute -top-3.5 right-6 rounded-full bg-gradient-to-l from-brand-500 to-brand-600 px-4 py-1 text-xs font-bold text-white shadow-md shadow-brand-500/20">
-          {badge}
-        </span>
-      )}
-      <h3 className="mb-1 text-lg font-bold text-blue-500 dark:text-white">{name}</h3>
-      <div className="mb-3 flex items-baseline gap-1">
-        <span className={`text-3xl font-black dark:text-white ${highlighted ? "gradient-text bg-gradient-to-l from-brand-500 to-brand-600" : "text-blue-500"}`}>{price}</span>
-        {period && <span className="text-sm text-blue-500/75 dark:text-zinc-400">{period}</span>}
-      </div>
-      <p className="mb-5 text-sm text-blue-500/75 dark:text-zinc-400">{description}</p>
-      <ul className="mb-6 flex-1 space-y-2.5">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm text-blue-500/80 dark:text-zinc-300">
-            <svg className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-            {f}
-          </li>
-        ))}
-      </ul>
-      <Link
-        href={ctaHref}
-        className={`inline-flex h-11 items-center justify-center rounded-xl text-sm font-semibold transition-all ${
-          highlighted
-            ? "bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-md hover:shadow-lg hover:brightness-110"
-            : "border border-brand-200 text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-zinc-900"
-        }`}
-      >
-        {cta}
-      </Link>
-    </motion.div>
-  );
-}
-
 // ─── Category label helpers ──────────────────────────────────────────────────
 
 const storyCategoryLabels: Record<string, string> = {
@@ -888,7 +781,7 @@ const blogCategoryLabels: Record<string, string> = {
   psychology: "פסיכולוגיה",
 };
 
-// ─── Success Stories Section ─────────────────────────────────────────────────
+// ─── Verified participant stories (currently fail-closed) ───────────────────
 
 function SuccessStoriesSection() {
   const stories = useQuery(api.stories.listFeatured);
@@ -910,10 +803,10 @@ function SuccessStoriesSection() {
           variants={fadeIn}
         >
           <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-wider text-brand-500">
-            סיפורי הצלחה אמיתיים
+            סיפורי משתתפים מאומתים
           </span>
           <h2 className="mb-4 text-3xl font-bold text-blue-500 dark:text-white md:text-4xl">
-            מה התלמידים שלנו אומרים
+            פורסמו בהסכמה מפורשת
           </h2>
         </motion.div>
 
@@ -985,7 +878,7 @@ function SuccessStoriesSection() {
             href="/stories"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 underline underline-offset-4 transition-colors hover:text-brand-600"
           >
-            ראה עוד סיפורים
+            מידע על אימות והסכמה
             <svg className="h-3.5 w-3.5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>

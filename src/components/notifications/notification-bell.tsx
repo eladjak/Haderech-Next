@@ -35,6 +35,7 @@ export function NotificationBell() {
   const markAllAsRead = useMutation(api.notifications.markAllAsRead);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [referenceTime] = useState(Date.now);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -67,7 +68,7 @@ export function NotificationBell() {
   );
 
   const formatTime = (timestamp: number) => {
-    const diff = Date.now() - timestamp;
+    const diff = referenceTime - timestamp;
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return "עכשיו";
     if (minutes < 60) return `${minutes}ד`;

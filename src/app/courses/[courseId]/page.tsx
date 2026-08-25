@@ -8,8 +8,9 @@ import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { Badge } from "@/components/ui/badge";
 import { EnrollButton } from "@/components/course/enroll-button";
+import { CourseSafetyNotice } from "@/components/course/course-safety-notice";
+import { CourseJourneyGuide } from "@/components/course/course-journey-guide";
 import { CourseReviews } from "@/components/reviews/course-reviews";
 import { SocialShare } from "@/components/social-share";
 import { ShareButton } from "@/components/ui/share-button";
@@ -52,21 +53,33 @@ export default function CourseDetailPage() {
     convexUser?._id ? { userId: convexUser._id, courseId } : "skip"
   );
 
+  const courseAccess = useQuery(
+    api.enrollments.getContentAccessStatus,
+    convexUser?._id ? { courseId } : "skip"
+  );
+  const hasCourseAccess = courseAccess?.hasAccess === true;
+
   const courseProgress = useQuery(
     api.progress.getForCourse,
-    convexUser?._id ? { userId: convexUser._id, courseId } : "skip"
+    convexUser?._id && hasCourseAccess
+      ? { userId: convexUser._id, courseId }
+      : "skip"
   );
 
   const certificate = useQuery(
     api.certificates.getByUserAndCourse,
-    convexUser?._id ? { userId: convexUser._id, courseId } : "skip"
+    convexUser?._id && hasCourseAccess
+      ? { userId: convexUser._id, courseId }
+      : "skip"
   );
 
-  // Course rating
-  const courseRating = useQuery(api.reviews.getCourseRating, { courseId });
+  // Reviews are part of the entitled learning experience, not public proof.
+  const courseRating = useQuery(
+    api.reviews.getCourseRating,
+    hasCourseAccess ? { courseId } : "skip"
+  );
 
   // Mutations
-  const enrollMutation = useMutation(api.enrollments.enroll);
   const unenrollMutation = useMutation(api.enrollments.unenroll);
   const issueCertificate = useMutation(api.certificates.issue);
 
@@ -182,25 +195,50 @@ export default function CourseDetailPage() {
 
   const canGetCertificate = completionPercent >= 80 && !certificate;
 
-  // Group lessons by week (7 lessons per week)
-  const LESSONS_PER_WEEK = 7;
-  const weeks: { weekNumber: number; lessons: typeof publishedLessons }[] = [];
-  for (let i = 0; i < publishedLessons.length; i += LESSONS_PER_WEEK) {
-    weeks.push({
-      weekNumber: Math.floor(i / LESSONS_PER_WEEK) + 1,
-      lessons: publishedLessons.slice(i, i + LESSONS_PER_WEEK),
+  // Group by the canonical metadata carried by every synchronized lesson.
+  // The proportional fallback keeps legacy records navigable without inventing
+  // a fixed seven-lessons-per-week structure (75 lessons span 12 weeks).
+  const weekMap = new Map<
+    number,
+    {
+      weekNumber: number;
+      phaseNumber?: number;
+      phaseName?: string;
+      lessons: typeof publishedLessons;
+    }
+  >();
+  publishedLessons.forEach((lesson, index) => {
+    const fallbackWeek = Math.min(
+      12,
+      Math.floor(
+        (index * 12) / Math.max(publishedLessons.length, 1)
+      ) + 1
+    );
+    const weekNumber = lesson.weekNumber ?? fallbackWeek;
+    const existingWeek = weekMap.get(weekNumber);
+
+    if (existingWeek) {
+      existingWeek.lessons.push(lesson);
+      existingWeek.phaseNumber ??= lesson.phaseNumber;
+      existingWeek.phaseName ??= lesson.phaseName;
+      return;
+    }
+
+    weekMap.set(weekNumber, {
+      weekNumber,
+      phaseNumber: lesson.phaseNumber,
+      phaseName: lesson.phaseName,
+      lessons: [lesson],
     });
-  }
+  });
+  const weeks = Array.from(weekMap.values()).sort(
+    (a, b) => a.weekNumber - b.weekNumber
+  );
 
   // Find next lesson to continue
   const nextLessonToContinue = publishedLessons.find(
     (l) => !progressMap.get(l._id)?.completed
   );
-
-  async function handleEnroll() {
-    if (!convexUser?._id) return;
-    await enrollMutation({ userId: convexUser._id, courseId });
-  }
 
   async function handleUnenroll() {
     if (!convexUser?._id) return;
@@ -267,6 +305,8 @@ export default function CourseDetailPage() {
                     {course.description}
                   </p>
 
+                  <CourseSafetyNotice />
+
                   {/* Rating display */}
                   {courseRating && courseRating.count > 0 && (
                     <div className="mb-6 flex items-center gap-2">
@@ -315,76 +355,70 @@ export default function CourseDetailPage() {
                       text={course.description}
                       url={`${siteConfig.url}/courses/${courseId}`}
                     />
-                    {clerkUser ? (
-                      <>
-                        {isEnrolled !== undefined && (
-                          <>
-                            {isEnrolled ? (
-                              <Link
-                                href={
-                                  nextLessonToContinue
-                                    ? `/courses/${courseId}/learn?lesson=${nextLessonToContinue._id}`
-                                    : `/courses/${courseId}/learn`
-                                }
-                                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30"
-                              >
-                                <svg
-                                  className="h-5 w-5"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                  aria-hidden="true"
-                                >
-                                  <path d="M8 5.14v14l11-7-11-7z" />
-                                </svg>
-                                {completedCount > 0
-                                  ? "המשך ללמוד"
-                                  : "התחל ללמוד"}
-                              </Link>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={handleEnroll}
-                                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30"
-                              >
-                                <svg
-                                  className="h-5 w-5"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                  aria-hidden="true"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 4.5v15m7.5-7.5h-15"
-                                  />
-                                </svg>
-                                הירשם לקורס - חינם
-                              </button>
-                            )}
-                          </>
-                        )}
-                        {isEnrolled && (
-                          <EnrollButton
-                            isEnrolled={true}
-                            onEnroll={handleEnroll}
-                            onUnenroll={handleUnenroll}
-                          />
-                        )}
-                      </>
-                    ) : (
+                    {clerkUser && courseAccess === undefined ? (
+                      <span
+                        className="inline-flex h-12 items-center rounded-full bg-zinc-100 px-6 text-sm text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300"
+                        role="status"
+                      >
+                        בודק גישה לקורס...
+                      </span>
+                    ) : hasCourseAccess ? (
                       <Link
-                        href="/sign-in"
+                        href={
+                          nextLessonToContinue
+                            ? `/courses/${courseId}/learn?lesson=${nextLessonToContinue._id}`
+                            : `/courses/${courseId}/learn`
+                        }
                         className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-brand-500 to-brand-600 px-8 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-xl hover:shadow-brand-500/30"
                       >
-                        התחבר כדי להירשם
+                        <svg
+                          className="h-5 w-5"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path d="M8 5.14v14l11-7-11-7z" />
+                        </svg>
+                        {completedCount > 0 ? "המשך ללמוד" : "התחל ללמוד"}
                       </Link>
+                    ) : (
+                      <div className="basis-full rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/25">
+                        <p className="font-semibold text-amber-900 dark:text-amber-100">
+                          הקורס המלא אינו פתוח כרגע להרשמה עצמית
+                        </p>
+                        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-amber-800 dark:text-amber-200">
+                          פתיחת חשבון או שמירת הקורס אינן מפעילות גישה לתוכן.
+                          בינתיים אפשר להתחיל בכלי תרגול פתוח, או לפנות לקבלת
+                          מידע מדויק על זמינות וגישה.
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Link
+                            href="/tools"
+                            className="inline-flex min-h-11 items-center rounded-xl bg-amber-800 px-5 text-sm font-semibold text-white hover:bg-amber-900 dark:bg-amber-600 dark:hover:bg-amber-500"
+                          >
+                            לנסות כלי פתוח
+                          </Link>
+                          <Link
+                            href={clerkUser ? "/contact" : "/sign-in"}
+                            className="inline-flex min-h-11 items-center rounded-xl border border-amber-300 bg-white px-5 text-sm font-medium text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-transparent dark:text-amber-100 dark:hover:bg-amber-950/40"
+                          >
+                            {clerkUser ? "לשאול על גישה" : "כניסה לחשבון קיים"}
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                    {isEnrolled && (
+                      <div className="basis-full">
+                        <EnrollButton
+                          isEnrolled={true}
+                          onUnenroll={handleUnenroll}
+                        />
+                      </div>
                     )}
                   </div>
 
-                  {/* Progress bar for enrolled users */}
-                  {isEnrolled && completedCount > 0 && (
+                  {/* Progress exists only inside a trusted course grant. */}
+                  {hasCourseAccess && completedCount > 0 && (
                     <div className="mt-6 max-w-sm">
                       <ProgressBar
                         value={completionPercent}
@@ -523,27 +557,29 @@ export default function CourseDetailPage() {
                 </p>
               </div>
 
-              {/* Rating */}
+              {/* Canonical course structure */}
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1.5">
                   <svg
                     className="h-5 w-5 text-accent-400"
-                    fill="currentColor"
+                    fill="none"
                     viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
                     aria-hidden="true"
                   >
-                    <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6.75 3.75h10.5M6.75 12h10.5M6.75 20.25h10.5M4.5 3.75h.008v.008H4.5V3.75zm0 8.25h.008v.008H4.5V12zm0 8.25h.008v.008H4.5v-.008z"
+                    />
                   </svg>
                   <span className="text-xl font-bold text-zinc-900 dark:text-white">
-                    {courseRating && courseRating.count > 0
-                      ? courseRating.average
-                      : "---"}
+                    6
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                  {courseRating && courseRating.count > 0
-                    ? `${courseRating.count} ביקורות`
-                    : "דירוג"}
+                  שלבים בתוכנית
                 </p>
               </div>
             </div>
@@ -553,6 +589,16 @@ export default function CourseDetailPage() {
         {/* ===== Main Content ===== */}
         <div className="container mx-auto px-4 py-10">
           <div className="mx-auto max-w-4xl">
+            <CourseJourneyGuide
+              lessonCount={publishedLessons.length}
+              isEnrolled={hasCourseAccess}
+              continueHref={
+                nextLessonToContinue
+                  ? `/courses/${courseId}/learn?lesson=${nextLessonToContinue._id}`
+                  : `/courses/${courseId}/learn`
+              }
+            />
+
             {/* Certificate CTA */}
             {canGetCertificate && (
               <div className="mb-8 rounded-2xl border border-emerald-200 bg-gradient-to-l from-emerald-50 to-white p-6 dark:border-emerald-800 dark:from-emerald-900/20 dark:to-zinc-900">
@@ -635,7 +681,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* ===== Curriculum Section ===== */}
-            <section aria-label="תוכנית לימודים">
+            <section id="curriculum" aria-label="תוכנית לימודים">
               <h2 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-white">
                 תוכנית הלימודים
               </h2>
@@ -662,17 +708,31 @@ export default function CourseDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {weeks.map((week) => (
+                  {weeks.map((week, weekIndex) => (
                     <div key={week.weekNumber}>
+                      {week.phaseNumber &&
+                        (weekIndex === 0 ||
+                          weeks[weekIndex - 1]?.phaseNumber !==
+                            week.phaseNumber) && (
+                          <div className="mb-4 mt-8 first:mt-0">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
+                              שלב {week.phaseNumber} מתוך 6
+                            </p>
+                            <h3 className="mt-1 text-balance text-xl font-bold text-zinc-900 dark:text-white">
+                              {week.phaseName ?? `שלב ${week.phaseNumber}`}
+                            </h3>
+                          </div>
+                        )}
+
                       {/* Week header (only show if more than 1 week) */}
                       {weeks.length > 1 && (
                         <div className="mb-3 flex items-center gap-3">
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-sm font-bold text-blue-500">
                             {week.weekNumber}
                           </div>
-                          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                          <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                             שבוע {week.weekNumber}
-                          </h3>
+                          </h4>
                           <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
                         </div>
                       )}
@@ -686,8 +746,8 @@ export default function CourseDetailPage() {
                           const lessonProgress = progressMap.get(lesson._id);
                           const isComplete =
                             lessonProgress?.completed === true;
-                          const isLocked = !isEnrolled && !!clerkUser;
-                          const lessonHref = isEnrolled
+                          const isLocked = !hasCourseAccess;
+                          const lessonHref = hasCourseAccess
                             ? `/courses/${courseId}/learn?lesson=${lesson._id}`
                             : `/courses/${courseId}`;
 
@@ -703,7 +763,7 @@ export default function CourseDetailPage() {
                               {/* L7: card-hover/gradient-border-hover only apply when the
                                   absolute Link overlay below exists (i.e. not locked) —
                                   a locked row has no interactive descendant. */}
-                              {isEnrolled || !clerkUser ? (
+                              {hasCourseAccess ? (
                                 <Link
                                   href={lessonHref}
                                   className="absolute inset-0 z-10 rounded-xl"
@@ -842,7 +902,7 @@ export default function CourseDetailPage() {
             </section>
 
             {/* ===== Reviews Section ===== */}
-            <CourseReviews courseId={courseId} />
+            {hasCourseAccess && <CourseReviews courseId={courseId} />}
           </div>
         </div>
       </main>
@@ -856,14 +916,6 @@ function formatDuration(seconds: number): string {
   if (minutes === 0) return `${remainingSeconds} שניות`;
   if (remainingSeconds === 0) return `${minutes} דקות`;
   return `${minutes}:${String(remainingSeconds).padStart(2, "0")} דקות`;
-}
-
-function formatTotalDuration(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (hours === 0) return `${minutes} דקות`;
-  if (minutes === 0) return `${hours} שעות`;
-  return `${hours} שעות ו-${minutes} דקות`;
 }
 
 function formatTotalDurationShort(totalSeconds: number): string {

@@ -1,10 +1,23 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  requireClerkSubject,
+  requireSelfOrAdmin,
+  requireUser,
+} from "./lib/authGuard";
+import {
+  PRIVACY_CONSENT_PURPOSES,
+  PRIVACY_POLICY_VERSION,
+  isOpenPrivacyRequest,
+} from "./lib/privacyPolicy";
+import { collectUserDataExport } from "./lib/privacyExport";
+import { createOrReturnPrivacyRequest } from "./lib/privacyRequests";
 
 // שליפת משתמש לפי Clerk ID
 export const getByClerkId = query({
   args: { clerkId: v.string() },
   handler: async (ctx, args) => {
+    await requireClerkSubject(ctx, args.clerkId);
     return await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
@@ -16,6 +29,7 @@ export const getByClerkId = query({
 export const getById = query({
   args: { id: v.id("users") },
   handler: async (ctx, args) => {
+    await requireSelfOrAdmin(ctx, args.id);
     return await ctx.db.get(args.id);
   },
 });
@@ -61,6 +75,7 @@ export const upsertFromClerk = internalMutation({
 export const isAdmin = query({
   args: { clerkId: v.string() },
   handler: async (ctx, args) => {
+    await requireClerkSubject(ctx, args.clerkId);
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
@@ -86,9 +101,6 @@ export const getMe = query({
   },
 });
 
-// אימיילים שתמיד יהיו admin
-const ADMIN_EMAILS = ["eladjak@gmail.com"];
-
 // יצירת משתמש אוטומטית מ-auth context (אם לא קיים)
 export const ensureUser = mutation({
   args: {},
@@ -97,7 +109,6 @@ export const ensureUser = mutation({
     if (!identity) return null;
 
     const email = identity.email ?? "";
-    const isAutoAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
 
     const existing = await ctx.db
       .query("users")
@@ -105,14 +116,6 @@ export const ensureUser = mutation({
       .unique();
 
     if (existing) {
-      // Auto-promote to admin if in ADMIN_EMAILS list and not already admin
-      if (isAutoAdmin && existing.role !== "admin") {
-        await ctx.db.patch(existing._id, {
-          role: "admin",
-          updatedAt: Date.now(),
-        });
-        return await ctx.db.get(existing._id);
-      }
       return existing;
     }
 
@@ -122,7 +125,7 @@ export const ensureUser = mutation({
       email,
       name: identity.name,
       imageUrl: identity.pictureUrl,
-      role: isAutoAdmin ? "admin" : "student",
+      role: "student",
       createdAt: now,
       updatedAt: now,
     });
@@ -131,53 +134,7 @@ export const ensureUser = mutation({
   },
 });
 
-// בדיקה אם יש admin כלשהו במערכת
-export const hasAnyAdmin = query({
-  args: {},
-  handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
-    return users.some((u) => u.role === "admin");
-  },
-});
-
-// קידום עצמי ל-admin (רק כשאין admins במערכת)
-export const promoteSelfToAdmin = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const allUsers = await ctx.db.query("users").collect();
-    const hasAdmin = allUsers.some((u) => u.role === "admin");
-    if (hasAdmin) {
-      throw new Error("Admin already exists. Contact existing admin for access.");
-    }
-
-    let user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      const now = Date.now();
-      await ctx.db.insert("users", {
-        clerkId: identity.subject,
-        email: identity.email ?? "",
-        name: identity.name,
-        imageUrl: identity.pictureUrl,
-        role: "admin",
-        createdAt: now,
-        updatedAt: now,
-      });
-      return { success: true };
-    }
-
-    await ctx.db.patch(user._id, { role: "admin", updatedAt: Date.now() });
-    return { success: true };
-  },
-});
-
-// קידום ראשוני ל-admin מה-CLI (ללא auth - רק כשאין admins)
+// קידום ראשוני ל-admin מתוך פעולה פנימית ומבוקרת בלבד.
 export const seedAdmin = internalMutation({
   args: { email: v.string() },
   handler: async (ctx, args) => {
@@ -434,72 +391,8 @@ export const updateLearningPreferences = mutation({
 export const exportUserData = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) return null;
-
-    const enrollments = await ctx.db
-      .query("enrollments")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-
-    const progress = await ctx.db
-      .query("progress")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-
-    const notes = await ctx.db
-      .query("notes")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-
-    const certificates = await ctx.db
-      .query("certificates")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
-
-    return {
-      profile: {
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
-        preferences: user.preferences,
-      },
-      enrollments: enrollments.map((e) => ({
-        courseId: e.courseId,
-        enrolledAt: e.enrolledAt,
-      })),
-      progress: progress.map((p) => ({
-        lessonId: p.lessonId,
-        courseId: p.courseId,
-        completed: p.completed,
-        progressPercent: p.progressPercent,
-        lastWatchedAt: p.lastWatchedAt,
-        completedAt: p.completedAt,
-      })),
-      notes: notes.map((n) => ({
-        lessonId: n.lessonId,
-        courseId: n.courseId,
-        content: n.content,
-        createdAt: n.createdAt,
-        updatedAt: n.updatedAt,
-      })),
-      certificates: certificates.map((c) => ({
-        courseId: c.courseId,
-        courseName: c.courseName,
-        completionPercent: c.completionPercent,
-        issuedAt: c.issuedAt,
-        certificateNumber: c.certificateNumber,
-      })),
-      exportedAt: Date.now(),
-    };
+    const user = await requireUser(ctx);
+    return await collectUserDataExport(ctx, user);
   },
 });
 
@@ -507,26 +400,125 @@ export const exportUserData = query({
 export const requestAccountDeletion = mutation({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await requireUser(ctx);
+    return await createOrReturnPrivacyRequest(ctx, user, "deletion");
+  },
+});
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
+export const getAccountDeletionRequest = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    const requests = await ctx.db
+      .query("privacyRequests")
+      .withIndex("by_user_type", (q) =>
+        q.eq("userId", user._id).eq("requestType", "deletion")
+      )
+      .collect();
+    const request = requests.sort((a, b) => b.requestedAt - a.requestedAt)[0];
 
-    if (!user) throw new Error("User not found");
+    if (request) {
+      return {
+        requestId: request._id,
+        status: request.status,
+        identityVerification: request.identityVerification,
+        requestedAt: request.requestedAt,
+        updatedAt: request.updatedAt,
+        completedAt: request.completedAt,
+        open: isOpenPrivacyRequest(request.status),
+        legacy: false,
+      };
+    }
 
-    const currentPrefs = user.preferences ?? {};
-    await ctx.db.patch(user._id, {
-      preferences: {
-        ...currentPrefs,
-        deletionRequested: true,
-        deletionRequestedAt: Date.now(),
-      },
-      updatedAt: Date.now(),
+    // Preserve visibility of requests recorded by the old preference flag.
+    // This is not treated as proof that deletion occurred.
+    if (user.preferences?.deletionRequested) {
+      return {
+        requestId: null,
+        status: "identity_verification_required" as const,
+        identityVerification: "manual_verification_required" as const,
+        requestedAt: user.preferences.deletionRequestedAt ?? user.updatedAt,
+        updatedAt: user.updatedAt,
+        completedAt: undefined,
+        open: true,
+        legacy: true,
+      };
+    }
+
+    return null;
+  },
+});
+
+export const requestPrivacyAction = mutation({
+  args: {
+    requestType: v.union(
+      v.literal("access"),
+      v.literal("correction"),
+      v.literal("deletion"),
+      v.literal("marketing_objection")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    return await createOrReturnPrivacyRequest(ctx, user, args.requestType);
+  },
+});
+
+export const getPrivacyConsents = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    const [analytics, marketing] = await Promise.all(
+      (["analytics", "marketing"] as const).map(async (consentType) => {
+        const record = await ctx.db
+          .query("privacyConsents")
+          .withIndex("by_user_type", (q) =>
+            q.eq("userId", user._id).eq("consentType", consentType)
+          )
+          .order("desc")
+          .first();
+        return record
+          ? {
+              consentType: record.consentType,
+              decision: record.decision,
+              purpose: record.purpose,
+              policyVersion: record.policyVersion,
+              decidedAt: record.decidedAt,
+            }
+          : null;
+      })
+    );
+    return { analytics, marketing };
+  },
+});
+
+export const recordPrivacyConsent = mutation({
+  args: {
+    consentType: v.union(v.literal("analytics"), v.literal("marketing")),
+    granted: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const decidedAt = Date.now();
+    const decision = args.granted
+      ? ("granted" as const)
+      : ("withdrawn" as const);
+    const consentId = await ctx.db.insert("privacyConsents", {
+      userId: user._id,
+      clerkId: user.clerkId,
+      consentType: args.consentType,
+      decision,
+      purpose: PRIVACY_CONSENT_PURPOSES[args.consentType],
+      policyVersion: PRIVACY_POLICY_VERSION,
+      source: "authenticated_api",
+      decidedAt,
     });
-
-    return { success: true };
+    return {
+      consentId,
+      consentType: args.consentType,
+      decision,
+      policyVersion: PRIVACY_POLICY_VERSION,
+      decidedAt,
+    };
   },
 });

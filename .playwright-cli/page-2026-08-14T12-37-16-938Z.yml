@@ -1,0 +1,77 @@
+- generic [active] [ref=f5e1]:
+  - link "דלג לתוכן הראשי" [ref=f5e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f5e3]:
+    - banner [ref=f5e4]:
+      - generic [ref=f5e5]:
+        - link "הדרך" [ref=f5e6] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f5e9]:
+          - link "חיפוש" [ref=f5e10] [cursor=pointer]:
+            - /url: /search
+          - button "פתיחת תפריט ניווט" [ref=f5e13]
+    - region [ref=f5e15]:
+      - generic [ref=f5e16]:
+        - generic [ref=f5e17]: למידה שמשנה חיים
+        - heading "הקורסים שלנו" [level=1] [ref=f5e18]
+        - paragraph [ref=f5e19]: קורסים מקצועיים בתחום התקשורת הזוגית והאישית - לומדים, מתאמנים, ומשנים
+    - main [ref=f5e20]:
+      - generic [ref=f5e22]:
+        - generic [ref=f5e23]: חיפוש קורסים
+        - searchbox "חיפוש קורסים" [ref=f5e24]
+      - status "הקורסים נטענים" [ref=f5e25]
+    - contentinfo [ref=f5e30]:
+      - generic [ref=f5e31]:
+        - generic [ref=f5e32]:
+          - generic [ref=f5e33]:
+            - link "אומנות הקשר הדרך" [ref=f5e34] [cursor=pointer]:
+              - /url: /
+              - img "אומנות הקשר" [ref=f5e35]
+              - generic [ref=f5e36]: הדרך
+            - paragraph [ref=f5e37]: פרויקט של אומנות הקשר
+            - paragraph [ref=f5e38]: תוכנית "הדרך" של אומנות הקשר.12 שבועות שישנו לך את חיי הזוגיות.
+          - navigation "ניווט תחתון" [ref=f5e39]:
+            - generic [ref=f5e40]: תוכנית
+            - link "הקורסים" [ref=f5e41] [cursor=pointer]:
+              - /url: /courses
+            - link "עדויות" [ref=f5e42] [cursor=pointer]:
+              - /url: /testimonials
+            - link "בלוג" [ref=f5e43] [cursor=pointer]:
+              - /url: /blog
+            - link "האזור שלי" [ref=f5e44] [cursor=pointer]:
+              - /url: /dashboard
+            - link "תעודות" [ref=f5e45] [cursor=pointer]:
+              - /url: /certificates
+            - link "טבלת מובילים" [ref=f5e46] [cursor=pointer]:
+              - /url: /student/leaderboard
+          - navigation "משאבים" [ref=f5e47]:
+            - link "צ'אט AI" [ref=f5e49] [cursor=pointer]:
+              - /url: /chat
+            - link "סימולטור דייטים" [ref=f5e50] [cursor=pointer]:
+              - /url: /simulator
+            - link "ספרייה" [ref=f5e51] [cursor=pointer]:
+              - /url: /resources
+            - link "אודות" [ref=f5e52] [cursor=pointer]:
+              - /url: /about
+            - link "עזרה" [ref=f5e53] [cursor=pointer]:
+              - /url: /help
+            - link "צרו קשר" [ref=f5e54] [cursor=pointer]:
+              - /url: /contact
+          - generic [ref=f5e55]:
+            - generic [ref=f5e56]: עקבו אחרינו
+            - link "אינסטגרם" [ref=f5e57] [cursor=pointer]:
+              - /url: https://www.instagram.com/omanut_hakesher
+            - link "פייסבוק" [ref=f5e60] [cursor=pointer]:
+              - /url: https://www.facebook.com/omanuthakesher
+            - link "יוטיוב" [ref=f5e63] [cursor=pointer]:
+              - /url: https://www.youtube.com/@omanuthakesher
+            - link "אומנות הקשר" [ref=f5e67] [cursor=pointer]:
+              - /url: https://www.ohlove.co.il
+        - generic [ref=f5e68]:
+          - paragraph [ref=f5e69]: © 2026 הדרך - אומנות הקשר. כל הזכויות שמורות.
+          - paragraph [ref=f5e70]:
+            - text: נבנה עם
+            - generic "אהבה" [ref=f5e71]: ♥
+            - text: באמצעות Next.js & Convex
+  - button "Open Next.js Dev Tools" [ref=f5e77] [cursor=pointer]
+  - alert [ref=f5e81]

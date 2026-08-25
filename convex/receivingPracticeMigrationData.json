@@ -1,0 +1,28 @@
+{
+  "migrationKey": "oh.course.migration.receiving-practice",
+  "migrationVersion": "2026-08-23.v1",
+  "courseTitle": "הדרך - אומנות הקשר",
+  "predecessorScriptIndex": "5.3.1",
+  "successorScriptIndex": "5.4.1",
+  "lesson": {
+    "title": "לבחור אם לקבל — תרגול רשות",
+    "description": "תרגול אופציונלי על קבלה וסירוב: אפשר לעבוד עם תרחיש בדיוני, לבחור חלופת כתיבה פרטית או לדלג. אין צורך בחשיפה אישית, באדם נוסף או בקשר, והתרגול אינו משפיע על ההתקדמות ואינו מקבל ציון.",
+    "duration": 90,
+    "published": true,
+    "weekNumber": 5,
+    "phaseNumber": 2,
+    "phaseName": "תקשורת",
+    "scriptIndex": "5.3.2",
+    "contentKey": "oh.course.lesson.receiving-practice",
+    "learnerAvailability": "optional",
+    "completionAffectsProgress": false,
+    "assessmentOrScoring": false,
+    "personalDisclosureRequired": false,
+    "relationshipOrPartnerRequired": false,
+    "learnerAlternatives": [
+      "written-fictional",
+      "private-written",
+      "skip"
+    ]
+  }
+}

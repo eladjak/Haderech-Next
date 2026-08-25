@@ -6,9 +6,9 @@ import { type Doc } from "@/../convex/_generated/dataModel";
 type ChatSession = Doc<"chatSessions">;
 
 const MODE_LABELS: Record<string, string> = {
-  coach: "מאמן אישי",
-  practice: "סימולטור",
-  analysis: "ניתוח",
+  coach: "כלי AI לרפלקציה",
+  practice: "תרגול בדיוני",
+  analysis: "ניתוח טקסט ב-AI",
 };
 
 const MODE_ICONS: Record<string, React.ReactNode> = {

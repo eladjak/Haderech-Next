@@ -66,7 +66,9 @@ export default function AdminLayout({
           </header>
 
           {/* Page content */}
-          <main className="p-4 md:p-8">{children}</main>
+          <main id="main-content" className="p-4 md:p-8">
+            {children}
+          </main>
         </div>
       </div>
     </AdminGuard>

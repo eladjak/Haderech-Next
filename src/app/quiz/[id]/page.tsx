@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
@@ -9,6 +9,7 @@ import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import type { Id } from "@/../convex/_generated/dataModel";
+import { learnerQuizSubmissionErrorMessage } from "@/lib/quiz-feedback";
 
 type QuizPhase = "intro" | "playing" | "feedback" | "results";
 
@@ -16,17 +17,18 @@ interface QuizQuestion {
   _id: string;
   question: string;
   options: string[];
-  correctIndex: number;
-  explanation?: string;
   order: number;
 }
 
 interface QuizResult {
-  score: number;
+  score: number | null;
   passed: boolean;
-  correctCount: number;
+  correctCount: number | null;
   totalQuestions: number;
   attemptNumber: number;
+  attemptsRemaining: number;
+  retryAfterSeconds: number | null;
+  feedback: "passed" | "retry_after_cooldown" | "attempt_window_exhausted";
   timeTakenSeconds: number;
 }
 
@@ -43,13 +45,16 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [result, setResult] = useState<QuizResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(DEFAULT_TIME_PER_QUESTION);
   const [totalTimeElapsed, setTotalTimeElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const totalTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Data queries
+  const quiz = useQuery(api.quizzes.getById, { quizId });
   const quizQuestions = useQuery(api.quizzes.getQuestions, { quizId });
+  const submitQuizAnswer = useMutation(api.quizzes.submitQuizAnswer);
 
   const convexUser = useQuery(
     api.users.getByClerkId,
@@ -147,7 +152,7 @@ export default function QuizPage() {
         return next;
       });
 
-      // Show immediate feedback
+      // Confirm the selection locally; grading happens only after server submit.
       if (timerRef.current) clearInterval(timerRef.current);
       setPhase("feedback");
       },
@@ -166,84 +171,54 @@ export default function QuizPage() {
   }, [currentIndex, sortedQuestions.length]);
 
   const handleSubmit = useCallback(async () => {
-    if (!convexUser?._id || sortedQuestions.length === 0) return;
+    if (!convexUser?._id || !quiz || sortedQuestions.length === 0) return;
     setSubmitting(true);
+    setSubmissionError(null);
 
     // Stop timers
     if (timerRef.current) clearInterval(timerRef.current);
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
 
-    // Convert -1 (unanswered) to a wrong answer index
     const finalAnswers = answers.map((a) => (a === null || a === -1 ? -1 : a));
 
-    // Find the lesson and course for this quiz
-    // We need to get quiz data - we have quizId, let's find questions that have quizId
-    // The quiz itself contains lessonId and courseId
-    // Since we don't have a direct getById for quiz, we'll use the first question's quiz
-    // Actually, we can infer from the quizAttempts schema requirements
-    // For now, submit using the submitAttempt from the original quizzes module
-    // which requires lessonId and courseId
-
-    // We need the quiz document to get lessonId and courseId
-    // Let's use a workaround - query all quizzes by course index
-    // Actually, the enhanced submit also needs lessonId and courseId
-    // For this page, we'll need these from URL params or from quiz data
-
-    // The simplest approach: the quizQuestions are fetched, and the quiz data
-    // is available through the getByLesson query or we need to get it differently
-    // Since we know the quizId, we can fetch quiz details via a separate approach
-
-    // For now, let's find any quizAttempt's courseId/lessonId from previous attempts,
-    // or get it from the quiz questions. Actually questions don't have courseId/lessonId.
-    // We need to find the quiz document.
-    // Let's query using the getByLesson pattern but we don't know lessonId.
-    // Best approach: pass lessonId and courseId as URL params or get from quiz.
-
-    // Since we need to handle this gracefully, let me check if quiz is queryable
-    // The quiz is queried by lessonId, but we have quizId.
-    // Actually the quizQuestions have quizId, and we can trace back.
-    // But the cleanest solution: pass lessonId and courseId via search params.
-
-    // For the enhanced quiz page that takes quizId directly, we need
-    // to derive lessonId and courseId. Let's scan quizzes table.
-    // Actually we can't do that from client directly.
-
-    // Simplest fix: use the basic submitAttempt from quizzes module
-    // which needs all IDs. But we don't have them here easily.
-    // The right design: This page will be accessed from the course/learn page
-    // which passes courseId and lessonId as query params.
-
-    // For safety, let's fall back to not submitting if we can't determine these
-    // We'll calculate results client-side if needed.
-
-    // Client-side scoring (always works, even without backend)
-    let correctCount = 0;
-    for (let i = 0; i < sortedQuestions.length; i++) {
-      if (finalAnswers[i] === sortedQuestions[i].correctIndex) {
-        correctCount++;
-      }
+    try {
+      const serverResult = await submitQuizAnswer({
+        userId: convexUser._id,
+        quizId,
+        lessonId: quiz.lessonId,
+        courseId: quiz.courseId,
+        answers: finalAnswers,
+        timeTakenSeconds: totalTimeElapsed,
+      });
+      setResult({
+        score: serverResult.score,
+        passed: serverResult.passed,
+        correctCount: serverResult.correctCount,
+        totalQuestions: serverResult.totalQuestions,
+        attemptNumber: serverResult.attemptNumber,
+        attemptsRemaining: serverResult.attemptsRemaining,
+        retryAfterSeconds: serverResult.retryAfterSeconds,
+        feedback: serverResult.feedback,
+        timeTakenSeconds: totalTimeElapsed,
+      });
+      setPhase("results");
+    } catch (error) {
+      // Fail closed: a transport or authorization failure must never trigger
+      // local grading or expose the answer key as a fallback.
+      setSubmissionError(learnerQuizSubmissionErrorMessage(error));
+    } finally {
+      setSubmitting(false);
     }
-    const score = Math.round((correctCount / sortedQuestions.length) * 100);
-
-    // We'll try to call the mutation but gracefully handle if lesson/course info missing
-    setResult({
-      score,
-      passed: score >= 60, // default passing score
-      correctCount,
-      totalQuestions: sortedQuestions.length,
-      attemptNumber: (lastAttempt ? 2 : 1),
-      timeTakenSeconds: totalTimeElapsed,
-    });
-    setPhase("results");
-    setSubmitting(false);
-  }, [answers, convexUser, sortedQuestions, lastAttempt, totalTimeElapsed]);
+  }, [answers, convexUser, quiz, quizId, sortedQuestions.length, submitQuizAnswer, totalTimeElapsed]);
 
   const resetQuiz = useCallback(() => {
     setAnswers(new Array(sortedQuestions.length).fill(null));
     setCurrentIndex(0);
     setResult(null);
+    setSubmissionError(null);
     setTimeRemaining(DEFAULT_TIME_PER_QUESTION);
     setTotalTimeElapsed(0);
+    setSubmissionError(null);
     setPhase("playing");
   }, [sortedQuestions.length]);
 
@@ -255,7 +230,7 @@ export default function QuizPage() {
   }, [sortedQuestions.length]);
 
   // Loading state
-  if (quizQuestions === undefined) {
+  if (quizQuestions === undefined || quiz === undefined) {
     return (
       <div className="min-h-dvh bg-white dark:bg-zinc-950">
         <Header />
@@ -269,7 +244,7 @@ export default function QuizPage() {
     );
   }
 
-  if (!quizQuestions || quizQuestions.length === 0) {
+  if (!quiz || !quizQuestions || quizQuestions.length === 0) {
     return (
       <div className="min-h-dvh bg-white dark:bg-zinc-950">
         <Header />
@@ -322,7 +297,7 @@ export default function QuizPage() {
               </div>
 
               <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-white">
-                בוחן
+                {quiz.title}
               </h1>
 
               <div className="mb-6 space-y-3 text-center">
@@ -367,7 +342,9 @@ export default function QuizPage() {
                 {lastAttempt && (
                   <div className="rounded-xl bg-zinc-100 p-3 dark:bg-zinc-800">
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                      ציון אחרון: {lastAttempt.score}%{" "}
+                      {lastAttempt.score === null
+                        ? "ניסיון קודם: עדיין לא עבר"
+                        : `ציון אחרון: ${lastAttempt.score}%`} {" "}
                       {lastAttempt.passed ? (
                         <span className="text-emerald-600 dark:text-emerald-400">
                           (עבר)
@@ -391,9 +368,14 @@ export default function QuizPage() {
                 <button
                   type="button"
                   onClick={startQuiz}
+                  disabled={lastAttempt?.passed === true}
                   className="inline-flex h-12 items-center rounded-full bg-zinc-900 px-8 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
                 >
-                  {lastAttempt ? "נסה שוב" : "התחל בוחן"}
+                  {lastAttempt?.passed
+                    ? "הבוחן הושלם"
+                    : lastAttempt
+                      ? "נסה שוב"
+                      : "התחל בוחן"}
                 </button>
               </div>
             </div>
@@ -405,7 +387,7 @@ export default function QuizPage() {
 
   // Results phase
   if (phase === "results" && result) {
-    const percentage = result.score;
+    const percentage = result.score ?? 0;
     const minutes = Math.floor(result.timeTakenSeconds / 60);
     const seconds = result.timeTakenSeconds % 60;
 
@@ -446,7 +428,7 @@ export default function QuizPage() {
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold text-zinc-900 dark:text-white">
-                      {percentage}%
+                      {result.score === null ? "עוד לא" : `${percentage}%`}
                     </span>
                   </div>
                 </div>
@@ -456,15 +438,25 @@ export default function QuizPage() {
                 {result.passed ? "כל הכבוד!" : "לא הצלחת הפעם"}
               </h2>
               <p className="mb-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
-                ענית נכון על {result.correctCount} מתוך{" "}
-                {result.totalQuestions} שאלות
+                {result.correctCount === null
+                  ? "הציון המדויק מוצג אחרי מעבר, כדי לשמור על הוגנות הבוחן."
+                  : `ענית נכון על ${result.correctCount} מתוך ${result.totalQuestions} שאלות`}
               </p>
+              {!result.passed && (
+                <p className="mb-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                  {result.feedback === "attempt_window_exhausted"
+                    ? "מכסת ההגשות להיום הסתיימה. אפשר לחזור מחר."
+                    : `נשארו ${result.attemptsRemaining} הגשות בחלון הנוכחי; אפשר לנסות שוב אחרי דקה.`}
+                </p>
+              )}
 
               {/* Stats grid */}
               <div className="mb-6 grid grid-cols-3 gap-3">
                 <div className="rounded-xl bg-zinc-100 p-3 text-center dark:bg-zinc-800">
                   <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                    {result.correctCount}/{result.totalQuestions}
+                    {result.correctCount === null
+                      ? "—"
+                      : `${result.correctCount}/${result.totalQuestions}`}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     תשובות נכונות
@@ -495,66 +487,28 @@ export default function QuizPage() {
                 </h3>
                 {sortedQuestions.map((q, qIdx) => {
                   const userAnswer = answers[qIdx];
-                  const isCorrect = userAnswer === q.correctIndex;
-                  const isUnanswered =
-                    userAnswer === null || userAnswer === -1;
 
                   return (
                     <div
                       key={q._id}
-                      className={`rounded-xl border p-4 ${
-                        isCorrect
-                          ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20"
-                          : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
-                      }`}
+                      className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800"
                     >
                       <div className="mb-2 flex items-start gap-2">
                         <span
-                          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
-                            isCorrect
-                              ? "bg-emerald-200 text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200"
-                              : "bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200"
-                          }`}
+                          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-medium text-brand-800 dark:bg-brand-900/30 dark:text-brand-200"
                         >
-                          {isCorrect ? "\u2713" : "\u2717"}
+                          {qIdx + 1}
                         </span>
                         <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                          {qIdx + 1}. {q.question}
+                          {q.question}
                         </p>
                       </div>
 
-                      <div className="mr-7 space-y-1">
-                        {q.options.map((opt, optIdx) => (
-                          <div
-                            key={optIdx}
-                            className={`rounded-lg px-3 py-1.5 text-sm ${
-                              optIdx === q.correctIndex
-                                ? "font-medium text-emerald-800 dark:text-emerald-300"
-                                : optIdx === userAnswer && !isCorrect
-                                  ? "text-red-800 line-through dark:text-red-300"
-                                  : "text-zinc-500 dark:text-zinc-400"
-                            }`}
-                          >
-                            {optIdx === q.correctIndex && "\u2713 "}
-                            {optIdx === userAnswer &&
-                              !isCorrect &&
-                              !isUnanswered &&
-                              "\u2717 "}
-                            {opt}
-                          </div>
-                        ))}
-                        {isUnanswered && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
-                            לא נענתה
-                          </p>
-                        )}
-                      </div>
-
-                      {q.explanation && (
-                        <p className="mr-7 mt-2 text-xs text-zinc-600 dark:text-zinc-400">
-                          {q.explanation}
-                        </p>
-                      )}
+                      <p className="mr-7 text-sm text-zinc-500 dark:text-zinc-400">
+                        {userAnswer === null || userAnswer < 0
+                          ? "לא נענתה"
+                          : `תשובתך: ${q.options[userAnswer]}`}
+                      </p>
                     </div>
                   );
                 })}
@@ -562,13 +516,15 @@ export default function QuizPage() {
 
               {/* Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={resetQuiz}
-                  className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-6 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-                >
-                  נסה שוב
-                </button>
+                {!result.passed && result.attemptsRemaining > 0 && (
+                  <button
+                    type="button"
+                    onClick={resetQuiz}
+                    className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-6 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+                  >
+                    נסה שוב אחרי דקה
+                  </button>
+                )}
                 <Link
                   href="/dashboard"
                   className="inline-flex h-10 items-center rounded-full border border-zinc-300 bg-white px-6 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
@@ -592,8 +548,6 @@ export default function QuizPage() {
   const answeredCount = answers.filter((a) => a !== null).length;
   const isFeedback = phase === "feedback";
   const selectedAnswer = answers[currentIndex];
-  const isCorrect =
-    isFeedback && selectedAnswer === currentQuestion.correctIndex;
   const isUnanswered =
     isFeedback && (selectedAnswer === null || selectedAnswer === -1);
 
@@ -698,26 +652,16 @@ export default function QuizPage() {
             >
               {currentQuestion.options.map((option, optIdx) => {
                 const isSelected = selectedAnswer === optIdx;
-                const isCorrectOption =
-                  optIdx === currentQuestion.correctIndex;
 
                 let optionStyle =
                   "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-700";
 
-                if (isFeedback) {
-                  if (isCorrectOption) {
-                    optionStyle =
-                      "border-emerald-400 bg-emerald-50 text-emerald-800 dark:border-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300";
-                  } else if (isSelected && !isCorrectOption) {
-                    optionStyle =
-                      "border-red-400 bg-red-50 text-red-800 dark:border-red-600 dark:bg-red-900/30 dark:text-red-300";
-                  } else {
-                    optionStyle =
-                      "border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500";
-                  }
-                } else if (isSelected) {
+                if (isSelected) {
                   optionStyle =
                     "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900";
+                } else if (isFeedback) {
+                  optionStyle =
+                    "border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500";
                 }
 
                 return (
@@ -732,20 +676,12 @@ export default function QuizPage() {
                   >
                     <span
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
-                        isFeedback && isCorrectOption
-                          ? "bg-emerald-200 text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200"
-                          : isFeedback && isSelected && !isCorrectOption
-                            ? "bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200"
-                            : isSelected && !isFeedback
-                              ? "bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white"
-                              : "bg-zinc-100 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300"
+                        isSelected
+                          ? "bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white"
+                          : "bg-zinc-100 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300"
                       }`}
                     >
-                      {isFeedback && isCorrectOption
-                        ? "\u2713"
-                        : isFeedback && isSelected && !isCorrectOption
-                          ? "\u2717"
-                          : String.fromCharCode(1488 + optIdx)}
+                      {String.fromCharCode(1488 + optIdx)}
                     </span>
                     <span className="flex-1">{option}</span>
                   </button>
@@ -756,35 +692,22 @@ export default function QuizPage() {
             {/* Feedback message */}
             {isFeedback && (
               <div
-                className={`mb-4 rounded-xl p-4 ${
-                  isUnanswered
-                    ? "bg-amber-50 dark:bg-amber-900/20"
-                    : isCorrect
-                      ? "bg-emerald-50 dark:bg-emerald-900/20"
-                      : "bg-red-50 dark:bg-red-900/20"
-                }`}
+                className={`mb-4 rounded-xl p-4 ${isUnanswered ? "bg-amber-50 dark:bg-amber-900/20" : "bg-blue-50 dark:bg-blue-900/20"}`}
               >
                 <p
-                  className={`text-sm font-medium ${
-                    isUnanswered
-                      ? "text-amber-800 dark:text-amber-300"
-                      : isCorrect
-                        ? "text-emerald-800 dark:text-emerald-300"
-                        : "text-red-800 dark:text-red-300"
-                  }`}
+                  className={`text-sm font-medium ${isUnanswered ? "text-amber-800 dark:text-amber-300" : "text-blue-800 dark:text-blue-300"}`}
                 >
                   {isUnanswered
-                    ? "הזמן נגמר! לא בחרת תשובה."
-                    : isCorrect
-                      ? "תשובה נכונה!"
-                      : "תשובה שגויה"}
+                    ? "הזמן נגמר ולא נבחרה תשובה. הבדיקה תתבצע בשרת בסיום."
+                    : "התשובה נשמרה. הבדיקה תתבצע בשרת בסיום הבוחן."}
                 </p>
-                {currentQuestion.explanation && (
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                    {currentQuestion.explanation}
-                  </p>
-                )}
               </div>
+            )}
+
+            {submissionError && (
+              <p className="mb-4 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-800 dark:bg-red-900/20 dark:text-red-300" role="alert">
+                {submissionError}
+              </p>
             )}
 
             {/* Navigation */}

@@ -1,6 +1,7 @@
 "use client";
 
-import { CATEGORY_COLORS, CATEGORY_LABELS, type ResourceCategory, type ResourceType, TYPE_LABELS } from "./resource-card";
+import { useId } from "react";
+import { CATEGORY_COLORS, type ResourceCategory, type ResourceType } from "./resource-card";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,8 @@ export function ResourceFilters({
   categoryCounts = {},
   totalCount = 0,
 }: ResourceFiltersProps) {
+  const searchId = useId();
+
   const update = (patch: Partial<ResourceFiltersState>) => {
     onFiltersChange({ ...filters, ...patch });
   };
@@ -59,18 +62,16 @@ export function ResourceFilters({
     return categoryCounts[id] ?? 0;
   };
 
-  const activeCategoryColor =
-    filters.category !== "all"
-      ? CATEGORY_COLORS[filters.category].split(" ")[0].replace("bg-", "bg-") + " " +
-        CATEGORY_COLORS[filters.category].split(" ")[1]
-      : "bg-brand-500 text-white";
-
   return (
     <div className="space-y-4">
       {/* Search */}
       <div className="relative">
+        <label htmlFor={searchId} className="sr-only">
+          חיפוש משאבים
+        </label>
         <div className="pointer-events-none absolute inset-y-0 end-3 flex items-center">
           <svg
+            aria-hidden="true"
             className="h-4 w-4 text-zinc-400"
             fill="none"
             viewBox="0 0 24 24"
@@ -85,6 +86,7 @@ export function ResourceFilters({
           </svg>
         </div>
         <input
+          id={searchId}
           type="text"
           placeholder="חיפוש משאב..."
           value={filters.search}
@@ -93,10 +95,12 @@ export function ResourceFilters({
         />
         {filters.search && (
           <button
+            type="button"
+            aria-label="ניקוי חיפוש"
             onClick={() => update({ search: "" })}
             className="absolute inset-y-0 start-3 flex items-center text-zinc-400 hover:text-zinc-600"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -104,14 +108,16 @@ export function ResourceFilters({
       </div>
 
       {/* Category pills */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="קטגוריית משאב">
         {CATEGORIES.map((cat) => {
           const isActive = filters.category === cat.id;
           const count = getCategoryCount(cat.id);
           return (
             <button
+              type="button"
               key={cat.id}
               onClick={() => update({ category: cat.id })}
+              aria-pressed={isActive}
               className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 ${
                 isActive
                   ? cat.id !== "all"
@@ -140,11 +146,13 @@ export function ResourceFilters({
         {/* Type filter */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">סוג:</span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="סוג משאב">
             {TYPES.map((t) => (
               <button
+                type="button"
                 key={t.id}
                 onClick={() => update({ type: t.id })}
+                aria-pressed={filters.type === t.id}
                 className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
                   filters.type === t.id
                     ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
@@ -160,11 +168,13 @@ export function ResourceFilters({
         {/* Access filter */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">גישה:</span>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5" role="group" aria-label="רמת גישה">
             {ACCESS_OPTIONS.map((opt) => (
               <button
+                type="button"
                 key={opt.id}
                 onClick={() => update({ access: opt.id })}
+                aria-pressed={filters.access === opt.id}
                 className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
                   filters.access === opt.id
                     ? opt.id === "free"

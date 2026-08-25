@@ -2,12 +2,16 @@
 
 import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedOut, SignInButton } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { DifficultyBadge } from "@/components/simulator/difficulty-badge";
 import Link from "next/link";
+
+// The legacy choice-and-grade content has not passed the consent review used
+// for free chat. Keep both data fetching and the route itself fail-closed.
+const STRUCTURED_DIALOGUE_AVAILABLE = false;
 
 const DIFFICULTY_FILTERS = [
   { value: "all", label: "כל הרמות" },
@@ -97,7 +101,7 @@ function DialogueScenarioCard({
                 d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            {estimatedMinutes} דק'
+            {estimatedMinutes} דק&apos;
           </div>
           <div className="flex items-center gap-1">
             <svg
@@ -173,8 +177,14 @@ function DialogueScenarioCard({
 }
 
 export default function DialogueScenariosPage() {
-  const scenarios = useQuery(api.simulator.listDialogueScenarios);
-  const bestScores = useQuery(api.simulator.getUserBestScores);
+  const scenarios = useQuery(
+    api.simulator.listDialogueScenarios,
+    STRUCTURED_DIALOGUE_AVAILABLE ? {} : "skip"
+  );
+  const bestScores = useQuery(
+    api.simulator.getUserBestScores,
+    STRUCTURED_DIALOGUE_AVAILABLE ? {} : "skip"
+  );
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "all" | "easy" | "medium" | "hard"
   >("all");
@@ -186,6 +196,31 @@ export default function DialogueScenariosPage() {
         selectedDifficulty === "all" || s.difficulty === selectedDifficulty
     );
   }, [scenarios, selectedDifficulty]);
+
+  if (!STRUCTURED_DIALOGUE_AVAILABLE) {
+    return (
+      <div className="min-h-dvh bg-white dark:bg-zinc-950">
+        <Header />
+        <main id="main-content" className="container mx-auto px-4 py-20" tabIndex={-1}>
+          <div className="mx-auto max-w-2xl rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-900/60 dark:bg-amber-950/30">
+            <h1 className="text-3xl font-bold text-amber-950 dark:text-amber-100">
+              תרגול בחירה מובנית אינו זמין כרגע
+            </h1>
+            <p className="mt-4 leading-7 text-amber-900/80 dark:text-amber-200/80">
+              התרחישים הישנים דירגו תגובות כאילו קיימת תשובה זוגית “נכונה”. השארנו את המסלול חסום עד שכל האפשרויות והמשוב יעברו בדיקת הסכמה, גבולות והטיה, וללא ציוני משיכה או יכולת אישית.
+            </p>
+            <Link
+              href="/simulator"
+              className="mt-7 inline-flex h-11 items-center rounded-xl bg-brand-500 px-6 text-sm font-semibold text-white hover:bg-brand-600"
+            >
+              חזרה לסימולטור
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-white dark:bg-zinc-950">
@@ -227,8 +262,7 @@ export default function DialogueScenariosPage() {
             תרגול תרחישי דייטינג
           </h1>
           <p className="max-w-xl text-zinc-600 dark:text-zinc-400">
-            בחר תשובות בסיטואציות אמיתיות וקבל משוב מיידי. למד מה עובד ומה
-            פחות.
+            בחרו תגובות בתרחישים בדיוניים וקבלו הסבר מוגבל. אין תשובה זוגית אחת נכונה, והמשוב אינו ציון אישי.
           </p>
         </div>
 
@@ -344,7 +378,7 @@ export default function DialogueScenariosPage() {
               {
                 step: "4",
                 title: "קבל משוב",
-                desc: "הסבר מיידי + טיפ + ציון סופי",
+                desc: "הסבר מוגבל + חלופות, ללא ציון אישי",
               },
             ].map((item) => (
               <div

@@ -1,4 +1,4 @@
-import { internalQuery, query } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 // ==========================================================
@@ -29,8 +29,8 @@ export const getChunksByIds = internalQuery({
   },
 });
 
-/** Public stats — a cheap deep-verification probe for the knowledge base. */
-export const stats = query({
+/** Internal-only stats probe. Never load the corpus from an unauthenticated query. */
+export const stats = internalQuery({
   args: {},
   handler: async (ctx) => {
     const all = await ctx.db.query("knowledgeChunks").collect();

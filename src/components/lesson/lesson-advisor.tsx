@@ -24,6 +24,7 @@ type Turn = {
   content: string;
   /** citation refs from the RAG layer (Phase 21) — shown under AI replies */
   sources?: string[];
+  source?: "live" | "template" | "safety";
 };
 
 function renderInline(text: string) {
@@ -82,6 +83,7 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
             ...(res.sources && res.sources.length > 0
               ? { sources: res.sources }
               : {}),
+            source: res.source,
           },
         ]);
         setSuggestSim(res.suggestSimulator);
@@ -126,7 +128,7 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-2 text-sm font-bold text-zinc-900 dark:text-white">
-            היועץ החכם שלך
+            כלי הרפלקציה לשיעור
             {profile && profile.phaseNumber > 0 && (
               <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
                 שלב {profile.phaseNumber} · {profile.name}
@@ -136,7 +138,7 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
           <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
             {profile?.skill
               ? `מתאמנים על: ${profile.skill}`
-              : "ייעוץ מותאם בדיוק לשיעור הזה"}
+              : "שאלות ותרגול בהקשר של השיעור הזה"}
           </p>
         </div>
         <svg
@@ -187,10 +189,19 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
                     }`}
                   >
                     {t.role === "assistant" ? renderInline(t.content) : t.content}
+                    {t.role === "assistant" && t.source && (
+                      <p className="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                        {t.source === "live"
+                          ? "מענה AI חי"
+                          : t.source === "safety"
+                            ? "הכוונת בטיחות אוטומטית"
+                            : "מענה אוטומטי בסיסי"}
+                      </p>
+                    )}
                     {t.role === "assistant" && t.sources && t.sources.length > 0 && (
                       <p className="mt-2 border-t border-zinc-200/70 pt-1.5 text-[11px] leading-relaxed text-zinc-400 dark:border-zinc-700 dark:text-zinc-500">
                         <span aria-hidden="true">📚 </span>
-                        מבוסס על: {t.sources.join(" · ")}
+                        מקורות שנשלפו לעיון: {t.sources.join(" · ")}
                       </p>
                     )}
                   </div>
@@ -221,11 +232,7 @@ export function LessonAdvisor({ lessonId, userId }: LessonAdvisorProps) {
                   תרגלת {practice.total}{" "}
                   {practice.total === 1 ? "פעם" : "פעמים"} מהשיעור הזה
                 </span>
-                {practice.bestScore !== null && (
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                    הציון הכי טוב שלך: {practice.bestScore}
-                  </span>
-                )}
+                <span>המשוב הוא אוטומטי ומוגבל לתרחיש; אין כאן ציון אישי.</span>
               </p>
             </div>
           )}

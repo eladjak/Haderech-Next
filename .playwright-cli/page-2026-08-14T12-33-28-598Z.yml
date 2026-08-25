@@ -1,0 +1,6 @@
+- generic [active] [ref=f2e1]:
+  - link "דלג לתוכן הראשי" [ref=f2e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f2e4]:
+    - paragraph [ref=f2e9]: הדרך
+    - paragraph [ref=f2e10]: טוען...
