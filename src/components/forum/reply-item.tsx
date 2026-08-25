@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useMutation, useQuery } from "convex/react";
-import { useUser, SignedIn } from "@clerk/nextjs";
+import { useUser, Show } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
@@ -124,7 +124,7 @@ export function ReplyItem({ reply, onDelete, index = 0 }: ReplyItemProps) {
 
         {/* Actions */}
         <div className="mt-1.5 flex items-center gap-2 px-2">
-          <SignedIn>
+          <Show when="signed-in">
             <CommunitySafetyActions
               targetType="reply"
               replyId={reply._id}
@@ -154,7 +154,7 @@ export function ReplyItem({ reply, onDelete, index = 0 }: ReplyItemProps) {
               </svg>
               <span>{likeCount}</span>
             </button>
-          </SignedIn>
+          </Show>
 
           {/* Delete button - shown only to the reply author (backend enforces) */}
           {user && onDelete && (

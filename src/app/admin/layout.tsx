@@ -55,7 +55,6 @@ export default function AdminLayout({
 
             <div className="flex items-center gap-3">
               <UserButton
-                afterSignOutUrl="/"
                 appearance={{
                   elements: {
                     avatarBox: "h-8 w-8",

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/nextjs";
+import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
@@ -323,10 +323,10 @@ function SessionsContent() {
 export default function SessionsPage() {
   return (
     <>
-      <SignedOut>
+      <Show when="signed-out">
         <RedirectToSignIn />
-      </SignedOut>
-      <SignedIn>
+      </Show>
+      <Show when="signed-in">
         <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950">
           <Header />
 
@@ -370,7 +370,7 @@ export default function SessionsPage() {
 
           <Footer />
         </div>
-      </SignedIn>
+      </Show>
     </>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { useUser, Show, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -327,7 +327,7 @@ export default function PostDetailPage() {
             {/* Actions */}
             <div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800">
               <div className="flex items-center gap-3">
-                <SignedIn>
+                <Show when="signed-in">
                   <LikeButton
                     count={likeCount}
                     liked={isLiked}
@@ -338,8 +338,8 @@ export default function PostDetailPage() {
                     targetType="topic"
                     topicId={post._id}
                   />
-                </SignedIn>
-                <SignedOut>
+                </Show>
+                <Show when="signed-out">
                   <SignInButton mode="modal">
                     <button className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">
                       <svg
@@ -359,7 +359,7 @@ export default function PostDetailPage() {
                       {likeCount}
                     </button>
                   </SignInButton>
-                </SignedOut>
+                </Show>
 
                 <span className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                   <svg
@@ -410,7 +410,7 @@ export default function PostDetailPage() {
             )}
 
             {/* Reply Form */}
-            <SignedIn>
+            <Show when="signed-in">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -449,9 +449,9 @@ export default function PostDetailPage() {
                   </div>
                 </form>
               </motion.div>
-            </SignedIn>
+            </Show>
 
-            <SignedOut>
+            <Show when="signed-out">
               <div className="rounded-2xl border border-zinc-100 bg-white p-6 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <p className="mb-4 text-zinc-600 dark:text-zinc-400">
                   יש להתחבר כדי להגיב
@@ -462,7 +462,7 @@ export default function PostDetailPage() {
                   </button>
                 </SignInButton>
               </div>
-            </SignedOut>
+            </Show>
           </section>
         </div>
       </main>

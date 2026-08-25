@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/../convex/_generated/api";
@@ -420,21 +420,21 @@ function MentorCard({ mentor }: { mentor: MentorData }) {
         </div>
 
         {/* CTA */}
-        <SignedIn>
+        <Show when="signed-in">
           <button
             onClick={() => setShowBooking(true)}
             className="w-full rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110"
           >
             הזמנת פגישה
           </button>
-        </SignedIn>
-        <SignedOut>
+        </Show>
+        <Show when="signed-out">
           <SignInButton mode="modal">
             <button className="w-full rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-110">
               התחברו כדי להזמין
             </button>
           </SignInButton>
-        </SignedOut>
+        </Show>
       </div>
 
       {showBooking && (
@@ -484,7 +484,7 @@ export default function MentoringPage() {
             sizes="(max-width: 672px) 100vw, 672px"
             className="mx-auto mb-8 aspect-[2/1] w-full max-w-2xl rounded-3xl object-cover shadow-md ring-1 ring-black/5 dark:ring-white/10"
           />
-          <SignedIn>
+          <Show when="signed-in">
             <Link
               href="/mentoring/sessions"
               className="mt-6 inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-white/80 px-5 py-2.5 text-sm font-medium text-brand-600 shadow-sm transition-all hover:bg-brand-50 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-brand-400 dark:hover:bg-zinc-700"
@@ -504,7 +504,7 @@ export default function MentoringPage() {
               </svg>
               הפגישות שלי
             </Link>
-          </SignedIn>
+          </Show>
         </div>
       </section>
 

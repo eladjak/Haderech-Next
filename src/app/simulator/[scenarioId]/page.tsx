@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
+import { Show, SignInButton, useAuth } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
@@ -210,7 +210,7 @@ export default function ScenarioPage() {
         </div>
 
         {/* CTA */}
-        <SignedIn>
+        <Show when="signed-in">
           {error && (
             <div className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-400">
               {error}
@@ -235,9 +235,9 @@ export default function ScenarioPage() {
               )}
             </div>
           )}
-        </SignedIn>
+        </Show>
 
-        <SignedOut>
+        <Show when="signed-out">
           <div className="rounded-2xl border border-brand-100 bg-brand-50 p-6 text-center dark:border-blue-500/20 dark:bg-blue-500/10">
             <p className="mb-3 font-medium text-zinc-900 dark:text-white">
               יש להתחבר כדי להשתמש בסימולטור
@@ -251,7 +251,7 @@ export default function ScenarioPage() {
               </button>
             </SignInButton>
           </div>
-        </SignedOut>
+        </Show>
       </main>
     </div>
   );

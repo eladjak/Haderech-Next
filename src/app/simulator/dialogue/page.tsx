@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
-import { SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -285,7 +285,7 @@ export default function DialogueScenariosPage() {
         </div>
 
         {/* Auth gate */}
-        <SignedOut>
+        <Show when="signed-out">
           <div className="mb-8 rounded-2xl border border-brand-100 bg-brand-50 p-6 text-center dark:border-blue-500/20 dark:bg-blue-500/10">
             <p className="mb-2 font-medium text-zinc-900 dark:text-white">
               יש להתחבר כדי לשמור את הציונים שלך
@@ -302,7 +302,7 @@ export default function DialogueScenariosPage() {
               </button>
             </SignInButton>
           </div>
-        </SignedOut>
+        </Show>
 
         {/* Loading */}
         {filteredScenarios === undefined && (

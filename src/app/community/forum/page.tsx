@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
@@ -214,7 +214,7 @@ export default function ForumPage() {
             </div>
 
             {/* Create post button */}
-            <SignedIn>
+            <Show when="signed-in">
               <Link
                 href="/community/forum/new"
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
@@ -235,8 +235,8 @@ export default function ForumPage() {
                 </svg>
                 פוסט חדש
               </Link>
-            </SignedIn>
-            <SignedOut>
+            </Show>
+            <Show when="signed-out">
               <SignInButton mode="modal">
                 <button className="flex items-center gap-2 rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110">
                   <svg
@@ -256,7 +256,7 @@ export default function ForumPage() {
                   הצטרף וכתוב
                 </button>
               </SignInButton>
-            </SignedOut>
+            </Show>
           </div>
         </div>
 
@@ -291,21 +291,21 @@ export default function ForumPage() {
                 ? "לא נמצאו פוסטים התואמים לחיפוש"
                 : "היה הראשון לפתוח דיון בקטגוריה זו!"}
             </p>
-            <SignedIn>
+            <Show when="signed-in">
               <Link
                 href="/community/forum/new"
                 className="rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:brightness-110"
               >
                 כתוב פוסט ראשון
               </Link>
-            </SignedIn>
-            <SignedOut>
+            </Show>
+            <Show when="signed-out">
               <SignInButton mode="modal">
                 <button className="rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:brightness-110">
                   הצטרף לקהילה
                 </button>
               </SignInButton>
-            </SignedOut>
+            </Show>
           </motion.div>
         ) : (
           <div className="space-y-4">
@@ -326,7 +326,7 @@ export default function ForumPage() {
       <Footer />
 
       {/* Floating Action Button for mobile */}
-      <SignedIn>
+      <Show when="signed-in">
         <div className="fixed bottom-6 left-6 z-40 sm:hidden">
           <Link
             href="/community/forum/new"
@@ -349,7 +349,7 @@ export default function ForumPage() {
             </svg>
           </Link>
         </div>
-      </SignedIn>
+      </Show>
     </div>
   );
 }

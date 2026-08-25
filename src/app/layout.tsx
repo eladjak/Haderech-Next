@@ -91,7 +91,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider localization={heIL}>
+    <ClerkProvider localization={heIL} afterSignOutUrl="/">
       <html lang="he" dir="rtl" data-scroll-behavior="smooth">
         <head>
           <WebsiteJsonLd />

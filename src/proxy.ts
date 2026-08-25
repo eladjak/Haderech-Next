@@ -19,18 +19,27 @@ const isProtectedRoute = createRouteMatcher([
   "/course/(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  // Runtime guard: a build-time check alone cannot protect a container whose
-  // environment changes before `next start`.
-  assertDemoModeConfiguration();
-  if (isDemoModeExplicitlyEnabled()) {
-    return;
-  }
-  // אם זה נתיב מוגן, דרוש התחברות
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-});
+const PRODUCTION_APP_HOSTNAME = "haderech-next.vercel.app";
+
+export default clerkMiddleware(
+  async (auth, req) => {
+    // Runtime guard: a build-time check alone cannot protect a container whose
+    // environment changes before `next start`.
+    assertDemoModeConfiguration();
+    if (isDemoModeExplicitlyEnabled()) {
+      return;
+    }
+    // אם זה נתיב מוגן, דרוש התחברות
+    if (isProtectedRoute(req)) {
+      await auth.protect();
+    }
+  },
+  {
+    frontendApiProxy: {
+      enabled: (url) => url.hostname === PRODUCTION_APP_HOSTNAME,
+    },
+  },
+);
 
 export const config = {
   matcher: [
@@ -38,5 +47,7 @@ export const config = {
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
+    // Always run for Clerk Frontend API proxy requests.
+    "/__clerk/(.*)",
   ],
 };

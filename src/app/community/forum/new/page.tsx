@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { api } from "@/../convex/_generated/api";
@@ -351,11 +351,11 @@ export default function NewPostPage() {
             transition={{ delay: 0.05 }}
             className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
           >
-            <SignedIn>
+            <Show when="signed-in">
               <NewPostForm />
-            </SignedIn>
+            </Show>
 
-            <SignedOut>
+            <Show when="signed-out">
               <div className="flex flex-col items-center py-10 text-center">
                 <div className="mb-4 text-4xl" aria-hidden="true">
                   🔒
@@ -372,11 +372,11 @@ export default function NewPostPage() {
                   </button>
                 </SignInButton>
               </div>
-            </SignedOut>
+            </Show>
           </motion.div>
 
           {/* Tips */}
-          <SignedIn>
+          <Show when="signed-in">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -405,7 +405,7 @@ export default function NewPostPage() {
                 </li>
               </ul>
             </motion.div>
-          </SignedIn>
+          </Show>
         </div>
       </main>
 
