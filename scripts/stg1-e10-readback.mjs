@@ -13,6 +13,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { ConvexHttpClient } from "convex/browser";
+import { makeFunctionReference } from "convex/server";
 import { evaluateStg1FinalBundle } from "./lib/stg1-final-audit.mjs";
 import {
   buildPhaseEvidence,
@@ -120,6 +122,23 @@ function projectObject(value, keys) {
   return Object.fromEntries(keys.map((key) => [key, value?.[key]]));
 }
 
+async function probeInternalWriter(client, functionName) {
+  try {
+    await client.mutation(makeFunctionReference(functionName), {});
+    throw new Error("STG1_E10:WRITER_PROBE_UNEXPECTEDLY_SUCCEEDED");
+  } catch (error) {
+    const message = String(error instanceof Error ? error.message : error);
+    if (message.includes("STG1_E10:WRITER_PROBE_UNEXPECTEDLY_SUCCEEDED")) {
+      throw error;
+    }
+    if (/Could not find|not found|does not exist/iu.test(message)) return false;
+    if (/ArgumentValidationError|validator|missing the required field/iu.test(message)) {
+      return true;
+    }
+    throw new Error("STG1_E10:WRITER_PROBE_INDETERMINATE");
+  }
+}
+
 async function fetchWithTimeout(url, timeoutMs = 15_000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -201,7 +220,17 @@ try {
     valueAfter("--identity-map"),
     "IDENTITY_MAP",
   );
-  validateStg1TargetFile(convexEnvFile, STG1_TARGET.deploymentName);
+  const convexTarget = validateStg1TargetFile(
+    convexEnvFile,
+    STG1_TARGET.deploymentName,
+  );
+  const convexValues = parseDotEnvForTargetGuard(
+    fs.readFileSync(convexEnvFile, "utf8"),
+  );
+  const deployKey = convexValues.get("CONVEX_DEPLOY_KEY");
+  if (!deployKey) throw new Error("STG1_E10:CONVEX_DEPLOY_KEY_REQUIRED");
+  const convexClient = new ConvexHttpClient(convexTarget.cloudUrl);
+  convexClient.setAdminAuth(deployKey);
   const clerkEnvFile = path.resolve(
     projectRoot,
     valueAfter("--clerk-env-file") ?? ".env.local",
@@ -353,23 +382,24 @@ try {
     (value) => value?.mode === "verify" && value?.accountsChecked === 7,
   );
 
-  const functionSpec = runProcess(process.execPath, [
-    path.join(projectRoot, "node_modules", "convex", "bin", "main.js"),
-    "function-spec",
-    "--env-file",
-    convexEnvFile,
-    "--deployment-name",
-    STG1_TARGET.deploymentName,
-  ]).stdout;
   const functionSpecPositive =
-    functionSpec.includes("stg1Fixtures") &&
-    functionSpec.includes("receivingPracticeMigration");
-  const ephemeralWriterPresent = functionSpec.includes("stg1AccessWriter");
+    convexFinal?.backendInspected === true &&
+    migrationFinal?.backendInspected === true;
+  const ephemeralWriterPresent = await probeInternalWriter(
+    convexClient,
+    "stg1AccessWriter:containSyntheticAccess",
+  );
   if (!functionSpecPositive) {
-    throw new Error("STG1_E10:FUNCTION_SPEC_POSITIVE_CONTROL_MISSING");
+    throw new Error("STG1_E10:FUNCTION_READBACK_POSITIVE_CONTROL_MISSING");
   }
+  const functionReadback = JSON.stringify({
+    method: "restricted-internal-function-readback",
+    stg1Fixtures: true,
+    receivingPracticeMigration: true,
+    stg1AccessWriter: ephemeralWriterPresent,
+  });
   const functionSpecSha256 = createHash("sha256")
-    .update(functionSpec)
+    .update(functionReadback)
     .digest("hex");
 
   const environmentList = runProcess(process.execPath, [
@@ -488,7 +518,7 @@ try {
       cloudHost: convexHost,
       functionSpecReadBack: true,
       functionSpecSha256,
-      baseFixtureModulePresent: functionSpec.includes("stg1Fixtures"),
+      baseFixtureModulePresent: functionSpecPositive,
       ephemeralWriterPresent,
       revisionMatchedCommittedSource,
       backupRecorded: providerCleanup.backupRecorded === true,

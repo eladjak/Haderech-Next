@@ -46,7 +46,7 @@ function passingBundle() {
         admins: 0,
         courseEntitlements: 2,
         activeCourseEntitlements: 0,
-        revokedCourseEntitlements: 2,
+        revokedCourseEntitlements: 1,
         communityEntitlements: 2,
         activeCommunityEntitlements: 0,
         revokedCommunityEntitlements: 2,

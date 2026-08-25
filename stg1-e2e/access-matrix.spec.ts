@@ -3,11 +3,11 @@ import path from "node:path";
 import { test, type BrowserContext, type Page } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
+import { expectedStg1IdentityEmail } from "../convex/lib/stg1FixturePlan";
 import {
   STG1_CLERK,
   assertDevelopmentClerkKeys,
   createShortLivedSignInToken,
-  expectedStg1Email,
   validateAccountMap,
   validateStg1PreviewUrl,
 } from "../scripts/lib/stg1-clerk-plan.mjs";
@@ -61,6 +61,12 @@ async function rejectsWith(promise: Promise<unknown>, marker: string) {
 
 function readJson(filePath: string) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function expectedConvexIdentityEmail(alias: Alias) {
+  return expectedStg1IdentityEmail(
+    alias as Parameters<typeof expectedStg1IdentityEmail>[0],
+  );
 }
 
 test("E07 role, privacy, course, community, simulator and payment containment", async ({
@@ -248,7 +254,13 @@ test("E07 role, privacy, course, community, simulator and payment containment", 
       const convexToken = await page.evaluate(async () => {
         const session = (globalThis as unknown as { Clerk?: BrowserClerk }).Clerk
           ?.session;
-        return session ? await session.getToken({ template: "convex" }) : null;
+        if (!session) return null;
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+          const token = await session.getToken({ template: "convex" });
+          if (typeof token === "string" && token.length > 100) return token;
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+        return null;
       });
       await must(`api.${alias}.convex-jwt`, () => {
         condition(typeof convexToken === "string" && convexToken.length > 100);
@@ -259,7 +271,7 @@ test("E07 role, privacy, course, community, simulator and payment containment", 
       await must(`api.${alias}.identity-binding`, () => {
         condition(me !== null);
         condition(me?.clerkId === accountMap.accounts[alias].providerId);
-        condition(me?.email === expectedStg1Email(alias));
+        condition(me?.email === expectedConvexIdentityEmail(alias));
         condition(me?.role === (alias === "ADMIN" ? "admin" : "student"));
       });
       runtimes.set(alias, {
@@ -415,7 +427,7 @@ test("E07 role, privacy, course, community, simulator and payment containment", 
         for (const other of STG1_CLERK.aliases) {
           if (other === alias) continue;
           condition(!serialized.includes(accountMap.accounts[other].providerId));
-          condition(!serialized.includes(expectedStg1Email(other)));
+          condition(!serialized.includes(expectedConvexIdentityEmail(other)));
         }
       });
     }

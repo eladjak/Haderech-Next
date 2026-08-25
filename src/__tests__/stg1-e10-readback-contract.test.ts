@@ -160,7 +160,9 @@ describe("STG-1 E10 read-only collector contract", () => {
     expect(source).toContain('"--preview-containment"');
     expect(source).toContain('"--verify-rollback"');
     expect(source).toContain('"--verify"');
-    expect(source).toContain('"function-spec"');
+    expect(source).toContain("ConvexHttpClient");
+    expect(source).toContain("stg1AccessWriter:containSyntheticAccess");
+    expect(source).not.toContain('"function-spec"');
     expect(source).toContain('"ls-remote"');
   });
 
