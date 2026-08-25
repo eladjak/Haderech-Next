@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -209,11 +209,11 @@ export default function SimulatorHistoryPage() {
           </Link>
         </div>
 
-        <SignedIn>
+        <Show when="signed-in">
           <HistoryContent />
-        </SignedIn>
+        </Show>
 
-        <SignedOut>
+        <Show when="signed-out">
           <div className="rounded-2xl border border-brand-100 bg-brand-50 p-8 text-center dark:border-blue-500/20 dark:bg-blue-500/10">
             <p className="mb-3 font-medium text-zinc-900 dark:text-white">
               יש להתחבר כדי לראות את ההיסטוריה
@@ -227,7 +227,7 @@ export default function SimulatorHistoryPage() {
               </button>
             </SignInButton>
           </div>
-        </SignedOut>
+        </Show>
       </main>
 
       <Footer />

@@ -7,8 +7,7 @@ import { usePathname } from "next/navigation";
 import {
   SignInButton,
   SignUpButton,
-  SignedIn,
-  SignedOut,
+  Show,
   UserButton,
 } from "@clerk/nextjs";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -17,12 +16,12 @@ import { DEMO_MODE } from "@/components/providers/demo-provider";
 
 function SignedInContent({ children }: { children: React.ReactNode }) {
   if (DEMO_MODE) return <>{children}</>;
-  return <SignedIn>{children}</SignedIn>;
+  return <Show when="signed-in">{children}</Show>;
 }
 
 function SignedOutContent({ children }: { children: React.ReactNode }) {
   if (DEMO_MODE) return null;
-  return <SignedOut>{children}</SignedOut>;
+  return <Show when="signed-out">{children}</Show>;
 }
 
 export function Header() {
@@ -72,7 +71,7 @@ export function Header() {
           />
           <div className="flex flex-col">
             <span className="text-base font-bold leading-tight text-blue-500 dark:text-white">הדרך</span>
-            <span className="hidden text-[10px] leading-tight text-zinc-400 sm:block dark:text-zinc-500">
+            <span className="hidden text-[10px] font-medium leading-tight text-zinc-700 sm:block dark:text-zinc-300">
               by אומנות הקשר
             </span>
           </div>
@@ -117,7 +116,6 @@ export function Header() {
             {!DEMO_MODE && <NotificationBell />}
             {!DEMO_MODE && (
               <UserButton
-                afterSignOutUrl="/"
                 appearance={{
                   elements: {
                     avatarBox: "h-9 w-9 ring-2 ring-brand-100 dark:ring-zinc-700",

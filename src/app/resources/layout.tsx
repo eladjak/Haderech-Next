@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "משאבים",
   description:
     "ספרייה עשירה של מאמרים, מדריכים ותוכן חינמי על דייטינג וזוגיות. למדו מהמומחים וגלו כיצד לשפר את חיי האהבה שלכם.",
+  alternates: { canonical: "/resources" },
   openGraph: {
     title: "משאבים | הדרך - אומנות הקשר",
     description:

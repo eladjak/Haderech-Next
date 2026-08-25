@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "ייעוץ אישי | הדרך",
   description:
     "קבלו הכוונה אישית ממאמנים מנוסים בתחום הדייטינג והזוגיות. הזמינו פגישת ייעוץ 1-על-1 עם מומחים מובילים.",
+  alternates: { canonical: "/mentoring" },
   openGraph: {
     title: "ייעוץ אישי | הדרך - אומנות הקשר",
     description:

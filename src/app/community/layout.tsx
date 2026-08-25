@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "קהילה",
   description:
     "הקהילה של אומנות הקשר נמצאת בהכנה לקראת פתיחה מסודרת סביב הספר, הקורס והליווי.",
+  alternates: { canonical: "/community" },
   openGraph: {
     title: "קהילה | הדרך - אומנות הקשר",
     description:

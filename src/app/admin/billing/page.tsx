@@ -20,41 +20,6 @@ const PLAN_NAMES: Record<string, string> = {
   vip: "מוביל",
 };
 
-// ---- Payment status badge ----
-
-function PaymentStatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; className: string }> = {
-    succeeded: {
-      label: "הצליח",
-      className:
-        "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400",
-    },
-    pending: {
-      label: "ממתין",
-      className:
-        "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400",
-    },
-    failed: {
-      label: "נכשל",
-      className: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400",
-    },
-    refunded: {
-      label: "הוחזר",
-      className:
-        "bg-zinc-50 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400",
-    },
-  };
-
-  const c = config[status] || config.pending;
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${c.className}`}
-    >
-      {c.label}
-    </span>
-  );
-}
-
 // ---- Main Page ----
 
 export default function AdminBillingPage() {

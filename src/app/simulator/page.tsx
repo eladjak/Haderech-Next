@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
-import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
+import { Show, SignInButton, useAuth } from "@clerk/nextjs";
 import { api } from "@/../convex/_generated/api";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -82,7 +82,7 @@ export default function SimulatorPage() {
         </div>
 
         {/* History link for signed-in users */}
-        <SignedIn>
+        <Show when="signed-in">
           {access && (
             <div className="mb-6">
               <SimulatorAccessPanel access={access} />
@@ -111,7 +111,7 @@ export default function SimulatorPage() {
               ההיסטוריה שלי
             </Link>
           </div>
-        </SignedIn>
+        </Show>
 
         {/* Search & Filters */}
         <div className="mb-8 flex flex-wrap gap-3">
@@ -203,7 +203,7 @@ export default function SimulatorPage() {
         )}
 
         {/* Auth gate */}
-        <SignedOut>
+        <Show when="signed-out">
           <div className="mb-8 rounded-2xl border border-brand-100 bg-brand-50 p-6 text-center dark:border-blue-500/20 dark:bg-blue-500/10">
             <p className="mb-2 font-medium text-zinc-900 dark:text-white">
               כדי להשתמש בסימולטור, יש להתחבר
@@ -220,7 +220,7 @@ export default function SimulatorPage() {
               </button>
             </SignInButton>
           </div>
-        </SignedOut>
+        </Show>
 
         {/* Scenarios grid */}
         {filteredScenarios !== undefined && filteredScenarios.length > 0 && (

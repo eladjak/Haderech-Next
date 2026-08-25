@@ -6,10 +6,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticPages = [
     "",
+    "/about",
     "/courses",
     "/blog",
     "/pricing",
     "/faq",
+    "/help",
     "/contact",
     "/chat",
     "/simulator",
@@ -18,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools",
     "/stories",
     "/search",
+    "/course-safety",
   ];
 
   return staticPages.map((path) => ({

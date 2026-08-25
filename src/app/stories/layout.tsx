@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "סיפורי משתתפים | הדרך",
   description:
     "עמוד סיפורי המשתתפים נמצא בבדיקת מקור, הרשאה לפרסום והסכמה מפורשת.",
+  alternates: { canonical: "/stories" },
   openGraph: {
     title: "סיפורי משתתפים | הדרך - אומנות הקשר",
     description:

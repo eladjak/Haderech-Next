@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { useUser, Show, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -181,7 +181,7 @@ function ReplyItem({
           </p>
         </div>
         <div className="mt-1.5 flex items-center gap-2 px-2">
-          <SignedIn>
+          <Show when="signed-in">
             <LikeButton
               count={likeCount}
               liked={isLiked !== undefined ? isLiked : serverLiked}
@@ -191,7 +191,7 @@ function ReplyItem({
               targetType="reply"
               replyId={reply._id}
             />
-          </SignedIn>
+          </Show>
           {currentUserId && (
             <button
               onClick={handleDelete}
@@ -386,7 +386,7 @@ export default function TopicDetailPage() {
             {/* Actions */}
             <div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800">
               <div className="flex items-center gap-3">
-                <SignedIn>
+                <Show when="signed-in">
                   <LikeButton
                     count={displayLikeCount}
                     liked={displayLiked}
@@ -397,8 +397,8 @@ export default function TopicDetailPage() {
                     targetType="topic"
                     topicId={topic._id}
                   />
-                </SignedIn>
-                <SignedOut>
+                </Show>
+                <Show when="signed-out">
                   <SignInButton mode="modal">
                     <button className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -407,7 +407,7 @@ export default function TopicDetailPage() {
                       {displayLikeCount}
                     </button>
                   </SignInButton>
-                </SignedOut>
+                </Show>
                 <span className="flex items-center gap-1.5 text-sm text-zinc-500">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -417,14 +417,14 @@ export default function TopicDetailPage() {
               </div>
 
               {/* Delete topic (show when signed in - backend enforces ownership) */}
-              <SignedIn>
+              <Show when="signed-in">
                 <button
                   onClick={handleDeleteTopic}
                   className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                 >
                   מחק נושא
                 </button>
-              </SignedIn>
+              </Show>
             </div>
           </motion.article>
 
@@ -457,7 +457,7 @@ export default function TopicDetailPage() {
             )}
 
             {/* Reply Form */}
-            <SignedIn>
+            <Show when="signed-in">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -491,9 +491,9 @@ export default function TopicDetailPage() {
                   </div>
                 </form>
               </motion.div>
-            </SignedIn>
+            </Show>
 
-            <SignedOut>
+            <Show when="signed-out">
               <div className="rounded-2xl border border-zinc-100 bg-white p-6 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <p className="mb-4 text-zinc-600 dark:text-zinc-400">
                   יש להתחבר כדי להגיב
@@ -504,7 +504,7 @@ export default function TopicDetailPage() {
                   </button>
                 </SignInButton>
               </div>
-            </SignedOut>
+            </Show>
           </section>
         </div>
       </main>

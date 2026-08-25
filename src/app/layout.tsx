@@ -11,6 +11,7 @@ import { MotionProvider } from "@/components/providers/motion-provider";
 import { ErrorTracker } from "@/components/analytics/error-tracker";
 import { WebsiteJsonLd, HomePageFallback } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
+import { SkipLink } from "@/components/layout/skip-link";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -90,7 +91,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider localization={heIL}>
+    <ClerkProvider localization={heIL} afterSignOutUrl="/">
       <html lang="he" dir="rtl" data-scroll-behavior="smooth">
         <head>
           <WebsiteJsonLd />
@@ -98,12 +99,7 @@ export default function RootLayout({
         <body className={`${heebo.variable} font-sans antialiased`}>
           <GoogleAnalyticsScript />
           <HomePageFallback />
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[100] focus:rounded-lg focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
-          >
-            דלג לתוכן הראשי
-          </a>
+          <SkipLink />
           <ConvexClientProvider>
             <Suspense>
               <AnalyticsProvider>

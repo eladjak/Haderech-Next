@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useUser, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/nextjs";
+import { useUser, Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { type Id } from "@/../convex/_generated/dataModel";
@@ -174,12 +174,12 @@ function CoachWelcome({
 export default function ChatPage() {
   return (
     <>
-      <SignedIn>
+      <Show when="signed-in">
         <ChatPageContent />
-      </SignedIn>
-      <SignedOut>
+      </Show>
+      <Show when="signed-out">
         <RedirectToSignIn />
-      </SignedOut>
+      </Show>
     </>
   );
 }
@@ -312,14 +312,14 @@ function ChatPageContent() {
         />
 
         {/* Main Chat Area */}
-        <main className="flex flex-1 flex-col overflow-hidden">
+        <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col overflow-hidden">
           {/* Chat Header */}
           <div className="flex items-center gap-3 border-b border-brand-100/30 bg-white/60 px-4 py-3 backdrop-blur-sm dark:border-zinc-700/50 dark:bg-zinc-900/60">
             {/* Mobile sidebar toggle */}
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-blue-100/40 bg-white text-blue-500/75 shadow-sm transition-colors hover:text-brand-500 md:hidden dark:border-zinc-700 dark:bg-zinc-800"
+              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-blue-100/40 bg-white text-blue-700 shadow-sm transition-colors hover:text-brand-700 md:hidden dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
               aria-label="פתח היסטוריית שיחות"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -363,7 +363,7 @@ function ChatPageContent() {
             <button
               type="button"
               onClick={() => setShowModeSelector(true)}
-              className="flex h-9 items-center gap-1.5 rounded-xl border border-brand-200/50 bg-brand-50/50 px-3 text-xs font-medium text-brand-600 shadow-sm transition-colors hover:bg-brand-100/50 dark:border-brand-200/20 dark:bg-brand-50/10 dark:text-brand-300"
+              className="flex min-h-11 items-center gap-1.5 rounded-xl border border-brand-200/50 bg-brand-50/50 px-3 text-xs font-semibold text-brand-700 shadow-sm transition-colors hover:bg-brand-100/50 dark:border-brand-200/20 dark:bg-brand-50/10 dark:text-brand-300"
               aria-label="שיחה חדשה"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">

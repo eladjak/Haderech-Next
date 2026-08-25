@@ -5,8 +5,11 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useAuth } from "@clerk/nextjs";
 import { ReactNode, useEffect, useRef } from "react";
 import { api } from "@/../convex/_generated/api";
+import { getConvexDeploymentUrl } from "@/lib/service-config";
 
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const convex = new ConvexReactClient(
+  getConvexDeploymentUrl(process.env.NEXT_PUBLIC_CONVEX_URL)
+);
 
 /**
  * Ensure every signed-in Clerk user has a Convex `users` row (Phase 22).

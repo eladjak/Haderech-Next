@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "צור קשר",
   description:
     "צרו קשר עם צוות הדרך - אומנות הקשר. יש לכם שאלות, הצעות או צורך בעזרה? אנחנו כאן בשבילכם.",
+  alternates: { canonical: "/contact" },
   openGraph: {
     title: "צור קשר | הדרך - אומנות הקשר",
     description:

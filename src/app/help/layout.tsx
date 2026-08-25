@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "עזרה ותמיכה",
   description:
     "מרכז העזרה של הדרך - אומנות הקשר. מצאו תשובות לשאלות נפוצות, מדריכי שימוש ופתרונות לבעיות נפוצות.",
+  alternates: { canonical: "/help" },
   openGraph: {
     title: "עזרה ותמיכה | הדרך - אומנות הקשר",
     description:

@@ -283,7 +283,7 @@ export default function HelpPage() {
                     setSearchQuery(e.target.value);
                     setOpenIndex(null);
                   }}
-                  className="h-13 w-full rounded-2xl border border-zinc-200 bg-white pr-12 pl-4 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-violet-600 dark:focus:ring-violet-900/30"
+                  className="h-13 w-full rounded-2xl border border-zinc-200 bg-white pr-12 pl-4 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-600 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-400 dark:focus:border-violet-600 dark:focus:ring-violet-900/30"
                   aria-label="חיפוש בשאלות נפוצות"
                 />
               </div>
@@ -293,7 +293,7 @@ export default function HelpPage() {
 
         {/* Quick Links */}
         <section className="container mx-auto px-4 py-10">
-          <h2 className="mb-5 text-center text-sm font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+              <h2 className="mb-5 text-center text-sm font-semibold tracking-wide text-zinc-700 uppercase dark:text-zinc-300">
             קישורים מהירים
           </h2>
           <div className="mx-auto grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -314,7 +314,7 @@ export default function HelpPage() {
                   <span className="text-xs font-semibold text-zinc-800 dark:text-white">
                     {link.title}
                   </span>
-                  <span className="hidden text-[10px] text-zinc-400 sm:block dark:text-zinc-500">
+                  <span className="hidden text-xs text-zinc-600 sm:block dark:text-zinc-400">
                     {link.description}
                   </span>
                 </Link>

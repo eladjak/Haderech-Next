@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -397,9 +397,9 @@ export default function CommunityPage() {
           </p>
         </motion.div>
 
-        <SignedIn>
+        <Show when="signed-in">
           <MyCommunityBlocks />
-        </SignedIn>
+        </Show>
 
         {/* Toolbar */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -429,7 +429,7 @@ export default function CommunityPage() {
           </div>
 
           {/* New Post Button */}
-          <SignedIn>
+          <Show when="signed-in">
             <button
               onClick={() => setShowNewTopicModal(true)}
               className="flex items-center gap-2 rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 hover:shadow-md"
@@ -450,8 +450,8 @@ export default function CommunityPage() {
               </svg>
               כתוב פוסט חדש
             </button>
-          </SignedIn>
-          <SignedOut>
+          </Show>
+          <Show when="signed-out">
             <SignInButton mode="modal">
               <button className="flex items-center gap-2 rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110">
                 <svg
@@ -471,7 +471,7 @@ export default function CommunityPage() {
                 הצטרף וכתוב פוסט
               </button>
             </SignInButton>
-          </SignedOut>
+          </Show>
         </div>
 
         {/* Category Pills */}
@@ -516,14 +516,14 @@ export default function CommunityPage() {
                 ? "לא נמצאו נושאים התואמים לחיפוש"
                 : "היה הראשון לפתוח דיון!"}
             </p>
-            <SignedIn>
+            <Show when="signed-in">
               <button
                 onClick={() => setShowNewTopicModal(true)}
                 className="rounded-xl bg-gradient-to-l from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:brightness-110"
               >
                 כתוב פוסט ראשון
               </button>
-            </SignedIn>
+            </Show>
           </motion.div>
         ) : (
           <div className="space-y-4">

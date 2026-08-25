@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "סימולטור שיחות בדיוני",
   description:
     "תרגלו שיחות בדיוניות עם דמויות AI וקבלו משוב אוטומטי על התרגול. הסימולציה אינה אדם אמיתי, והמשוב אינו אבחון, ציון ליכולת או תחזית לקשר.",
+  alternates: { canonical: "/simulator" },
   openGraph: {
     title: "סימולטור שיחות בדיוני | הדרך - אומנות הקשר",
     description:

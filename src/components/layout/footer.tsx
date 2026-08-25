@@ -12,7 +12,7 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand / About */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-2.5">
+            <Link href="/" className="inline-flex min-h-11 items-center gap-2.5">
               <Image
                 src="/images/omanut-hakesher-icon.png"
                 alt="אומנות הקשר"
@@ -103,9 +103,11 @@ export function Footer() {
           <p className="text-xs text-zinc-600 dark:text-zinc-400">
             &copy; {currentYear} הדרך - אומנות הקשר. כל הזכויות שמורות.
           </p>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400">
-            נבנה לתרגול בקצב שמתאים לך
-          </p>
+          <nav className="flex flex-wrap items-center justify-center gap-x-4" aria-label="מידע משפטי ונגישות">
+            <FooterLink href="/privacy">פרטיות</FooterLink>
+            <FooterLink href="/terms">תנאי שימוש</FooterLink>
+            <FooterLink href="/accessibility">נגישות</FooterLink>
+          </nav>
         </div>
       </div>
     </footer>
@@ -122,7 +124,7 @@ function FooterLink({
   return (
     <Link
       href={href}
-      className="text-sm text-zinc-700 transition-colors hover:text-brand-700 focus-visible:text-brand-700 dark:text-zinc-300 dark:hover:text-brand-300 dark:focus-visible:text-brand-300"
+      className="inline-flex min-h-11 items-center text-sm text-zinc-700 transition-colors hover:text-brand-700 focus-visible:text-brand-700 dark:text-zinc-300 dark:hover:text-brand-300 dark:focus-visible:text-brand-300"
     >
       {children}
     </Link>
@@ -143,7 +145,7 @@ function SocialLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2.5 text-sm text-zinc-700 transition-colors hover:text-brand-700 focus-visible:text-brand-700 dark:text-zinc-300 dark:hover:text-brand-300 dark:focus-visible:text-brand-300"
+      className="inline-flex min-h-11 items-center gap-2.5 text-sm text-zinc-700 transition-colors hover:text-brand-700 focus-visible:text-brand-700 dark:text-zinc-300 dark:hover:text-brand-300 dark:focus-visible:text-brand-300"
       aria-label={label}
     >
       <svg

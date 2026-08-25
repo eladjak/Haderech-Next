@@ -112,6 +112,7 @@ export default function ContactPage() {
           </p>
           <Image
             src="/images/illustrations/header-contact.webp"
+            priority
             alt="איור: שתי גבעות בשעת דמדומים המחוברות בגשר של אור, ובכל קצה עומד אדם ופניו אל השני"
             width={1536}
             height={1024}

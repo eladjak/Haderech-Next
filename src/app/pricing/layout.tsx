@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "רכישה ותשלום אינם זמינים | הדרך",
   description:
     "עמוד סטטוס: המסלולים, המחירים והרכישה המקוונת אינם פתוחים עד להשלמת חוזה המוצר ותשתית התשלום והזכאות.",
+  alternates: { canonical: "/pricing" },
   openGraph: {
     title: "סטטוס רכישה | הדרך - אומנות הקשר",
     description:

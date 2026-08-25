@@ -34,15 +34,15 @@ test.describe("Landing Page", () => {
     const primaryCta = hero.getByRole("link", { name: "התחילו את המסע" });
     await expect(primaryCta).toBeVisible();
 
-    const secondaryCta = hero.getByRole("link", { name: "התחל בחינם" });
+    const secondaryCta = hero.getByRole("link", { name: "בדקו זמינות" });
     await expect(secondaryCta).toBeVisible();
   });
 
   test("should display the stats counter bar", async ({ page }) => {
-    await expect(page.locator("text=קורסים").first()).toBeVisible();
+    await expect(page.locator("text=שבועות").first()).toBeVisible();
     await expect(page.locator("text=שיעורים").first()).toBeVisible();
-    await expect(page.locator("text=תלמידים").first()).toBeVisible();
-    await expect(page.locator("text=שביעות רצון").first()).toBeVisible();
+    await expect(page.locator("text=מסמכי תרגול").first()).toBeVisible();
+    await expect(page.locator("text=שלבי למידה").first()).toBeVisible();
   });
 
   test("should display the three values section", async ({ page }) => {
@@ -63,16 +63,14 @@ test.describe("Landing Page", () => {
     await expect(sectionHeading).toBeVisible();
   });
 
-  test("should display the pricing preview section", async ({ page }) => {
-    const pricingHeading = page.locator("h2", {
-      hasText: "בחר את המסלול שלך",
+  test("should contain paid offers until product and payment approval", async ({ page }) => {
+    const availabilityHeading = page.locator("h2", {
+      hasText: "הרכישה המקוונת עדיין לא פתוחה",
     });
-    await expect(pricingHeading).toBeVisible();
-
-    const pricing = page.locator('section[aria-labelledby="pricing-heading"]');
-    await expect(pricing.getByRole("heading", { level: 3, name: "טעימה", exact: true })).toBeVisible();
-    await expect(pricing.getByRole("heading", { level: 3, name: "משנה", exact: true })).toBeVisible();
-    await expect(pricing.getByRole("heading", { level: 3, name: "מוביל", exact: true })).toBeVisible();
+    await expect(availabilityHeading).toBeVisible();
+    const availability = page.locator('section[aria-labelledby="availability-heading"]');
+    await expect(availability.getByRole("link", { name: "בירור זמינות" })).toHaveAttribute("href", "/contact");
+    await expect(availability.locator('a[href="/sign-up"]')).toHaveCount(0);
   });
 
   test("should display the final CTA section", async ({ page }) => {
@@ -81,8 +79,8 @@ test.describe("Landing Page", () => {
     });
     await expect(ctaHeading).toBeVisible();
 
-    const ctaButton = page.locator("section >> a[href='/sign-up']", {
-      hasText: "התחל בחינם",
+    const ctaButton = page.locator('section[aria-labelledby="cta-heading"]').getByRole("link", {
+      name: "בדקו זמינות",
     });
     await expect(ctaButton.first()).toBeVisible();
   });
